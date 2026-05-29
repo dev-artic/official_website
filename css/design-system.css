@@ -1,0 +1,62 @@
+﻿/* -------------------------------------------------------------
+ * DESIGN SYSTEM TOKENS - ART GALLERY & WEBZINE BOILERPLATE
+ * -------------------------------------------------------------
+ * Centralized variables for colors, typography, transitions, and layers.
+ * Supports auto dark-mode using media query prefers-color-scheme.
+ */
+
+:root {
+  /* Font Families */
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Color Palette - Warm Gallery Light Mode */
+  --bg-primary: #FAF9F6;       /* Soft gallery alabaster */
+  --bg-secondary: #F4F3EF;     /* Slightly darker tone for containers */
+  --text-primary: #111111;     /* Deep slate obsidian */
+  --text-secondary: #555555;   /* Refined body text gray */
+  --text-muted: #8E8D8A;       /* Subtle meta / label grey */
+  --accent: #B89047;           /* Elegant Champagne Gold */
+  --accent-light: #E7D7C1;     /* Soft gold glow tint */
+  --border-color: rgba(17, 17, 17, 0.08); /* Minimalist borders */
+  --border-focus: rgba(184, 144, 71, 0.4);
+
+  /* Spacing System (Precise & Spacious) */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  --space-xxl: 6rem;
+
+  /* Animation & Transitions */
+  --transition-smooth: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: all 0.25s ease;
+
+  /* Layout Constants */
+  --max-width: 1400px;
+  --header-height: 80px;
+
+  /* Overlay and Blurs */
+  --glass-bg: rgba(250, 249, 246, 0.75);
+  --glass-blur: blur(12px);
+}
+
+/* System Dark Mode (Automatic Override) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Color Palette - Premium Gallery Dark Mode */
+    --bg-primary: #0A0A0A;       /* Midnight velvet black */
+    --bg-secondary: #121212;     /* Dark obsidian gray */
+    --text-primary: #F3F3F3;     /* Pure linen white */
+    --text-secondary: #A0A0A0;   /* Slate grey body text */
+    --text-muted: #666666;       /* Darker grey meta */
+    --accent: #D4AF37;           /* Vibrant classic gold */
+    --accent-light: #332B1A;     /* Dark warm gold tint */
+    --border-color: rgba(243, 243, 243, 0.08);
+    --border-focus: rgba(212, 175, 55, 0.5);
+
+    /* Overlay and Blurs */
+    --glass-bg: rgba(10, 10, 10, 0.75);
+  }
+}

@@ -1,0 +1,79 @@
+﻿/* -------------------------------------------------------------
+ * EDITORIAL GRID & STRUCTURAL LAYOUTS
+ * -------------------------------------------------------------
+ * Responsive containers, asymmetric spacing, and grid column configurations.
+ */
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+}
+
+.section {
+  padding-top: var(--space-xl);
+  padding-bottom: var(--space-xl);
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-top: var(--space-xxl);
+    padding-bottom: var(--space-xxl);
+  }
+}
+
+/* Header & Main Padding Offset */
+main {
+  padding-top: var(--header-height);
+  min-height: calc(100vh - var(--header-height));
+}
+
+/* Fluid Flex Helpers */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Modern Asymmetric Gallery & Article Grids */
+.grid-editorial {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 768px) {
+  .grid-editorial {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
+  .col-4 { grid-column: span 4; }
+  .col-6 { grid-column: span 6; }
+  .col-8 { grid-column: span 8; }
+  .col-12 { grid-column: span 12; }
+
+  /* Asymmetric offset layouts (luxury gallery-style placement) */
+  .grid-editorial > *:nth-child(odd) {
+    transform: translateY(var(--space-md));
+  }
+  
+  .grid-editorial > *:nth-child(even) {
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-editorial {
+    gap: var(--space-xl);
+  }
+}

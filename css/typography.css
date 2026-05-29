@@ -1,0 +1,81 @@
+﻿/* -------------------------------------------------------------
+ * EDITORIAL TYPOGRAPHY SYSTEM
+ * -------------------------------------------------------------
+ * Precise scale, letter-spacing, and typographic pairing rules.
+ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  color: var(--text-primary);
+  font-weight: 400;
+  line-height: 1.15;
+  margin-bottom: var(--space-xs);
+}
+
+/* Typographic Scale */
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  letter-spacing: 0;
+}
+
+h4 {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+}
+
+p {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+/* Editorial blockquote / pull quote styling */
+blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  line-height: 1.4;
+  color: var(--accent);
+  padding-left: var(--space-md);
+  border-left: 2px solid var(--accent);
+  margin: var(--space-md) 0;
+}
+
+/* Metadata, category labels, dates */
+.meta-tag {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  display: inline-block;
+  margin-bottom: var(--space-xs);
+}
+
+.text-meta {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Featured intro paragraphs */
+.lead-paragraph {
+  font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+  line-height: 1.6;
+  font-weight: 300;
+  color: var(--text-primary);
+}

@@ -1,0 +1,16 @@
+﻿/* -------------------------------------------------------------
+ * MAIN ENTRY STYLESHEET - ART GALLERY & WEBZINE BOILERPLATE
+ * -------------------------------------------------------------
+ * Imports all modular CSS fragments for clean architectural separation.
+ */
+
+@import url('design-system.css');
+@import url('base.css');
+@import url('layout.css');
+@import url('typography.css');
+@import url('animations.css');
+
+/* Components */
+@import url('components/navbar.css');
+@import url('components/gallery.css');
+@import url('components/footer.css');

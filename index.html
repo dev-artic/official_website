@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ARTIC - Modern, minimal art gallery and editorial webzine in preparation.">
+  <meta name="description" content="artic. - Under Restoration">
   <meta name="author" content="dev-artic">
-  <title>ARTIC / Silent Symmetry — Opening Soon</title>
+  <title>artic.</title>
   
   <!-- CSS Linkage -->
   <link rel="stylesheet" href="css/main.css">
@@ -26,7 +26,7 @@
       overflow: hidden;
     }
 
-    /* Ambient Champagne Gold Background Glow */
+    /* Ambient Background Glow */
     .ambient-glow {
       position: absolute;
       width: 600px;
@@ -46,13 +46,14 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      max-width: 600px;
+      max-width: 450px;
+      width: 100%;
     }
 
     /* Central Digital Sculpture Animating */
     .sculpture-frame {
-      width: 220px;
-      height: 220px;
+      width: 180px;
+      height: 180px;
       margin-bottom: var(--space-lg);
       position: relative;
       display: flex;
@@ -63,7 +64,7 @@
     .sculpture-svg {
       width: 100%;
       height: 100%;
-      animation: slowRotate 24s linear infinite;
+      animation: slowRotate 28s linear infinite;
     }
 
     @keyframes slowRotate {
@@ -71,72 +72,114 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Branding Typography */
+    /* Branding Typography - Lowercase 'artic.' */
     .brand-logo {
       font-family: var(--font-serif);
-      font-size: 2.2rem;
-      font-weight: 400;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      text-transform: lowercase;
       margin-bottom: var(--space-xs);
       color: #FAF9F6;
     }
 
     .brand-logo span {
       color: var(--accent);
+      margin-left: -0.05em;
     }
 
     .exhibit-title {
       font-family: var(--font-sans);
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.25em;
+      letter-spacing: 0.35em;
       color: var(--accent);
-      margin-bottom: var(--space-md);
+      margin-top: 0.25rem;
     }
 
     .divider {
-      width: 40px;
+      width: 30px;
       height: 1px;
-      background-color: rgba(243, 243, 243, 0.15);
-      margin: var(--space-md) 0;
+      background-color: rgba(243, 243, 243, 0.1);
+      margin: var(--space-lg) 0;
     }
 
-    .status-msg {
+    /* Elegant Glassmorphic Email Form */
+    .subscribe-form-container {
+      width: 100%;
+      margin-top: var(--space-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .subscribe-form {
+      display: flex;
+      width: 100%;
+      max-width: 380px;
+      border: 1px solid rgba(243, 243, 243, 0.08);
+      background-color: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 4px;
+      transition: var(--transition-smooth);
+    }
+
+    .subscribe-form:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px rgba(184, 144, 71, 0.1);
+    }
+
+    .email-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      color: #FAF9F6;
+      background: transparent;
+      outline: none;
+      border: none;
+    }
+
+    .email-input::placeholder {
+      color: rgba(243, 243, 243, 0.25);
+    }
+
+    .btn-submit {
+      padding: 0 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-primary);
+      background-color: #FAF9F6;
+      border: none;
+      transition: var(--transition-fast);
+    }
+
+    .btn-submit:hover {
+      background-color: var(--accent);
+      color: #FAF9F6;
+    }
+
+    /* Elegant Success Notification */
+    .success-box {
       font-family: var(--font-serif);
       font-style: italic;
-      font-size: 1.25rem;
-      color: #A0A0A0;
-      line-height: 1.6;
-      margin-bottom: var(--space-sm);
-    }
-
-    .date-tag {
-      font-family: var(--font-sans);
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    /* Link to template preview for private tests */
-    .preview-badge {
-      margin-top: var(--space-lg);
-      font-family: var(--font-sans);
-      font-size: 0.75rem;
-      color: rgba(243, 243, 243, 0.3);
-      padding: 0.5rem 1rem;
-      border: 1px solid rgba(243, 243, 243, 0.1);
-      transition: var(--transition-fast);
-      letter-spacing: 0.05em;
-    }
-
-    .preview-badge:hover {
+      font-size: 1.1rem;
       color: var(--accent);
-      border-color: var(--accent);
-      background-color: rgba(184, 144, 71, 0.02);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      display: none;
+    }
+
+    .success-box.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -146,35 +189,83 @@
 
   <div class="splash-container animate-fade">
     
-    <!-- Pulse-glowing Interactive Digital Sculpture -->
+    <!-- Rotating Symmetric Digital Sculpture -->
     <div class="sculpture-frame">
       <svg class="sculpture-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <!-- Outermost guiding geometric circle -->
-        <circle cx="100" cy="100" r="85" stroke="rgba(184, 144, 71, 0.15)" stroke-width="0.5" stroke-dasharray="2 4"/>
+        <circle cx="100" cy="100" r="85" stroke="rgba(184, 144, 71, 0.12)" stroke-width="0.5" stroke-dasharray="2 4"/>
         
-        <!-- Rotating symmetric frames -->
-        <rect x="35" y="35" width="130" height="130" stroke="var(--accent)" stroke-width="0.5" opacity="0.3"/>
-        <rect x="35" y="35" width="130" height="130" stroke="rgba(243, 243, 243, 0.2)" stroke-width="0.5" transform="rotate(45 100 100)"/>
+        <!-- Symmetric frames -->
+        <rect x="40" y="40" width="120" height="120" stroke="var(--accent)" stroke-width="0.5" opacity="0.25"/>
+        <rect x="40" y="40" width="120" height="120" stroke="rgba(243, 243, 243, 0.15)" stroke-width="0.5" transform="rotate(45 100 100)"/>
         
-        <!-- Inner glowing core -->
-        <circle cx="100" cy="100" r="30" stroke="var(--accent)" stroke-width="0.75" class="animate-float"/>
-        <circle cx="100" cy="100" r="10" fill="var(--accent)" opacity="0.4" class="animate-float"/>
+        <!-- Core sculpture element -->
+        <circle cx="100" cy="100" r="24" stroke="var(--accent)" stroke-width="0.75" class="animate-float"/>
+        <circle cx="100" cy="100" r="8" fill="var(--accent)" opacity="0.3" class="animate-float"/>
       </svg>
     </div>
 
-    <!-- Branding Text -->
-    <div class="brand-logo">ARTIC<span>.</span></div>
-    <div class="exhibit-title">Silent Symmetry</div>
+    <!-- Branding Text (lowercase 'artic.') -->
+    <div class="brand-logo">artic<span>.</span></div>
+    
+    <!-- Under Restoration Label -->
+    <div class="exhibit-title">under restoration</div>
     
     <div class="divider"></div>
     
-    <!-- Opening Announcement -->
-    <div class="status-msg">전시 및 디지털 아티스틱 저널을 준비 중입니다.</div>
-    <div class="date-tag">June 2026 / Launching Soon</div>
+    <!-- Email Collection Form -->
+    <div class="subscribe-form-container">
+      <form id="subscribe-form" class="subscribe-form">
+        <input type="email" id="email-field" class="email-input" placeholder="enter your email" required autocomplete="off">
+        <button type="submit" class="btn-submit">notify me</button>
+      </form>
+      
+      <!-- Success Message (appears on submit) -->
+      <div id="success-message" class="success-box">
+        Access requested. We will notify you.
+      </div>
+    </div>
 
-    <!-- Private view token for the templates -->
-    <a href="index-preview.html" class="preview-badge" id="btn-private-preview">Private Preview →</a>
   </div>
+
+  <script>
+    // Handle Glassmorphic Email Submission
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('subscribe-form');
+      const successMessage = document.getElementById('success-message');
+      const emailField = document.getElementById('email-field');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const email = emailField.value.trim();
+        if (email) {
+          // Retrieve existing subscribers or initialize new array
+          let subscribers = [];
+          try {
+            subscribers = JSON.parse(localStorage.getItem('artic_subscribers')) || [];
+          } catch(err) {
+            subscribers = [];
+          }
+          
+          // Add new email if it doesn't already exist
+          if (!subscribers.includes(email)) {
+            subscribers.push(email);
+            localStorage.setItem('artic_subscribers', JSON.stringify(subscribers));
+          }
+
+          // Smoothly animate form hide and success message show
+          form.style.opacity = '0';
+          form.style.pointerEvents = 'none';
+          
+          setTimeout(() => {
+            form.style.display = 'none';
+            successMessage.classList.add('active');
+          }, 400);
+        }
+      });
+    });
+  </script>
 
 </body>
 </html>

@@ -79,24 +79,22 @@
 
     .logo-icon {
       transform: translateY(40px);
-      opacity: 0;
       animation: revealIcon 1.2s var(--ease-out-expo) 0.3s forwards;
     }
 
     .logo-type {
       transform: translateY(-36px);
-      opacity: 0;
       animation: revealType 1.2s var(--ease-out-expo) 0.3s forwards;
     }
 
     @keyframes revealIcon {
-      from { transform: translateY(40px); opacity: 0; }
-      to   { transform: translateY(0);   opacity: 1; }
+      from { transform: translateY(40px); }
+      to   { transform: translateY(0); }
     }
 
     @keyframes revealType {
-      from { transform: translateY(-36px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
+      from { transform: translateY(-36px); }
+      to   { transform: translateY(0); }
     }
 
     /* ── Content Sections ── */

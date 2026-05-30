@@ -1,0 +1,386 @@
+/* -------------------------------------------------------------
+ * PORTFOLIO & ARCHIVE STYLES - /projects
+ * -------------------------------------------------------------
+ * This stylesheet handles the layouts, asymmetric grid, 
+ * glassmorphic elements, and interactions for the projects page.
+ * Uses global tokens from design-system.css.
+ */
+
+/* Core Page Specific Configuration */
+body {
+  background-color: #060606;
+  color: #F3F3F3;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Ambient Radial Light Source */
+.ambient-glow {
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  background: radial-gradient(circle, rgba(184, 144, 71, 0.04) 0%, rgba(6, 6, 6, 0) 70%);
+  top: -10%;
+  right: -10%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Base Responsive Container */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* 1. Header Navigation System */
+.gallery-header {
+  height: var(--header-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(243, 243, 243, 0.05);
+  margin-bottom: var(--space-xl);
+}
+
+.brand-logo {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  color: #FAF9F6;
+  text-transform: lowercase;
+}
+
+.brand-logo span {
+  color: var(--accent);
+}
+
+.gallery-nav {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.nav-link {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+  color: var(--text-secondary);
+  transition: var(--transition-fast);
+  position: relative;
+  padding: 6px 0;
+}
+
+.nav-link:hover, 
+.nav-link.active {
+  color: #FAF9F6;
+}
+
+/* Sliding underline animation */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* 2. Hero Intro Header */
+.gallery-intro {
+  max-width: 650px;
+  margin-bottom: var(--space-xxl);
+  margin-top: var(--space-md);
+}
+
+.curator-tag {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin-bottom: var(--space-xs);
+  display: inline-block;
+}
+
+.gallery-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  color: #FAF9F6;
+  margin-bottom: var(--space-sm);
+  line-height: 1.15;
+}
+
+.gallery-desc {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* 3. Asymmetric CSS Grid Gallery Layout */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-xl) var(--space-lg);
+  margin-bottom: var(--space-xxl);
+}
+
+/* Card Geometry Structure */
+.project-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Staggered size variations */
+.size-large {
+  grid-column: span 2;
+}
+
+.size-medium {
+  grid-column: span 1;
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Aspect ratios for different card scales */
+.size-large .image-wrapper {
+  aspect-ratio: 16 / 9;
+}
+
+.size-medium .image-wrapper {
+  aspect-ratio: 4 / 3;
+}
+
+/* Image zoom & depth setup */
+.image-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.project-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: grayscale(15%) brightness(90%);
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(6,6,6,0) 50%, rgba(6,6,6,0.4) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Caption and Context metadata box */
+.project-info {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  background-color: rgba(255, 255, 255, 0.005);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.project-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.project-date {
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.project-name {
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: #FAF9F6;
+  margin-bottom: var(--space-xs);
+  text-transform: uppercase;
+}
+
+.project-subtext {
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+}
+
+/* Button & Arrow micro-interaction */
+.view-project-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #FAF9F6;
+  margin-top: auto;
+  transition: color 0.3s ease;
+}
+
+.arrow-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Active Hover Mechanics */
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.2);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 
+              0 0 30px rgba(212, 175, 55, 0.03);
+}
+
+.project-card:hover .project-img {
+  transform: scale(1.04);
+  filter: grayscale(0%) brightness(95%);
+}
+
+.project-card:hover .view-project-btn {
+  color: var(--accent);
+}
+
+.project-card:hover .arrow-icon {
+  transform: translateX(6px);
+}
+
+/* 4. Footer System */
+.gallery-footer {
+  border-top: 1px solid rgba(243, 243, 243, 0.05);
+  padding: var(--space-lg) 0;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: auto;
+}
+
+.gallery-footer span {
+  color: var(--accent);
+}
+
+/* CSS Entry Animations */
+.animate-fade-in {
+  animation: pageReveal 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 5. Fluid Responsive Scaling */
+@media (max-width: 900px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+  }
+  
+  .size-large, .size-medium {
+    grid-column: span 1;
+  }
+  
+  .size-large .image-wrapper, 
+  .size-medium .image-wrapper {
+    aspect-ratio: 4 / 3;
+  }
+
+  .gallery-intro {
+    margin-bottom: var(--space-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-logo {
+    font-size: 1.5rem;
+  }
+  
+  .gallery-header {
+    margin-bottom: var(--space-lg);
+  }
+
+  .size-large .image-wrapper, 
+  .size-medium .image-wrapper {
+    aspect-ratio: 3 / 2;
+  }
+  
+  .project-name {
+    font-size: 1.4rem;
+  }
+}

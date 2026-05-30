@@ -2,14 +2,14 @@
  * PORTFOLIO & ARCHIVE STYLES - /projects
  * -------------------------------------------------------------
  * This stylesheet handles the layouts, asymmetric grid, 
- * glassmorphic elements, and interactions for the projects page.
+ * bright glassmorphic elements, and interactions for the projects page.
  * Uses global tokens from design-system.css.
  */
 
-/* Core Page Specific Configuration */
+/* Core Page Specific Configuration - Premium Bright Theme */
 body {
-  background-color: #060606;
-  color: #F3F3F3;
+  background-color: #FAF9F6;  /* Soft gallery alabaster */
+  color: #111111;            /* Deep obsidian charcoal */
   margin: 0;
   padding: 0;
   display: flex;
@@ -19,12 +19,12 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient Radial Light Source */
+/* Ambient Radial Light Source - Delicate gold glow overlay */
 .ambient-glow {
   position: absolute;
   width: 900px;
   height: 900px;
-  background: radial-gradient(circle, rgba(184, 144, 71, 0.04) 0%, rgba(6, 6, 6, 0) 70%);
+  background: radial-gradient(circle, rgba(184, 144, 71, 0.04) 0%, rgba(250, 249, 246, 0) 70%);
   top: -10%;
   right: -10%;
   z-index: 1;
@@ -50,7 +50,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(243, 243, 243, 0.05);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.06);
   margin-bottom: var(--space-xl);
 }
 
@@ -60,7 +60,7 @@ body {
   font-weight: 300;
   letter-spacing: 0.1em;
   text-decoration: none;
-  color: #FAF9F6;
+  color: #111111;
   text-transform: lowercase;
 }
 
@@ -80,7 +80,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.15em;
   text-decoration: none;
-  color: var(--text-secondary);
+  color: #555555;
   transition: var(--transition-fast);
   position: relative;
   padding: 6px 0;
@@ -88,7 +88,7 @@ body {
 
 .nav-link:hover, 
 .nav-link.active {
-  color: #FAF9F6;
+  color: #111111;
 }
 
 /* Sliding underline animation */
@@ -134,7 +134,7 @@ body {
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 300;
   letter-spacing: 0.15em;
-  color: #FAF9F6;
+  color: #111111;
   margin-bottom: var(--space-sm);
   line-height: 1.15;
 }
@@ -143,7 +143,7 @@ body {
   font-family: var(--font-sans);
   font-size: 0.95rem;
   font-weight: 300;
-  color: var(--text-secondary);
+  color: #555555;
   line-height: 1.7;
 }
 
@@ -155,15 +155,16 @@ body {
   margin-bottom: var(--space-xxl);
 }
 
-/* Card Geometry Structure */
+/* Card Geometry Structure - Bright Glassmorphic design */
 .project-card {
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: 16px;
-  background-color: rgba(255, 255, 255, 0.01);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background-color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(17, 17, 17, 0.05);
+  box-shadow: 0 10px 30px rgba(17, 17, 17, 0.02);
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -198,6 +199,7 @@ body {
   width: 100%;
   overflow: hidden;
   position: relative;
+  background-color: #EAEAEA; /* Wireframe-style grey placeholder background */
 }
 
 .project-img {
@@ -205,7 +207,7 @@ body {
   height: 100%;
   object-fit: cover;
   transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: grayscale(15%) brightness(90%);
+  filter: grayscale(10%) brightness(95%);
 }
 
 .image-overlay {
@@ -214,7 +216,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, rgba(6,6,6,0) 50%, rgba(6,6,6,0.4) 100%);
+  background: linear-gradient(to bottom, rgba(250,249,246,0) 60%, rgba(250,249,246,0.3) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -225,10 +227,10 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
-  background-color: rgba(255, 255, 255, 0.005);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(17, 17, 17, 0.04);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .meta-row {
@@ -250,7 +252,7 @@ body {
   font-size: 0.65rem;
   font-weight: 400;
   letter-spacing: 0.1em;
-  color: var(--text-muted);
+  color: #8E8D8A;
 }
 
 .project-name {
@@ -258,7 +260,7 @@ body {
   font-size: 1.75rem;
   font-weight: 300;
   letter-spacing: 0.08em;
-  color: #FAF9F6;
+  color: #111111;
   margin-bottom: var(--space-xs);
   text-transform: uppercase;
 }
@@ -266,7 +268,7 @@ body {
 .project-subtext {
   font-size: 0.85rem;
   font-weight: 300;
-  color: var(--text-secondary);
+  color: #444444;
   line-height: 1.6;
   margin-bottom: var(--space-md);
 }
@@ -280,7 +282,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: #FAF9F6;
+  color: #111111;
   margin-top: auto;
   transition: color 0.3s ease;
 }
@@ -295,14 +297,14 @@ body {
 /* Active Hover Mechanics */
 .project-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(212, 175, 55, 0.2);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 
-              0 0 30px rgba(212, 175, 55, 0.03);
+  border-color: rgba(184, 144, 71, 0.3);
+  box-shadow: 0 20px 40px rgba(17, 17, 17, 0.08), 
+              0 0 25px rgba(184, 144, 71, 0.05);
 }
 
 .project-card:hover .project-img {
-  transform: scale(1.04);
-  filter: grayscale(0%) brightness(95%);
+  transform: scale(1.03);
+  filter: grayscale(0%) brightness(100%);
 }
 
 .project-card:hover .view-project-btn {
@@ -315,11 +317,11 @@ body {
 
 /* 4. Footer System */
 .gallery-footer {
-  border-top: 1px solid rgba(243, 243, 243, 0.05);
+  border-top: 1px solid rgba(17, 17, 17, 0.06);
   padding: var(--space-lg) 0;
   text-align: center;
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: #8E8D8A;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   margin-top: auto;
@@ -337,7 +339,7 @@ body {
 @keyframes pageReveal {
   0% {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;

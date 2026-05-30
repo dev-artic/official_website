@@ -105,7 +105,7 @@
         justify-content: flex-start;
         text-align: left;
         align-items: center;
-        gap: 24px;
+        gap: 48px; /* Doubled gap between cover and text */
       }
     }
 
@@ -130,15 +130,15 @@
     /* Desktop: Slide left from horizontal center */
     @media (min-width: 768px) {
       .album-art-wrapper {
-        transform: translateX(calc(50% - 140px)); /* Horizontally centered in showcase container */
+        left: calc(50% - 140px); /* Perfectly centered horizontally relative to the showcase container */
         animation: albumSlideLeft 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards,
                    albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
       }
     }
 
     @keyframes albumSlideLeft {
-      from { transform: translateX(calc(50% - 140px)); }
-      to   { transform: translateX(0); }
+      from { left: calc(50% - 140px); }
+      to   { left: 0; }
     }
 
     .album-art {

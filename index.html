@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -228,33 +228,78 @@
 
   </div>
 
-  <script>
-    // Handle Glassmorphic Email Submission
+  <!-- Firebase Web SDK Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // === Firebase Configuration ===
+    // TODO: Replace this placeholder object with your actual Firebase project configuration.
+    // You can copy this object from the Firebase Console (Project Settings -> Web App).
+    const firebaseConfig = {
+      apiKey: "AIzaSyAlW7fE3c8mTL4EHdU08wjnVA4U_nKl1Fo",
+      authDomain: "artic-official-home.firebaseapp.com",
+      projectId: "artic-official-home",
+      storageBucket: "artic-official-home.firebasestorage.app",
+      messagingSenderId: "259485663128",
+      appId: "1:259485663128:web:9b01f04205edf4125e75ed",
+      measurementId: "G-KJDZPGXQSX"
+    };
+
+    // Self-healing check: check if keys are still default placeholders
+    const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
+
+    let db = null;
+    if (isFirebaseConfigured) {
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        console.log("Firebase Firestore successfully initialized.");
+      } catch (err) {
+        console.error("Error initializing Firebase:", err);
+      }
+    } else {
+      console.warn("Firebase is not configured yet. Please update the 'firebaseConfig' object inside index.html with your active keys. Falling back to LocalStorage.");
+    }
+
+    // Handle Form Submission
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('subscribe-form');
       const successMessage = document.getElementById('success-message');
       const emailField = document.getElementById('email-field');
 
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const email = emailField.value.trim();
         if (email) {
-          // Retrieve existing subscribers or initialize new array
-          let subscribers = [];
+          // 1. Local Storage Backup (Client-side Cache)
+          let localSubscribers = [];
           try {
-            subscribers = JSON.parse(localStorage.getItem('artic_subscribers')) || [];
+            localSubscribers = JSON.parse(localStorage.getItem('artic_subscribers')) || [];
           } catch(err) {
-            subscribers = [];
+            localSubscribers = [];
           }
-          
-          // Add new email if it doesn't already exist
-          if (!subscribers.includes(email)) {
-            subscribers.push(email);
-            localStorage.setItem('artic_subscribers', JSON.stringify(subscribers));
+          if (!localSubscribers.includes(email)) {
+            localSubscribers.push(email);
+            localStorage.setItem('artic_subscribers', JSON.stringify(localSubscribers));
           }
 
-          // Smoothly animate form hide and success message show
+          // 2. Save directly to Firebase Firestore
+          if (db) {
+            try {
+              // Add a new document with an auto-generated ID to the "subscribers" collection
+              await addDoc(collection(db, "subscribers"), {
+                email: email,
+                timestamp: serverTimestamp()
+              });
+              console.log("Subscription successfully registered in Firebase Firestore!");
+            } catch (err) {
+              console.error("Failed to save to Firebase Firestore database:", err);
+            }
+          }
+
+          // 3. Smooth UI fade animation
           form.style.opacity = '0';
           form.style.pointerEvents = 'none';
           

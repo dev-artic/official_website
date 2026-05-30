@@ -1,25 +1,44 @@
-﻿/* -------------------------------------------------------------
- * DESIGN SYSTEM TOKENS - ART GALLERY & WEBZINE BOILERPLATE
+/* -------------------------------------------------------------
+ * DESIGN SYSTEM TOKENS - ART GALLERY & WEBZINE
  * -------------------------------------------------------------
- * Centralized variables for colors, typography, transitions, and layers.
- * Supports auto dark-mode using media query prefers-color-scheme.
+ * Centralized variables for Kakao Sans fonts, pure monochrome colors,
+ * transitions, and layout sizes.
  */
 
-:root {
-  /* Font Families */
-  --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+/* 1. Kakao Brand Font-Face Declarations (Hosted Locally) */
+@font-face {
+  font-family: 'KakaoBig';
+  src: url('../fonts/KakaoBigSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
-  /* Color Palette - Warm Gallery Light Mode */
-  --bg-primary: #FAF9F6;       /* Soft gallery alabaster */
-  --bg-secondary: #F4F3EF;     /* Slightly darker tone for containers */
-  --text-primary: #111111;     /* Deep slate obsidian */
-  --text-secondary: #555555;   /* Refined body text gray */
-  --text-muted: #8E8D8A;       /* Subtle meta / label grey */
-  --accent: #B89047;           /* Elegant Champagne Gold */
-  --accent-light: #E7D7C1;     /* Soft gold glow tint */
-  --border-color: rgba(17, 17, 17, 0.08); /* Minimalist borders */
-  --border-focus: rgba(184, 144, 71, 0.4);
+@font-face {
+  font-family: 'KakaoSmall';
+  src: url('../fonts/KakaoSmallSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Font Families - Kakao Sans Priority */
+  --font-serif: 'KakaoBig', -apple-system, sans-serif;
+  --font-sans: 'KakaoSmall', system-ui, sans-serif;
+
+  /* Color Palette - Pure Monochrome Theme (White & Black) */
+  --bg-primary: #FFFFFF;       /* Pure white gallery */
+  --bg-secondary: #FAF9F6;     /* Off-white secondary */
+  --text-primary: #000000;     /* Pure obsidian black */
+  --text-secondary: #333333;   /* Slate dark gray */
+  --text-muted: #777777;       /* Delicate caption gray */
+  
+  /* Accent Colors - Monochrome Only (No Gold/Amber) */
+  --accent: #000000;           /* High contrast black */
+  --accent-light: #EEEEEE;     /* Light gray focus tint */
+  --border-color: rgba(0, 0, 0, 0.08); /* Minimal borders */
+  --border-focus: rgba(0, 0, 0, 0.4);
 
   /* Spacing System (Precise & Spacious) */
   --space-xs: 0.5rem;
@@ -38,25 +57,27 @@
   --header-height: 80px;
 
   /* Overlay and Blurs */
-  --glass-bg: rgba(250, 249, 246, 0.75);
+  --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-blur: blur(12px);
 }
 
-/* System Dark Mode (Automatic Override) */
+/* System Dark Mode (Automatic Monochrome Override) */
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Color Palette - Premium Gallery Dark Mode */
-    --bg-primary: #0A0A0A;       /* Midnight velvet black */
-    --bg-secondary: #121212;     /* Dark obsidian gray */
-    --text-primary: #F3F3F3;     /* Pure linen white */
-    --text-secondary: #A0A0A0;   /* Slate grey body text */
-    --text-muted: #666666;       /* Darker grey meta */
-    --accent: #D4AF37;           /* Vibrant classic gold */
-    --accent-light: #332B1A;     /* Dark warm gold tint */
-    --border-color: rgba(243, 243, 243, 0.08);
-    --border-focus: rgba(212, 175, 55, 0.5);
+    /* Color Palette - Pure Black & White Contrast */
+    --bg-primary: #000000;       /* Velvet pure black */
+    --bg-secondary: #0A0A0A;     /* Soft dark gray */
+    --text-primary: #FFFFFF;     /* Pure white */
+    --text-secondary: #CCCCCC;   /* Light gray body */
+    --text-muted: #777777;       /* Darker grey meta */
+    
+    /* Monochrome Accent */
+    --accent: #FFFFFF;           /* Crisp white accent */
+    --accent-light: #222222;     /* Dark gray tint */
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(255, 255, 255, 0.4);
 
     /* Overlay and Blurs */
-    --glass-bg: rgba(10, 10, 10, 0.75);
+    --glass-bg: rgba(0, 0, 0, 0.8);
   }
 }

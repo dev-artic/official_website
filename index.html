@@ -9,12 +9,13 @@
   
   <!-- CSS Linkage -->
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/design-system.css">
   
   <style>
-    /* Splash Screen Specific Styling (Dark Gallery Default) */
+    /* Splash Screen Specific Styling (Monochrome Bright Theme) */
     body {
-      background-color: #0A0A0A;
-      color: #F3F3F3;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -24,19 +25,12 @@
       padding: var(--space-md);
       position: relative;
       overflow: hidden;
+      font-family: var(--font-sans);
     }
 
-    /* Ambient Background Glow */
+    /* Ambient Background Glow - Disabled */
     .ambient-glow {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(184, 144, 71, 0.04) 0%, rgba(10, 10, 10, 0) 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1;
-      pointer-events: none;
+      display: none;
     }
 
     .splash-container {
@@ -48,12 +42,13 @@
       text-align: center;
       max-width: 450px;
       width: 100%;
+      margin: auto;
     }
 
-    /* Central Digital Sculpture Animating */
+    /* Central Digital Sculpture Animating - Pure Flat Vector Outline */
     .sculpture-frame {
-      width: 180px;
-      height: 180px;
+      width: 160px;
+      height: 160px;
       margin-bottom: var(--space-lg);
       position: relative;
       display: flex;
@@ -64,7 +59,7 @@
     .sculpture-svg {
       width: 100%;
       height: 100%;
-      animation: slowRotate 28s linear infinite;
+      animation: slowRotate 36s linear infinite;
     }
 
     @keyframes slowRotate {
@@ -72,40 +67,40 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Branding Typography - Lowercase 'artic.' */
+    /* Branding Typography - Kakao Sans */
     .brand-logo {
       font-family: var(--font-serif);
-      font-size: 2.5rem;
-      font-weight: 300;
-      letter-spacing: 0.12em;
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
       text-transform: lowercase;
       margin-bottom: var(--space-xs);
-      color: #FAF9F6;
+      color: var(--text-primary);
     }
 
     .brand-logo span {
-      color: var(--accent);
+      color: var(--text-muted);
       margin-left: -0.05em;
     }
 
     .exhibit-title {
       font-family: var(--font-sans);
-      font-size: 0.75rem;
-      font-weight: 500;
+      font-size: 0.7rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.35em;
-      color: var(--accent);
+      color: var(--text-primary);
       margin-top: 0.25rem;
     }
 
     .divider {
-      width: 30px;
+      width: 40px;
       height: 1px;
-      background-color: rgba(243, 243, 243, 0.1);
+      background-color: var(--border-color);
       margin: var(--space-lg) 0;
     }
 
-    /* Elegant Glassmorphic Email Form */
+    /* Flat Monochrome Email Form */
     .subscribe-form-container {
       width: 100%;
       margin-top: var(--space-sm);
@@ -118,17 +113,14 @@
       display: flex;
       width: 100%;
       max-width: 380px;
-      border: 1px solid rgba(243, 243, 243, 0.08);
-      background-color: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      background-color: transparent;
       padding: 4px;
       transition: var(--transition-smooth);
     }
 
     .subscribe-form:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 15px rgba(184, 144, 71, 0.1);
+      border-color: var(--text-primary);
     }
 
     .email-input {
@@ -136,42 +128,42 @@
       padding: 0.75rem 1rem;
       font-family: var(--font-sans);
       font-size: 0.85rem;
-      color: #FAF9F6;
+      color: var(--text-primary);
       background: transparent;
       outline: none;
       border: none;
     }
 
     .email-input::placeholder {
-      color: rgba(243, 243, 243, 0.25);
+      color: var(--text-muted);
     }
 
     .btn-submit {
       padding: 0 1.25rem;
       font-family: var(--font-sans);
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.7rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: var(--text-primary);
-      background-color: #FAF9F6;
+      color: var(--bg-primary);
+      background-color: var(--text-primary);
       border: none;
       transition: var(--transition-fast);
+      cursor: pointer;
     }
 
     .btn-submit:hover {
-      background-color: var(--accent);
-      color: #FAF9F6;
+      opacity: 0.8;
     }
 
-    /* Elegant Success Notification */
+    /* Success Notification */
     .success-box {
       font-family: var(--font-serif);
-      font-style: italic;
-      font-size: 1.1rem;
-      color: var(--accent);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-primary);
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(5px);
       transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       display: none;
     }
@@ -181,27 +173,39 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Brand Footer */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: var(--space-md) 0;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: auto;
+      z-index: 2;
+    }
   </style>
 </head>
 <body>
 
-  <div class="ambient-glow"></div>
-
   <div class="splash-container animate-fade">
     
-    <!-- Rotating Symmetric Digital Sculpture -->
+    <!-- Rotating Symmetric digital wireframe sculpture -->
     <div class="sculpture-frame">
       <svg class="sculpture-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
         <!-- Outermost guiding geometric circle -->
-        <circle cx="100" cy="100" r="85" stroke="rgba(184, 144, 71, 0.12)" stroke-width="0.5" stroke-dasharray="2 4"/>
+        <circle cx="100" cy="100" r="85" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="2 4"/>
         
-        <!-- Symmetric frames -->
-        <rect x="40" y="40" width="120" height="120" stroke="var(--accent)" stroke-width="0.5" opacity="0.25"/>
-        <rect x="40" y="40" width="120" height="120" stroke="rgba(243, 243, 243, 0.15)" stroke-width="0.5" transform="rotate(45 100 100)"/>
+        <!-- Symmetric flat wireframes -->
+        <rect x="40" y="40" width="120" height="120" stroke="var(--text-primary)" stroke-width="0.5" opacity="0.4"/>
+        <rect x="40" y="40" width="120" height="120" stroke="var(--text-muted)" stroke-width="0.5" transform="rotate(45 100 100)" opacity="0.3"/>
         
-        <!-- Core sculpture element -->
-        <circle cx="100" cy="100" r="24" stroke="var(--accent)" stroke-width="0.75" class="animate-float"/>
-        <circle cx="100" cy="100" r="8" fill="var(--accent)" opacity="0.3" class="animate-float"/>
+        <!-- Core wireframe sculpture elements -->
+        <circle cx="100" cy="100" r="24" stroke="var(--text-primary)" stroke-width="0.75"/>
+        <circle cx="100" cy="100" r="8" fill="var(--text-primary)" opacity="0.2"/>
       </svg>
     </div>
 
@@ -220,13 +224,18 @@
         <button type="submit" class="btn-submit">notify me</button>
       </form>
       
-      <!-- Success Message (appears on submit) -->
+      <!-- Success Message -->
       <div id="success-message" class="success-box">
-        Access requested. We will notify you.
+        access requested.
       </div>
     </div>
 
   </div>
+
+  <!-- Brand Footer -->
+  <footer>
+    artic. All Rights Reserved
+  </footer>
 
   <!-- Firebase Web SDK Integration -->
   <script type="module">
@@ -234,8 +243,6 @@
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // === Firebase Configuration ===
-    // TODO: Replace this placeholder object with your actual Firebase project configuration.
-    // You can copy this object from the Firebase Console (Project Settings -> Web App).
     const firebaseConfig = {
       apiKey: "AIzaSyAlW7fE3c8mTL4EHdU08wjnVA4U_nKl1Fo",
       authDomain: "artic-official-home.firebaseapp.com",
@@ -246,7 +253,6 @@
       measurementId: "G-KJDZPGXQSX"
     };
 
-    // Self-healing check: check if keys are still default placeholders
     const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
 
     let db = null;
@@ -258,8 +264,6 @@
       } catch (err) {
         console.error("Error initializing Firebase:", err);
       }
-    } else {
-      console.warn("Firebase is not configured yet. Please update the 'firebaseConfig' object inside index.html with your active keys. Falling back to LocalStorage.");
     }
 
     // Handle Form Submission
@@ -288,7 +292,6 @@
           // 2. Save directly to Firebase Firestore
           if (db) {
             try {
-              // Add a new document with an auto-generated ID to the "subscribers" collection
               await addDoc(collection(db, "subscribers"), {
                 email: email,
                 timestamp: serverTimestamp()

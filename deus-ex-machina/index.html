@@ -10,13 +10,12 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- CSS Linkage from parent for design-system tokens -->
   <link rel="stylesheet" href="../css/design-system.css">
   
   <style>
-    /* Reset & Base overrides for the Premium Bright Theme */
+    /* Reset & Base overrides for the Premium Monochrome Bright Theme */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -24,8 +23,8 @@
     }
 
     body {
-      background-color: #FAF9F6;  /* Soft gallery alabaster */
-      color: #111111;            /* Deep obsidian charcoal */
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
       font-family: var(--font-sans);
       min-height: 100vh;
       display: flex;
@@ -37,28 +36,9 @@
       position: relative;
     }
 
-    /* Ambient Radial Light Source */
-    .ambient-glow-1 {
-      position: absolute;
-      width: 700px;
-      height: 700px;
-      background: radial-gradient(circle, rgba(184, 144, 71, 0.05) 0%, rgba(250, 249, 246, 0) 70%);
-      top: -10%;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .ambient-glow-2 {
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(184, 144, 71, 0.03) 0%, rgba(250, 249, 246, 0) 65%);
-      bottom: 5%;
-      left: 20%;
-      z-index: 1;
-      pointer-events: none;
+    /* Ambient Radial Light Source - Completely Disabled */
+    .ambient-glow-1, .ambient-glow-2 {
+      display: none;
     }
 
     /* Core Container */
@@ -80,7 +60,7 @@
       align-items: center;
       margin-bottom: var(--space-lg);
       padding: 0 var(--space-xs);
-      border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+      border-bottom: 1px solid var(--border-color);
       padding-bottom: var(--space-xs);
     }
 
@@ -90,7 +70,7 @@
       gap: 8px;
       font-size: 0.75rem;
       font-weight: 500;
-      color: #555555;
+      color: var(--text-secondary);
       text-decoration: none;
       text-transform: uppercase;
       letter-spacing: 0.15em;
@@ -98,7 +78,7 @@
     }
 
     .back-btn:hover {
-      color: var(--accent);
+      color: var(--text-primary);
       transform: translateX(-3px);
     }
 
@@ -111,18 +91,18 @@
     .brand-logo {
       font-family: var(--font-serif);
       font-size: 1.5rem;
-      font-weight: 300;
-      letter-spacing: 0.1em;
+      font-weight: 700;
+      letter-spacing: 0.05em;
       text-decoration: none;
-      color: #111111;
+      color: var(--text-primary);
       text-transform: lowercase;
     }
 
     .brand-logo span {
-      color: var(--accent);
+      color: var(--text-muted);
     }
 
-    /* Album Presentation Module */
+    /* Album Presentation Module - Flat & Sharp */
     .album-showcase {
       display: flex;
       flex-direction: column;
@@ -137,100 +117,58 @@
       width: 280px;
       height: 280px;
       margin-bottom: var(--space-md);
-      perspective: 1000px;
     }
 
     .album-art {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 12px;
-      border: 1px solid rgba(17, 17, 17, 0.08);
-      box-shadow: 0 15px 35px rgba(17, 17, 17, 0.15), 
-                  0 0 25px rgba(184, 144, 71, 0.08);
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-                  box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 0px; /* Sharp corners for flat wireframe minimalist look */
+      border: 1px solid var(--border-color);
+      box-shadow: none; /* Removed heavy dynamic drop-shadows */
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
-      z-index: 2;
-      position: relative;
     }
 
     .album-art-wrapper:hover .album-art {
-      transform: scale(1.02) rotateY(2deg);
-      box-shadow: 0 20px 45px rgba(17, 17, 17, 0.22), 
-                  0 0 35px rgba(184, 144, 71, 0.12);
+      transform: scale(1.02);
     }
 
-    /* Subtle vinyl record peek animation behind artwork */
+    /* Vinyl record peek - Disabled */
     .vinyl-peek {
-      position: absolute;
-      width: 260px;
-      height: 260px;
-      background: radial-gradient(circle, #0e0e0e 30%, #151515 55%, #050505 70%);
-      border-radius: 50%;
-      top: 10px;
-      right: -20px;
-      z-index: 1;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-      animation: spinVinyl 25s linear infinite;
-    }
-    
-    .vinyl-peek::after {
-      content: '';
-      position: absolute;
-      width: 80px;
-      height: 80px;
-      background: #B89047;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      border: 5px solid #111;
-      opacity: 0.8;
-    }
-
-    .album-art-wrapper:hover .vinyl-peek {
-      transform: translateX(40px);
-    }
-
-    @keyframes spinVinyl {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      display: none;
     }
 
     .artist-name {
       font-family: var(--font-sans);
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.3em;
-      color: var(--accent);
+      color: var(--text-primary);
       margin-bottom: 0.5rem;
-      background: rgba(184, 144, 71, 0.08);
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(184, 144, 71, 0.15);
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      border: none;
       display: inline-block;
     }
 
     .album-title {
       font-family: var(--font-serif);
       font-size: 2.25rem;
-      font-weight: 300;
-      letter-spacing: 0.15em;
+      font-weight: 700;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: #111111;
+      color: var(--text-primary);
       margin-bottom: 0.5rem;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .album-meta {
       font-size: 0.8rem;
-      color: #555555;
+      color: var(--text-muted);
       letter-spacing: 0.1em;
-      font-weight: 300;
+      font-weight: 400;
     }
 
     /* Platform Link Container */
@@ -242,21 +180,24 @@
       margin-bottom: var(--space-xl);
     }
 
-    /* Bright Glassmorphic Link Card */
+    /* Flat Monochrome Link Card */
     .link-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       width: 100%;
-      background-color: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(17, 17, 17, 0.05);
-      box-shadow: 0 4px 15px rgba(17, 17, 17, 0.02);
+      background-color: transparent;
+      border: 1px solid var(--border-color);
       padding: 16px 20px;
-      border-radius: 12px;
+      border-radius: 0px; /* Sharp edges */
       text-decoration: none;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .link-item:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--text-primary);
+      transform: translateY(-1px);
     }
 
     .platform-info {
@@ -266,156 +207,147 @@
     }
 
     .platform-logo {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      fill: #111111;
+      fill: var(--text-primary);
       transition: fill 0.3s ease;
     }
 
     .platform-name {
       font-size: 0.9rem;
-      font-weight: 500;
-      color: #111111;
+      font-weight: 400;
+      color: var(--text-primary);
       letter-spacing: 0.05em;
     }
 
     .listen-badge {
       font-size: 0.7rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.15em;
-      color: #FAF9F6;
-      background-color: #111111;
+      color: var(--bg-primary);
+      background-color: var(--text-primary);
       padding: 8px 18px;
-      border-radius: 6px;
+      border-radius: 0px; /* Sharp corners */
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* -------------------------------------------------------------
-     * PLATFORM SPECIFIC SIGNATURE HOVERS (Official Brand Colors)
+     * PLATFORM SPECIFIC BRAND HOVERS
      * -------------------------------------------------------------
      */
     
     /* 1. Spotify (#1DB954) */
     .link-spotify:hover {
       background-color: rgba(29, 185, 84, 0.04);
-      border-color: rgba(29, 185, 84, 0.25);
-      box-shadow: 0 10px 20px rgba(29, 185, 84, 0.04);
+      border-color: rgba(29, 185, 84, 0.3);
     }
     .link-spotify:hover .platform-logo {
       fill: #1DB954;
     }
     .link-spotify:hover .listen-badge {
       background-color: #1DB954;
-      box-shadow: 0 4px 10px rgba(29, 185, 84, 0.25);
+      color: #FFFFFF;
     }
 
     /* 2. Apple Music (#FC3C44) */
     .link-apple:hover {
       background-color: rgba(252, 60, 68, 0.04);
-      border-color: rgba(252, 60, 68, 0.25);
-      box-shadow: 0 10px 20px rgba(252, 60, 68, 0.04);
+      border-color: rgba(252, 60, 68, 0.3);
     }
     .link-apple:hover .platform-logo {
       fill: #FC3C44;
     }
     .link-apple:hover .listen-badge {
       background-color: #FC3C44;
-      box-shadow: 0 4px 10px rgba(252, 60, 68, 0.25);
+      color: #FFFFFF;
     }
 
     /* 3. YouTube Music (#FF0000) */
     .link-youtube:hover {
       background-color: rgba(255, 0, 0, 0.04);
-      border-color: rgba(255, 0, 0, 0.25);
-      box-shadow: 0 10px 20px rgba(255, 0, 0, 0.04);
+      border-color: rgba(255, 0, 0, 0.3);
     }
     .link-youtube:hover .platform-logo {
       fill: #FF0000;
     }
     .link-youtube:hover .listen-badge {
       background-color: #FF0000;
-      box-shadow: 0 4px 10px rgba(255, 0, 0, 0.25);
+      color: #FFFFFF;
     }
 
-    /* 4. Tidal (#00E6FF) */
+    /* 4. Tidal (#00C2E5) */
     .link-tidal:hover {
       background-color: rgba(0, 230, 255, 0.04);
-      border-color: rgba(0, 230, 255, 0.25);
-      box-shadow: 0 10px 20px rgba(0, 230, 255, 0.04);
+      border-color: rgba(0, 230, 255, 0.3);
     }
     .link-tidal:hover .platform-logo {
-      fill: #00C2E5; /* Tidal High-Contrast Cyan */
+      fill: #00C2E5;
     }
     .link-tidal:hover .listen-badge {
       background-color: #00C2E5;
       color: #111111;
-      box-shadow: 0 4px 10px rgba(0, 230, 255, 0.25);
     }
 
     /* 5. Amazon Music (#00A8E1) */
     .link-amazon:hover {
       background-color: rgba(0, 168, 225, 0.04);
-      border-color: rgba(0, 168, 225, 0.25);
-      box-shadow: 0 10px 20px rgba(0, 168, 225, 0.04);
+      border-color: rgba(0, 168, 225, 0.3);
     }
     .link-amazon:hover .platform-logo {
       fill: #00A8E1;
     }
     .link-amazon:hover .listen-badge {
       background-color: #00A8E1;
-      box-shadow: 0 4px 10px rgba(0, 168, 225, 0.25);
+      color: #FFFFFF;
     }
 
     /* 6. Melon (#00CD3C) */
     .link-melon:hover {
       background-color: rgba(0, 205, 60, 0.04);
-      border-color: rgba(0, 205, 60, 0.25);
-      box-shadow: 0 10px 20px rgba(0, 205, 60, 0.04);
+      border-color: rgba(0, 205, 60, 0.3);
     }
     .link-melon:hover .platform-logo {
       fill: #00CD3C;
     }
     .link-melon:hover .listen-badge {
       background-color: #00CD3C;
-      box-shadow: 0 4px 10px rgba(0, 205, 60, 0.25);
+      color: #FFFFFF;
     }
 
     /* 7. Genie (#09B4E3) */
     .link-genie:hover {
       background-color: rgba(9, 180, 227, 0.04);
-      border-color: rgba(9, 180, 227, 0.25);
-      box-shadow: 0 10px 20px rgba(9, 180, 227, 0.04);
+      border-color: rgba(9, 180, 227, 0.3);
     }
     .link-genie:hover .platform-logo {
       fill: #09B4E3;
     }
     .link-genie:hover .listen-badge {
       background-color: #09B4E3;
-      box-shadow: 0 4px 10px rgba(9, 180, 227, 0.25);
+      color: #FFFFFF;
     }
 
     /* 8. Bugs (#F5463E) */
     .link-bugs:hover {
       background-color: rgba(245, 70, 62, 0.04);
-      border-color: rgba(245, 70, 62, 0.25);
-      box-shadow: 0 10px 20px rgba(245, 70, 62, 0.04);
+      border-color: rgba(245, 70, 62, 0.3);
     }
     .link-bugs:hover .platform-logo {
       fill: #F5463E;
     }
     .link-bugs:hover .listen-badge {
       background-color: #F5463E;
-      box-shadow: 0 4px 10px rgba(245, 70, 62, 0.25);
+      color: #FFFFFF;
     }
 
-    /* Pre-save Form Module */
+    /* Pre-save Form Module - Ultra Clean */
     .pre-save-section {
       width: 100%;
-      border-top: 1px solid rgba(17, 17, 17, 0.06);
+      border-top: 1px solid var(--border-color);
       padding-top: var(--space-lg);
       text-align: center;
       margin-bottom: var(--space-xl);
@@ -424,35 +356,30 @@
     .pre-save-title {
       font-family: var(--font-serif);
       font-size: 1.25rem;
-      font-style: italic;
-      color: var(--accent);
-      margin-bottom: 0.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--space-md);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .pre-save-desc {
-      font-size: 0.8rem;
-      color: #555555;
-      margin-bottom: var(--space-md);
-      line-height: 1.5;
-      padding: 0 20px;
+      display: none; /* Description text completely removed for whitespace and minimalism */
     }
 
-    /* Bright Glassmorphic Form */
+    /* Flat Monochrome Form */
     .subscribe-form {
       display: flex;
       width: 100%;
-      border: 1px solid rgba(17, 17, 17, 0.06);
-      background-color: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border-color);
+      background-color: transparent;
       padding: 4px;
-      border-radius: 8px;
+      border-radius: 0px; /* Sharp corners */
       transition: var(--transition-smooth);
     }
 
     .subscribe-form:focus-within {
-      border-color: var(--accent);
-      box-shadow: 0 0 15px rgba(184, 144, 71, 0.15);
+      border-color: var(--text-primary);
     }
 
     .email-input {
@@ -460,43 +387,42 @@
       padding: 0.75rem 1rem;
       font-family: var(--font-sans);
       font-size: 0.85rem;
-      color: #111111;
+      color: var(--text-primary);
       background: transparent;
       outline: none;
       border: none;
     }
 
     .email-input::placeholder {
-      color: #8E8D8A;
+      color: var(--text-muted);
     }
 
     .btn-submit {
       padding: 0 1.25rem;
       font-family: var(--font-sans);
       font-size: 0.7rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #FAF9F6;
-      background-color: #111111;
+      color: var(--bg-primary);
+      background-color: var(--text-primary);
       border: none;
-      border-radius: 6px;
+      border-radius: 0px; /* Sharp corners */
       cursor: pointer;
       transition: var(--transition-fast);
     }
 
     .btn-submit:hover {
-      background-color: var(--accent);
-      color: #FAF9F6;
+      opacity: 0.8;
     }
 
     .success-box {
       font-family: var(--font-serif);
-      font-style: italic;
+      font-weight: 700;
       font-size: 1rem;
-      color: var(--accent);
+      color: var(--text-primary);
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(5px);
       transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       display: none;
       margin-top: 15px;
@@ -513,16 +439,16 @@
       width: 100%;
       text-align: center;
       padding: var(--space-md) 0;
-      border-top: 1px solid rgba(17, 17, 17, 0.05);
+      border-top: 1px solid var(--border-color);
       margin-top: auto;
       font-size: 0.65rem;
-      color: #8E8D8A;
+      color: var(--text-muted);
       letter-spacing: 0.1em;
       text-transform: uppercase;
     }
 
     footer span {
-      color: var(--accent);
+      color: var(--text-primary);
     }
 
     /* Animation effects */
@@ -533,7 +459,7 @@
     @keyframes fadeInUp {
       0% {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(15px);
       }
       100% {
         opacity: 1;
@@ -543,9 +469,6 @@
   </style>
 </head>
 <body>
-
-  <div class="ambient-glow-1"></div>
-  <div class="ambient-glow-2"></div>
 
   <div class="page-container animate-fade-in">
     
@@ -689,12 +612,9 @@
 
     </main>
 
-    <!-- Interactive Pre-save -->
+    <!-- Interactive Pre-save - Ultra Clean -->
     <section class="pre-save-section">
       <h2 class="pre-save-title">Pre-Save & Newsletter</h2>
-      <p class="pre-save-desc">
-        다음 신보 소식과 아티스트 arkyteccc의 새로운 특별 콘텐츠 알림을 가장 먼저 보내드립니다.
-      </p>
       
       <div class="subscribe-form-container">
         <form id="pre-save-form" class="subscribe-form">
@@ -704,14 +624,14 @@
         
         <!-- Success Message -->
         <div id="success-message" class="success-box">
-          사전 구독 신청이 완료되었습니다. 감사드립니다.
+          사전 구독 신청이 완료되었습니다.
         </div>
       </div>
     </section>
 
     <!-- Footer -->
     <footer>
-      © 2026 <span>artic.</span> powered by arkyteccc.
+      artic. All Rights Reserved
     </footer>
 
   </div>

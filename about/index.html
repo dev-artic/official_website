@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="artic. — Art, Culture, and Archive. About us.">
+  <meta name="author" content="artic.">
+  <title>About — artic.</title>
+
+  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="stylesheet" href="../css/design-system.css">
+
+  <script>
+    (function(){
+      var s = localStorage.getItem('artic-theme');
+      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
+      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
+    })();
+  </script>
+
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+
+    /* ── Layout ── */
+    .about-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+      padding-top: 80px; /* space for floating nav */
+    }
+
+    /* ── Row: Two-column split ── */
+    .about-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(40px, 8vw, 120px);
+      padding: var(--space-xxl) 0;
+      border-top: 1px solid var(--border-color);
+      transition: border-color 0.5s ease;
+      align-items: start;
+    }
+
+    .about-row:first-child {
+      border-top: none;
+      padding-top: var(--space-xl);
+    }
+
+    /* ── Headline (left column, row 1) ── */
+    .about-headline {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: 0.01em;
+      color: var(--text-primary);
+    }
+
+    /* ── Description block (right column) ── */
+    .about-desc-en {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+    }
+
+    .about-desc-ko {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      line-height: 1.75;
+      color: var(--text-muted);
+      margin-bottom: var(--space-lg);
+    }
+
+    /* ── Action Links (CONTACT / FOLLOW / YOUTUBE) ── */
+    .about-actions {
+      display: flex;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .about-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-sans);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .about-action:hover {
+      color: var(--text-muted);
+    }
+
+    .about-action svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    /* ── Large Logo Image (left column, row 2) ── */
+    .about-logo-wrap {
+      align-self: center;
+    }
+
+    .about-logo-img {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+    }
+
+    .dark-mode .about-logo-img {
+      filter: invert(1);
+    }
+
+    /* ── Extended Description (right column, row 2) ── */
+    .about-extended {
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      align-self: center;
+    }
+
+    /* ── Footer ── */
+    .about-footer {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-lg) var(--gutter);
+      border-top: 1px solid var(--border-color);
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: border-color 0.5s ease;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .about-row {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+        padding: var(--space-xl) 0;
+      }
+
+      .about-logo-img {
+        max-width: 260px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Navigation -->
+  <nav class="nav-bar">
+    <a href="/" class="nav-home animate-on-load" id="nav-home">artic.</a>
+    <a href="/about/" class="nav-link active">About</a>
+    <a href="/projects/" class="nav-link">Projects</a>
+    <a href="/contact/" class="nav-link">Contact</a>
+  </nav>
+
+  <div class="about-content animate-fade-in">
+
+    <!-- Row 1: Headline + Description -->
+    <div class="about-row">
+      <div>
+        <h1 class="about-headline">artic. illuminates artists' message,<br>bringing their creative voice to life.</h1>
+      </div>
+      <div>
+        <p class="about-desc-en">
+          artic. is a creative brand aiming to create the most aesthetic and experimental contents
+          focused on artists' message.
+        </p>
+        <p class="about-desc-ko">
+          artic.은 창작자가 의도한 메시지에 집중하며<br>
+          이를 가장 아름다운 방식으로 조명합니다.
+        </p>
+        <div class="about-actions">
+          <a href="/contact/" class="about-action">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            Contact
+          </a>
+          <a href="#" class="about-action" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            Follow
+          </a>
+          <a href="#" class="about-action" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
+            YouTube
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-row">
+      <div class="about-logo-wrap">
+        <img src="../images/logo-type-black.png" alt="artic." class="about-logo-img">
+      </div>
+      <div>
+        <p class="about-extended">
+          artic. stands for artists' attic—<br>
+          a symbolic place where the initial message of an artist
+          emerges. With the most profound respect for
+          the message intended by the artist, artic.
+          pursues a border-crossing, limit-pushing,<br>
+          media-bending approach to creativity.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="about-footer">
+    © 2026 artic. All Rights Reserved
+  </footer>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+
+  <script src="../js/shared.js"></script>
+
+</body>
+</html>

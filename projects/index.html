@@ -3,123 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. - Curation & Project Archive. Art gallery and visual archives.">
+  <meta name="description" content="artic. — Project Archive. Art, music, and culture curation.">
   <meta name="author" content="artic.">
-  <title>archives • artic.</title>
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  
-  <!-- Global Design System System -->
+  <title>Projects — artic.</title>
+
+  <link rel="icon" type="image/png" href="../images/favicon.png">
   <link rel="stylesheet" href="../css/design-system.css">
-  
-  <!-- Page Specific Separated Stylesheet -->
   <link rel="stylesheet" href="style.css">
+
+  <script>
+    (function(){
+      var s = localStorage.getItem('artic-theme');
+      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
+      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
+    })();
+  </script>
 </head>
 <body>
 
-  <!-- Ambient Glow Background - Disabled in pure monochrome CSS -->
-  <div class="ambient-glow"></div>
+  <!-- ── Floating Navigation (same as homepage) ── -->
+  <nav class="nav-bar">
+    <a href="/" class="nav-home animate-on-load" id="nav-home">artic.</a>
+    <a href="/about/" class="nav-link">About</a>
+    <a href="/projects/" class="nav-link active">Projects</a>
+    <a href="/contact/" class="nav-link">Contact</a>
+  </nav>
 
   <div class="container animate-fade-in">
-    
-    <!-- Header Navigation -->
-    <header class="gallery-header">
-      <a href="../index.html" class="brand-logo">artic<span>.</span></a>
-      <nav class="gallery-nav">
-        <a href="../index.html" class="nav-link">Home</a>
-        <a href="index.html" class="nav-link active">Projects</a>
-        <a href="../index.html#subscribe" class="nav-link">Request Access</a>
-      </nav>
-    </header>
 
-    <!-- Page Title / Hero Curation - Spaced & Minimal -->
+    <!-- Page Title -->
     <section class="gallery-intro">
-      <span class="curator-tag">Curation / Archive</span>
-      <h1 class="gallery-title">PROJECT ARCHIVE</h1>
+      <span class="curator-tag">Archive</span>
+      <h1 class="gallery-title">Projects</h1>
     </section>
 
-    <!-- Asymmetric CSS Grid Gallery -->
-    <main class="projects-grid">
-      
-      <!-- Project Card 1: Deus Ex Machina (Arkyteccc) -->
-      <article class="project-card size-large">
+    <!-- Horizontal Scroll Carousel -->
+    <div class="projects-carousel" id="projects-carousel">
+
+      <article class="project-card">
         <a href="../deus-ex-machina/index.html" class="card-link">
           <div class="image-wrapper">
-            <img src="../deus-ex-machina/album-art.png" alt="arkyteccc - Deus Ex Machina" class="project-img">
-            <div class="image-overlay"></div>
+            <img src="../deus-ex-machina/album-art.png" alt="arkyteccc — Deus Ex Machina" class="project-img">
           </div>
           <div class="project-info">
             <div class="meta-row">
-              <span class="project-tag">MUSIC / DESIGN</span>
-              <span class="project-date">2026.06 RELEASE</span>
+              <span class="project-tag">Music</span>
+              <span class="project-date">2024</span>
             </div>
-            <h2 class="project-name">DEUS EX MACHINA</h2>
+            <h2 class="project-name">Deus Ex Machina</h2>
             <div class="view-project-btn">
-              <span>View Campaign</span>
-              <svg viewBox="0 0 24 24" class="arrow-icon">
-                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-              </svg>
+              <span>View</span>
+              <svg viewBox="0 0 24 24" class="arrow-icon"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
             </div>
           </div>
         </a>
       </article>
 
-      <!-- Project Card 2: Silence in Motion -->
-      <article class="project-card size-medium">
+      <article class="project-card">
         <a href="#" class="card-link">
           <div class="image-wrapper">
-            <img src="media-art.png" alt="Silence in Motion Media Art" class="project-img">
-            <div class="image-overlay"></div>
+            <img src="media-art.png" alt="Silence in Motion" class="project-img">
           </div>
           <div class="project-info">
             <div class="meta-row">
-              <span class="project-tag">MEDIA ART</span>
-              <span class="project-date">2026.03 EXHIBITION</span>
+              <span class="project-tag">Media Art</span>
+              <span class="project-date">2026</span>
             </div>
-            <h2 class="project-name">SILENCE IN MOTION</h2>
+            <h2 class="project-name">Silence in Motion</h2>
             <div class="view-project-btn">
-              <span>Read Curation</span>
-              <svg viewBox="0 0 24 24" class="arrow-icon">
-                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-              </svg>
+              <span>View</span>
+              <svg viewBox="0 0 24 24" class="arrow-icon"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
             </div>
           </div>
         </a>
       </article>
 
-      <!-- Project Card 3: Restoration of Space -->
-      <article class="project-card size-medium">
+      <article class="project-card">
         <a href="#" class="card-link">
           <div class="image-wrapper">
-            <img src="space-art.png" alt="Restoration of Space Architectural Art" class="project-img">
-            <div class="image-overlay"></div>
+            <img src="space-art.png" alt="Restoration of Space" class="project-img">
           </div>
           <div class="project-info">
             <div class="meta-row">
-              <span class="project-tag">ARCHITECTURE / INSTALLATION</span>
-              <span class="project-date">2026.01 COMPLETED</span>
+              <span class="project-tag">Architecture</span>
+              <span class="project-date">2026</span>
             </div>
-            <h2 class="project-name">RESTORATION OF SPACE</h2>
+            <h2 class="project-name">Restoration of Space</h2>
             <div class="view-project-btn">
-              <span>Read Curation</span>
-              <svg viewBox="0 0 24 24" class="arrow-icon">
-                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-              </svg>
+              <span>View</span>
+              <svg viewBox="0 0 24 24" class="arrow-icon"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
             </div>
           </div>
         </a>
       </article>
 
-    </main>
+    </div>
 
-    <!-- Footer -->
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span class="scroll-text">Scroll to explore</span>
+    </div>
+
     <footer class="gallery-footer">
-      <p>artic. All Rights Reserved</p>
+      <p>© 2026 artic. All Rights Reserved</p>
     </footer>
 
   </div>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+
+  <script src="../js/shared.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Drag-to-scroll
+      const c = document.getElementById('projects-carousel');
+      if (!c) return;
+      let down = false, sx, sl;
+      c.addEventListener('mousedown', e => { down = true; sx = e.pageX - c.offsetLeft; sl = c.scrollLeft; });
+      c.addEventListener('mouseleave', () => down = false);
+      c.addEventListener('mouseup', () => down = false);
+      c.addEventListener('mousemove', e => { if (!down) return; e.preventDefault(); c.scrollLeft = sl - (e.pageX - c.offsetLeft - sx) * 1.5; });
+    });
+  </script>
 
 </body>
 </html>

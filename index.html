@@ -3,315 +3,324 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. - Under Restoration">
-  <meta name="author" content="dev-artic">
+  <meta name="description" content="artic. — Art, Culture, and Archive">
+  <meta name="author" content="artic.">
   <title>artic.</title>
-  
-  <!-- CSS Linkage -->
-  <link rel="stylesheet" href="css/main.css">
+
+  <link rel="icon" type="image/png" href="images/favicon.png">
   <link rel="stylesheet" href="css/design-system.css">
-  
+
+  <!-- Prevent flash: apply theme before render -->
+  <script>
+    (function(){
+      var s = localStorage.getItem('artic-theme');
+      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
+      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
+    })();
+  </script>
+
   <style>
-    /* Splash Screen Specific Styling (Monochrome Bright Theme) */
+    /* ── Page ── */
     body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* ── Nav (initial: hidden, appears after logo animation) ── */
+    .nav-bar {
+      opacity: 0;
+      transform: translateY(-12px);
+      animation: navReveal 0.7s var(--ease-out-expo) 1.8s forwards;
+    }
+
+    @keyframes navReveal {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Hero Section ── */
+    .hero {
       min-height: 100vh;
-      margin: 0;
-      padding: var(--space-md);
-      position: relative;
-      overflow: hidden;
-      font-family: var(--font-sans);
-    }
-
-    /* Ambient Background Glow - Disabled */
-    .ambient-glow {
-      display: none;
-    }
-
-    .splash-container {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      max-width: 450px;
-      width: 100%;
-      margin: auto;
-    }
-
-    /* Central Digital Sculpture Animating - Pure Flat Vector Outline */
-    .sculpture-frame {
-      width: 160px;
-      height: 160px;
-      margin-bottom: var(--space-lg);
-      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
 
-    .sculpture-svg {
+    .logo-split {
+      position: relative;
+      width: 100px;
+      aspect-ratio: 434 / 313;
+    }
+
+    .logo-split img {
+      position: absolute;
+      top: 0; left: 0;
       width: 100%;
-      height: 100%;
-      animation: slowRotate 36s linear infinite;
+      height: auto;
+      display: block;
     }
 
-    @keyframes slowRotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .logo-icon {
+      clip-path: inset(50% 0 50% 0);
+      transform: translateY(20px);
+      animation: revealIcon 1.2s var(--ease-out-expo) 0.3s forwards;
     }
 
-    /* Branding Typography - Kakao Sans */
-    .brand-logo {
-      font-family: var(--font-serif);
-      font-size: 2.8rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: lowercase;
-      margin-bottom: var(--space-xs);
-      color: var(--text-primary);
+    .logo-type {
+      clip-path: inset(50% 0 50% 0);
+      transform: translateY(-20px);
+      animation: revealType 1.2s var(--ease-out-expo) 0.3s forwards;
     }
 
-    .brand-logo span {
-      color: var(--text-muted);
-      margin-left: -0.05em;
+    @keyframes revealIcon {
+      from { clip-path: inset(50% 0 50% 0); transform: translateY(20px); }
+      to   { clip-path: inset(0 0 43% 0);   transform: translateY(0); }
     }
 
-    .exhibit-title {
+    @keyframes revealType {
+      from { clip-path: inset(50% 0 50% 0); transform: translateY(-20px); }
+      to   { clip-path: inset(57% 0 0 0);   transform: translateY(0); }
+    }
+
+    /* ── Content Sections ── */
+    .content-section {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-xxl) var(--gutter);
+      border-top: 1px solid var(--border-color);
+      transition: border-color 0.5s ease;
+    }
+
+    .section-tag {
+      display: block;
       font-family: var(--font-sans);
-      font-size: 0.7rem;
-      font-weight: 700;
+      font-size: 0.6rem;
+      font-weight: 400;
       text-transform: uppercase;
-      letter-spacing: 0.35em;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-sm);
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
       color: var(--text-primary);
-      margin-top: 0.25rem;
+      margin-bottom: var(--space-md);
+      max-width: 600px;
     }
 
-    .divider {
-      width: 40px;
-      height: 1px;
-      background-color: var(--border-color);
-      margin: var(--space-lg) 0;
-    }
-
-    /* Flat Monochrome Email Form */
-    .subscribe-form-container {
-      width: 100%;
-      margin-top: var(--space-sm);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .subscribe-form {
-      display: flex;
-      width: 100%;
-      max-width: 380px;
-      border: 1px solid var(--border-color);
-      background-color: transparent;
-      padding: 4px;
-      transition: var(--transition-smooth);
-    }
-
-    .subscribe-form:focus-within {
-      border-color: var(--text-primary);
-    }
-
-    .email-input {
-      flex: 1;
-      padding: 0.75rem 1rem;
+    .section-desc {
       font-family: var(--font-sans);
       font-size: 0.85rem;
-      color: var(--text-primary);
-      background: transparent;
-      outline: none;
-      border: none;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin-bottom: var(--space-lg);
     }
 
-    .email-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .btn-submit {
-      padding: 0 1.25rem;
+    .section-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-family: var(--font-sans);
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--bg-primary);
-      background-color: var(--text-primary);
-      border: none;
-      transition: var(--transition-fast);
-      cursor: pointer;
-    }
-
-    .btn-submit:hover {
-      opacity: 0.8;
-    }
-
-    /* Success Notification */
-    .success-box {
-      font-family: var(--font-serif);
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--text-primary);
-      opacity: 0;
-      transform: translateY(5px);
-      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      display: none;
-    }
-
-    .success-box.active {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Brand Footer */
-    footer {
-      width: 100%;
-      text-align: center;
-      padding: var(--space-md) 0;
-      border-top: 1px solid var(--border-color);
       font-size: 0.65rem;
-      color: var(--text-muted);
-      letter-spacing: 0.15em;
+      font-weight: 400;
       text-transform: uppercase;
-      margin-top: auto;
-      z-index: 2;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
+      transition: color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .section-link:hover {
+      color: var(--text-primary);
+    }
+
+    .section-link svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+      transition: transform 0.4s var(--ease-out-expo);
+    }
+
+    .section-link:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* ── Projects Preview Row ── */
+    .projects-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .projects-preview {
+      display: flex;
+      gap: var(--space-md);
+      flex: 1;
+      min-width: 0;
+    }
+
+
+
+    .preview-card {
+      flex: 0 0 280px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .preview-card-img {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      margin-bottom: var(--space-xs);
+      transition: transform 0.6s var(--ease-out-expo);
+    }
+
+    .preview-card:hover .preview-card-img {
+      transform: scale(1.02);
+    }
+
+    .preview-card-title {
+      font-family: var(--font-serif);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .preview-card-meta {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .preview-img-wrap {
+      overflow: hidden;
+      margin-bottom: var(--space-xs);
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: var(--space-lg) var(--gutter);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: border-color 0.5s ease;
+    }
+
+    .site-footer span {
+      color: var(--text-muted);
+    }
+
+    /* ── Theme Toggle (initial reveal) ── */
+    .theme-toggle {
+      opacity: 0;
+      animation: toggleReveal 0.5s ease 2.2s forwards;
+    }
+
+    @keyframes toggleReveal {
+      to { opacity: 1; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .preview-card { flex: 0 0 220px; }
+      .content-section { padding: var(--space-xl) var(--gutter); }
     }
   </style>
 </head>
 <body>
 
-  <div class="splash-container animate-fade">
-    
-    <!-- Rotating Symmetric digital wireframe sculpture -->
-    <div class="sculpture-frame">
-      <svg class="sculpture-svg" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Outermost guiding geometric circle -->
-        <circle cx="100" cy="100" r="85" stroke="var(--border-color)" stroke-width="0.5" stroke-dasharray="2 4"/>
-        
-        <!-- Symmetric flat wireframes -->
-        <rect x="40" y="40" width="120" height="120" stroke="var(--text-primary)" stroke-width="0.5" opacity="0.4"/>
-        <rect x="40" y="40" width="120" height="120" stroke="var(--text-muted)" stroke-width="0.5" transform="rotate(45 100 100)" opacity="0.3"/>
-        
-        <!-- Core wireframe sculpture elements -->
-        <circle cx="100" cy="100" r="24" stroke="var(--text-primary)" stroke-width="0.75"/>
-        <circle cx="100" cy="100" r="8" fill="var(--text-primary)" opacity="0.2"/>
-      </svg>
-    </div>
+  <!-- ── Floating Navigation ── -->
+  <nav class="nav-bar">
+    <a href="/" class="nav-home" id="nav-home">artic.</a>
+    <a href="/about/" class="nav-link">About</a>
+    <a href="/projects/" class="nav-link">Projects</a>
+    <a href="/contact/" class="nav-link">Contact</a>
+  </nav>
 
-    <!-- Branding Text (lowercase 'artic.') -->
-    <div class="brand-logo">artic<span>.</span></div>
-    
-    <!-- Under Restoration Label -->
-    <div class="exhibit-title">under restoration</div>
-    
-    <div class="divider"></div>
-    
-    <!-- Email Collection Form -->
-    <div class="subscribe-form-container">
-      <form id="subscribe-form" class="subscribe-form">
-        <input type="email" id="email-field" class="email-input" placeholder="enter your email" required autocomplete="off">
-        <button type="submit" class="btn-submit">notify me</button>
-      </form>
-      
-      <!-- Success Message -->
-      <div id="success-message" class="success-box">
-        access requested.
+  <!-- ── Hero: Logo Animation ── -->
+  <section class="hero" id="hero-logo">
+    <div class="logo-split">
+      <img src="images/logo-black.png" alt="" class="logo-icon">
+      <img src="images/logo-black.png" alt="artic." class="logo-type">
+    </div>
+  </section>
+
+  <!-- ── Projects Preview ── -->
+  <section class="content-section">
+    <div class="projects-row">
+      <div class="projects-preview">
+        <a href="deus-ex-machina/index.html" class="preview-card">
+          <div class="preview-img-wrap">
+            <img src="deus-ex-machina/album-art.png" alt="deus ex machina" class="preview-card-img">
+          </div>
+          <div class="preview-card-title">deus ex machina</div>
+          <div class="preview-card-meta">Music · 2024</div>
+        </a>
+        <a href="#" class="preview-card">
+          <div class="preview-img-wrap">
+            <img src="projects/media-art.png" alt="Silence in Motion" class="preview-card-img">
+          </div>
+          <div class="preview-card-title">Silence in Motion</div>
+          <div class="preview-card-meta">Media Art · 2026</div>
+        </a>
+        <a href="#" class="preview-card">
+          <div class="preview-img-wrap">
+            <img src="projects/space-art.png" alt="Restoration of Space" class="preview-card-img">
+          </div>
+          <div class="preview-card-title">Restoration of Space</div>
+          <div class="preview-card-meta">Architecture · 2026</div>
+        </a>
       </div>
+      <a href="/projects/" class="section-link">
+        <span>View All Projects</span>
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </a>
     </div>
+  </section>
 
-  </div>
+  <!-- ── Contact ── -->
+  <section class="content-section" style="text-align: right;">
+    <a href="/contact/" class="section-link">
+      <span>Contact Us</span>
+      <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+    </a>
+  </section>
 
-  <!-- Brand Footer -->
-  <footer>
-    artic. All Rights Reserved
+  <!-- ── Footer ── -->
+  <footer class="site-footer">
+    <span>© 2026 artic. All Rights Reserved</span>
   </footer>
 
-  <!-- Firebase Web SDK Integration -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <!-- ── Theme Toggle ── -->
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <!-- Moon (shown in light mode → click for dark) -->
+    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+    <!-- Sun (shown in dark mode → click for light) -->
+    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
 
-    // === Firebase Configuration ===
-    const firebaseConfig = {
-      apiKey: "AIzaSyAlW7fE3c8mTL4EHdU08wjnVA4U_nKl1Fo",
-      authDomain: "artic-official-home.firebaseapp.com",
-      projectId: "artic-official-home",
-      storageBucket: "artic-official-home.firebasestorage.app",
-      messagingSenderId: "259485663128",
-      appId: "1:259485663128:web:9b01f04205edf4125e75ed",
-      measurementId: "G-KJDZPGXQSX"
-    };
-
-    const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
-
-    let db = null;
-    if (isFirebaseConfigured) {
-      try {
-        const app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        console.log("Firebase Firestore successfully initialized.");
-      } catch (err) {
-        console.error("Error initializing Firebase:", err);
-      }
-    }
-
-    // Handle Form Submission
+  <!-- ── Scripts ── -->
+  <script src="js/shared.js"></script>
+  <script>
+    sessionStorage.removeItem('artic-subpage');
     document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('subscribe-form');
-      const successMessage = document.getElementById('success-message');
-      const emailField = document.getElementById('email-field');
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const email = emailField.value.trim();
-        if (email) {
-          // 1. Local Storage Backup (Client-side Cache)
-          let localSubscribers = [];
-          try {
-            localSubscribers = JSON.parse(localStorage.getItem('artic_subscribers')) || [];
-          } catch(err) {
-            localSubscribers = [];
-          }
-          if (!localSubscribers.includes(email)) {
-            localSubscribers.push(email);
-            localStorage.setItem('artic_subscribers', JSON.stringify(localSubscribers));
-          }
-
-          // 2. Save directly to Firebase Firestore
-          if (db) {
-            try {
-              await addDoc(collection(db, "subscribers"), {
-                email: email,
-                timestamp: serverTimestamp()
-              });
-              console.log("Subscription successfully registered in Firebase Firestore!");
-            } catch (err) {
-              console.error("Failed to save to Firebase Firestore database:", err);
-            }
-          }
-
-          // 3. Smooth UI fade animation
-          form.style.opacity = '0';
-          form.style.pointerEvents = 'none';
-          
-          setTimeout(() => {
-            form.style.display = 'none';
-            successMessage.classList.add('active');
-          }, 400);
-        }
-      });
+      initNavScroll(467);
     });
   </script>
 

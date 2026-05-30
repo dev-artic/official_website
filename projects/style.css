@@ -1,169 +1,95 @@
 /* -------------------------------------------------------------
- * PORTFOLIO & ARCHIVE STYLES - /projects
+ * PROJECTS / ARCHIVE — /projects
  * -------------------------------------------------------------
- * This stylesheet handles the layouts, asymmetric grid, 
- * pure white/black glassmorphic elements, and interactions for the projects page.
- * Uses global Kakao Sans tokens from design-system.css.
+ * Horizontal scroll carousel with snap, gagosian-inspired spacing.
+ * All cards uniform size, swipe one at a time.
  */
 
-/* Core Page Specific Configuration - Pure Monochrome Theme */
+/* ── Page Layout ── */
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  margin: 0;
-  padding: 0;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  transition: var(--transition-theme);
 }
 
-/* Ambient Radial Light Source - Completely Disabled for Pure Monochrome Minimalism */
-.ambient-glow {
-  display: none;
-}
-
-/* Base Responsive Container */
 .container {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 var(--space-md);
-  position: relative;
-  z-index: 2;
+  padding: 0 var(--gutter);
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
-/* 1. Header Navigation System */
-.gallery-header {
-  height: var(--header-height);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: var(--space-xl);
-}
-
-.brand-logo {
-  font-family: var(--font-serif);
-  font-size: 1.8rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-decoration: none;
-  color: var(--text-primary);
-  text-transform: lowercase;
-}
-
-.brand-logo span {
-  color: var(--text-muted);
-}
-
-.gallery-nav {
-  display: flex;
-  gap: var(--space-md);
-}
-
-.nav-link {
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  text-decoration: none;
-  color: var(--text-secondary);
-  transition: var(--transition-fast);
-  position: relative;
-  padding: 6px 0;
-}
-
-.nav-link:hover, 
-.nav-link.active {
-  color: var(--text-primary);
-}
-
-/* Sliding underline animation */
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background-color: var(--text-primary);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.nav-link:hover::after,
-.nav-link.active::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-/* 2. Hero Intro Header - Ultra Spaced & Minimal */
+/* ── 1. Spacing for floating nav ── */
 .gallery-intro {
-  max-width: 600px;
-  margin-bottom: var(--space-xxl);
-  margin-top: var(--space-md);
+  margin-top: 70px; /* space for floating nav */
+}
+
+/* ── 2. Page Title ── */
+.gallery-intro {
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
 .curator-tag {
   font-family: var(--font-sans);
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.65rem;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.3em;
   color: var(--text-muted);
-  margin-bottom: var(--space-sm);
-  display: inline-block;
+  margin-bottom: var(--space-xs);
+  display: block;
 }
 
 .gallery-title {
   font-family: var(--font-serif);
-  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   color: var(--text-primary);
-  margin-bottom: var(--space-sm);
   line-height: 1.15;
 }
 
-/* Descriptions are mostly removed or simplified to maximize whitespace */
-.gallery-desc {
-  display: none; /* Removed for pure minimalism & whitespace */
+/* ── 3. Horizontal Scroll Carousel ── */
+.projects-carousel {
+  display: flex;
+  gap: var(--space-md);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-xl);
+  cursor: grab;
+
+  /* Hide scrollbar for clean aesthetic */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* 3. Asymmetric CSS Grid Gallery Layout */
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-xxl) var(--space-lg); /* Increased row gaps for extreme breathing space */
-  margin-bottom: var(--space-xxl);
+.projects-carousel::-webkit-scrollbar {
+  display: none;
 }
 
-/* Card Geometry Structure - Raw Monochrome Card */
+.projects-carousel:active {
+  cursor: grabbing;
+}
+
+/* ── 4. Project Card — Uniform Size ── */
 .project-card {
-  position: relative;
+  flex: 0 0 420px;
+  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: 0px; /* Sharp corners for ultra-minimalist raw look */
-  background-color: transparent;
-  border: 1px solid var(--border-color);
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Staggered size variations */
-.size-large {
-  grid-column: span 2;
-}
-
-.size-medium {
-  grid-column: span 1;
+  transition: opacity 0.4s ease;
 }
 
 .card-link {
@@ -174,18 +100,10 @@ body {
   height: 100%;
 }
 
-/* Aspect ratios for different card scales */
-.size-large .image-wrapper {
-  aspect-ratio: 16 / 9;
-}
-
-.size-medium .image-wrapper {
-  aspect-ratio: 4 / 3;
-}
-
-/* Image zoom & depth setup */
+/* Image container */
 .image-wrapper {
   width: 100%;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
   position: relative;
   background-color: var(--bg-secondary);
@@ -195,43 +113,37 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-  filter: grayscale(100%) contrast(105%); /* High contrast monochrome art photography */
+  transition: transform 0.8s var(--ease-out-expo);
 }
 
-.image-overlay {
-  display: none; /* Removed color gradients */
+.project-card:hover .project-img {
+  transform: scale(1.03);
 }
 
-/* Caption and Context metadata box */
+/* Caption metadata */
 .project-info {
-  padding: var(--space-md) 0; /* Align perfectly with edges by removing lateral padding */
+  padding: var(--space-sm) 0;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
-  border-top: none;
-  background-color: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-xs);
+  margin-bottom: 4px;
 }
 
 .project-tag {
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-size: 0.6rem;
+  font-weight: 400;
   letter-spacing: 0.15em;
   color: var(--text-muted);
   text-transform: uppercase;
 }
 
 .project-date {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 400;
   letter-spacing: 0.1em;
   color: var(--text-muted);
@@ -239,65 +151,72 @@ body {
 
 .project-name {
   font-family: var(--font-serif);
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   color: var(--text-primary);
-  margin-bottom: var(--space-xs);
   text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
-.project-subtext {
-  display: none; /* Description text completely removed to maximize whitespace */
-}
-
-/* Button & Arrow micro-interaction */
 .view-project-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.7rem;
-  font-weight: 700;
+  gap: 6px;
+  font-size: 0.65rem;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--text-primary);
-  margin-top: var(--space-xs);
-  transition: opacity 0.3s ease;
-}
-
-.arrow-icon {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Active Hover Mechanics */
-.project-card:hover {
-  border-color: var(--text-primary);
-  box-shadow: none; /* Removed heavy dynamic drop-shadows for a pure flat wireframe feel */
-}
-
-.project-card:hover .project-img {
-  transform: scale(1.02);
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-top: 2px;
+  transition: color 0.3s ease;
 }
 
 .project-card:hover .view-project-btn {
-  opacity: 0.7;
+  color: var(--text-primary);
+}
+
+.arrow-icon {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  transition: transform 0.4s var(--ease-out-expo);
 }
 
 .project-card:hover .arrow-icon {
   transform: translateX(4px);
 }
 
-/* 4. Footer System */
+/* ── 5. Scroll Indicator ── */
+.scroll-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xxl);
+}
+
+.scroll-line {
+  width: 40px;
+  height: 1px;
+  background-color: var(--text-muted);
+}
+
+.scroll-text {
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── 6. Footer ── */
 .gallery-footer {
   border-top: 1px solid var(--border-color);
   padding: var(--space-lg) 0;
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-top: auto;
 }
@@ -306,58 +225,37 @@ body {
   margin: 0;
 }
 
-/* CSS Entry Animations */
-.animate-fade-in {
-  animation: pageReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes pageReveal {
-  0% {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 5. Fluid Responsive Scaling */
+/* ── 7. Responsive ── */
 @media (max-width: 900px) {
-  .projects-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-xl);
-  }
-  
-  .size-large, .size-medium {
-    grid-column: span 1;
-  }
-  
-  .size-large .image-wrapper, 
-  .size-medium .image-wrapper {
-    aspect-ratio: 4 / 3;
-  }
-
-  .gallery-intro {
-    margin-bottom: var(--space-xl);
+  .project-card {
+    flex: 0 0 320px;
   }
 }
 
 @media (max-width: 600px) {
-  .brand-logo {
-    font-size: 1.5rem;
-  }
-  
-  .gallery-header {
-    margin-bottom: var(--space-lg);
+  .project-card {
+    flex: 0 0 280px;
   }
 
-  .size-large .image-wrapper, 
-  .size-medium .image-wrapper {
-    aspect-ratio: 3 / 2;
+  .gallery-intro {
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-md);
   }
-  
-  .project-name {
-    font-size: 1.3rem;
+
+  .gallery-nav {
+    gap: var(--space-sm);
+  }
+
+  .nav-link {
+    font-size: 0.65rem;
+  }
+}
+
+/* ── 8. Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .project-img,
+  .arrow-icon,
+  .nav-link::after {
+    transition: none !important;
   }
 }

@@ -112,6 +112,7 @@
     /* ── Album Art ── */
     .album-art-wrapper {
       position: relative;
+      z-index: 2; /* Layered above the text to physically cover it during Phase 1 & 2 */
       width: 280px;
       height: 280px;
       margin-bottom: 0;
@@ -163,6 +164,8 @@
 
     /* ── Album Info ── */
     .album-info {
+      position: relative;
+      z-index: 1; /* Layered below the cover to ensure it emerges from behind the cover's edge */
       opacity: 0;
       clip-path: inset(0 100% 0 0);
       transform: translateY(10px);

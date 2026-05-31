@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — TASTING NOTE (artic. Original)">
+  <meta name="description" content="artic. — TASTING NOTE (original series)">
   <meta name="author" content="artic.">
-  <title>TASTING NOTE — artic. Original</title>
+  <title>TASTING NOTE — original series</title>
 
   <link rel="icon" type="image/png" href="../images/favicon.png">
   <link rel="stylesheet" href="../css/design-system.css">
@@ -20,100 +20,151 @@
   </script>
 
   <style>
-    /* ── 1. Page Root & Navigation Styles ── */
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow-x: hidden;
-      transition: var(--transition-theme);
-    }
-
-    /* Floating navigation shield (Glassmorphic blur only, no duplicate logo on mobile) */
-    .mobile-header-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 64px;
-      z-index: 99;
-      background: linear-gradient(to bottom, var(--bg-primary) 50%, transparent 100%);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-      mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
-      pointer-events: none; /* Let clicks pass through to underneath layers */
-    }
-
-    .hamburger-btn {
-      position: fixed;
-      top: 42px; /* Lock Y-center exactly to 42px on both viewports */
-      right: var(--gutter);
-      transform: translateY(-50%);
-      z-index: 101;
-      width: 32px;
-      height: 32px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 5px;
+    /* Reset & Base overrides for the Premium Monochrome Bright Theme */
+    * {
+      box-sizing: border-box;
+      margin: 0;
       padding: 0;
     }
 
-    .hamburger-line {
-      width: 24px;
-      height: 1px;
-      background-color: var(--text-primary);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .hamburger-line:nth-child(2) {
-      width: 16px;
-    }
-
-    /* ── 2. Showcase Area & Layout ── */
-    .album-showcase {
-      width: 100%;
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      margin-top: clamp(80px, 10vh, 120px);
-      margin-bottom: 48px; /* Clean gap before detail listings */
-      text-align: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+      padding: var(--space-md) var(--space-sm);
+      padding-top: 100px;
+      position: relative;
+      transition: var(--transition-theme);
     }
 
+    /* Core Container (Always centered at 480px for a perfectly balanced 1-column editorial layout) */
+    .page-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-grow: 1;
+    }
+
+    @media (min-width: 768px) {
+      .page-container {
+        max-width: 480px !important; /* Constrain to single column width on desktop as requested */
+      }
+    }
+
+    /* ══════════════════════════════════════
+       Entry Animation — 3-Phase Sequence
+       Phase 1 (0–1.2s):  Album cover fades in
+       Phase 2 (1.3–2.3s): Album info is wiped open
+       Phase 3 (2.7–3.8s): Everything slides up vertically, album cover shrinks, content appears
+       ══════════════════════════════════════ */
+
+    .album-showcase {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      gap: 32px;
+      margin-bottom: 80px;
+      /* Stacked group centered vertically in the viewport initially */
+      transform: translateY(calc(50dvh - 310px));
+      will-change: transform;
+      animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+    }
+
+    @keyframes showcaseSlideUp {
+      to { transform: translateY(0); }
+    }
+
+    /* ── Album Art ── */
     .album-art-wrapper {
       position: relative;
+      z-index: 2;
       width: 280px;
       height: 280px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-      margin-bottom: var(--space-lg);
-      overflow: hidden;
-      background-color: var(--bg-secondary);
-      opacity: 0;
-      transform: scale(1.02);
-      will-change: transform, opacity;
-      animation: albumReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+      margin-bottom: 0;
+      flex-shrink: 0;
+      will-change: width, height;
+      animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+    }
+
+    @keyframes albumShrink {
+      to {
+        width: 170px;
+        height: 170px;
+      }
     }
 
     .album-art {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      border: 1px solid var(--border-color);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
+      opacity: 0;
+      animation: albumFadeIn 1s ease 0.3s forwards;
+      transition: transform 0.6s var(--ease-out-expo);
+      cursor: pointer;
     }
 
+    @keyframes albumFadeIn {
+      to { opacity: 1; }
+    }
+
+    .album-art-wrapper:hover .album-art {
+      transform: scale(1.02);
+    }
+
+    /* ── Album Info ── */
     .album-info {
+      position: relative;
+      z-index: 1;
       opacity: 0;
-      transform: translateY(14px);
-      animation: infoReveal 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+      clip-path: inset(0 100% 0 0);
+      transform: translateY(10px);
+      animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @keyframes infoWipeRevealMobile {
+      to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: translateY(55px);
+      }
+    }
+
+    @keyframes infoShiftUpMobile {
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Artist/Category Name (original series) ── */
+    .artist-name {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.62rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
     }
 
     .album-title {
@@ -124,156 +175,90 @@
       text-transform: uppercase;
       line-height: 1.1;
       margin-bottom: var(--space-xs);
+      color: var(--text-primary);
     }
 
-    .album-subtitle {
+    .album-meta {
       font-family: var(--font-sans);
-      font-size: 0.75rem;
-      font-weight: 400;
-      letter-spacing: 0.25em;
+      font-size: 0.58rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-bottom: var(--space-sm);
     }
 
-    .album-description {
-      font-family: var(--font-sans);
-      font-size: 0.8rem;
-      line-height: 1.7;
-      color: var(--text-secondary);
-      max-width: 440px;
-      margin: 0 auto;
+    /* ── Section Title Wipes ── */
+    .film-label {
+      opacity: 0;
+      clip-path: inset(0 100% 0 0);
+      animation: labelWipe 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: 2.9s;
     }
 
-    /* ── 3. Detail Columns & Accordions ── */
+    @keyframes labelWipe {
+      from {
+        clip-path: inset(0 100% 0 0);
+        opacity: 0;
+      }
+      to {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+      }
+    }
+
+    /* ── Links & Archive Stagger ── */
+    @keyframes sectionReveal {
+      to { opacity: 1; }
+    }
+
+    .archive-entry {
+      border-bottom: 1px solid var(--border-color);
+      opacity: 0;
+      transform: translateY(14px);
+      animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
+    }
+
+    @keyframes linkCardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Film / Episodes items stagger (starts at 3.1s) */
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.1s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.15s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.2s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.25s; }
+
+    /* ── Single-Column Page Layout ── */
     .content-columns {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 48px; /* Unified equal spacing of 48px between sections */
+      gap: var(--space-xl);
       margin-bottom: 120px;
       opacity: 0;
       animation: sectionReveal 0.5s ease 2.8s forwards;
     }
 
-    @media (min-width: 768px) {
-      .content-columns {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 48px;
-        align-items: start;
-      }
+    /* ── Archive Section ── */
+    .archive-section {
+      width: 100%;
     }
 
-    /* Accordion Headers */
-    .mobile-toggle-header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: var(--space-md);
-      transition: border-color 0.5s ease;
+    .archive-group {
+      margin-bottom: var(--space-lg);
     }
 
     .archive-group-label {
-      font-family: var(--font-serif);
-      font-size: 1.1rem;
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.6rem;
       font-weight: 700;
-      letter-spacing: 0.02em;
       text-transform: uppercase;
-      color: var(--text-primary);
-    }
-
-    .toggle-icon {
-      display: none; /* Hidden on desktop */
-    }
-
-    /* ── 4. Streaming Platform List ── */
-    .links-container {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .links-container .toggle-content {
-      display: flex;
-      flex-direction: column;
-      gap: 12px; /* Uniform platform card margins */
-    }
-
-    .platform-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 24px;
-      background-color: var(--bg-secondary);
-      border: 1px solid transparent;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      opacity: 0;
-      transform: translateY(14px);
-      animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
-      will-change: transform, opacity;
-    }
-
-    .platform-card:hover {
-      background-color: var(--bg-primary);
-      border-color: var(--border-color);
-      transform: translateY(-2px);
-    }
-
-    .platform-info {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .platform-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-primary);
-    }
-
-    .platform-logo svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-    }
-
-    .platform-name {
-      font-family: var(--font-sans);
-      font-size: 0.85rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-    }
-
-    .listen-badge {
-      font-family: var(--font-sans);
-      font-size: 0.65rem;
-      font-weight: 400;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
       color: var(--text-muted);
-      transition: color 0.3s ease;
-    }
-
-    .platform-card:hover .listen-badge {
-      color: var(--text-primary);
-    }
-
-    /* Staggered load delays for stream link cards */
-    .link-item:nth-child(1) { animation-delay: 3.0s; }
-    .link-item:nth-child(2) { animation-delay: 3.05s; }
-    .link-item:nth-child(3) { animation-delay: 3.1s; }
-
-    /* ── 5. Archive / Film Section ── */
-    .archive-section {
-      display: flex;
-      flex-direction: column;
-      gap: 48px;
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-xs);
+      border-bottom: 1px solid var(--border-color);
+      transition: border-color 0.5s ease;
     }
 
     .archive-list {
@@ -283,29 +268,13 @@
 
     .archive-entry {
       border-bottom: 1px solid var(--border-color);
-      opacity: 0;
-      transform: translateY(14px);
-      animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
-      will-change: transform, opacity;
-      transition: border-color 0.5s ease;
     }
-
-    /* Film items stagger (starts at 3.1s, overlapping 50% with Stream) */
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.1s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.15s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.2s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.25s; }
-
-    /* Print items stagger (starts at 3.3s, overlapping 50% with Film) */
-    .archive-group:nth-of-type(2) .archive-entry:nth-child(1) { animation-delay: 3.3s; }
-    .archive-group:nth-of-type(2) .archive-entry:nth-child(2) { animation-delay: 3.35s; }
 
     .archive-item {
       display: flex;
       align-items: center;
-      padding: 14px 0; /* Premium spacious layout padding */
+      padding: 14px 0;
       text-decoration: none;
-      color: inherit;
       cursor: pointer;
       transition: all 0.3s ease;
     }
@@ -324,34 +293,38 @@
       width: 14px;
       height: 14px;
       fill: var(--text-muted);
-      transition: transform 0.3s ease, fill 0.3s ease;
+      stroke: none;
+      flex-shrink: 0;
+      transition: fill 0.3s ease;
     }
 
     .archive-item:hover .archive-icon {
       fill: var(--text-primary);
-      transform: scale(1.08);
     }
 
     .archive-item-type {
       display: block;
       font-family: var(--font-sans);
-      font-size: 0.6rem;
-      font-weight: 400;
+      font-size: 0.55rem;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
       color: var(--text-muted);
-      margin-bottom: 2px;
+      transition: color 0.3s ease;
     }
 
     .archive-item-title {
-      font-family: var(--font-serif);
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
       color: var(--text-primary);
+      transition: color 0.3s ease;
     }
 
-    /* Dynamic Inline Video Panel */
+    .archive-item:hover .archive-item-type {
+      color: var(--text-secondary);
+    }
+
+    /* Inline video embed */
     .archive-embed {
       width: 100%;
       max-height: 0;
@@ -366,10 +339,10 @@
     }
 
     .archive-embed.open {
-      max-height: 500px;
+      max-height: 380px;
       opacity: 1;
       transform: scaleY(1);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .archive-embed iframe {
@@ -441,54 +414,26 @@
       transform: rotate(90deg);
     }
 
-    /* ── 6. Animations ── */
-    @keyframes albumReveal {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+    /* ── Footer ── */
+    footer {
+      width: 100%;
+      border-top: 1px solid var(--border-color);
+      padding: var(--space-lg) 0;
+      text-align: center;
+      font-size: 0.55rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: auto;
+      transition: border-color 0.5s ease;
     }
 
-    @keyframes infoReveal {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* ── Mobile Accordion Styles & Overrides ── */
+    .toggle-icon {
+      display: none;
     }
 
-    @keyframes sectionReveal {
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes linkCardIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes borderWipe {
-      to {
-        transform: scaleX(1);
-      }
-    }
-
-    @keyframes spinIn {
-      from {
-        opacity: 0;
-        transform: rotate(-180deg) scale(0.6);
-      }
-      to {
-        opacity: 1;
-        transform: rotate(0deg) scale(1);
-      }
-    }
-
-    /* ── 7. Responsive Mobile Accordion & Cover Art Shrink ── */
     @media (max-width: 767px) {
-      /* High-performance mobile GPU-accelerated album shrink */
       .album-showcase {
         will-change: transform;
       }
@@ -530,19 +475,9 @@
         will-change: transform;
       }
 
-      /* Stream Header Border Staggered Wipe */
-      .links-container .mobile-toggle-header::after {
-        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
-      }
-
-      /* Film Header Border Staggered Wipe */
+      /* Film/Episodes Header Border Staggered Wipe */
       .archive-group:nth-of-type(1) .mobile-toggle-header::after {
         animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.9s forwards;
-      }
-
-      /* Print Header Border Staggered Wipe */
-      .archive-group:nth-of-type(2) .mobile-toggle-header::after {
-        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 3.1s forwards;
       }
       
       .toggle-icon {
@@ -557,19 +492,9 @@
         will-change: transform, opacity;
       }
 
-      /* Stream Toggle Icon Spin-In */
-      .links-container .toggle-icon {
-        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.0s forwards;
-      }
-
-      /* Film Toggle Icon Spin-In */
+      /* Episodes Toggle Icon Spin-In */
       .archive-group:nth-of-type(1) .toggle-icon {
         animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.2s forwards;
-      }
-
-      /* Print Toggle Icon Spin-In */
-      .archive-group:nth-of-type(2) .toggle-icon {
-        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.4s forwards;
       }
 
       .mobile-toggle-header:hover .toggle-icon {
@@ -586,7 +511,7 @@
         content: '−';
       }
 
-      /* Hide content when collapsed on mobile */
+      /* Hide content when collapsed */
       .toggle-content {
         max-height: 0;
         overflow: hidden;
@@ -601,16 +526,14 @@
         margin-top: 16px;
       }
       
-      /* Overrides for mobile borders & layout gaps to avoid jumps and match spacings */
-      .links-container .stream-group-label,
       .archive-group .archive-group-label {
         border-bottom: none !important;
         margin-bottom: 0 !important;
         padding-bottom: 0 !important;
       }
 
-      .links-container {
-        gap: 0 !important; /* Zero gap on mobile container to prevent collapsed Stream vertical offset */
+      .content-columns {
+        gap: 48px !important;
       }
     }
 
@@ -627,102 +550,68 @@
       }
       to {
         opacity: 1;
-        transform: translateY(55px); /* Shunted downward during scaled state to avoid overlap */
+        transform: translateY(55px);
       }
     }
 
     @keyframes infoShiftUpMobile {
       to {
-        transform: translateY(0); /* Glide smoothly back to standard position as cover shrinks */
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes borderWipe {
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    @keyframes spinIn {
+      from {
+        opacity: 0;
+        transform: rotate(-180deg) scale(0.6);
+      }
+      to {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Floating Navigation Shield -->
-  <div class="mobile-header-bar"></div>
+  <!-- Floating Navigation -->
+  <nav class="nav-bar">
+    <a href="/" class="nav-home animate-on-load" id="nav-home">artic.</a>
+    <a href="/about/" class="nav-link">About</a>
+    <a href="/projects/" class="nav-link">Projects</a>
+    <a href="/contact/" class="nav-link">Contact</a>
+  </nav>
 
-  <!-- Hamburger Menu Button -->
-  <button class="hamburger-btn" id="menu-toggle" aria-label="Open menu">
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-  </button>
+  <div class="page-container animate-fade-in">
 
-  <div class="container">
-
-    <!-- ── Header Showcase ── -->
-    <header class="album-showcase">
+    <!-- Album Showcase (Matches deus ex machina animations) -->
+    <section class="album-showcase">
       <div class="album-art-wrapper">
         <img class="album-art" src="album-art.png" alt="TASTING NOTE Cover Art">
       </div>
       <div class="album-info">
+        <span class="artist-name">original series</span>
         <h1 class="album-title">TASTING NOTE</h1>
-        <p class="album-subtitle">artic. Original</p>
-        <p class="album-description">음악이라는 렌즈를 통해 아티스트의 고유한 취향과 예술적 가치관을 들여다보는 artic. 오리지널 플레이리스트 인터뷰 시리즈.</p>
+        <p class="album-meta">Playlist Interview • 2026</p>
       </div>
-    </header>
+    </section>
 
+    <!-- 1-Column: Episodes Only (No Stream, No Print, Centered at 480px width) -->
     <div class="content-columns">
 
-      <!-- Left Column: Stream Link List -->
-      <main class="links-container">
-        
-        <div class="mobile-toggle-header">
-          <span class="archive-group-label stream-group-label">Stream</span>
-          <span class="toggle-icon"></span>
-        </div>
-
-        <div class="toggle-content">
-          
-          <div class="platform-card link-item">
-            <div class="platform-info">
-              <div class="platform-logo">
-                <!-- YouTube Music Logo (custom red/black look via design-system) -->
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-12.5v9l7.5-4.5-7.5-4.5z"/>
-                </svg>
-              </div>
-              <span class="platform-name">YouTube Playlist</span>
-            </div>
-            <a href="https://www.youtube.com/playlist?list=PL5pgihOzM4-RbM38hhEY6JbQCex-BlOCj" target="_blank" rel="noopener" class="listen-badge">View</a>
-          </div>
-
-          <div class="platform-card link-item">
-            <div class="platform-info">
-              <div class="platform-logo">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm4.5 13.5c-.18.27-.52.36-.8.18-2.2-1.35-4.97-1.66-8.23-.9-.31.07-.63-.12-.7-.43-.07-.31.12-.63.43-.7 3.57-.81 6.64-.47 9.12 1.05.28.18.37.52.18.8zm1.2-2.75c-.23.36-.7.48-1.06.26-2.52-1.55-6.36-2.01-9.33-1.11-.4.12-.82-.11-.94-.51-.12-.4.11-.82.51-.94 3.4-1.03 7.63-.52 10.5 1.25.37.22.49.69.26 1.05zm.1-2.82c-3.02-1.8-8.01-1.97-10.9-1.09-.46.14-.94-.12-1.08-.58-.14-.46.12-.94.58-1.08 3.33-1.01 8.83-.81 12.3 1.25.41.25.55.78.3 1.19-.25.4-.78.54-1.19.3z"/>
-                </svg>
-              </div>
-              <span class="platform-name">Spotify</span>
-            </div>
-            <a href="https://spotify.com" target="_blank" rel="noopener" class="listen-badge">View</a>
-          </div>
-
-          <div class="platform-card link-item">
-            <div class="platform-info">
-              <div class="platform-logo">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-                </svg>
-              </div>
-              <span class="platform-name">Apple Music</span>
-            </div>
-            <a href="https://music.apple.com" target="_blank" rel="noopener" class="listen-badge">View</a>
-          </div>
-
-        </div>
-
-      </main>
-
-      <!-- Right Column: Archive Sections (Film & Print) -->
+      <!-- Archive / Episodes Section -->
       <section class="archive-section">
 
-        <!-- Film Accordion Group -->
+        <!-- Episodes Accordion Group -->
         <div class="archive-group">
           <div class="mobile-toggle-header">
-            <span class="archive-group-label film-label">Film</span>
+            <span class="archive-group-label film-label">episodes</span>
             <span class="toggle-icon"></span>
           </div>
           <div class="archive-list toggle-content">
@@ -777,41 +666,6 @@
                 </div>
               </a>
               <div class="archive-embed"></div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Print Accordion Group -->
-        <div class="archive-group">
-          <div class="mobile-toggle-header">
-            <span class="archive-group-label print-label">Print</span>
-            <span class="toggle-icon"></span>
-          </div>
-          <div class="archive-list toggle-content">
-            
-            <div class="archive-entry">
-              <a class="archive-item" href="#" target="_blank" rel="noopener">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v15H6V2z"/><line x1="9" y1="10" x2="16" y2="10" stroke-width="1"/><line x1="9" y1="13" x2="16" y2="13" stroke-width="1"/><line x1="9" y1="16" x2="13" y2="16" stroke-width="1"/></svg>
-                  <div>
-                    <span class="archive-item-type">Editorial Note</span>
-                    <span class="archive-item-title">TASTING NOTE 기획 노트 (Curation Profile)</span>
-                  </div>
-                </div>
-              </a>
-            </div>
-
-            <div class="archive-entry">
-              <a class="archive-item" href="#" target="_blank" rel="noopener">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v15H6V2z"/><line x1="9" y1="10" x2="16" y2="10" stroke-width="1"/><line x1="9" y1="13" x2="16" y2="13" stroke-width="1"/><line x1="9" y1="16" x2="13" y2="16" stroke-width="1"/></svg>
-                  <div>
-                    <span class="archive-item-type">Interview Script</span>
-                    <span class="archive-item-title">수민(SUMIN) '행복은 시차를 두고 다가온다' 서면 인터뷰 전문</span>
-                  </div>
-                </div>
-              </a>
             </div>
 
           </div>

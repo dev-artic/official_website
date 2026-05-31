@@ -296,6 +296,91 @@
       color: var(--text-muted);
     }
 
+    /* ── Desktop/Mobile Displays ── */
+    .desktop-only {
+      display: inline-flex !important;
+    }
+    .mobile-only {
+      display: none !important;
+    }
+
+    @media (max-width: 767px) {
+      .desktop-only {
+        display: none !important;
+      }
+      .mobile-only {
+        display: flex !important;
+      }
+    }
+
+    /* ── Swipe to Navigate Slider Component ── */
+    .swipe-to-navigate {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      margin-top: 24px;
+    }
+
+    .swipe-track {
+      position: relative;
+      width: 200px;
+      height: 44px;
+      border: 1px solid var(--border-color);
+      background-color: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 0px; /* Sharp corners matching artic. */
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      transition: border-color 0.5s ease, background-color 0.5s ease;
+    }
+
+    .swipe-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      user-select: none;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding-left: 36px;
+      padding-right: 12px;
+      box-sizing: border-box;
+    }
+
+    .swipe-handle {
+      width: 42px;
+      height: 42px;
+      background-color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      position: absolute;
+      left: 0px;
+      transition: background-color 0.5s ease;
+      border-radius: 0px; /* Sharp handle */
+      z-index: 2;
+    }
+
+    .swipe-handle svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--bg-primary);
+      transition: fill 0.5s ease, transform 0.4s var(--ease-out-expo);
+    }
+
+    .swipe-handle:active {
+      cursor: grabbing;
+    }
+
     /* ── Theme Toggle (initial reveal) ── */
     .theme-toggle {
       opacity: 0;
@@ -375,19 +460,39 @@
           <div class="preview-card-meta">original series · 2026</div>
         </a>
       </div>
-      <a href="/projects/" class="section-link">
+      <!-- Desktop Link -->
+      <a href="/projects/" class="section-link desktop-only">
         <span>View All Projects</span>
         <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
       </a>
+      <!-- Mobile Swipe Link -->
+      <div class="swipe-to-navigate mobile-only" data-href="/projects/">
+        <div class="swipe-track">
+          <span class="swipe-text">SWIPE TO VIEW</span>
+          <div class="swipe-handle">
+            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ── Contact ── -->
   <section class="content-section" style="text-align: right;">
-    <a href="/contact/" class="section-link">
+    <!-- Desktop Link -->
+    <a href="/contact/" class="section-link desktop-only">
       <span>Contact Us</span>
       <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
     </a>
+    <!-- Mobile Swipe Link -->
+    <div class="swipe-to-navigate mobile-only" data-href="/contact/">
+      <div class="swipe-track">
+        <span class="swipe-text">SWIPE TO CONTACT</span>
+        <div class="swipe-handle">
+          <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- ── Footer ── -->
@@ -409,6 +514,84 @@
     sessionStorage.removeItem('artic-subpage');
     document.addEventListener('DOMContentLoaded', () => {
       initNavScroll(467);
+      
+      // Initialize interactive Swipe-to-Navigate components on mobile
+      document.querySelectorAll('.swipe-to-navigate').forEach(slider => {
+        const handle = slider.querySelector('.swipe-handle');
+        const text = slider.querySelector('.swipe-text');
+        const href = slider.dataset.href;
+        
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+        
+        function getDragLimit() {
+          const track = slider.querySelector('.swipe-track');
+          return track.clientWidth - handle.clientWidth - 2; // Subtract border thickness offset
+        }
+        
+        function startDrag(e) {
+          isDragging = true;
+          startX = (e.type === 'touchstart') ? e.touches[0].clientX : e.clientX;
+          handle.style.transition = 'none';
+          handle.style.cursor = 'grabbing';
+        }
+        
+        function drag(e) {
+          if (!isDragging) return;
+          
+          const maxDrag = getDragLimit();
+          const clientX = (e.type === 'touchmove') ? e.touches[0].clientX : e.clientX;
+          let deltaX = clientX - startX;
+          
+          // Boundaries check
+          if (deltaX < 0) deltaX = 0;
+          if (deltaX > maxDrag) deltaX = maxDrag;
+          
+          currentX = deltaX;
+          handle.style.transform = `translateX(${currentX}px)`;
+          
+          // Fade text as we drag
+          const pct = currentX / maxDrag;
+          text.style.opacity = 1 - (pct * 1.5);
+        }
+        
+        function endDrag() {
+          if (!isDragging) return;
+          isDragging = false;
+          handle.style.cursor = 'grab';
+          
+          const maxDrag = getDragLimit();
+          
+          // Trigger successful navigation if swiped over 85% of track
+          if (currentX >= maxDrag * 0.85) {
+            handle.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+            handle.style.transform = `translateX(${maxDrag}px)`;
+            text.style.opacity = 0;
+            
+            // Trigger smooth custom page transition
+            setTimeout(() => {
+              window.location.href = href;
+            }, 250);
+          } else {
+            // Spring back with elastic premium bezier curves
+            handle.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+            handle.style.transform = 'translateX(0px)';
+            text.style.opacity = 1;
+            currentX = 0;
+          }
+        }
+        
+        // Desktop mouse handlers
+        handle.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('mouseup', endDrag);
+        
+        // Touchscreen handlers
+        handle.addEventListener('touchstart', startDrag, { passive: true });
+        window.addEventListener('touchmove', drag, { passive: false });
+        window.addEventListener('touchend', endDrag);
+      });
     });
   </script>
 

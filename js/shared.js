@@ -79,17 +79,19 @@ function initMobileNav() {
   `;
   document.body.appendChild(burger);
 
-  // Toggle nav-open class on body
+  // Create backdrop overlay dynamically
+  const overlay = document.createElement('div');
+  overlay.className = 'nav-overlay';
+  document.body.appendChild(overlay);
+
+  // Toggle nav-open class on body when clicking the burger
   burger.addEventListener('click', (e) => {
-    e.stopPropagation();
     document.body.classList.toggle('nav-open');
   });
 
-  // Close sidebar when clicking outside
-  document.addEventListener('click', (e) => {
-    if (document.body.classList.contains('nav-open') && !nav.contains(e.target) && !burger.contains(e.target)) {
-      document.body.classList.remove('nav-open');
-    }
+  // Close sidebar when clicking the backdrop overlay
+  overlay.addEventListener('click', () => {
+    document.body.classList.remove('nav-open');
   });
 
   // Close nav when clicking a link

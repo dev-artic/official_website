@@ -247,7 +247,30 @@ img { display: block; max-width: 100%; }
   display: none;
 }
 
+.nav-overlay {
+  display: none;
+}
+
 @media (max-width: 767px) {
+  /* Dynamic Backdrop Overlay */
+  .nav-overlay {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 998; /* Under sidebar, above page content */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .nav-open .nav-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   /* Hamburger Button */
   .hamburger-btn {
     position: fixed;
@@ -255,10 +278,10 @@ img { display: block; max-width: 100%; }
     right: 20px;
     width: 44px;
     height: 44px;
-    background: transparent;
+    background-color: rgba(0, 0, 0, 0); /* Safari hit-test fix */
     border: none;
     cursor: pointer;
-    z-index: 1000; /* Extremely high to float over everything */
+    z-index: 1000; /* Float over everything */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -266,6 +289,8 @@ img { display: block; max-width: 100%; }
     gap: 5px;
     padding: 0;
     transition: transform 0.3s ease;
+    touch-action: manipulation;
+    pointer-events: auto;
   }
 
   .burger-line {

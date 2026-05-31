@@ -43,7 +43,7 @@
       transition: var(--transition-theme);
     }
 
-    /* Core Container (Always centered at 480px for a perfectly balanced 1-column editorial layout) */
+    /* Core Container */
     .page-container {
       position: relative;
       z-index: 2;
@@ -55,16 +55,17 @@
       flex-grow: 1;
     }
 
+    /* Desktop: widen for row layout in header */
     @media (min-width: 768px) {
       .page-container {
-        max-width: 480px !important; /* Constrain to single column width on desktop as requested */
+        max-width: 780px;
       }
     }
 
     /* ══════════════════════════════════════
        Entry Animation — 3-Phase Sequence
-       Phase 1 (0–1.2s):  Album cover fades in
-       Phase 2 (1.3–2.3s): Album info is wiped open
+       Phase 1 (0–1.2s):  Album cover fades in at its centered (or left-aligned) reference
+       Phase 2 (1.3–2.3s): Album info is wiped open with a premium bezier curve
        Phase 3 (2.7–3.8s): Everything slides up vertically, album cover shrinks, content appears
        ══════════════════════════════════════ */
 
@@ -74,11 +75,12 @@
       align-items: center;
       text-align: center;
       width: 100%;
-      gap: 32px;
-      margin-bottom: 80px;
+      gap: 32px; /* Premium gap between cover and text on mobile */
+      margin-bottom: 80px; /* Generous gap below the showcase */
       /* Stacked group centered vertically in the viewport initially */
       transform: translateY(calc(50dvh - 310px));
       will-change: transform;
+      /* Phase 3: slides up vertically */
       animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
@@ -86,15 +88,28 @@
       to { transform: translateY(0); }
     }
 
+    /* Desktop: row layout, always left-aligned to align with content columns below */
+    @media (min-width: 768px) {
+      .album-showcase {
+        flex-direction: row;
+        justify-content: flex-start;
+        text-align: left;
+        align-items: center;
+        gap: 48px; /* Doubled gap between cover and text */
+        transform: translateY(calc(50dvh - 210px)); /* Desktop row centered vertically */
+      }
+    }
+
     /* ── Album Art ── */
     .album-art-wrapper {
       position: relative;
-      z-index: 2;
+      z-index: 2; /* Layered above the text to physically cover it during Phase 1 & 2 */
       width: 280px;
       height: 280px;
       margin-bottom: 0;
       flex-shrink: 0;
-      will-change: width, height;
+      will-change: width, height; /* Hardware acceleration for layout resize */
+      /* Phase 3: album cover shrinks when sliding up */
       animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
@@ -105,6 +120,20 @@
       }
     }
 
+    /* Desktop: Slide left from horizontal center */
+    @media (min-width: 768px) {
+      .album-art-wrapper {
+        left: calc(50% - 140px); /* Perfectly centered horizontally relative to the showcase container */
+        animation: albumSlideLeft 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards,
+                   albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+      }
+    }
+
+    @keyframes albumSlideLeft {
+      from { left: calc(50% - 140px); }
+      to   { left: 0; }
+    }
+
     .album-art {
       width: 100%;
       height: 100%;
@@ -112,8 +141,9 @@
       border: 1px solid var(--border-color);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0); /* Cache decoded image on GPU */
       will-change: transform;
+      /* Phase 1: fade in */
       opacity: 0;
       animation: albumFadeIn 1s ease 0.3s forwards;
       transition: transform 0.6s var(--ease-out-expo);
@@ -131,14 +161,12 @@
     /* ── Album Info ── */
     .album-info {
       position: relative;
-      z-index: 1;
+      z-index: 1; /* Layered below the cover to ensure it emerges from behind the cover's edge */
       opacity: 0;
       clip-path: inset(0 100% 0 0);
       transform: translateY(10px);
+      /* Phase 2: wipe open with organic bezier curve */
       animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     @keyframes infoWipeRevealMobile {
@@ -155,36 +183,54 @@
       }
     }
 
+    @keyframes infoWipeRevealDesktop {
+      to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: translateX(0);
+      }
+    }
+
+    /* Desktop: wipe open with organic bezier curve & horizontal slide */
+    @media (min-width: 768px) {
+      .album-info {
+        transform: translateX(-15px);
+        animation: infoWipeRevealDesktop 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards;
+      }
+    }
+
     /* ── Artist/Category Name (original series) ── */
     .artist-name {
-      display: block;
       font-family: var(--font-sans);
-      font-size: 0.62rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.25em;
-      color: var(--text-muted);
-      margin-bottom: 2px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--text-primary);
+      margin-bottom: var(--space-xs);
+      display: inline-block;
     }
 
     .album-title {
       font-family: var(--font-serif);
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-size: 2.25rem;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      line-height: 1.1;
-      margin-bottom: var(--space-xs);
+      letter-spacing: 0;
       color: var(--text-primary);
+      margin-bottom: var(--space-xs);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 767px) {
+      .album-title {
+        font-size: 1.75rem;
+      }
     }
 
     .album-meta {
-      font-family: var(--font-sans);
-      font-size: 0.58rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+      font-size: 0.8rem;
       color: var(--text-muted);
+      letter-spacing: 0;
+      font-weight: 400;
     }
 
     /* ── Section Title Wipes ── */
@@ -237,6 +283,15 @@
       margin-bottom: 120px;
       opacity: 0;
       animation: sectionReveal 0.5s ease 2.8s forwards;
+    }
+
+    /* Centered column at 480px on desktop as requested */
+    @media (min-width: 768px) {
+      .content-columns {
+        display: block;
+        max-width: 480px;
+        margin: 0 auto 120px auto;
+      }
     }
 
     /* ── Archive Section ── */
@@ -590,7 +645,7 @@
 
   <div class="page-container animate-fade-in">
 
-    <!-- Album Showcase (Matches deus ex machina animations) -->
+    <!-- Album Showcase (Perfectly models deus ex machina desktop & mobile reveal animations) -->
     <section class="album-showcase">
       <div class="album-art-wrapper">
         <img class="album-art" src="album-art.png" alt="TASTING NOTE Cover Art">
@@ -598,7 +653,7 @@
       <div class="album-info">
         <span class="artist-name">original series</span>
         <h1 class="album-title">TASTING NOTE</h1>
-        <p class="album-meta">Playlist Interview • 2026</p>
+        <p class="album-meta">original series • 2026</p>
       </div>
     </section>
 

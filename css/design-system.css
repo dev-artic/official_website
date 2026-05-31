@@ -498,6 +498,12 @@ img { display: block; max-width: 100%; }
 }
 
 /* ── Global Flexbox Sticky Footer (Option B — Pinned to Bottom of Page) ── */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
 body {
   display: flex !important;
   flex-direction: column !important;

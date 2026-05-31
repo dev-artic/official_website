@@ -192,13 +192,16 @@
     /* ── Projects Preview Row ── */
     .projects-row {
       width: 100%;
+      max-width: 100%;
       position: relative;
+      overflow: hidden; /* Clips horizontal leak */
     }
 
     .projects-preview {
       display: flex;
       gap: var(--space-md);
       width: 100%;
+      max-width: 100%;
       overflow-x: auto;
       scrollbar-width: none; /* Firefox */
       -ms-overflow-style: none; /* IE 10+ */
@@ -272,7 +275,8 @@
       background-color: var(--bg-secondary);
       border-left: 1px solid var(--border-color);
       transition: flex-basis 0.3s var(--ease-out-expo), width 0.3s var(--ease-out-expo), opacity 0.3s ease;
-      align-self: stretch; /* Stretch vertically matching the cards container */
+      height: auto;
+      aspect-ratio: 4 / 5;
       position: relative;
     }
 
@@ -496,11 +500,6 @@
 
     /* ── Responsive ── */
     @media (max-width: 767px) {
-      .projects-preview {
-        margin: 0 calc(-1 * var(--gutter)) !important;
-        padding: 0 var(--gutter) 8px var(--gutter) !important;
-        width: auto !important;
-      }
       .preview-card {
         flex: 0 0 220px;
       }

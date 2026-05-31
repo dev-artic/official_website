@@ -752,12 +752,29 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+
     /* ── Mobile Accordion Styles ── */
     .toggle-icon {
       display: none;
     }
 
     @media (max-width: 767px) {
+      /* High-performance mobile GPU-accelerated album shrink */
+      .album-art-wrapper {
+        width: 170px !important;
+        height: 170px !important;
+        transform: scale(1.647);
+        transform-origin: center center;
+        animation: albumShrinkMobile 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards !important;
+      }
+
+      @keyframes albumShrinkMobile {
+        to {
+          transform: scale(1);
+        }
+      }
+
       .mobile-toggle-header {
         display: flex;
         justify-content: space-between;

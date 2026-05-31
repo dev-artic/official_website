@@ -447,32 +447,57 @@
       filter: brightness(1.0);
     }
 
+    /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Pill Play Button */
     .poster-play-btn {
       position: absolute;
       bottom: 16px;
       right: 16px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.95);
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      gap: 8px;
+      padding: 8px 14px;
+      background-color: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 0px; /* Sharp editorial corners matching artic. */
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
     }
-
+ 
     .poster-play-btn svg {
-      width: 12px;
-      height: 12px;
-      fill: #000;
-      margin-left: 2px;
+      width: 8px;
+      height: 8px;
+      fill: var(--text-primary);
+      margin-left: 0;
+      transition: fill 0.4s ease, transform 0.4s ease;
     }
-
+ 
+    .poster-play-btn::after {
+      content: 'PLAY';
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      line-height: 1;
+      transition: color 0.4s ease;
+    }
+ 
     .custom-video-poster:hover .poster-play-btn {
-      background-color: #FFFFFF;
-      transform: scale(1.08);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      background-color: var(--text-primary);
+      border-color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+ 
+    .custom-video-poster:hover .poster-play-btn svg {
+      fill: var(--bg-primary);
+      transform: scale(1.1);
+    }
+ 
+    .custom-video-poster:hover .poster-play-btn::after {
+      color: var(--bg-primary);
     }
 
     .archive-entry.active .archive-item {

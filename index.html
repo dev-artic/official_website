@@ -189,18 +189,6 @@
       transform: translateX(4px);
     }
 
-    /* ── Section Header Divider ── */
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 12px;
-      margin-bottom: var(--space-md);
-      transition: border-color 0.5s ease;
-      width: 100%;
-    }
-
     /* ── Projects Preview Row ── */
     .projects-row {
       width: 100%;
@@ -223,6 +211,28 @@
       display: none; /* WebKit */
     }
 
+    /* ── Desktop Floating Link (Overlap layer with fade-in on hover) ── */
+    .floating-view-link {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: calc(100% - 8px); /* Account for padding-bottom of preview */
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      z-index: 10;
+      background: linear-gradient(to left, var(--bg-primary) 60%, transparent);
+      padding: 0 var(--gutter) 0 100px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s var(--ease-out-expo);
+    }
+
+    .projects-row:hover .floating-view-link {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     /* ── Mobile Overswipe Pull Indicator ── */
     .pull-indicator {
       flex: 0 0 0px;
@@ -242,14 +252,11 @@
 
     .pull-indicator-content {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
-      width: 120px;
-      text-align: center;
-      padding: 0 16px;
-      transform: translateX(10px);
+      gap: 8px;
+      padding: 0 24px;
+      color: var(--text-muted);
+      white-space: nowrap;
       transition: transform 0.3s var(--ease-out-expo);
     }
 
@@ -258,24 +265,19 @@
     }
 
     .pull-arrow {
-      width: 16px;
-      height: 16px;
-      fill: none;
-      stroke: var(--text-primary);
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
       transition: transform 0.4s var(--ease-out-expo);
     }
 
     .pull-text {
       font-family: var(--font-sans);
-      font-size: 0.5rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: var(--text-primary);
-      white-space: nowrap;
+      font-size: 0.65rem;
+      font-weight: 400;
       text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-muted);
     }
 
 
@@ -501,14 +503,6 @@
 
   <!-- ── Projects Preview ── -->
   <section class="content-section">
-    <div class="section-header animate-on-load" style="animation-delay: 0.8s;">
-      <h2 class="section-header-title">Selected Projects</h2>
-      <a href="/projects/" class="section-link">
-        <span>View All Projects</span>
-        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-      </a>
-    </div>
-    
     <div class="projects-row animate-on-load" style="animation-delay: 1.0s;">
       <div class="projects-preview" id="projects-preview-container">
         <a href="deus-ex-machina/" class="preview-card">
@@ -538,23 +532,26 @@
         <!-- Mobile Overswipe Pull Indicator -->
         <div class="pull-indicator" id="projects-pull-card">
           <div class="pull-indicator-content">
-            <svg class="pull-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-            <span class="pull-text">PULL TO VIEW</span>
+            <span class="pull-text">View All Projects</span>
+            <svg class="pull-arrow" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
           </div>
         </div>
       </div>
+
+      <!-- Desktop Floating Link (Overlap layer with fade-in on hover) -->
+      <a href="/projects/" class="section-link desktop-only floating-view-link">
+        <span>View All Projects</span>
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </a>
     </div>
   </section>
 
   <!-- ── Contact ── -->
-  <section class="content-section">
-    <div class="section-header animate-on-load" style="animation-delay: 1.2s; border-bottom: none; margin-bottom: 0;">
-      <h2 class="section-header-title">Connect</h2>
-      <a href="/contact/" class="section-link">
-        <span>Contact Us</span>
-        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-      </a>
-    </div>
+  <section class="content-section" style="text-align: right;">
+    <a href="/contact/" class="section-link animate-on-load" style="animation-delay: 1.2s;">
+      <span>Contact Us</span>
+      <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+    </a>
   </section>
 
   <!-- ── Footer ── -->
@@ -589,7 +586,7 @@
         let startX = 0;
         let isAtEnd = false;
         let pullDistance = 0;
-        const threshold = 100; // Delta touch past the end of scroll to trigger navigation
+        const threshold = 120; // Delta touch past the end of scroll to trigger navigation
 
         container.addEventListener('touchstart', (e) => {
           startX = e.touches[0].clientX;
@@ -606,19 +603,17 @@
           if (deltaX > 0) {
             pullDistance = deltaX;
             // Apply exponential damping for smooth physical feedback
-            const visualPull = Math.min(pullDistance * 0.45, 80);
+            const visualPull = Math.min(pullDistance * 0.5, 140);
             
             pullCard.style.flexBasis = `${visualPull}px`;
             pullCard.style.width = `${visualPull}px`;
-            pullCard.style.opacity = Math.min(visualPull / 40, 1);
+            pullCard.style.opacity = Math.min(visualPull / 60, 1);
 
-            if (visualPull >= 50) {
-              pullText.innerText = 'RELEASE TO VIEW';
-              pullArrow.style.transform = 'rotate(180deg)';
+            if (visualPull >= 95) {
+              pullArrow.style.transform = 'translateX(4px)';
               pullCard.classList.add('active');
             } else {
-              pullText.innerText = 'PULL TO VIEW';
-              pullArrow.style.transform = 'rotate(0deg)';
+              pullArrow.style.transform = 'translateX(0px)';
               pullCard.classList.remove('active');
             }
           }
@@ -627,8 +622,8 @@
         container.addEventListener('touchend', () => {
           if (isAtEnd && pullDistance >= threshold) {
             pullCard.style.transition = 'flex-basis 0.25s ease, width 0.25s ease, opacity 0.25s ease';
-            pullCard.style.flexBasis = '120px';
-            pullCard.style.width = '120px';
+            pullCard.style.flexBasis = '160px';
+            pullCard.style.width = '160px';
             pullCard.style.opacity = '1';
 
             // Add standard elegant exit transition

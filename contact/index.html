@@ -25,8 +25,8 @@
       max-width: var(--max-width);
       margin: 0 auto;
       padding: 0 var(--gutter);
-      padding-top: clamp(120px, 20vh, 200px);
-      min-height: 100vh;
+      padding-top: clamp(80px, 8vh, 120px); /* Reduced padding top for better vertical fit */
+      min-height: auto; /* Removed 100vh to prevent forcing a full viewport size */
       display: flex;
       flex-direction: column;
       width: 100%;
@@ -41,7 +41,7 @@
     }
 
     .contact-header {
-      margin-bottom: 64px;
+      margin-bottom: 48px; /* Reduced header spacing */
       opacity: 0;
       transform: translateY(20px);
       animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -72,7 +72,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 40px;
-      margin-bottom: 80px;
+      margin-bottom: 40px; /* Reduced margin-bottom to prevent forcing scrollbar */
       opacity: 0;
       transform: translateY(20px);
       animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
@@ -155,28 +155,7 @@
       color: var(--text-primary);
     }
 
-    .copy-toast {
-      position: absolute;
-      top: 24px;
-      right: 0;
-      font-family: var(--font-sans);
-      font-size: 0.55rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--bg-primary);
-      background-color: var(--text-primary);
-      padding: 4px 8px;
-      border-radius: 0px;
-      opacity: 0;
-      transform: translateY(5px);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
-    }
 
-    .copy-toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
 
     .contact-footer {
       margin-top: auto;
@@ -246,20 +225,8 @@
   <script>
     function copyText(text, btnElement) {
       navigator.clipboard.writeText(text).then(() => {
-        let container = btnElement.parentElement;
-        let toast = container.querySelector('.copy-toast');
-        if (!toast) {
-          toast = document.createElement('div');
-          toast.className = 'copy-toast';
-          toast.innerText = 'COPIED';
-          container.appendChild(toast);
-        }
-        
-        toast.classList.add('show');
         btnElement.innerText = 'COPIED!';
-        
         setTimeout(() => {
-          toast.classList.remove('show');
           btnElement.innerText = 'COPY ADDRESS';
         }, 2000);
       });

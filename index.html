@@ -226,7 +226,7 @@
       justify-content: flex-end;
       z-index: 10;
       background: linear-gradient(to left, var(--bg-primary) 20%, transparent 100%);
-      padding: 0 var(--gutter) 0 220px; /* Highly stretched padding creates extremely soft gradient transition */
+      padding: 0 0 0 220px; /* Removed right padding to align arrow perfectly with grid edge */
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.4s var(--ease-out-expo);

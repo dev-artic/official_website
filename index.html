@@ -152,6 +152,26 @@
       color: var(--text-muted);
       transition: color 0.3s ease;
       white-space: nowrap;
+      position: relative;
+      padding-bottom: 2px;
+    }
+
+    .section-link::after {
+      content: '';
+      position: absolute;
+      width: calc(100% - 20px); /* Exclude arrow SVG */
+      transform: scaleX(0);
+      height: 1px;
+      bottom: 0;
+      left: 0;
+      background-color: var(--text-primary);
+      transform-origin: bottom right;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .section-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
     }
 
     .section-link:hover {
@@ -222,6 +242,37 @@
     .preview-img-wrap {
       overflow: hidden;
       margin-bottom: var(--space-xs);
+      position: relative;
+    }
+
+    /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Explore Tag */
+    .preview-img-wrap::after {
+      content: 'EXPLORE';
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      background-color: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 0px; /* Sharp editorial corners matching artic. */
+      font-family: var(--font-sans);
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text-primary);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .preview-card:hover .preview-img-wrap::after {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     /* ── Footer ── */

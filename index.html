@@ -221,8 +221,8 @@
       align-items: center;
       justify-content: flex-end;
       z-index: 10;
-      background: linear-gradient(to left, var(--bg-primary) 60%, transparent);
-      padding: 0 var(--gutter) 0 100px;
+      background: linear-gradient(to left, var(--bg-primary) 20%, transparent 100%);
+      padding: 0 var(--gutter) 0 220px; /* Highly stretched padding creates extremely soft gradient transition */
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.4s var(--ease-out-expo);
@@ -231,6 +231,33 @@
     .projects-row:hover .floating-view-link {
       opacity: 1;
       pointer-events: auto;
+    }
+
+    .floating-view-link::after {
+      display: none !important; /* Disable wide container-bottom underline */
+    }
+
+    .floating-view-link span {
+      position: relative;
+      padding-bottom: 2px;
+    }
+
+    .floating-view-link span::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      transform: scaleX(0);
+      height: 1px;
+      bottom: 0;
+      left: 0;
+      background-color: var(--text-primary);
+      transform-origin: bottom right;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .projects-row:hover .floating-view-link span::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
     }
 
     /* ── Mobile Overswipe Pull Indicator ── */

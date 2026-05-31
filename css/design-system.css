@@ -419,6 +419,7 @@ img { display: block; max-width: 100%; }
   top: 0; left: 0; right: 0; bottom: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* Dynamic Viewport Height for perfect mobile centering */
   background-color: var(--bg-primary);
   display: flex;
   justify-content: center;

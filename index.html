@@ -102,6 +102,7 @@
 
     /* ── Content Sections ── */
     .content-section {
+      width: 100%;
       max-width: var(--max-width);
       margin: 0 auto;
       padding: var(--space-xxl) var(--gutter);
@@ -316,6 +317,18 @@
       flex: 0 0 280px;
       text-decoration: none;
       color: inherit;
+      scroll-snap-align: start; /* Standard scroll snap for mobile momentum */
+    }
+
+    /* ── View All Projects Inline Scroll Link ── */
+    .view-all-link-wrapper {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: var(--space-md);
+      padding-right: var(--gutter);
+      scroll-snap-align: start;
     }
 
     .preview-card-img {
@@ -500,7 +513,8 @@
 
     /* ── Responsive ── */
     @media (max-width: 767px) {
-      .preview-card {
+      .preview-card,
+      .view-all-card {
         flex: 0 0 220px;
       }
       .content-section {
@@ -559,12 +573,12 @@
           <div class="preview-card-meta">original series · 2024</div>
         </a>
 
-        <!-- Mobile Overswipe Pull Indicator -->
-        <div class="pull-indicator" id="projects-pull-card">
-          <div class="pull-indicator-content">
-            <span class="pull-text">View All Projects</span>
-            <svg class="pull-arrow" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-          </div>
+        <!-- Elegant Inline Link (Visible on mobile as 4th item at the end of the scroll list) -->
+        <div class="view-all-link-wrapper">
+          <a href="/projects/" class="section-link">
+            <span>View All Projects</span>
+            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+          </a>
         </div>
       </div>
 
@@ -603,78 +617,47 @@
     sessionStorage.removeItem('artic-subpage');
     document.addEventListener('DOMContentLoaded', () => {
       initNavScroll(467);
-      
-      // Initialize premium Mobile Horizontal Over-Swipe Pull-to-Navigate
-      (function() {
-        const container = document.getElementById('projects-preview-container');
-        const pullCard = document.getElementById('projects-pull-card');
-        if (!container || !pullCard) return;
 
-        const pullArrow = pullCard.querySelector('.pull-arrow');
-        const pullText = pullCard.querySelector('.pull-text');
+      // Drag-to-scroll with snap suspension for homepage projects preview
+      const preview = document.getElementById('projects-preview-container');
+      if (preview) {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
 
-        let startX = 0;
-        let isAtEnd = false;
-        let pullDistance = 0;
-        const threshold = 120; // Delta touch past the end of scroll to trigger navigation
-
-        container.addEventListener('touchstart', (e) => {
-          startX = e.touches[0].clientX;
-          // Check if scrolled to the absolute right end
-          isAtEnd = (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10);
-          pullDistance = 0;
-        }, { passive: true });
-
-        container.addEventListener('touchmove', (e) => {
-          if (!isAtEnd) return;
-          const currentX = e.touches[0].clientX;
-          const deltaX = startX - currentX; // Dragging left = scroll right
-
-          if (deltaX > 0) {
-            pullDistance = deltaX;
-            // Apply exponential damping for smooth physical feedback
-            const visualPull = Math.min(pullDistance * 0.5, 140);
-            
-            pullCard.style.flexBasis = `${visualPull}px`;
-            pullCard.style.width = `${visualPull}px`;
-            pullCard.style.opacity = Math.min(visualPull / 60, 1);
-
-            if (visualPull >= 95) {
-              pullArrow.style.transform = 'translateX(4px)';
-              pullCard.classList.add('active');
-            } else {
-              pullArrow.style.transform = 'translateX(0px)';
-              pullCard.classList.remove('active');
-            }
-          }
-        }, { passive: true });
-
-        container.addEventListener('touchend', () => {
-          if (isAtEnd && pullDistance >= threshold) {
-            pullCard.style.transition = 'flex-basis 0.25s ease, width 0.25s ease, opacity 0.25s ease';
-            pullCard.style.flexBasis = '160px';
-            pullCard.style.width = '160px';
-            pullCard.style.opacity = '1';
-
-            // Add standard elegant exit transition
-            document.body.classList.add('page-exit');
-            setTimeout(() => {
-              window.location.href = '/projects/';
-            }, 250);
-          } else {
-            // Smoothly collapse back with modern bezier curves
-            pullCard.style.transition = 'flex-basis 0.4s var(--ease-out-expo), width 0.4s var(--ease-out-expo), opacity 0.4s ease';
-            pullCard.style.flexBasis = '0px';
-            pullCard.style.width = '0px';
-            pullCard.style.opacity = '0';
-            pullCard.classList.remove('active');
-
-            setTimeout(() => {
-              pullCard.style.transition = '';
-            }, 400);
-          }
+        preview.addEventListener('mousedown', (e) => {
+          isDown = true;
+          preview.classList.add('active');
+          preview.style.scrollSnapType = 'none';
+          preview.style.scrollBehavior = 'auto';
+          startX = e.pageX - preview.offsetLeft;
+          scrollLeft = preview.scrollLeft;
         });
-      })();
+
+        preview.addEventListener('mouseleave', () => {
+          if (!isDown) return;
+          isDown = false;
+          preview.classList.remove('active');
+          preview.style.scrollSnapType = 'x mandatory';
+          preview.style.scrollBehavior = 'smooth';
+        });
+
+        preview.addEventListener('mouseup', () => {
+          if (!isDown) return;
+          isDown = false;
+          preview.classList.remove('active');
+          preview.style.scrollSnapType = 'x mandatory';
+          preview.style.scrollBehavior = 'smooth';
+        });
+
+        preview.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - preview.offsetLeft;
+          const walk = (x - startX) * 1.5; // Drag speed multiplier
+          preview.scrollLeft = scrollLeft - walk;
+        });
+      }
     });
   </script>
 

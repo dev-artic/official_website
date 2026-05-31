@@ -22,13 +22,22 @@
     body { overflow-x: hidden; }
 
     .contact-wrap {
-      max-width: 780px;
+      max-width: var(--max-width);
       margin: 0 auto;
       padding: 0 var(--gutter);
       padding-top: clamp(120px, 20vh, 200px);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      width: 100%;
+    }
+
+    .contact-header,
+    .contact-grid {
+      max-width: 780px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .contact-header {
@@ -222,10 +231,11 @@
 
     </div>
 
-    <footer class="contact-footer">
-      © 2026 artic. All Rights Reserved
-    </footer>
   </div>
+
+  <footer class="contact-footer">
+    © 2026 artic. All Rights Reserved
+  </footer>
 
   <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
     <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>

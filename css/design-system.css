@@ -532,6 +532,8 @@ footer,
   bottom: auto !important;
   left: auto !important;
   width: 100% !important;
+  max-width: var(--max-width) !important;
+  margin: 0 auto !important; /* Horizontally center footer on all pages */
   height: auto !important;
   z-index: 10 !important;
   background-color: transparent !important;

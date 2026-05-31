@@ -325,9 +325,9 @@ img { display: block; max-width: 100%; }
     width: 100%;
     height: 100vh;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0 var(--space-md);
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding: 100px 32px var(--space-md) var(--space-md);
     gap: var(--space-md);
     background-color: transparent;
     border-left: none;
@@ -346,13 +346,13 @@ img { display: block; max-width: 100%; }
     pointer-events: auto;
   }
 
-  /* Sidebar Links stack vertically and center */
+  /* Sidebar Links stack vertically and right-aligned */
   .nav-link {
     width: auto;
     padding: var(--space-xs) 0 !important;
     font-size: 1.15rem;
     border-bottom: none;
-    text-align: center;
+    text-align: right;
     color: rgba(255, 255, 255, 0.7);
     
     /* Fade and slide down transition */
@@ -375,7 +375,7 @@ img { display: block; max-width: 100%; }
     border-bottom: none;
     margin-bottom: var(--space-sm);
     overflow: visible;
-    text-align: center;
+    text-align: right;
     color: rgba(255, 255, 255, 0.7);
     
     /* Fade and slide down transition */

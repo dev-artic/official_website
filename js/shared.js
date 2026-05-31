@@ -94,6 +94,13 @@ function initMobileNav() {
     document.body.classList.remove('nav-open');
   });
 
+  // Close sidebar when clicking the transparent nav container itself (empty space)
+  nav.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-link') && !e.target.closest('.nav-home')) {
+      document.body.classList.remove('nav-open');
+    }
+  });
+
   // Close nav when clicking a link
   nav.querySelectorAll('.nav-link, .nav-home').forEach(link => {
     link.addEventListener('click', () => {

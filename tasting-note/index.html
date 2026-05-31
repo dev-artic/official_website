@@ -278,7 +278,6 @@
     .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.25s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(5) { animation-delay: 3.3s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 3.35s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(7) { animation-delay: 3.4s; }
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
@@ -361,9 +360,36 @@
     .latest-release-header {
       display: block;
       font-family: var(--font-sans);
-      margin-bottom: var(--space-sm);
-      padding-bottom: var(--space-xs);
       transition: border-color 0.5s ease;
+    }
+
+    /* Latest Featured Video Custom Styling */
+    .latest-featured-item {
+      padding: 16px 0;
+    }
+
+    .latest-featured-item .archive-item-type {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    .latest-featured-item .archive-item-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 4px;
+    }
+
+    .latest-featured-item .archive-item-date {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .latest-featured-item:hover .archive-item-date {
+      color: var(--text-primary);
     }
 
     /* ── Archive Section ── */
@@ -759,9 +785,8 @@
         </div>
         <div class="static-content">
           <div class="archive-entry active" data-vid="3OyKOqX1tgU">
-            <a class="archive-item" href="javascript:void(0)">
+            <a class="archive-item latest-featured-item" href="javascript:void(0)">
               <div class="archive-item-left">
-                <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 <div>
                   <span class="archive-item-type">강지원</span>
                   <span class="archive-item-title">영원히 남을 하나의 멜로디를 향해</span>
@@ -872,20 +897,6 @@
                   </div>
                 </div>
                 <span class="archive-item-date">2026.05.11</span>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <div class="archive-entry" data-vid="3OyKOqX1tgU">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div>
-                    <span class="archive-item-type">강지원</span>
-                    <span class="archive-item-title">영원히 남을 하나의 멜로디를 향해</span>
-                  </div>
-                </div>
-                <span class="archive-item-date">2026.05.28</span>
               </a>
               <div class="archive-embed"></div>
             </div>

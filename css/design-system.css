@@ -250,18 +250,21 @@ img { display: block; max-width: 100%; }
 
 .nav-overlay {
   display: none;
-}@media (max-width: 767px) {
+}
+
+.mobile-header-bar {
+  display: none;
+}
+
+@media (max-width: 767px) {
   /* Mobile Top Header Bar with Gradient Blur Boundary */
   .mobile-header-bar {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
+    display: block;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: 84px; /* Align center to exactly 42px (top 20px + height 44px / 2) */
-    padding: 20px 24px; /* Match hamburger button vertical top start */
+    height: 84px; /* Covers top 84px scroll range under hamburger */
     z-index: 997; /* Under hamburger (1000) and overlay (998) */
     pointer-events: none; /* Let clicks pass through the blur area */
     
@@ -272,33 +275,6 @@ img { display: block; max-width: 100%; }
     -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
     transition: background-color 0.5s ease, opacity 0.4s ease;
-  }
-  
-  .mobile-logo {
-    font-family: var(--font-logo);
-    font-size: 1.55rem; /* Increased size to match hamburger visual height perfectly */
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    color: var(--text-primary);
-    text-decoration: none;
-    pointer-events: auto; /* Re-enable clicks specifically for the logo */
-    
-    /* Exact height match with hamburger container for perfect Y-axis alignment */
-    height: 44px;
-    display: flex;
-    align-items: center;
-    transform: translateY(2px); /* Optical Y-alignment adjustment to match hamburger lines perfectly */
-    
-    transition: opacity 0.4s ease, color 0.3s ease;
-  }
-
-  .home-header .mobile-logo {
-    display: none;
-  }
-
-  .nav-open .mobile-logo {
-    opacity: 0;
-    pointer-events: none;
   }
 
   /* Dynamic Backdrop Overlay with deep blur and darkness */

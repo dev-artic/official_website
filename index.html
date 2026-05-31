@@ -618,13 +618,14 @@
     document.addEventListener('DOMContentLoaded', () => {
       initNavScroll(467);
 
-      // Drag-to-scroll with snap suspension for homepage projects preview
+      // Drag-to-scroll with snap suspension for homepage projects preview (Mouse & Touch)
       const preview = document.getElementById('projects-preview-container');
       if (preview) {
         let isDown = false;
         let startX;
         let scrollLeft;
 
+        // Mouse Drag (Desktop)
         preview.addEventListener('mousedown', (e) => {
           isDown = true;
           preview.classList.add('active');
@@ -657,6 +658,28 @@
           const walk = (x - startX) * 1.5; // Drag speed multiplier
           preview.scrollLeft = scrollLeft - walk;
         });
+
+        // Touch Swipe (Mobile & Emulators)
+        preview.addEventListener('touchstart', (e) => {
+          isDown = true;
+          preview.style.scrollSnapType = 'none';
+          preview.style.scrollBehavior = 'auto';
+          startX = e.touches[0].pageX - preview.offsetLeft;
+          scrollLeft = preview.scrollLeft;
+        }, { passive: true });
+
+        preview.addEventListener('touchend', () => {
+          isDown = false;
+          preview.style.scrollSnapType = 'x mandatory';
+          preview.style.scrollBehavior = 'smooth';
+        });
+
+        preview.addEventListener('touchmove', (e) => {
+          if (!isDown) return;
+          const x = e.touches[0].pageX - preview.offsetLeft;
+          const walk = (x - startX) * 1.5;
+          preview.scrollLeft = scrollLeft - walk;
+        }, { passive: true });
       }
     });
   </script>

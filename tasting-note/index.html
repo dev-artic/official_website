@@ -16,6 +16,9 @@
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
+      // Force scroll to top on every load (prevents refresh keeping scroll position)
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      window.scrollTo(0, 0);
     })();
   </script>
 
@@ -58,7 +61,7 @@
     /* Desktop: widen for row layout in header */
     @media (min-width: 768px) {
       .page-container {
-        max-width: 620px;
+        max-width: 780px;
       }
     }
 
@@ -277,7 +280,7 @@
     .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 3.35s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(7) { animation-delay: 3.4s; }
 
-    /* ── Single-Column Page Layout ── */
+    /* ── 2-Column Page Layout ── */
     .content-columns {
       width: 100%;
       display: flex;
@@ -288,13 +291,75 @@
       animation: sectionReveal 0.5s ease 2.8s forwards;
     }
 
-    /* Centered column at 480px on desktop as requested */
     @media (min-width: 768px) {
       .content-columns {
-        display: block;
-        max-width: 480px;
-        margin: 0 auto 120px auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: start;
       }
+    }
+
+    /* Left Column: Latest Release */
+    .links-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .links-container .archive-entry {
+      opacity: 0;
+      transform: translateY(14px);
+      animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
+      animation-delay: 3.0s;
+      border-bottom: none;
+    }
+
+    .stream-label {
+      opacity: 0;
+      clip-path: inset(0 100% 0 0);
+      animation: labelWipe 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation-delay: 2.7s;
+    }
+
+    /* Flat Monochrome Link Card */
+    .link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 0px;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+
+    .link-item:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .release-date-badge {
+      font-family: var(--font-sans);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 0px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .link-item:hover .release-date-badge {
+      background-color: var(--text-primary);
+      color: var(--bg-primary);
+      border-color: var(--text-primary);
     }
 
     /* ── Archive Section ── */
@@ -584,14 +649,28 @@
         margin-top: 16px;
       }
       
+      .links-container .archive-group-label,
       .archive-group .archive-group-label {
         border-bottom: none !important;
         margin-bottom: 0 !important;
         padding-bottom: 0 !important;
       }
 
+      .links-container {
+        gap: 0 !important;
+      }
+
       .content-columns {
         gap: 48px !important;
+      }
+
+      /* Toggle animations for Latest Release on mobile */
+      .links-container .mobile-toggle-header::after {
+        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+      }
+
+      .links-container .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.0s forwards;
       }
     }
 
@@ -601,16 +680,7 @@
       }
     }
 
-    @keyframes infoWipeRevealMobile {
-      from {
-        opacity: 0;
-        transform: translateY(70px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(55px);
-      }
-    }
+    /* Removed duplicate keyframes to prevent overriding the clip-path info reveal on mobile */
 
     @keyframes infoShiftUpMobile {
       to {
@@ -660,10 +730,33 @@
       </div>
     </section>
 
-    <!-- 1-Column: Episodes Only (No Stream, No Print, Centered at 480px width) -->
+    <!-- 2-Column: Latest Release (left) + Episodes (right) -->
     <div class="content-columns">
 
-      <!-- Archive / Episodes Section -->
+      <!-- Left Column: Latest Release -->
+      <main class="links-container">
+        <div class="mobile-toggle-header">
+          <span class="archive-group-label stream-label">Latest Release</span>
+          <span class="toggle-icon"></span>
+        </div>
+        <div class="toggle-content">
+          <div class="archive-entry" data-vid="3OyKOqX1tgU">
+            <a class="archive-item link-item" href="javascript:void(0)">
+              <div class="archive-item-left">
+                <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <div>
+                  <span class="archive-item-type">강지원 (Kang Jiwon)</span>
+                  <span class="archive-item-title">영원히 남을 하나의 멜로디를 향해</span>
+                </div>
+              </div>
+              <span class="release-date-badge">2026.05.28</span>
+            </a>
+            <div class="archive-embed"></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Column: Archive / Episodes Section -->
       <section class="archive-section">
 
         <!-- Episodes Accordion Group -->

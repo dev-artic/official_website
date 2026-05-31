@@ -21,41 +21,10 @@ body {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: clamp(100px, 15vh, 180px) var(--gutter) 0 var(--gutter);
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-}
-
-/* ── 1. Spacing for floating nav ── */
-.gallery-intro {
-  margin-top: 70px; /* space for floating nav */
-}
-
-/* ── 2. Page Title ── */
-.gallery-intro {
-  margin-top: var(--space-xl);
-  margin-bottom: var(--space-lg);
-}
-
-.curator-tag {
-  font-family: var(--font-sans);
-  font-size: 0.65rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  color: var(--text-muted);
-  margin-bottom: var(--space-xs);
-  display: block;
-}
-
-.gallery-title {
-  font-family: var(--font-serif);
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--text-primary);
-  line-height: 1.15;
 }
 
 /* ── 3. Horizontal Scroll Carousel ── */

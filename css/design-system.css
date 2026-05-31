@@ -412,3 +412,59 @@ img { display: block; max-width: 100%; }
     transition-delay: 0.34s;
   }
 }
+
+/* ── 7. Premium Sub-page Landing Transition Overlay ── */
+.subpage-transition-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.6s var(--ease-out-expo);
+  pointer-events: auto;
+}
+
+.subpage-transition-title {
+  font-family: var(--font-logo);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: var(--text-primary);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
+  text-align: center;
+}
+
+.subpage-transition-overlay.active .subpage-transition-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.subpage-transition-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.subpage-transition-overlay.fade-out .subpage-transition-title {
+  opacity: 0;
+  transform: translateY(-16px);
+}
+
+/* ── Cascading Page Content Reveal ── */
+.reveal-item {
+  opacity: 0 !important;
+  transform: translateY(20px) !important;
+  transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+}
+
+.reveal-active .reveal-item,
+.reveal-item.revealed {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}

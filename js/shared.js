@@ -109,13 +109,83 @@ function initMobileNav() {
   });
 }
 
-// ── 5. Init ──
+// ── 5. Sub-page Landing Transition Overlay ──
+function initSubpageTransition() {
+  const mainContent = document.querySelector('.about-content, .container, .contact-wrap');
+  if (!mainContent) return;
+
+  // Do NOT run on homepage
+  if (document.getElementById('hero-logo') || document.querySelector('.logo-split')) {
+    return;
+  }
+
+  // Determine sub-page title
+  let titleText = "";
+  const activeNav = document.querySelector('.nav-link.active');
+  if (activeNav) {
+    titleText = activeNav.textContent.trim();
+  } else {
+    let docTitle = document.title;
+    if (docTitle.includes('|')) docTitle = docTitle.split('|')[0];
+    if (docTitle.includes('—')) docTitle = docTitle.split('—')[0];
+    titleText = docTitle.trim();
+  }
+  titleText = titleText.toUpperCase();
+
+  // Create overlay element
+  const transitionOverlay = document.createElement('div');
+  transitionOverlay.className = 'subpage-transition-overlay';
+  transitionOverlay.innerHTML = `
+    <div class="subpage-transition-title">${titleText}</div>
+  `;
+  document.body.appendChild(transitionOverlay);
+
+  // Collect target reveal items
+  let items = [];
+  if (document.querySelector('.about-content')) {
+    items = Array.from(document.querySelectorAll('.about-row'));
+  } else if (document.querySelector('.container')) {
+    items = Array.from(document.querySelectorAll('.project-card'));
+  } else if (document.querySelector('.contact-wrap')) {
+    items = Array.from(document.querySelectorAll('.contact-email'));
+  }
+
+  items.forEach((item, index) => {
+    item.classList.add('reveal-item');
+    // Staggered delay: starting after the overlay begins fading out (0.9s)
+    item.style.transitionDelay = `${0.3 + index * 0.15}s`;
+  });
+
+  // Trigger animations
+  requestAnimationFrame(() => {
+    // Show title text
+    transitionOverlay.classList.add('active');
+
+    // After 0.9s, fade out the overlay
+    setTimeout(() => {
+      transitionOverlay.classList.add('fade-out');
+      
+      // Reveal the main content items one by one
+      mainContent.classList.add('reveal-active');
+      items.forEach(item => item.classList.add('revealed'));
+    }, 900);
+
+    // After 1.5s, completely remove overlay
+    setTimeout(() => {
+      transitionOverlay.style.display = 'none';
+      transitionOverlay.remove();
+    }, 1500);
+  });
+}
+
+// ── 6. Init ──
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('theme-toggle');
   if (btn) btn.addEventListener('click', toggleTheme);
 
   initSubpageNav();
   initMobileNav();
+  initSubpageTransition();
 });
 
 // Apply theme before DOM ready

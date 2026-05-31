@@ -344,7 +344,7 @@
     .archive-item {
       display: flex;
       align-items: center;
-      padding: 10px 0;
+      padding: 14px 0; /* Premium, spacious padding for list items globally */
       text-decoration: none;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -474,7 +474,13 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 0; /* Handled by inner toggle-content gap to avoid mobile collapse offset */
+    }
+
+    .links-container .toggle-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px; /* Spacious gap between platform link cards globally */
     }
 
     /* Flat Monochrome Link Card */
@@ -914,24 +920,18 @@
         padding-bottom: 0 !important;
       }
 
-      .links-container .toggle-content {
-        display: flex;
-        flex-direction: column;
-        gap: 12px; /* Restored generous gap between platform link cards */
-      }
-
-      .archive-item {
-        padding: 14px 0 !important; /* Restored spacious premium vertical padding for list items */
+      .links-container {
+        gap: 0 !important; /* Zero gap on mobile container to prevent collapsed Stream vertical offset */
       }
 
       .content-columns {
-        gap: 48px !important; /* Restored generous spacious gap between sections */
+        gap: 48px !important; /* Unified uniform spacing of exactly 48px between sections */
       }
 
       .archive-section {
         display: flex;
         flex-direction: column;
-        gap: 48px; /* Restored generous spacious gap between Film and Print */
+        gap: 48px; /* Unified uniform spacing of exactly 48px between Film and Print */
       }
 
       .archive-group {

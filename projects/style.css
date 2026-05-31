@@ -245,17 +245,12 @@ body {
   .gallery-nav {
     gap: var(--space-sm);
   }
-
-  .nav-link {
-    font-size: 0.65rem;
-  }
 }
 
 /* ── 8. Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .project-img,
-  .arrow-icon,
-  .nav-link::after {
+  .arrow-icon {
     transition: none !important;
   }
 }

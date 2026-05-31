@@ -87,9 +87,10 @@
       align-items: center;
       text-align: center;
       width: 100%;
+      gap: 32px; /* Premium gap between cover and text on mobile */
       margin-bottom: 80px; /* Generous gap below the showcase */
       /* Centered vertically in the viewport initially */
-      transform: translateY(calc(50vh - 210px));
+      transform: translateY(calc(50dvh - 210px));
       /* Phase 3: slides up vertically */
       animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
     }

@@ -35,7 +35,8 @@ body {
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: var(--space-md);
+  padding-top: 10px;
+  padding-bottom: 60px; /* Accommodate staggered translation offset */
   margin-bottom: var(--space-xl);
   cursor: grab;
 
@@ -54,11 +55,17 @@ body {
 
 /* ── 4. Project Card — Uniform Size ── */
 .project-card {
-  flex: 0 0 420px;
+  flex: 0 0 calc(50% - 12px); /* Exactly 2 cards visible on screen by default */
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  will-change: transform;
+}
+
+/* Even-numbered cards shifted down to create a sophisticated gallery rhythm */
+.project-card:nth-child(even) {
+  transform: translateY(48px);
 }
 
 .card-link {
@@ -197,13 +204,13 @@ body {
 /* ── 7. Responsive ── */
 @media (max-width: 900px) {
   .project-card {
-    flex: 0 0 320px;
+    flex: 0 0 calc(50% - 12px); /* exactly 2 items on tablet */
   }
 }
 
 @media (max-width: 600px) {
   .project-card {
-    flex: 0 0 280px;
+    flex: 0 0 calc(75% - 12px); /* 1.5 items on mobile to encourage swipe affordance */
   }
 
   .gallery-intro {
@@ -219,7 +226,51 @@ body {
 /* ── 8. Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .project-img,
-  .arrow-icon {
+  .arrow-icon,
+  .project-card {
     transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ── 9. Scroll-driven animations progressive enhancement ── */
+@supports ((animation-timeline: view()) and (animation-range: entry)) {
+  @keyframes carouselCardScale {
+    0% {
+      scale: 0.96;
+      opacity: 0.8;
+    }
+    50% {
+      scale: 1.0;
+      opacity: 1;
+    }
+    100% {
+      scale: 0.96;
+      opacity: 0.8;
+    }
+  }
+
+  .project-card {
+    animation: carouselCardScale auto linear both;
+    animation-timeline: view(inline);
+  }
+
+  @keyframes carouselCardScaleEven {
+    0% {
+      transform: translateY(48px) scale(0.96);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translateY(48px) scale(1.0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(48px) scale(0.96);
+      opacity: 0.8;
+    }
+  }
+
+  .project-card:nth-child(even) {
+    animation-name: carouselCardScaleEven;
   }
 }

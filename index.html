@@ -189,18 +189,93 @@
       transform: translateX(4px);
     }
 
+    /* ── Section Header Divider ── */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: var(--space-md);
+      transition: border-color 0.5s ease;
+      width: 100%;
+    }
+
     /* ── Projects Preview Row ── */
     .projects-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-lg);
+      width: 100%;
+      position: relative;
     }
 
     .projects-preview {
       display: flex;
       gap: var(--space-md);
-      flex: 1;
-      min-width: 0;
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE 10+ */
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+    }
+
+    .projects-preview::-webkit-scrollbar {
+      display: none; /* WebKit */
+    }
+
+    /* ── Mobile Overswipe Pull Indicator ── */
+    .pull-indicator {
+      flex: 0 0 0px;
+      width: 0px;
+      opacity: 0;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-secondary);
+      border-left: 1px solid var(--border-color);
+      transition: flex-basis 0.3s var(--ease-out-expo), width 0.3s var(--ease-out-expo), opacity 0.3s ease;
+      height: auto;
+      aspect-ratio: 4 / 5;
+      position: relative;
+    }
+
+    .pull-indicator-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 120px;
+      text-align: center;
+      padding: 0 16px;
+      transform: translateX(10px);
+      transition: transform 0.3s var(--ease-out-expo);
+    }
+
+    .pull-indicator.active .pull-indicator-content {
+      transform: translateX(0);
+    }
+
+    .pull-arrow {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: var(--text-primary);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.4s var(--ease-out-expo);
+    }
+
+    .pull-text {
+      font-family: var(--font-sans);
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text-primary);
+      white-space: nowrap;
+      text-transform: uppercase;
     }
 
 
@@ -393,22 +468,6 @@
 
     /* ── Responsive ── */
     @media (max-width: 767px) {
-      .projects-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-lg);
-      }
-      .projects-preview {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 8px;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-      }
-      .projects-preview::-webkit-scrollbar {
-        display: none;
-      }
       .preview-card {
         flex: 0 0 220px;
       }
@@ -442,8 +501,16 @@
 
   <!-- ── Projects Preview ── -->
   <section class="content-section">
-    <div class="projects-row">
-      <div class="projects-preview">
+    <div class="section-header animate-on-load" style="animation-delay: 0.8s;">
+      <h2 class="section-header-title">Selected Projects</h2>
+      <a href="/projects/" class="section-link">
+        <span>View All Projects</span>
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </a>
+    </div>
+    
+    <div class="projects-row animate-on-load" style="animation-delay: 1.0s;">
+      <div class="projects-preview" id="projects-preview-container">
         <a href="deus-ex-machina/" class="preview-card">
           <div class="preview-img-wrap">
             <img src="deus-ex-machina/album-art.png" alt="deus ex machina" class="preview-card-img">
@@ -467,18 +534,12 @@
           <div class="preview-card-title">NEUTRAL INTERVIEW</div>
           <div class="preview-card-meta">original series · 2024</div>
         </a>
-      </div>
-      <!-- Desktop Link -->
-      <a href="/projects/" class="section-link desktop-only">
-        <span>View All Projects</span>
-        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-      </a>
-      <!-- Mobile Swipe Link -->
-      <div class="swipe-to-navigate mobile-only" data-href="/projects/">
-        <div class="swipe-track">
-          <span class="swipe-text">SWIPE TO VIEW</span>
-          <div class="swipe-handle">
-            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+
+        <!-- Mobile Overswipe Pull Indicator -->
+        <div class="pull-indicator" id="projects-pull-card">
+          <div class="pull-indicator-content">
+            <svg class="pull-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            <span class="pull-text">PULL TO VIEW</span>
           </div>
         </div>
       </div>
@@ -486,20 +547,13 @@
   </section>
 
   <!-- ── Contact ── -->
-  <section class="content-section" style="text-align: right;">
-    <!-- Desktop Link -->
-    <a href="/contact/" class="section-link desktop-only">
-      <span>Contact Us</span>
-      <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-    </a>
-    <!-- Mobile Swipe Link -->
-    <div class="swipe-to-navigate mobile-only" data-href="/contact/">
-      <div class="swipe-track">
-        <span class="swipe-text">SWIPE TO CONTACT</span>
-        <div class="swipe-handle">
-          <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-        </div>
-      </div>
+  <section class="content-section">
+    <div class="section-header animate-on-load" style="animation-delay: 1.2s; border-bottom: none; margin-bottom: 0;">
+      <h2 class="section-header-title">Connect</h2>
+      <a href="/contact/" class="section-link">
+        <span>Contact Us</span>
+        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+      </a>
     </div>
   </section>
 
@@ -523,83 +577,79 @@
     document.addEventListener('DOMContentLoaded', () => {
       initNavScroll(467);
       
-      // Initialize interactive Swipe-to-Navigate components on mobile
-      document.querySelectorAll('.swipe-to-navigate').forEach(slider => {
-        const handle = slider.querySelector('.swipe-handle');
-        const text = slider.querySelector('.swipe-text');
-        const href = slider.dataset.href;
-        
-        let isDragging = false;
+      // Initialize premium Mobile Horizontal Over-Swipe Pull-to-Navigate
+      (function() {
+        const container = document.getElementById('projects-preview-container');
+        const pullCard = document.getElementById('projects-pull-card');
+        if (!container || !pullCard) return;
+
+        const pullArrow = pullCard.querySelector('.pull-arrow');
+        const pullText = pullCard.querySelector('.pull-text');
+
         let startX = 0;
-        let currentX = 0;
-        
-        function getDragLimit() {
-          const track = slider.querySelector('.swipe-track');
-          return track.clientWidth - handle.clientWidth - 2; // Subtract border thickness offset
-        }
-        
-        function startDrag(e) {
-          isDragging = true;
-          startX = (e.type === 'touchstart') ? e.touches[0].clientX : e.clientX;
-          handle.style.transition = 'none';
-          handle.style.cursor = 'grabbing';
-        }
-        
-        function drag(e) {
-          if (!isDragging) return;
-          
-          const maxDrag = getDragLimit();
-          const clientX = (e.type === 'touchmove') ? e.touches[0].clientX : e.clientX;
-          let deltaX = clientX - startX;
-          
-          // Boundaries check
-          if (deltaX < 0) deltaX = 0;
-          if (deltaX > maxDrag) deltaX = maxDrag;
-          
-          currentX = deltaX;
-          handle.style.transform = `translateX(${currentX}px)`;
-          
-          // Fade text as we drag
-          const pct = currentX / maxDrag;
-          text.style.opacity = 1 - (pct * 1.5);
-        }
-        
-        function endDrag() {
-          if (!isDragging) return;
-          isDragging = false;
-          handle.style.cursor = 'grab';
-          
-          const maxDrag = getDragLimit();
-          
-          // Trigger successful navigation if swiped over 85% of track
-          if (currentX >= maxDrag * 0.85) {
-            handle.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-            handle.style.transform = `translateX(${maxDrag}px)`;
-            text.style.opacity = 0;
+        let isAtEnd = false;
+        let pullDistance = 0;
+        const threshold = 100; // Delta touch past the end of scroll to trigger navigation
+
+        container.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+          // Check if scrolled to the absolute right end
+          isAtEnd = (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10);
+          pullDistance = 0;
+        }, { passive: true });
+
+        container.addEventListener('touchmove', (e) => {
+          if (!isAtEnd) return;
+          const currentX = e.touches[0].clientX;
+          const deltaX = startX - currentX; // Dragging left = scroll right
+
+          if (deltaX > 0) {
+            pullDistance = deltaX;
+            // Apply exponential damping for smooth physical feedback
+            const visualPull = Math.min(pullDistance * 0.45, 80);
             
-            // Trigger smooth custom page transition
+            pullCard.style.flexBasis = `${visualPull}px`;
+            pullCard.style.width = `${visualPull}px`;
+            pullCard.style.opacity = Math.min(visualPull / 40, 1);
+
+            if (visualPull >= 50) {
+              pullText.innerText = 'RELEASE TO VIEW';
+              pullArrow.style.transform = 'rotate(180deg)';
+              pullCard.classList.add('active');
+            } else {
+              pullText.innerText = 'PULL TO VIEW';
+              pullArrow.style.transform = 'rotate(0deg)';
+              pullCard.classList.remove('active');
+            }
+          }
+        }, { passive: true });
+
+        container.addEventListener('touchend', () => {
+          if (isAtEnd && pullDistance >= threshold) {
+            pullCard.style.transition = 'flex-basis 0.25s ease, width 0.25s ease, opacity 0.25s ease';
+            pullCard.style.flexBasis = '120px';
+            pullCard.style.width = '120px';
+            pullCard.style.opacity = '1';
+
+            // Add standard elegant exit transition
+            document.body.classList.add('page-exit');
             setTimeout(() => {
-              window.location.href = href;
+              window.location.href = '/projects/';
             }, 250);
           } else {
-            // Spring back with elastic premium bezier curves
-            handle.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-            handle.style.transform = 'translateX(0px)';
-            text.style.opacity = 1;
-            currentX = 0;
+            // Smoothly collapse back with modern bezier curves
+            pullCard.style.transition = 'flex-basis 0.4s var(--ease-out-expo), width 0.4s var(--ease-out-expo), opacity 0.4s ease';
+            pullCard.style.flexBasis = '0px';
+            pullCard.style.width = '0px';
+            pullCard.style.opacity = '0';
+            pullCard.classList.remove('active');
+
+            setTimeout(() => {
+              pullCard.style.transition = '';
+            }, 400);
           }
-        }
-        
-        // Desktop mouse handlers
-        handle.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', drag);
-        window.addEventListener('mouseup', endDrag);
-        
-        // Touchscreen handlers
-        handle.addEventListener('touchstart', startDrag, { passive: true });
-        window.addEventListener('touchmove', drag, { passive: false });
-        window.addEventListener('touchend', endDrag);
-      });
+        });
+      })();
     });
   </script>
 

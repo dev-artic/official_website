@@ -83,6 +83,7 @@ body {
   overflow: hidden;
   position: relative;
   background-color: var(--bg-secondary);
+  flex-shrink: 0;
 }
 
 .project-img {
@@ -131,6 +132,8 @@ body {
   padding: var(--space-sm) 0;
   display: flex;
   flex-direction: column;
+  height: 72px; /* Fixed height unifies all cards perfectly */
+  justify-content: flex-start;
 }
 
 .meta-row {

@@ -496,3 +496,44 @@ img { display: block; max-width: 100%; }
   opacity: 1 !important;
   transform: translateY(0) !important;
 }
+
+/* ── Global Pinned Footer Bar (Option A — Framed Viewport) ── */
+footer,
+.site-footer,
+.about-footer,
+.gallery-footer,
+.contact-footer {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 48px !important;
+  z-index: 100 !important;
+  background-color: var(--bg-primary) !important;
+  border-top: 1px solid var(--border-color) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  padding: 0 var(--gutter) !important;
+  margin: 0 !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.55rem !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  transition: var(--transition-theme) !important;
+}
+
+footer span,
+.site-footer span,
+.about-footer span,
+.gallery-footer span,
+.contact-footer span {
+  color: var(--text-muted) !important;
+}
+
+/* Ensure no content is overlapped by the fixed footer bar */
+body {
+  padding-bottom: 64px !important;
+}
+

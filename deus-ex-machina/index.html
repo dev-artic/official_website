@@ -776,6 +776,17 @@
       to   { transform: scaleX(1); }
     }
 
+    @keyframes spinIn {
+      from {
+        opacity: 0;
+        transform: rotate(-180deg) scale(0.6);
+      }
+      to {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+      }
+    }
+
     /* ── Mobile Accordion Styles ── */
     .toggle-icon {
       display: none;
@@ -847,6 +858,23 @@
         color: var(--text-muted);
         line-height: 1;
         transition: color 0.3s ease;
+        opacity: 0; /* Hidden initially, spins in staggered */
+        will-change: transform, opacity;
+      }
+
+      /* Stream Toggle Icon Spin-In */
+      .links-container .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.5s forwards;
+      }
+
+      /* Film Toggle Icon Spin-In */
+      .archive-group:nth-of-type(1) .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.9s forwards;
+      }
+
+      /* Print Toggle Icon Spin-In */
+      .archive-group:nth-of-type(2) .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 4.3s forwards;
       }
 
       .mobile-toggle-header:hover .toggle-icon {

@@ -78,7 +78,7 @@
        Entry Animation — 3-Phase Sequence
        Phase 1 (0–1.2s):  Album cover fades in at its left-aligned (or centered on mobile) horizontal reference
        Phase 2 (1.3–2.3s): Album info is wiped open with a premium bezier curve
-       Phase 3 (2.5–3.6s): Everything slides up vertically, album cover shrinks, content appears
+       Phase 3 (2.7–3.8s): Everything slides up vertically, album cover shrinks, content appears
        ══════════════════════════════════════ */
 
     .album-showcase {
@@ -91,8 +91,9 @@
       margin-bottom: 80px; /* Generous gap below the showcase */
       /* Stacked group centered vertically in the viewport initially */
       transform: translateY(calc(50dvh - 310px));
+      will-change: transform;
       /* Phase 3: slides up vertically */
-      animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
+      animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
     @keyframes showcaseSlideUp {
@@ -121,7 +122,7 @@
       flex-shrink: 0;
       will-change: width, height; /* Hardware acceleration for layout resize */
       /* Phase 3: album cover shrinks when sliding up */
-      animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
+      animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
     @keyframes albumShrink {
@@ -136,7 +137,7 @@
       .album-art-wrapper {
         left: calc(50% - 140px); /* Perfectly centered horizontally relative to the showcase container */
         animation: albumSlideLeft 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards,
-                   albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards;
+                   albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
       }
     }
 
@@ -188,19 +189,19 @@
       }
     }
 
+    @keyframes infoWipeRevealDesktop {
+      to {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: translateX(0);
+      }
+    }
+
     /* Desktop: wipe open with organic bezier curve & horizontal slide */
     @media (min-width: 768px) {
       .album-info {
         transform: translateX(-15px);
         animation: infoWipeRevealDesktop 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards;
-      }
-
-      @keyframes infoWipeRevealDesktop {
-        to {
-          opacity: 1;
-          clip-path: inset(0 0 0 0);
-          transform: translateX(0);
-        }
       }
     }
 
@@ -222,9 +223,9 @@
       }
     }
 
-    .stream-label { animation-delay: 2.6s; }
-    .film-label { animation-delay: 3.0s; }
-    .print-label { animation-delay: 3.4s; }
+    .stream-label { animation-delay: 2.8s; }
+    .film-label { animation-delay: 3.2s; }
+    .print-label { animation-delay: 3.6s; }
 
     /* ── Links & Archive Stagger ── */
     @keyframes sectionReveal {
@@ -241,15 +242,15 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .link-item:nth-child(1) { animation-delay: 2.8s; }
-    .link-item:nth-child(2) { animation-delay: 2.9s; }
-    .link-item:nth-child(3) { animation-delay: 3.0s; }
-    .link-item:nth-child(4) { animation-delay: 3.1s; }
-    .link-item:nth-child(5) { animation-delay: 3.2s; }
-    .link-item:nth-child(6) { animation-delay: 3.3s; }
-    .link-item:nth-child(7) { animation-delay: 3.4s; }
-    .link-item:nth-child(8) { animation-delay: 3.5s; }
-    .link-item:nth-child(9) { animation-delay: 3.6s; }
+    .link-item:nth-child(1) { animation-delay: 3.0s; }
+    .link-item:nth-child(2) { animation-delay: 3.1s; }
+    .link-item:nth-child(3) { animation-delay: 3.2s; }
+    .link-item:nth-child(4) { animation-delay: 3.3s; }
+    .link-item:nth-child(5) { animation-delay: 3.4s; }
+    .link-item:nth-child(6) { animation-delay: 3.5s; }
+    .link-item:nth-child(7) { animation-delay: 3.6s; }
+    .link-item:nth-child(8) { animation-delay: 3.7s; }
+    .link-item:nth-child(9) { animation-delay: 3.8s; }
 
     .archive-entry {
       border-bottom: 1px solid var(--border-color);
@@ -258,16 +259,16 @@
       animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
     }
 
-    /* Film items stagger (starts at 3.2s, overlapping 50% with Stream) */
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.2s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.3s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.4s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.5s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(5) { animation-delay: 3.6s; }
+    /* Film items stagger (starts at 3.4s, overlapping 50% with Stream) */
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.4s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.5s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.6s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.7s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(5) { animation-delay: 3.8s; }
 
-    /* Print items stagger (starts at 3.6s, overlapping 50% with Film) */
-    .archive-group:nth-of-type(2) .archive-entry:nth-child(1) { animation-delay: 3.6s; }
-    .archive-group:nth-of-type(2) .archive-entry:nth-child(2) { animation-delay: 3.7s; }
+    /* Print items stagger (starts at 3.8s, overlapping 50% with Film) */
+    .archive-group:nth-of-type(2) .archive-entry:nth-child(1) { animation-delay: 3.8s; }
+    .archive-group:nth-of-type(2) .archive-entry:nth-child(2) { animation-delay: 3.9s; }
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
@@ -277,7 +278,7 @@
       gap: var(--space-xl);
       margin-bottom: 120px;
       opacity: 0;
-      animation: sectionReveal 0.5s ease 2.6s forwards;
+      animation: sectionReveal 0.5s ease 2.8s forwards;
     }
 
     @media (min-width: 768px) {
@@ -422,7 +423,7 @@
     /* Footer — reveal after content */
     footer {
       opacity: 0;
-      animation: sectionReveal 0.5s ease 3.8s forwards;
+      animation: sectionReveal 0.5s ease 4.0s forwards;
     }
 
     .artist-name {
@@ -754,6 +755,12 @@
       }
     }
 
+    @keyframes albumShrinkMobile {
+      to {
+        transform: scale(1);
+      }
+    }
+
     /* ── Mobile Accordion Styles ── */
     .toggle-icon {
       display: none;
@@ -761,18 +768,17 @@
 
     @media (max-width: 767px) {
       /* High-performance mobile GPU-accelerated album shrink */
+      .album-showcase {
+        will-change: transform;
+      }
+
       .album-art-wrapper {
         width: 170px !important;
         height: 170px !important;
         transform: scale(1.647);
         transform-origin: center center;
-        animation: albumShrinkMobile 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.5s forwards !important;
-      }
-
-      @keyframes albumShrinkMobile {
-        to {
-          transform: scale(1);
-        }
+        will-change: transform !important;
+        animation: albumShrinkMobile 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards !important;
       }
 
       .mobile-toggle-header {

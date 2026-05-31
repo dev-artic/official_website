@@ -251,6 +251,49 @@ img { display: block; max-width: 100%; }
 .nav-overlay {
   display: none;
 }@media (max-width: 767px) {
+  /* Mobile Top Header Bar with Gradient Blur Boundary */
+  .mobile-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    padding: 0 24px;
+    z-index: 997; /* Under hamburger (1000) and overlay (998) */
+    pointer-events: none; /* Let clicks pass through the blur area */
+    
+    /* Elegant gradient blur mask */
+    background: linear-gradient(to bottom, var(--bg-primary) 50%, transparent 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+    transition: background-color 0.5s ease, opacity 0.4s ease;
+  }
+  
+  .mobile-logo {
+    font-family: var(--font-logo);
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    text-decoration: none;
+    pointer-events: auto; /* Re-enable clicks specifically for the logo */
+    transition: opacity 0.4s ease, color 0.3s ease;
+  }
+
+  .home-header .mobile-logo {
+    display: none;
+  }
+
+  .nav-open .mobile-logo {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   /* Dynamic Backdrop Overlay with deep blur and darkness */
   .nav-overlay {
     display: block;

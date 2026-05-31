@@ -68,6 +68,18 @@ function initMobileNav() {
   const nav = document.querySelector('.nav-bar');
   if (!nav) return;
 
+  // Create mobile header bar dynamically for gradient blur & logo
+  const isHomepage = document.getElementById('hero-logo') || document.querySelector('.logo-split');
+  const mobileHeader = document.createElement('div');
+  mobileHeader.className = 'mobile-header-bar';
+  if (isHomepage) {
+    mobileHeader.classList.add('home-header');
+  }
+  mobileHeader.innerHTML = `
+    <a href="/" class="mobile-logo">artic.</a>
+  `;
+  document.body.appendChild(mobileHeader);
+
   // Create hamburger button dynamically
   const burger = document.createElement('button');
   burger.className = 'hamburger-btn';

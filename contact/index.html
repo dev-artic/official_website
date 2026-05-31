@@ -22,26 +22,151 @@
     body { overflow-x: hidden; }
 
     .contact-wrap {
-      max-width: var(--max-width);
+      max-width: 780px;
       margin: 0 auto;
       padding: 0 var(--gutter);
-      padding-top: 40vh;
+      padding-top: clamp(120px, 20vh, 200px);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    .contact-email {
-      font-family: var(--font-sans);
-      font-size: 0.8rem;
-      letter-spacing: 0.18em;
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color 0.3s ease;
+    .contact-header {
+      margin-bottom: 64px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    .contact-email:hover {
+    .contact-sub {
+      font-family: var(--font-sans);
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .contact-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+      font-weight: 700;
+      line-height: 1.25;
       color: var(--text-primary);
+      max-width: 580px;
+      letter-spacing: -0.01em;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      margin-bottom: 80px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+    }
+
+    @media (min-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+      }
+    }
+
+    .contact-channel {
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+      transition: border-color 0.5s ease;
+    }
+
+    .channel-label {
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .channel-link {
+      font-family: var(--font-sans);
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      font-weight: 400;
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      word-break: break-all;
+      position: relative;
+      display: inline-block;
+    }
+
+    .channel-link::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      transform: scaleX(0);
+      height: 1px;
+      bottom: -2px;
+      left: 0;
+      background-color: var(--text-primary);
+      transform-origin: bottom right;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .channel-link:hover::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
+
+    .channel-action {
+      font-family: var(--font-sans);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 4px 0;
+      transition: color 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .channel-action:hover {
+      color: var(--text-primary);
+    }
+
+    .copy-toast {
+      position: absolute;
+      top: 24px;
+      right: 0;
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--bg-primary);
+      background-color: var(--text-primary);
+      padding: 4px 8px;
+      border-radius: 0px;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .copy-toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .contact-footer {
@@ -56,6 +181,13 @@
       color: var(--text-muted);
       transition: border-color 0.5s ease;
     }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body>
@@ -67,8 +199,28 @@
     <a href="/contact/" class="nav-link active">Contact</a>
   </nav>
 
-  <div class="contact-wrap animate-fade-in">
-    <a href="mailto:admin@artic.live" class="contact-email">admin@artic.live</a>
+  <div class="contact-wrap">
+    
+    <div class="contact-header">
+      <span class="contact-sub">CONNECT</span>
+      <h1 class="contact-title">Get in touch for collaborations, projects, or tastings.</h1>
+    </div>
+
+    <div class="contact-grid">
+      
+      <div class="contact-channel">
+        <span class="channel-label">EMAIL</span>
+        <a href="mailto:admin@artic.live" class="channel-link">admin@artic.live</a>
+        <span class="channel-action" onclick="copyText('admin@artic.live', this)">COPY ADDRESS</span>
+      </div>
+
+      <div class="contact-channel">
+        <span class="channel-label">INSTAGRAM</span>
+        <a href="https://instagram.com/artic.live" target="_blank" rel="noopener" class="channel-link">@artic.live</a>
+        <a href="https://instagram.com/artic.live" target="_blank" rel="noopener" class="channel-action">SEND DIRECT MESSAGE</a>
+      </div>
+
+    </div>
 
     <footer class="contact-footer">
       © 2026 artic. All Rights Reserved
@@ -81,5 +233,27 @@
   </button>
 
   <script src="../js/shared.js"></script>
+  <script>
+    function copyText(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        let container = btnElement.parentElement;
+        let toast = container.querySelector('.copy-toast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.className = 'copy-toast';
+          toast.innerText = 'COPIED';
+          container.appendChild(toast);
+        }
+        
+        toast.classList.add('show');
+        btnElement.innerText = 'COPIED!';
+        
+        setTimeout(() => {
+          toast.classList.remove('show');
+          btnElement.innerText = 'COPY ADDRESS';
+        }, 2000);
+      });
+    }
+  </script>
 </body>
 </html>

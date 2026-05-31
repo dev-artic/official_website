@@ -26,14 +26,16 @@
     }
 
     /* ── Nav (initial: hidden, appears after logo animation) ── */
-    .nav-bar {
-      opacity: 0;
-      transform: translateY(-12px);
-      animation: navReveal 0.7s var(--ease-out-expo) 1.8s forwards;
-    }
+    @media (min-width: 768px) {
+      .nav-bar {
+        opacity: 0;
+        transform: translateY(-12px);
+        animation: navReveal 0.7s var(--ease-out-expo) 1.8s forwards;
+      }
 
-    @keyframes navReveal {
-      to { opacity: 1; transform: translateY(0); }
+      @keyframes navReveal {
+        to { opacity: 1; transform: translateY(0); }
+      }
     }
 
     /* ── Hero Section ── */

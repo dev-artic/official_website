@@ -21,9 +21,10 @@ body {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: clamp(100px, 15vh, 180px) var(--gutter) 0 var(--gutter);
+  padding: 100px var(--gutter) 60px var(--gutter); /* Standard top-bottom padding leaving space for fixed nav */
   display: flex;
   flex-direction: column;
+  justify-content: center; /* Vertically center carousel on both desktop and mobile */
   flex-grow: 1;
 }
 

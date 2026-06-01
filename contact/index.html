@@ -19,17 +19,26 @@
   </script>
 
   <style>
-    body { overflow-x: hidden; }
+    body {
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
 
     .contact-wrap {
       max-width: var(--max-width);
       margin: 0 auto;
       padding: 0 var(--gutter);
-      padding-top: clamp(80px, 8vh, 120px); /* Reduced padding top for better vertical fit */
-      min-height: auto; /* Removed 100vh to prevent forcing a full viewport size */
+      padding-top: 80px;
+      padding-bottom: 80px;
       display: flex;
       flex-direction: column;
+      justify-content: center;
+      flex: 1;
       width: 100%;
+      box-sizing: border-box;
     }
 
     .contact-header,
@@ -190,7 +199,6 @@
   <div class="contact-wrap">
     
     <div class="contact-header">
-      <span class="contact-sub">CONNECT</span>
       <h1 class="contact-title">Reach out to us.</h1>
     </div>
 

@@ -372,16 +372,16 @@ img { display: block; max-width: 100%; }
     box-shadow: none;
     z-index: 999;
     
-    /* Fade transition */
-    opacity: 0;
-    pointer-events: none;
+    /* Fade transition ??!important to override .delayed-reveal.revealed */
+    opacity: 0 !important;
+    pointer-events: none !important;
     transform: none;
     transition: opacity 0.5s ease;
   }
 
   .nav-open .nav-bar {
-    opacity: 1;
-    pointer-events: auto;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
   /* Sidebar Links stack vertically and right-aligned */

@@ -112,11 +112,22 @@ function initMobileNav() {
       document.body.classList.remove('nav-open');
     });
   });
+
+  // Clear nav-open on bfcache restore (back/forward navigation)
+  // Prevents blur overlay from persisting after page transition
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      document.body.classList.remove('nav-open');
+    }
+  });
+
+  // Safety net: always start with nav closed
+  document.body.classList.remove('nav-open');
 }
 
 // ── 5. Sub-page Landing Transition Overlay ──
 function initSubpageTransition() {
-  const mainContent = document.querySelector('.about-content, .container, .contact-wrap');
+  const mainContent = document.querySelector('.about-content, .container, .contact-wrap, .page-container');
   if (!mainContent) return;
 
   // Do NOT run on homepage

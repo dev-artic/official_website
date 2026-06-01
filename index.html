@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -20,127 +20,8 @@
   </script>
 
   <style>
-    /* ── Page ── */
-    body {
-      overflow-x: hidden;
-    }
 
-    /* ── Nav (initial: hidden, appears after logo animation) ── */
-    @media (min-width: 768px) {
-      .nav-bar {
-        opacity: 0;
-        transform: translateY(-12px);
-        animation: navReveal 0.7s var(--ease-out-expo) 1.8s forwards;
-      }
-
-      @keyframes navReveal {
-        to { opacity: 1; transform: translateY(0); }
-      }
-    }
-
-    /* ── Hero Section ── */
-    .hero {
-      min-height: 100vh;
-      min-height: 100dvh; /* Dynamic viewport height for perfect mobile vertical centering */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
-
-    .logo-split {
-      position: relative;
-      width: 100px;
-      aspect-ratio: 434 / 313;
-    }
-
-    .logo-split img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .logo-icon-wrapper {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      clip-path: inset(0 0 54% 0);
-      overflow: hidden;
-    }
-
-    .logo-type-wrapper {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      clip-path: inset(55.5% 0 -5px 0);
-      overflow: hidden;
-    }
-
-    .logo-icon {
-      transform: translateY(40px);
-      animation: revealIcon 1.2s var(--ease-out-expo) 0.3s forwards;
-    }
-
-    .logo-type {
-      transform: translateY(-36px);
-      animation: revealType 1.2s var(--ease-out-expo) 0.3s forwards;
-    }
-
-    @keyframes revealIcon {
-      from { transform: translateY(40px); }
-      to   { transform: translateY(0); }
-    }
-
-    @keyframes revealType {
-      from { transform: translateY(-36px); }
-      to   { transform: translateY(0); }
-    }
-
-    /* ── Content Sections ── */
-    .content-section {
-      width: 100%;
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: var(--space-xxl) var(--gutter);
-      border-top: 1px solid var(--border-color);
-      transition: border-color 0.5s ease;
-    }
-
-    .section-tag {
-      display: block;
-      font-family: var(--font-sans);
-      font-size: 0.6rem;
-      font-weight: 400;
-      text-transform: uppercase;
-      letter-spacing: 0.3em;
-      color: var(--text-muted);
-      margin-bottom: var(--space-sm);
-    }
-
-    .section-title {
-      font-family: var(--font-serif);
-      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      line-height: 1.2;
-      color: var(--text-primary);
-      margin-bottom: var(--space-md);
-      max-width: 600px;
-    }
-
-    .section-desc {
-      font-family: var(--font-sans);
-      font-size: 0.85rem;
-      line-height: 1.8;
-      color: var(--text-secondary);
-      max-width: 480px;
-      margin-bottom: var(--space-lg);
-    }
-
+    /* — Section Link — */
     .section-link {
       display: inline-flex;
       align-items: center;
@@ -160,7 +41,7 @@
     .section-link::after {
       content: '';
       position: absolute;
-      width: calc(100% - 20px); /* Exclude arrow SVG */
+      width: calc(100% - 20px);
       transform: scaleX(0);
       height: 1px;
       bottom: 0;
@@ -190,46 +71,38 @@
       transform: translateX(4px);
     }
 
-    /* ── Projects Preview Row ── */
+    /* — Projects Preview Row — */
     .projects-row {
       width: 100%;
       max-width: 100%;
       position: relative;
-      overflow: hidden; /* Clips horizontal leak */
     }
-
-    .projects-preview {
-      display: flex;
-      gap: var(--space-md);
-      width: 100%;
-      max-width: 100%;
-      overflow-x: auto;
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none; /* IE 10+ */
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 8px;
-    }
-
-    .projects-preview::-webkit-scrollbar {
-      display: none; /* WebKit */
-    }
-
-    /* ── Desktop Floating Link (Overlap layer with fade-in on hover) ── */
+        /* ??Desktop Floating Link (Wrapper that shows on row hover, contains a standard section-link) ??*/
     .floating-view-link {
       position: absolute;
       right: 0;
       top: 0;
-      height: calc(100% - 8px); /* Account for padding-bottom of preview */
-      display: flex;
+      height: calc(100% - 8px);
+      display: inline-flex;
       align-items: center;
       justify-content: flex-end;
       z-index: 10;
-      background: linear-gradient(to left, var(--bg-primary) 20%, transparent 100%);
-      padding: 0 0 0 220px; /* Removed right padding to align arrow perfectly with grid edge */
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.4s var(--ease-out-expo);
+    }
+
+    /* Gradient overlay behind the text */
+    .floating-view-link::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 320px;
+      background: linear-gradient(to left, var(--bg-primary) 40%, transparent 100%);
+      z-index: -1;
+      pointer-events: none;
     }
 
     .projects-row:hover .floating-view-link {
@@ -237,32 +110,13 @@
       pointer-events: auto;
     }
 
-    .floating-view-link::after {
-      display: none !important; /* Disable wide container-bottom underline */
-    }
+    
 
-    .floating-view-link span {
-      position: relative;
-      padding-bottom: 2px;
-    }
+    
 
-    .floating-view-link span::after {
-      content: '';
-      position: absolute;
-      width: 100%;
-      transform: scaleX(0);
-      height: 1px;
-      bottom: 0;
-      left: 0;
-      background-color: var(--text-primary);
-      transform-origin: bottom right;
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+    
 
-    .projects-row:hover .floating-view-link span::after {
-      transform: scaleX(1);
-      transform-origin: bottom left;
-    }
+    
 
     /* ── Mobile Overswipe Pull Indicator ── */
     .pull-indicator {
@@ -310,8 +164,6 @@
       letter-spacing: 0.18em;
       color: var(--text-muted);
     }
-
-
 
     .preview-card {
       flex: 0 0 280px;
@@ -582,10 +434,12 @@
       </div>
 
       <!-- Desktop Floating Link (Overlap layer with fade-in on hover) -->
-      <a href="/projects/" class="section-link desktop-only floating-view-link">
-        <span>View All Projects</span>
-        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-      </a>
+      <div class="desktop-only floating-view-link">
+        <a href="/projects/" class="section-link">
+          <span>View All Projects</span>
+          <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </a>
+      </div>
     </div>
   </section>
 

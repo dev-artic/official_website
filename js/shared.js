@@ -1,4 +1,4 @@
-/* -------------------------------------------------------------
+﻿/* -------------------------------------------------------------
  * shared.js — artic. Global Behaviors
  * ------------------------------------------------------------- */
 
@@ -165,6 +165,14 @@ function initSubpageTransition() {
   requestAnimationFrame(() => {
     // Show title text
     transitionOverlay.classList.add('active');
+
+    // Reveal all delayed elements (nav + content) after 200ms behind the curtain of the white overlay
+    const delayedElements = document.querySelectorAll('.delayed-reveal');
+    if (delayedElements.length > 0) {
+      setTimeout(() => {
+        delayedElements.forEach(el => el.classList.add('revealed'));
+      }, 200);
+    }
 
     // After 0.9s, fade out the overlay
     setTimeout(() => {

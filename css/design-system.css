@@ -1,4 +1,4 @@
-/* -------------------------------------------------------------
+﻿/* -------------------------------------------------------------
  * DESIGN SYSTEM TOKENS — artic.
  * -------------------------------------------------------------
  * Typography, colors, spacing, layout.
@@ -128,6 +128,18 @@ img { display: block; max-width: 100%; }
   -webkit-backdrop-filter: blur(16px);
   background-color: var(--glass-bg);
   transition: var(--transition-theme);
+}
+
+/* Subpage delayed reveal ??hides nav + content until transition overlay covers screen */
+.delayed-reveal {
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+}
+
+.delayed-reveal.revealed {
+  opacity: 1 !important;
+  pointer-events: auto;
 }
 
 .nav-link {

@@ -110,9 +110,9 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 - 연락처: {phone}
 
 [입금 계좌 정보]
-- 은행: 국민은행
-- 계좌번호: 123-4567-89012
-- 예금주: artic
+- 은행: 토스뱅크
+- 계좌번호: 1002-1532-0842
+- 예금주: 김민제
 
 문의 사항이 있으실 경우 admin@artic.live 로 메일을 보내주시기 바랍니다.
 감사합니다.

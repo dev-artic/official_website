@@ -37,15 +37,18 @@
 
     /* -- Hero About Button (discover) -- */
     .hero-about-btn {
+      position: absolute;
+      top: calc(50% + 100px); /* Logo center (50%) + half height (36px) + gap (64px) */
+      left: 50%;
       opacity: 0;
-      transform: translateY(10px);
+      transform: translate(-50%, 10px);
       animation: buttonReveal 0.8s var(--ease-out-expo) 1.8s forwards;
     }
 
     @keyframes buttonReveal {
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate(-50%, 0);
       }
     }
 
@@ -55,16 +58,14 @@
     .hero {
       min-height: 100vh;
       min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 64px;
       position: relative;
     }
 
     .logo-split {
-      position: relative;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       width: 100px;
       aspect-ratio: 434 / 313;
     }
@@ -698,27 +699,12 @@
           preview.scrollLeft = scrollLeft - walk;
         });
 
-        // Touch Swipe (Mobile & Emulators)
-        preview.addEventListener('touchstart', (e) => {
-          isDown = true;
-          preview.style.scrollSnapType = 'none';
-          preview.style.scrollBehavior = 'auto';
-          startX = e.touches[0].pageX - preview.offsetLeft;
-          scrollLeft = preview.scrollLeft;
-        }, { passive: true });
+        
+        
 
-        preview.addEventListener('touchend', () => {
-          isDown = false;
-          preview.style.scrollSnapType = 'x mandatory';
-          preview.style.scrollBehavior = 'smooth';
-        });
+        
 
-        preview.addEventListener('touchmove', (e) => {
-          if (!isDown) return;
-          const x = e.touches[0].pageX - preview.offsetLeft;
-          const walk = (x - startX) * 1.5;
-          preview.scrollLeft = scrollLeft - walk;
-        }, { passive: true });
+        
       }
     });
   </script>

@@ -1,4 +1,4 @@
-/* -------------------------------------------------------------
+﻿/* -------------------------------------------------------------
  * PROJECTS / HORIZONTAL TIMELINE VIEW | /projects
  * -------------------------------------------------------------
  * Unified horizontal timeline layout for both mobile and desktop.
@@ -50,7 +50,10 @@ body {
 
 /* Spacer adjustments for horizontal timeline */
 .dial-spacer:first-child {
-  display: none !important; /* No spacer needed at the start */
+  display: block !important;
+  height: 100%;
+  width: 24px; /* Mobile: start offset to align with left reference point */
+  flex-shrink: 0;
 }
 
 .dial-spacer:last-child {
@@ -123,12 +126,17 @@ body {
   100% { transform: translateX(0); }
 }
 
-.year-title.active-pop-right {
+.year-title span {
+  display: inline-block;
+  transition: color 0.3s ease;
+}
+
+.year-title.active-pop-right span {
   color: var(--text-primary) !important;
   animation: chewySlideRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.year-title.active-pop-left {
+.year-title.active-pop-left span {
   color: var(--text-primary) !important;
   animation: chewySlideLeft 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
@@ -286,6 +294,10 @@ body {
 
   .project-card {
     flex: 0 0 280px; /* Larger cards on desktop */
+  }
+
+  .dial-spacer:first-child {
+    width: 40px; /* Desktop: start offset to align with left reference point */
   }
 
   .dial-spacer:last-child {

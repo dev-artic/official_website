@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -34,7 +34,7 @@
 
         <!-- Year: 2026 -->
         <div class="dial-year-node" data-year="2026">
-          <div class="year-header-wrapper"><h2 class="year-title">2026</h2></div>
+          <div class="year-header-wrapper"><h2 class="year-title"><span>2026</span></h2></div>
           <div class="year-projects">
             <article class="project-card">
               <a href="../tasting-note/" class="card-link">
@@ -54,7 +54,7 @@
 
         <!-- Year: 2025 -->
         <div class="dial-year-node" data-year="2025">
-          <div class="year-header-wrapper"><h2 class="year-title">2025</h2></div>
+          <div class="year-header-wrapper"><h2 class="year-title"><span>2025</span></h2></div>
           <div class="year-projects">
             <article class="project-card">
               <a href="../neutral-interview/" class="card-link">
@@ -74,7 +74,7 @@
 
         <!-- Year: 2024 -->
         <div class="dial-year-node" data-year="2024">
-          <div class="year-header-wrapper"><h2 class="year-title">2024</h2></div>
+          <div class="year-header-wrapper"><h2 class="year-title"><span>2024</span></h2></div>
           <div class="year-projects">
             <article class="project-card">
               <a href="../gagosian-party-music/" class="card-link">
@@ -130,13 +130,74 @@
       let activeYear = '';
       let lastScrollLeft = 0;
 
-      // Desktop: Translate vertical mouse wheel scroll to horizontal container scroll
+      // Desktop: Translate vertical/horizontal mouse wheel scroll to horizontal container scroll with smooth snapping
+      let wheelTimeout = null;
+      let snapTimeout = null;
+
       viewport.addEventListener('wheel', (e) => {
-        if (window.innerWidth >= 768 && e.deltaY !== 0) {
+        if (window.innerWidth >= 768) {
+          // Prevent browser's default scroll behavior
           e.preventDefault();
-          viewport.scrollLeft += e.deltaY;
+
+          // Clear any active snap timer
+          if (wheelTimeout) clearTimeout(wheelTimeout);
+          if (snapTimeout) clearTimeout(snapTimeout);
+
+          // Temporarily disable native CSS snap to allow fluid wheel movement
+          viewport.style.scrollSnapType = 'none';
+          viewport.style.scrollBehavior = 'auto';
+
+          // Accumulate scroll (translating Y or X delta to horizontal scroll)
+          const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
+          viewport.scrollLeft += delta;
+
+          // Set debounce timer to trigger snap when wheel interaction stops
+          wheelTimeout = setTimeout(() => {
+            snapToClosestCard();
+          }, 150);
         }
       }, { passive: false });
+
+      function snapToClosestCard() {
+        const scrollLeft = viewport.scrollLeft;
+        const pad = window.innerWidth >= 768 ? 40 : 24;
+        const viewRect = viewport.getBoundingClientRect();
+        const refPoint = viewRect.left + pad;
+
+        let closestCard = null;
+        let minDistance = Infinity;
+
+        // Find the project card closest to the reference alignment point
+        cards.forEach(card => {
+          const cardRect = card.getBoundingClientRect();
+          // Calculate distance of the card's left edge to the reference snap point
+          const distance = Math.abs(cardRect.left - refPoint);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          // Calculate the target scroll position for this card to align with scroll-padding-left
+          const targetScrollLeft = closestCard.offsetLeft - pad;
+          
+          viewport.scrollTo({
+            left: targetScrollLeft,
+            behavior: 'smooth'
+          });
+
+          // Restore scroll-snap-type after the smooth scroll finishes
+          snapTimeout = setTimeout(() => {
+            viewport.style.scrollSnapType = 'x mandatory';
+            // Trigger active year update manually once snapped
+            updateActiveYear();
+          }, 400);
+        } else {
+          // Fallback if no cards found
+          viewport.style.scrollSnapType = 'x mandatory';
+        }
+      }
 
       // Track active year and trigger pop animation when it snaps/aligns to left edge
       function updateActiveYear() {

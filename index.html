@@ -1,4 +1,4 @@
-﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -684,23 +684,20 @@
           });
         };
 
-        // If section is already in view (e.g. page loaded scrolled down), fire immediately
-        const rect = projectsSection.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
-          // Slight delay to ensure layout is settled after cards are added
-          setTimeout(revealCards, 80);
-        } else {
-          // Otherwise observe and fire when it scrolls into view (one-shot)
-          const sectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                revealCards();
-                sectionObserver.disconnect();
-              }
-            });
-          }, { threshold: 0.05 });
-          sectionObserver.observe(projectsSection);
-        }
+        // Trigger stagger when projects section scrolls into view (~15% visible).
+        // IntersectionObserver handles both cases:
+        //   - section not yet in view  ??fires when user scrolls to it
+        //   - section already in view on load (e.g. deep-linked) ??fires immediately
+        // threshold 0.15: visually, the top card row is just peeking in ??perfect timing.
+        const sectionObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              revealCards();
+              sectionObserver.disconnect();
+            }
+          });
+        }, { threshold: 0.15 });
+        sectionObserver.observe(projectsSection);
       })
       .catch(() => {
         const loading = document.getElementById('home-projects-loading');

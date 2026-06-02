@@ -213,7 +213,7 @@
     }
 
     /* ── Section Title Wipes ── */
-    .stream-label, .film-label, .print-label {
+    .stream-label, .film-label, .print-label, .play-label {
       opacity: 0;
       clip-path: inset(0 100% 0 0);
       animation: labelWipe 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -230,9 +230,10 @@
       }
     }
 
-    .stream-label { animation-delay: 2.7s; }
-    .film-label { animation-delay: 2.9s; }
-    .print-label { animation-delay: 3.1s; }
+    .stream-label { animation-delay: 2.9s; }
+    .film-label   { animation-delay: 2.9s; }
+    .print-label  { animation-delay: 3.1s; }
+    .play-label   { animation-delay: 2.7s; }
 
     /* ── Links & Archive Stagger ── */
     @keyframes sectionReveal {
@@ -296,6 +297,278 @@
         gap: 48px;
         align-items: start;
       }
+    }
+
+    /* ── Left Column Wrapper ── */
+    .left-column {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+    }
+
+    @media (min-width: 768px) {
+      .left-column {
+        gap: 48px;
+      }
+    }
+
+    /* ─────────────────────────────────────────────
+     * PLAY Widget — Premium Monochrome Music Player
+     * ─────────────────────────────────────────────
+     */
+    .play-section {
+      width: 100%;
+    }
+
+    .play-group-label {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-xs);
+      border-bottom: 1px solid var(--border-color);
+      transition: border-color 0.5s ease;
+    }
+
+    .play-label { animation-delay: 2.9s; }
+
+    /* Widget card */
+    .play-widget {
+      border: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: none;
+      background-color: transparent;
+    }
+
+    /* Track info row */
+    .play-track-info {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    .play-track-num {
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1;
+      padding-top: 0;
+      min-width: 24px;
+      flex-shrink: 0;
+    }
+
+    .play-track-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .play-track-title {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.3s ease;
+    }
+
+    .play-track-status {
+      display: block;
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Track Transition Keyframe Animations */
+    @keyframes trackFadeOutUp {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-8px); }
+    }
+    @keyframes trackFadeInUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes trackFadeOutDown {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(8px); }
+    }
+    @keyframes trackFadeInDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .play-track-info.track-anim-out-up {
+      animation: trackFadeOutUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .play-track-info.track-anim-in-up {
+      animation: trackFadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .play-track-info.track-anim-out-down {
+      animation: trackFadeOutDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .play-track-info.track-anim-in-down {
+      animation: trackFadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Progress bar seeking transition style */
+    .play-bar-fill.is-seeking {
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    /* Progress bar */
+    .play-progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .play-time {
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      min-width: 30px;
+      flex-shrink: 0;
+    }
+
+    .play-time.dur { text-align: right; }
+
+    .play-bar-track {
+      flex: 1;
+      height: 1px;
+      background-color: var(--border-color);
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .play-bar-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background-color: var(--text-primary);
+      transition: width 0.4s linear, background-color 0.5s ease;
+      pointer-events: none;
+    }
+
+    .play-bar-fill.is-resetting {
+      transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .play-bar-track::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: 0;
+      right: 0;
+      bottom: -6px;
+    }
+
+    /* Controls row */
+    .play-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .play-ctrl-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.3s ease;
+    }
+
+    .play-ctrl-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .play-ctrl-btn svg {
+      width: 10px;
+      height: 10px;
+      fill: currentColor;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .play-ctrl-btn:hover svg {
+      transform: scale(1.15);
+    }
+
+    /* Central play/pause button */
+    .play-main-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 0;
+      flex-shrink: 0;
+      color: var(--text-primary);
+    }
+
+    .play-main-btn:hover {
+      background-color: transparent;
+      border-color: transparent;
+      opacity: 0.7;
+    }
+
+    .play-main-btn svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+      transition: transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .play-main-btn:hover svg {
+      fill: currentColor;
+      transform: scale(1.15);
+    }
+
+    /* State: playing */
+    .play-widget.is-playing .play-main-btn {
+      background-color: transparent;
+      border-color: transparent;
+    }
+    .play-widget.is-playing .play-main-btn svg {
+      fill: currentColor;
+    }
+    .play-widget.is-playing .play-track-status {
+      color: var(--text-primary);
     }
 
     /* Stream group label (matches archive group labels) */
@@ -1007,6 +1280,10 @@
         gap: 48px !important; /* Unified uniform spacing of exactly 48px between sections */
       }
 
+      .left-column {
+        gap: 48px !important; /* Match content-columns gap for mobile */
+      }
+
       .archive-section {
         display: flex;
         flex-direction: column;
@@ -1015,6 +1292,235 @@
 
       .archive-group {
         margin-bottom: 0 !important;
+      }
+    }
+
+      /* ── Print Modal Popup ── */
+      .print-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .print-modal.is-active {
+        opacity: 1;
+        pointer-events: auto;
+        visibility: visible;
+      }
+
+      .print-modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(26, 26, 26, 0.3);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      [data-theme="dark"] .print-modal-overlay {
+        background-color: rgba(10, 10, 10, 0.6);
+      }
+
+      .print-modal-container {
+        position: relative;
+        z-index: 10001;
+        width: 90%;
+        max-width: 900px;
+        max-height: 85vh;
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        transform: translateY(24px);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.16);
+        scrollbar-width: none;
+      }
+
+      .print-modal-container::-webkit-scrollbar {
+        display: none;
+      }
+
+      .print-modal.is-active .print-modal-container {
+        transform: translateY(0);
+      }
+
+      .print-modal-content {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+      }
+
+      @media (min-width: 768px) {
+        .print-modal-content {
+          flex-direction: row;
+          min-height: 540px;
+        }
+      }
+
+      .print-modal-image-wrap {
+        flex: 1;
+        background-color: var(--bg-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.5s ease;
+      }
+
+      @media (min-width: 768px) {
+        .print-modal-image-wrap {
+          border-bottom: none;
+          border-right: 1px solid var(--border-color);
+          width: 50%;
+          max-width: 50%;
+          flex: 0 0 50%;
+          padding: 60px;
+        }
+      }
+
+      .print-modal-image-wrap img {
+        max-width: 100%;
+        max-height: 40vh;
+        object-fit: contain;
+        filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.12));
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
+      }
+
+      .print-modal-image-wrap:hover img {
+        transform: scale(1.025) rotate(-0.5deg);
+        filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.18));
+      }
+
+      @media (min-width: 768px) {
+        .print-modal-image-wrap img {
+          max-height: 65vh;
+        }
+      }
+
+      .print-modal-info {
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 32px;
+      }
+
+      @media (min-width: 768px) {
+        .print-modal-info {
+          padding: 56px;
+          width: 50%;
+          max-width: 50%;
+          flex: 0 0 50%;
+        }
+      }
+
+      .print-modal-close {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        z-index: 10002;
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        padding: 0;
+      }
+
+      .print-modal-close:hover {
+        opacity: 0.6;
+        transform: rotate(90deg);
+      }
+
+      .print-modal-close svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+      }
+
+      /* Grid Metadata Styles inside Popup Info */
+      .print-info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        row-gap: 16px;
+        column-gap: 16px;
+        font-family: var(--font-sans);
+        margin-top: 24px;
+      }
+
+      @media (min-width: 768px) {
+        .print-info-grid {
+          grid-template-columns: 100px 1fr;
+          row-gap: 24px;
+          align-items: baseline;
+        }
+      }
+
+      .print-meta-label {
+        font-size: 0.55rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.15em;
+        line-height: 1.2;
+      }
+
+      .print-meta-value {
+        font-size: 0.8rem;
+        color: var(--text-primary);
+        line-height: 1.45;
+      }
+
+      .print-badge {
+        display: inline-block;
+        font-size: 0.55rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 6px 12px;
+        border: 1px solid var(--text-primary);
+        margin-top: 6px;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .print-badge.request-purchase {
+        background-color: var(--text-primary);
+        color: var(--bg-primary);
+        cursor: pointer;
+      }
+
+      .print-badge.request-purchase:hover {
+        opacity: 0.8;
+      }
+
+      .print-badge.not-for-sale {
+        color: var(--text-muted);
+        border-color: var(--border-color);
+        cursor: default;
       }
   </style>
 </head>
@@ -1042,13 +1548,53 @@
       </div>
     </section>
 
-    <!-- 2-Column: Streaming Links (left) + Archive (right) -->
+    <!-- 2-Column: Left (Streaming Links + PLAY) + Right (Archive) -->
     <div class="content-columns">
 
-      <!-- Left Column: Streaming Links -->
+      <!-- Left Column -->
+      <div class="left-column">
+
+      <!-- PLAY Widget Section -->
+      <div class="play-section">
+        <span class="play-group-label play-label">Play</span>
+        <div class="play-widget" id="play-widget">
+          <!-- Track Info -->
+          <div class="play-track-info">
+            <span class="play-track-num" id="play-track-num">01</span>
+            <div class="play-track-text">
+              <span class="play-track-title" id="play-track-title">from corners to switch</span>
+              <span class="play-track-status" id="play-track-status">Ready</span>
+            </div>
+          </div>
+          <!-- Progress -->
+          <div class="play-progress-wrap">
+            <span class="play-time" id="play-current">0:00</span>
+            <div class="play-bar-track" id="play-bar-track">
+              <div class="play-bar-fill" id="play-bar-fill"></div>
+            </div>
+            <span class="play-time dur" id="play-duration">2:26</span>
+          </div>
+          <!-- Controls -->
+          <div class="play-controls">
+            <button class="play-ctrl-btn" id="play-prev-btn" aria-label="Previous track">
+              <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+              Prev
+            </button>
+            <button class="play-main-btn" id="play-main-btn" aria-label="Play">
+              <svg viewBox="0 0 24 24" id="play-main-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button class="play-ctrl-btn" id="play-next-btn" aria-label="Next track">
+              Next
+              <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streaming Links -->
       <main class="links-container expanded">
         <div class="mobile-toggle-header">
-          <span class="stream-group-label stream-label">Stream</span>
+          <span class="stream-group-label stream-label">Available On</span>
           <span class="toggle-icon"></span>
         </div>
         <div class="toggle-content">
@@ -1167,6 +1713,8 @@
 
       </main>
 
+      </div><!-- end left-column -->
+
       <!-- Right Column: Archive -->
       <section class="archive-section">
 
@@ -1257,8 +1805,8 @@
             <span class="toggle-icon"></span>
           </div>
           <div class="archive-list toggle-content">
-            <div class="archive-entry">
-              <a class="archive-item" href="#" target="_blank" rel="noopener">
+            <div class="archive-entry" data-print="lyric-booklet">
+              <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v15H6V2z"/><line x1="9" y1="10" x2="16" y2="10" stroke-width="1"/><line x1="9" y1="13" x2="16" y2="13" stroke-width="1"/><line x1="9" y1="16" x2="13" y2="16" stroke-width="1"/></svg>
                   <div>
@@ -1268,8 +1816,8 @@
                 </div>
               </a>
             </div>
-            <div class="archive-entry">
-              <a class="archive-item" href="#" target="_blank" rel="noopener">
+            <div class="archive-entry" data-print="1mc1pd">
+              <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2h9l5 5v15H6V2z"/><line x1="9" y1="10" x2="16" y2="10" stroke-width="1"/><line x1="9" y1="13" x2="16" y2="13" stroke-width="1"/><line x1="9" y1="16" x2="13" y2="16" stroke-width="1"/></svg>
                   <div>
@@ -1293,6 +1841,25 @@
     <span>© 2026 artic. All Rights Reserved</span>
   </footer>
 
+  <!-- Print Modal Popup -->
+  <div class="print-modal" id="print-modal" aria-hidden="true">
+    <div class="print-modal-overlay" id="print-modal-overlay"></div>
+    <div class="print-modal-container">
+      <button class="print-modal-close" id="print-modal-close" aria-label="Close modal">
+        <svg viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="1.5" />
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      </button>
+      <div class="print-modal-content">
+        <div class="print-modal-image-wrap">
+          <img src="" alt="" id="print-modal-image">
+        </div>
+        <div class="print-modal-info" id="print-modal-info">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
   <!-- Theme Toggle -->
   <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
     <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
@@ -1416,6 +1983,111 @@
       });
     })();
 
+    // ── Print Modal Control ──
+    (function() {
+      const PRINT_DATA = {
+        '1mc1pd': {
+          title: "1MC1PD: The Interview",
+          image: "1mc1pd.png",
+          artists: "@arkyteccc<br>@poltergeisy_",
+          album: "arkyteccc,<br>deus ex machina (2024)",
+          dimensions: "130*210",
+          status: "Limited Edition",
+          statusClass: "request-purchase",
+          statusText: "Request Purchase",
+          credits: "Designed by @63.46.kr @gyu.dev",
+          copyright: "ⓒ 2025 artic. All Rights Reserved."
+        },
+        'lyric-booklet': {
+          title: "Lyric Booklet",
+          image: "lyric-booklet.png",
+          artists: "@arkyteccc",
+          album: "arkyteccc,<br>deus ex machina (2024)",
+          dimensions: "148*210",
+          status: "Distributed in Listening Party",
+          statusClass: "not-for-sale",
+          statusText: "Not For Sale",
+          credits: "Designed by @gyu.dev @otffbtys",
+          copyright: "ⓒ 2025 artic. All Rights Reserved."
+        }
+      };
+
+      const modal = document.getElementById('print-modal');
+      const overlay = document.getElementById('print-modal-overlay');
+      const closeBtn = document.getElementById('print-modal-close');
+      const modalImg = document.getElementById('print-modal-image');
+      const modalInfo = document.getElementById('print-modal-info');
+
+      function openModal(key) {
+        const data = PRINT_DATA[key];
+        if (!data) return;
+
+        modalImg.src = data.image;
+        modalImg.alt = data.title;
+        
+        let badgeHtml = '';
+        if (data.statusClass === 'request-purchase') {
+          badgeHtml = `<a href="https://artic-live.notion.site/ebd/1f1ffc3c3af5806088a8c6d851fe9d62" target="_blank" rel="noopener noreferrer" class="print-badge ${data.statusClass}">${data.statusText}</a>`;
+        } else {
+          badgeHtml = `<span class="print-badge ${data.statusClass}">${data.statusText}</span>`;
+        }
+
+        modalInfo.innerHTML = `
+          <div class="print-modal-info-header">
+            <h2 class="print-info-title" style="font-family: var(--font-serif); font-size: 1.6rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; margin-bottom: 8px;">${data.title}</h2>
+            <div class="print-info-grid">
+              <span class="print-meta-label">Artist</span>
+              <span class="print-meta-value">${data.artists}</span>
+
+              <span class="print-meta-label">Project</span>
+              <span class="print-meta-value">${data.album}</span>
+
+              <span class="print-meta-label">Dimensions</span>
+              <span class="print-meta-value">${data.dimensions}</span>
+
+              <span class="print-meta-label">Status</span>
+              <div class="print-meta-value">
+                <div style="font-weight: 400; color: var(--text-primary); margin-bottom: 2px;">${data.status}</div>
+                ${badgeHtml}
+              </div>
+            </div>
+          </div>
+          <div class="print-modal-info-footer" style="border-top: 1px solid var(--border-color); padding-top: 24px; font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5;">
+            <div>${data.credits}</div>
+            <div style="margin-top: 4px;">${data.copyright}</div>
+          </div>
+        `;
+
+        modal.classList.add('is-active');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modal.classList.remove('is-active');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('.archive-entry[data-print]').forEach(entry => {
+        entry.querySelector('.archive-item').addEventListener('click', function(e) {
+          e.preventDefault();
+          const key = entry.dataset.print;
+          openModal(key);
+        });
+      });
+
+      closeBtn.addEventListener('click', closeModal);
+      overlay.addEventListener('click', closeModal);
+
+      // ESC key to close modal
+      window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-active')) {
+          closeModal();
+        }
+      });
+    })();
+
     // ── Mobile Accordion Toggle ──
     document.querySelectorAll('.mobile-toggle-header').forEach(header => {
       header.addEventListener('click', function() {
@@ -1425,6 +2097,222 @@
         }
       });
     });
+
+    // ═══════════════════════════════════════════════════
+    // PLAY Widget — YouTube IFrame Audio Player
+    // ═══════════════════════════════════════════════════
+    (function() {
+      const TRACKS = [
+        { vid: "DlVMIGT30_c", title: "from corners to switch", duration: "2:26" },
+        { vid: "X9mz9ldkaNY", title: "발버둥",                 duration: "3:40" },
+        { vid: "ypC5FeYc8wY", title: "기면증",                 duration: "2:30" },
+        { vid: "98P1Utmb-94", title: "곁눈박이",               duration: "3:34" },
+        { vid: "BQR87WzBsAo", title: "일조량 변환 메트로놈",    duration: "3:23" },
+        { vid: "QXozHrPAVcw", title: "043 interlude",          duration: "2:00" },
+        { vid: "U56Yo5BXpXA", title: "going through (with Yiloy)", duration: "3:50" },
+        { vid: "7OjgubVlMrk", title: "bad therapy",            duration: "3:35" },
+        { vid: "_BM0fsBFPCU", title: "오로라",                 duration: "3:39" },
+        { vid: "PNVFfAzqZGo", title: "tied.",                  duration: "2:50" },
+        { vid: "37YNUwxP6-w", title: "후일담",                 duration: "3:55" }
+      ];
+
+      var currentIdx = 0;
+      var ytPlayer = null;
+      var isPlaying = false;
+      var progressInterval = null;
+
+      // DOM refs
+      var widget     = document.getElementById('play-widget');
+      var elNum      = document.getElementById('play-track-num');
+      var elTitle    = document.getElementById('play-track-title');
+      var elStatus   = document.getElementById('play-track-status');
+      var elCurrent  = document.getElementById('play-current');
+      var elDuration = document.getElementById('play-duration');
+      var elBarFill  = document.getElementById('play-bar-fill');
+      var elBarTrack = document.getElementById('play-bar-track');
+      var elMainBtn  = document.getElementById('play-main-btn');
+      var elMainIcon = document.getElementById('play-main-icon');
+      var elPrevBtn  = document.getElementById('play-prev-btn');
+      var elNextBtn  = document.getElementById('play-next-btn');
+
+      function pad(n) { return n < 10 ? '0' + n : n; }
+
+      function formatTime(sec) {
+        if (!isFinite(sec) || isNaN(sec)) return '0:00';
+        var m = Math.floor(sec / 60);
+        var s = Math.floor(sec % 60);
+        return m + ':' + pad(s);
+      }
+
+      function updateTrackUI(idx) {
+        var t = TRACKS[idx];
+        elNum.textContent   = pad(idx + 1);
+        elTitle.textContent = t.title;
+        elDuration.textContent = t.duration;
+        elCurrent.textContent = '0:00';
+        
+        // Add resetting class for cubic-bezier progress bar reset transition
+        elBarFill.classList.add('is-resetting');
+        elBarFill.style.width = '0%';
+        
+        setTimeout(function() {
+          elBarFill.classList.remove('is-resetting');
+        }, 450);
+      }
+
+      function setPlaying(state) {
+        isPlaying = state;
+        if (state) {
+          widget.classList.add('is-playing');
+          elStatus.textContent = 'Now Playing';
+          // Pause icon
+          elMainIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+          startProgress();
+        } else {
+          widget.classList.remove('is-playing');
+          elStatus.textContent = isPlaying === false && ytPlayer ? 'Paused' : 'Ready';
+          elMainIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+          stopProgress();
+        }
+      }
+
+      function startProgress() {
+        stopProgress();
+        progressInterval = setInterval(function() {
+          if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+          try {
+            var cur = ytPlayer.getCurrentTime();
+            var dur = ytPlayer.getDuration();
+            if (dur > 0) {
+              elCurrent.textContent = formatTime(cur);
+              elBarFill.style.width = ((cur / dur) * 100).toFixed(2) + '%';
+            }
+          } catch(e) {}
+        }, 400);
+      }
+
+      function stopProgress() {
+        if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+      }
+
+      function loadTrack(idx, autoplay, direction) {
+        currentIdx = idx;
+        direction = direction || 'next';
+
+        // Trigger direction-specific text transition keyframe animation
+        var elTrackInfo = document.querySelector('.play-track-info');
+        if (elTrackInfo) {
+          elTrackInfo.classList.remove('track-anim-out-up', 'track-anim-out-down', 'track-anim-in-up', 'track-anim-in-down');
+          
+          var outClass = direction === 'prev' ? 'track-anim-out-down' : 'track-anim-out-up';
+          elTrackInfo.classList.add(outClass);
+          
+          setTimeout(function() {
+            updateTrackUI(idx);
+            elTrackInfo.classList.remove(outClass);
+            
+            var inClass = direction === 'prev' ? 'track-anim-in-down' : 'track-anim-in-up';
+            elTrackInfo.classList.add(inClass);
+          }, 250); // 250ms matches the fade out keyframe animation duration
+        } else {
+          updateTrackUI(idx);
+        }
+
+        if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
+        if (autoplay) {
+          ytPlayer.loadVideoById(TRACKS[idx].vid);
+          setPlaying(true);
+        } else {
+          ytPlayer.cueVideoById(TRACKS[idx].vid);
+          setPlaying(false);
+          elStatus.textContent = 'Ready';
+        }
+      }
+
+      // ── YouTube IFrame API ──
+      var ytTag = document.createElement('script');
+      ytTag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(ytTag);
+
+      window.onYouTubeIframeAPIReady = function() {
+        var ytDiv = document.createElement('div');
+        ytDiv.id  = 'yt-play-hidden';
+        ytDiv.style.cssText = 'position:fixed;bottom:-200px;right:-200px;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-9999;';
+        document.body.appendChild(ytDiv);
+
+        ytPlayer = new YT.Player('yt-play-hidden', {
+          height: '1', width: '1',
+          videoId: TRACKS[0].vid,
+          playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
+          events: {
+            onReady: function(event) {
+              // Auto-play the first track once the player API is ready
+              event.target.playVideo();
+            },
+            onStateChange: function(event) {
+              if (event.data === YT.PlayerState.PLAYING) {
+                setPlaying(true);
+              } else if (event.data === YT.PlayerState.PAUSED) {
+                isPlaying = false;
+                widget.classList.remove('is-playing');
+                elStatus.textContent = 'Paused';
+                elMainIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+                stopProgress();
+              } else if (event.data === YT.PlayerState.ENDED) {
+                // Auto-advance to next track (next direction animation)
+                var next = (currentIdx + 1) % TRACKS.length;
+                loadTrack(next, true, 'next');
+              }
+            }
+          }
+        });
+      };
+
+      // ── Controls ──
+      elMainBtn.addEventListener('click', function() {
+        if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+        var state = ytPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          ytPlayer.pauseVideo();
+        } else {
+          ytPlayer.playVideo();
+        }
+      });
+
+      elPrevBtn.addEventListener('click', function() {
+        var prev = (currentIdx - 1 + TRACKS.length) % TRACKS.length;
+        loadTrack(prev, isPlaying, 'prev');
+      });
+
+      elNextBtn.addEventListener('click', function() {
+        var next = (currentIdx + 1) % TRACKS.length;
+        loadTrack(next, isPlaying, 'next');
+      });
+
+      // ── Progress bar seek ──
+      elBarTrack.addEventListener('click', function(e) {
+        if (!ytPlayer || typeof ytPlayer.getDuration !== 'function') return;
+        var rect = elBarTrack.getBoundingClientRect();
+        var ratio = (e.clientX - rect.left) / rect.width;
+        ratio = Math.max(0, Math.min(1, ratio));
+        
+        // Add seeking transition class for smooth cubic-bezier fill animation
+        elBarFill.classList.add('is-seeking');
+        elBarFill.style.width = (ratio * 100).toFixed(2) + '%';
+        
+        try {
+          var dur = ytPlayer.getDuration();
+          if (dur > 0) ytPlayer.seekTo(dur * ratio, true);
+        } catch(err) {}
+
+        setTimeout(function() {
+          elBarFill.classList.remove('is-seeking');
+        }, 500);
+      });
+
+      // Initialize UI
+      updateTrackUI(0);
+    })();
   </script>
 
 </body>

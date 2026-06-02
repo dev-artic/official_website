@@ -1,4 +1,4 @@
-﻿name: Sync All YouTube Playlists
+name: Sync All YouTube Playlists
 
 on:
   # 매주 월요일 KST 오전 9시 (UTC 00:00)
@@ -13,6 +13,9 @@ on:
         required: false
         default: 'false'
         type: boolean
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   sync-playlists:
@@ -38,7 +41,7 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.MJ_YOUTUBE_API_KEY }}
           # ── 각 프로젝트의 플레이리스트 ID ──────────────────────
           # playlist_config.py의 playlist_id_env와 이름이 일치해야 합니다.
-          # Secret이 없으면 해당 프로젝트는 자동으로 스킵됩니다.
+          # Secret이 없으면 playlist_config.py의 기본값(hardcoded)을 사용합니다.
           THE_ROOT_PLAYLIST_ID:            ${{ secrets.THE_ROOT_PLAYLIST_ID }}
           TASTING_NOTE_PLAYLIST_ID:        ${{ secrets.TASTING_NOTE_PLAYLIST_ID }}
           NEUTRAL_INTERVIEW_PLAYLIST_ID:   ${{ secrets.NEUTRAL_INTERVIEW_PLAYLIST_ID }}

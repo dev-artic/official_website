@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "id": "tasting-note",
     "title": "TASTING NOTE",
@@ -12,7 +12,7 @@
     "id": "the-root",
     "title": "Project : The Root",
     "client": "Bokos x artic.",
-    "category": "ORIGINAL CONTENTS",
+    "category": "ORIGINAL SERIES",
     "year": 2026,
     "cover_image": "../the-root/album-art.png",
     "slug": "/the-root/"

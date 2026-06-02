@@ -630,7 +630,7 @@
     sessionStorage.removeItem('artic-subpage');
 
     // ?? Dynamic Project Cards from projects.json ??
-    fetch('/projects.json')
+    fetch('./projects.json')
       .then(r => r.json())
       .then(projects => {
         const container = document.getElementById('projects-preview-container');
@@ -649,7 +649,7 @@
           const delay = i + 1;
           const card = document.createElement('a');
           card.href = p.slug;
-          card.className = `preview-card reveal delay-${delay}`;
+          card.className = 'preview-card';
           card.innerHTML = `
             <div class="preview-img-wrap">
               <img src="${imgSrc}" alt="${p.title}" class="preview-card-img">

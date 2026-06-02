@@ -58,7 +58,7 @@
     (function() {
       var track = document.querySelector('.dial-track');
 
-      fetch('/projects.json')
+      fetch('../projects.json')
         .then(function(r) { return r.json(); })
         .then(function(projects) {
           var loadingEl = document.getElementById('projects-loading');

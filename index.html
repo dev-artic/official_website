@@ -38,11 +38,12 @@
     /* -- Hero About Button (discover) -- */
     .hero-about-btn {
       position: absolute;
-      top: calc(50% + 100px); /* Logo center (50%) + half height (36px) + gap (64px) */
+      top: calc(50dvh + 100px); /* Logo center (50dvh) + half height (36px) + gap (64px) */
       left: 50%;
       opacity: 0;
       transform: translate(-50%, 10px);
       animation: buttonReveal 0.8s var(--ease-out-expo) 1.8s forwards;
+      z-index: 10;
     }
 
     @keyframes buttonReveal {
@@ -63,7 +64,7 @@
 
     .logo-split {
       position: absolute;
-      top: 50%;
+      top: 50dvh;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 100px;

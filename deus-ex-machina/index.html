@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -397,16 +397,16 @@
       color: var(--text-secondary);
     }
 
-        /* Inline video embed */
+    /* Inline video embed */
     .archive-embed {
       max-height: 0;
       overflow: hidden;
       opacity: 0;
       transform: translateY(-12px);
-      transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-                  padding 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-                  opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1),
-                  transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: max-height 0.65s cubic-bezier(0.25, 1, 0.5, 1),
+                  padding 0.65s cubic-bezier(0.25, 1, 0.5, 1),
+                  opacity 0.65s cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
       will-change: max-height, opacity, transform;
     }
 
@@ -1109,7 +1109,7 @@
           </a>
 
           <!-- 5. Amazon Music -->
-          <a href="https://www.amazon.com/dp/B0D2LFP15X" target="_blank" rel="noopener noreferrer" class="link-item link-amazon">
+          <a href="https://amazon.com/music/player/albums/B0FY74Z2VR?marketplaceId=ATVPDKIKX0DER&musicTerritory=US&ref=dm_sh_HPAT6ZlM3m0LskedhsxwNIvCI" target="_blank" rel="noopener noreferrer" class="link-item link-amazon">
             <div class="platform-info">
               <div class="platform-logo">
                 <!-- Amazon Music Official Smile-Arrow Logo -->
@@ -1304,6 +1304,7 @@
         // -- Inline video embed toggle (close-first-then-open) --
     (function() {
       let openEntry = null;
+      let closeTimeout = null;
 
       // Preload video thumbnails for instant display
       (function preloadThumbnails() {
@@ -1323,22 +1324,31 @@
       }
 
       function closeEntry(entry, callback) {
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+          closeTimeout = null;
+        }
         entry.classList.remove('active');
         const embed = entry.querySelector('.archive-embed');
         embed.classList.remove('open');
-        setTimeout(() => {
+        closeTimeout = setTimeout(() => {
           embed.innerHTML = '';
+          closeTimeout = null;
           if (callback) callback();
-        }, 400);
+        }, 650);
       }
 
       function openEntryFn(entry) {
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+          closeTimeout = null;
+        }
         const embed = entry.querySelector('.archive-embed');
         const vid = entry.dataset.vid;
         
         // Render custom video poster with opacity 0 initially for fade-in transition
         embed.innerHTML = `
-          <div class="custom-video-poster" data-vid="${vid}" style="opacity: 0; transition: opacity 0.4s ease;">
+          <div class="custom-video-poster" data-vid="${vid}" style="opacity: 0; transition: opacity 0.8s ease;">
             <img class="poster-thumbnail" src="https://img.youtube.com/vi/${vid}/maxresdefault.jpg" alt="Video Cover">
             <div class="poster-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
@@ -1369,13 +1379,19 @@
         });
 
         entry.classList.add('active');
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            embed.classList.add('open');
-            const poster = embed.querySelector('.custom-video-poster');
-            if (poster) poster.style.opacity = '1';
-          });
-        });
+        // Force layout reflow before triggering slide-open animation
+        embed.offsetHeight; 
+        embed.classList.add('open');
+        
+        // Delay the fade-in of the poster to allow smooth container unfolding
+        setTimeout(() => {
+          const poster = embed.querySelector('.custom-video-poster');
+          if (poster) {
+            poster.offsetHeight; // Force layout reflow
+            poster.style.opacity = '1';
+          }
+        }, 200);
+        
         openEntry = entry;
       }
 

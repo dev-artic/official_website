@@ -143,19 +143,10 @@ def update_latest_release(html: str, newest: dict) -> str:
     title = newest["title"]
     date  = newest["publishedAt"]
 
-    guest = "최신 에피소드"
-    if " | " in title:
-        candidate = title.split(" | ")[0].strip()
-        if len(candidate) > 20:
-            guest = candidate[:20] + "…"
-        elif len(candidate) > 0:
-            guest = candidate
-
-    new_block = f"""          <div class="archive-entry" data-vid="{vid}">
+    new_block = f"""          <div class="archive-entry active" data-vid="{vid}">
             <a class="archive-item latest-featured-item" href="javascript:void(0)">
               <div class="archive-item-left">
                 <div class="archive-item-text">
-                  <span class="archive-item-type">{guest}</span>
                   <div class="archive-item-title-row">
                     <span class="archive-item-title">{title}</span>
                     <span class="archive-item-date">{date}</span>
@@ -163,8 +154,8 @@ def update_latest_release(html: str, newest: dict) -> str:
                 </div>
               </div>
             </a>
-            <div class="archive-embed">
-              <div class="custom-video-poster" data-vid="{vid}">
+            <div class="archive-embed open">
+              <div class="custom-video-poster" data-vid="{vid}" style="opacity: 0; transition: opacity 0.8s ease;">
                 <img class="poster-thumbnail" src="https://img.youtube.com/vi/{vid}/maxresdefault.jpg" alt="Video Cover">
                 <div class="poster-play-btn">
                   <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>

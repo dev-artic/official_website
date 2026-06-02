@@ -490,9 +490,9 @@
       overflow: hidden;
       opacity: 0;
       transform: translateY(-12px);
-      transition: max-height 0.65s cubic-bezier(0.16, 1, 0.3, 1), 
+      transition: max-height 0.65s cubic-bezier(0.25, 1, 0.5, 1), 
                   opacity 0.65s ease-out, 
-                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+                  transform 0.65s cubic-bezier(0.25, 1, 0.5, 1);
       will-change: max-height, opacity, transform;
     }
 
@@ -811,11 +811,10 @@
         </div>
         <div class="toggle-content">
           <div class="static-content">
-            <div class="archive-entry" data-vid="gRSwOt_GwBk">
+            <div class="archive-entry active" data-vid="gRSwOt_GwBk">
               <a class="archive-item latest-featured-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <div class="archive-item-text">
-                    <span class="archive-item-type">차승우</span>
                     <div class="archive-item-title-row">
                       <span class="archive-item-title">차승우라는 한 남자의 인생과 앨범들 | EP.7</span>
                       <span class="archive-item-date">2026.05.20</span>
@@ -823,8 +822,8 @@
                   </div>
                 </div>
               </a>
-              <div class="archive-embed">
-                <div class="custom-video-poster" data-vid="gRSwOt_GwBk">
+              <div class="archive-embed open">
+                <div class="custom-video-poster" data-vid="gRSwOt_GwBk" style="opacity: 0; transition: opacity 0.8s ease;">
                   <img class="poster-thumbnail" src="https://img.youtube.com/vi/gRSwOt_GwBk/maxresdefault.jpg" alt="Video Cover">
                   <div class="poster-play-btn">
                     <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
@@ -1054,6 +1053,27 @@
       const initialOpen = document.querySelector('.archive-entry.active');
       if (initialOpen) {
         openEntry = initialOpen;
+        const poster = openEntry.querySelector('.custom-video-poster');
+        if (poster) {
+          const vid = openEntry.dataset.vid;
+          const embed = openEntry.querySelector('.archive-embed');
+          poster.addEventListener('click', function(e) {
+            e.stopPropagation();
+            poster.style.opacity = '0';
+            setTimeout(() => {
+              const iframe = document.createElement('iframe');
+              iframe.src = 'https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0&modestbranding=1';
+              iframe.allow = "autoplay; encrypted-media";
+              iframe.allowFullscreen = true;
+              iframe.style.opacity = '0';
+              iframe.style.transition = 'opacity 0.5s ease';
+              embed.innerHTML = '';
+              embed.appendChild(iframe);
+              iframe.offsetHeight; // Force layout reflow
+              iframe.style.opacity = '1';
+            }, 300);
+          });
+        }
       }
 
       function closeEntry(entry, callback) {
@@ -1068,7 +1088,7 @@
           embed.innerHTML = '';
           closeTimeout = null;
           if (callback) callback();
-        }, 400);
+        }, 650);
       }
 
       function openEntryFn(entry) {
@@ -1081,7 +1101,7 @@
         
         // Render custom video poster with opacity 0 initially for fade-in transition
         embed.innerHTML = `
-          <div class="custom-video-poster" data-vid="${vid}" style="opacity: 0; transition: opacity 0.4s ease;">
+          <div class="custom-video-poster" data-vid="${vid}" style="opacity: 0; transition: opacity 0.8s ease;">
             <img class="poster-thumbnail" src="https://img.youtube.com/vi/${vid}/maxresdefault.jpg" alt="Video Cover">
             <div class="poster-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
@@ -1112,11 +1132,16 @@
         // Force layout reflow before triggering slide-open animation
         embed.offsetHeight; 
         embed.classList.add('open');
-        const poster = embed.querySelector('.custom-video-poster');
-        if (poster) {
-          poster.offsetHeight; // Force layout reflow
-          poster.style.opacity = '1';
-        }
+        
+        // Delay the fade-in of the poster to allow smooth container unfolding
+        setTimeout(() => {
+          const poster = embed.querySelector('.custom-video-poster');
+          if (poster) {
+            poster.offsetHeight; // Force layout reflow
+            poster.style.opacity = '1';
+          }
+        }, 200);
+        
         openEntry = entry;
       }
 
@@ -1140,11 +1165,15 @@
         });
       });
 
-      // Automatically open the Latest Release video on page load after stagger finishes
+      // Slowly fade in the Latest Release video poster after stagger finishes
       setTimeout(() => {
         const latestEntry = document.querySelector('.links-container .archive-entry');
-        if (latestEntry && !openEntry) {
-          openEntryFn(latestEntry);
+        if (latestEntry) {
+          const poster = latestEntry.querySelector('.custom-video-poster');
+          if (poster) {
+            poster.offsetHeight; // Force layout reflow
+            poster.style.opacity = '1';
+          }
         }
       }, 3500);
     })();

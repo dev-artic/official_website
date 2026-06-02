@@ -1306,14 +1306,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        opacity: 0;
         pointer-events: none;
         visibility: hidden;
-        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: visibility 0.5s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .print-modal.is-active {
-        opacity: 1;
         pointer-events: auto;
         visibility: visible;
       }
@@ -1327,7 +1325,12 @@
         background-color: rgba(26, 26, 26, 0.3);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
+        opacity: 0;
         transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .print-modal.is-active .print-modal-overlay {
+        opacity: 1;
       }
 
       [data-theme="dark"] .print-modal-overlay {
@@ -1345,8 +1348,9 @@
         display: flex;
         flex-direction: column;
         overflow-y: auto;
+        opacity: 0;
         transform: translateY(24px);
-        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         box-shadow: 0 40px 80px rgba(0, 0, 0, 0.16);
         scrollbar-width: none;
       }
@@ -1356,6 +1360,7 @@
       }
 
       .print-modal.is-active .print-modal-container {
+        opacity: 1;
         transform: translateY(0);
       }
 
@@ -2102,6 +2107,7 @@
     // PLAY Widget — YouTube IFrame Audio Player
     // ═══════════════════════════════════════════════════
     (function() {
+      const pageLoadTime = Date.now();
       const TRACKS = [
         { vid: "DlVMIGT30_c", title: "from corners to switch", duration: "2:26" },
         { vid: "X9mz9ldkaNY", title: "발버둥",                 duration: "3:40" },
@@ -2246,8 +2252,16 @@
           playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
           events: {
             onReady: function(event) {
-              // Auto-play the first track once the player API is ready
-              event.target.playVideo();
+              // Auto-play the first track once the Play section has visually faded in.
+              // The entrance animation for .content-columns starts at 2.8s and takes 0.5s (fully visible at 3.3s).
+              // We will trigger playback at 3.1s for a natural synchronization.
+              var elapsed = Date.now() - pageLoadTime;
+              var delay = Math.max(0, 3100 - elapsed);
+              setTimeout(function() {
+                if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                  event.target.playVideo();
+                }
+              }, delay);
             },
             onStateChange: function(event) {
               if (event.data === YT.PlayerState.PLAYING) {

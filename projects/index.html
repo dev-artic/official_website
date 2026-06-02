@@ -164,23 +164,27 @@
         const viewRect = viewport.getBoundingClientRect();
         const refPoint = viewRect.left + pad;
 
-        let closestCard = null;
-        let minDistance = Infinity;
+        let targetCard = null;
 
-        // Find the project card closest to the reference alignment point
-        cards.forEach(card => {
+        // Find the first card whose center coordinate has not crossed to the left of refPoint (50% threshold)
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
           const cardRect = card.getBoundingClientRect();
-          // Calculate distance of the card's left edge to the reference snap point
-          const distance = Math.abs(cardRect.left - refPoint);
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestCard = card;
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          if (cardCenter >= refPoint) {
+            targetCard = card;
+            break;
           }
-        });
+        }
 
-        if (closestCard) {
+        // Fallback to the last card if scrolled completely to the end
+        if (!targetCard && cards.length > 0) {
+          targetCard = cards[cards.length - 1];
+        }
+
+        if (targetCard) {
           // Calculate the target scroll position for this card to align with scroll-padding-left
-          const targetScrollLeft = closestCard.offsetLeft - pad;
+          const targetScrollLeft = targetCard.offsetLeft - pad;
           
           viewport.scrollTo({
             left: targetScrollLeft,
@@ -197,9 +201,7 @@
           // Fallback if no cards found
           viewport.style.scrollSnapType = 'x mandatory';
         }
-      }
-
-      // Track active year and trigger pop animation when it snaps/aligns to left edge
+      }// Track active year and trigger pop animation when it snaps/aligns to left edge
       function updateActiveYear() {
         const scrollLeft = viewport.scrollLeft;
         const direction = scrollLeft > lastScrollLeft ? 'right' : 'left';
@@ -255,6 +257,37 @@
           }
         }
       }
+
+      // Click on Year Title to scroll directly to that year's first project
+      nodes.forEach(node => {
+        const title = node.querySelector('.year-title');
+        if (title) {
+          title.style.cursor = 'pointer';
+          title.addEventListener('click', () => {
+            const firstCard = node.querySelector('.project-card');
+            if (firstCard) {
+              const pad = window.innerWidth >= 768 ? 40 : 24;
+              const targetScrollLeft = firstCard.offsetLeft - pad;
+
+              if (wheelTimeout) clearTimeout(wheelTimeout);
+              if (snapTimeout) clearTimeout(snapTimeout);
+
+              viewport.style.scrollSnapType = 'none';
+              viewport.style.scrollBehavior = 'auto';
+
+              viewport.scrollTo({
+                left: targetScrollLeft,
+                behavior: 'smooth'
+              });
+
+              snapTimeout = setTimeout(() => {
+                viewport.style.scrollSnapType = 'x mandatory';
+                updateActiveYear();
+              }, 400);
+            }
+          });
+        }
+      });
 
       // Track scroll position for header snapping transitions
       viewport.addEventListener('scroll', updateActiveYear);

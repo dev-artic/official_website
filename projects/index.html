@@ -126,7 +126,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       const viewport = document.getElementById('dial-viewport');
       const nodes = document.querySelectorAll('.dial-year-node');
+      const cards = document.querySelectorAll('.project-card');
       let activeYear = '';
+      let lastScrollLeft = 0;
 
       // Desktop: Translate vertical mouse wheel scroll to horizontal container scroll
       viewport.addEventListener('wheel', (e) => {
@@ -138,37 +140,56 @@
 
       // Track active year and trigger pop animation when it snaps/aligns to left edge
       function updateActiveYear() {
-        let closestNode = null;
-        let minDiff = Infinity;
+        const scrollLeft = viewport.scrollLeft;
+        const direction = scrollLeft > lastScrollLeft ? 'right' : 'left';
+        lastScrollLeft = scrollLeft;
+
+        let activeCard = null;
         const viewRect = viewport.getBoundingClientRect();
         
-        nodes.forEach(node => {
-          const nodeRect = node.getBoundingClientRect();
-          // Diff from scroll container left edge (taking left padding/alignment into account)
-          // On mobile left spacing is 24px, on desktop it is 40px
-          const pad = window.innerWidth >= 768 ? 40 : 24;
-          const diff = Math.abs(nodeRect.left - viewRect.left - pad);
-          if (diff < minDiff) {
-            minDiff = diff;
-            closestNode = node;
-          }
-        });
+        // Offset padding on mobile is 24px, on desktop is 40px
+        const pad = window.innerWidth >= 768 ? 40 : 24;
+        const refPoint = viewRect.left + pad;
 
-        if (closestNode) {
-          const year = closestNode.dataset.year;
-          if (year !== activeYear) {
-            activeYear = year;
-            
-            // Reset active classes
-            nodes.forEach(n => {
-              const t = n.querySelector('.year-title');
-              if (t) t.classList.remove('active-pop');
-            });
-            
-            // Add elastic transition class to new active year title
-            const activeTitle = closestNode.querySelector('.year-title');
-            if (activeTitle) {
-              activeTitle.classList.add('active-pop');
+        // Find the first card whose center coordinate has not crossed the reference point
+        // Meaning the previous card has crossed by more than 50% of its width
+        for (let i = 0; i < cards.length; i++) {
+          const card = cards[i];
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          if (cardCenter >= refPoint) {
+            activeCard = card;
+            break;
+          }
+        }
+
+        // Fallback to the last card if scrolled completely to the end
+        if (!activeCard && cards.length > 0) {
+          activeCard = cards[cards.length - 1];
+        }
+
+        if (activeCard) {
+          // Find the parent year node to extract the year
+          const parentNode = activeCard.closest('.dial-year-node');
+          if (parentNode) {
+            const year = parentNode.dataset.year;
+            if (year !== activeYear) {
+              activeYear = year;
+              
+              // Reset active classes
+              nodes.forEach(n => {
+                const t = n.querySelector('.year-title');
+                if (t) {
+                  t.classList.remove('active-pop-right', 'active-pop-left');
+                }
+              });
+              
+              // Add directional chewy transition class to new active year title
+              const activeTitle = parentNode.querySelector('.year-title');
+              if (activeTitle) {
+                const popClass = direction === 'right' ? 'active-pop-right' : 'active-pop-left';
+                activeTitle.classList.add(popClass);
+              }
             }
           }
         }

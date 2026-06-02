@@ -105,16 +105,25 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Chewy Snap Pop Animation for Year transitions */
-@keyframes chewyPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15) translateX(3px); }
-  100% { transform: scale(1); }
+/* Chewy Directional Slide Animations for Year transitions */
+@keyframes chewySlideRight {
+  0% { transform: translateX(20px); }
+  100% { transform: translateX(0); }
 }
 
-.year-title.active-pop {
+@keyframes chewySlideLeft {
+  0% { transform: translateX(-20px); }
+  100% { transform: translateX(0); }
+}
+
+.year-title.active-pop-right {
   color: var(--text-primary) !important;
-  animation: chewyPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: chewySlideRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.year-title.active-pop-left {
+  color: var(--text-primary) !important;
+  animation: chewySlideLeft 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* ?? Horizontal Cover Cards ?? */

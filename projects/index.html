@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -32,91 +32,8 @@
         <!-- Top Spacer to allow first year to center -->
         <div class="dial-spacer"></div>
 
-        <!-- Year: 2026 -->
-        <div class="dial-year-node" data-year="2026">
-          <div class="year-header-wrapper"><h2 class="year-title"><span>2026</span></h2></div>
-          <div class="year-projects">
-            <article class="project-card">
-              <a href="../tasting-note/" class="card-link">
-                <div class="image-wrapper">
-                  <img src="../tasting-note/album-art.png" alt="artic. — TASTING NOTE" class="project-img">
-                </div>
-                <div class="project-info">
-                  <div class="meta-row">
-                    <span class="project-tag">ORIGINAL SERIES</span>
-                  </div>
-                  <h3 class="project-name">TASTING NOTE</h3>
-                </div>
-              </a>
-            </article>
-            <article class="project-card">
-              <a href="../the-root/" class="card-link">
-                <div class="image-wrapper">
-                  <img src="../the-root/album-art.png" alt="Bokos x artic. — Project : The Root" class="project-img">
-                </div>
-                <div class="project-info">
-                  <div class="meta-row">
-                    <span class="project-tag">ORIGINAL CONTENTS</span>
-                  </div>
-                  <h3 class="project-name">Project : The Root</h3>
-                </div>
-              </a>
-            </article>
-          </div>
-        </div>
-
-        <!-- Year: 2025 -->
-        <div class="dial-year-node" data-year="2025">
-          <div class="year-header-wrapper"><h2 class="year-title"><span>2025</span></h2></div>
-          <div class="year-projects">
-            <article class="project-card">
-              <a href="../neutral-interview/" class="card-link">
-                <div class="image-wrapper">
-                  <img src="../neutral-interview/album-art.png" alt="artic. — 중립적인인터뷰" class="project-img">
-                </div>
-                <div class="project-info">
-                  <div class="meta-row">
-                    <span class="project-tag">PRODUCTION</span>
-                  </div>
-                  <h3 class="project-name">중립적인인터뷰</h3>
-                </div>
-              </a>
-            </article>
-          </div>
-        </div>
-
-        <!-- Year: 2024 -->
-        <div class="dial-year-node" data-year="2024">
-          <div class="year-header-wrapper"><h2 class="year-title"><span>2024</span></h2></div>
-          <div class="year-projects">
-            <article class="project-card">
-              <a href="../gagosian-party-music/" class="card-link">
-                <div class="image-wrapper">
-                  <img src="../gagosian-party-music/album-art.png" alt="artic. — Gagosian Party Curation" class="project-img">
-                </div>
-                <div class="project-info">
-                  <div class="meta-row">
-                    <span class="project-tag">MUSIC CURATION</span>
-                  </div>
-                  <h3 class="project-name">Gagosian Party Curation</h3>
-                </div>
-              </a>
-            </article>
-            <article class="project-card">
-              <a href="../deus-ex-machina/" class="card-link">
-                <div class="image-wrapper">
-                  <img src="../deus-ex-machina/album-art.png" alt="arkyteccc — deus ex machina" class="project-img">
-                </div>
-                <div class="project-info">
-                  <div class="meta-row">
-                    <span class="project-tag">LP</span>
-                  </div>
-                  <h3 class="project-name">deus ex machina</h3>
-                </div>
-              </a>
-            </article>
-          </div>
-        </div>
+        <!-- Projects rendered dynamically from /projects.json -->
+        <div id="projects-loading" style="display:flex;align-items:center;padding:40px;color:var(--text-muted);font-family:var(--font-sans);font-size:0.65rem;letter-spacing:0.1em;">Loading...</div>
 
         <!-- Bottom Spacer to allow last year to center -->
         <div class="dial-spacer"></div>
@@ -136,10 +53,61 @@
 
   <script src="../js/shared.js"></script>
   <script>
+    
+    // ?? Dynamic Projects Dial from /projects.json ??
+    (function() {
+      var track = document.querySelector('.dial-track');
+
+      fetch('/projects.json')
+        .then(function(r) { return r.json(); })
+        .then(function(projects) {
+          var loadingEl = document.getElementById('projects-loading');
+
+          // Group by year descending
+          var byYear = {};
+          projects.forEach(function(p) {
+            if (!byYear[p.year]) byYear[p.year] = [];
+            byYear[p.year].push(p);
+          });
+          var years = Object.keys(byYear).sort(function(a, b) { return b - a; });
+          var bottomSpacer = track.querySelector('.dial-spacer:last-child');
+
+          years.forEach(function(year) {
+            var node = document.createElement('div');
+            node.className = 'dial-year-node';
+            node.dataset.year = year;
+            var cards = byYear[year].map(function(p) {
+              return '<article class="project-card"><a href="' + p.slug + '" class="card-link"><div class="image-wrapper"><img src="' + p.cover_image + '" alt="' + p.client + ' \u2014 ' + p.title + '" class="project-img"></div><div class="project-info"><div class="meta-row"><span class="project-tag">' + p.category + '</span></div><h3 class="project-name">' + p.title + '</h3></div></a></article>';
+            }).join('');
+            node.innerHTML = '<div class="year-header-wrapper"><h2 class="year-title"><span>' + year + '</span></h2></div><div class="year-projects">' + cards + '</div>';
+            if (bottomSpacer) {
+              track.insertBefore(node, bottomSpacer);
+            } else {
+              track.appendChild(node);
+            }
+          });
+
+          if (loadingEl) loadingEl.remove();
+
+          // Re-init the dial scroll since DOM changed
+          var evt = new Event('projects-loaded');
+          document.dispatchEvent(evt);
+        })
+        .catch(function(err) {
+          var loadingEl = document.getElementById('projects-loading');
+          if (loadingEl) loadingEl.textContent = 'Failed to load.';
+        });
+    })();
+
+    document.addEventListener('projects-loaded', function() {
+      initDialScrollLogic();
+    });
+
     document.addEventListener('DOMContentLoaded', () => {
       const viewport = document.getElementById('dial-viewport');
-      const nodes = document.querySelectorAll('.dial-year-node');
-      const cards = document.querySelectorAll('.project-card');
+      // nodes/cards queried dynamically after projects-loaded
+      let nodes = [];
+      let cards = [];
       let activeYear = '';
       let lastScrollLeft = 0;
 
@@ -314,6 +282,38 @@
       // Initialize state
       setTimeout(updateActiveYear, 100);
     });
+
+    function initDialScrollLogic() {
+      // Re-query after DOM is populated
+      nodes = Array.from(document.querySelectorAll('.dial-year-node'));
+      cards = Array.from(document.querySelectorAll('.project-card'));
+      // Re-bind year title click handlers
+      nodes.forEach(function(node) {
+        var title = node.querySelector('.year-title');
+        if (title) {
+          title.style.cursor = 'pointer';
+          title.addEventListener('click', function() {
+            var firstCard = node.querySelector('.project-card');
+            if (firstCard) {
+              var pad = window.innerWidth >= 768 ? 40 : 24;
+              var viewRect = viewport.getBoundingClientRect();
+              var cardRect = firstCard.getBoundingClientRect();
+              var targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - pad;
+              if (wheelTimeout) clearTimeout(wheelTimeout);
+              if (snapTimeout) clearTimeout(snapTimeout);
+              viewport.style.scrollSnapType = 'none';
+              viewport.style.scrollBehavior = 'auto';
+              viewport.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+              snapTimeout = setTimeout(function() {
+                viewport.style.scrollSnapType = 'x mandatory';
+                updateActiveYear();
+              }, 400);
+            }
+          });
+        }
+      });
+      setTimeout(updateActiveYear, 100);
+    }
   </script>
 </body>
 </html>

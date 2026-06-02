@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -581,38 +581,10 @@
   <section class="content-section">
     <div class="projects-row">
       <div class="projects-preview" id="projects-preview-container">
-        <a href="tasting-note/" class="preview-card reveal delay-1">
-          <div class="preview-img-wrap">
-            <img src="tasting-note/album-art.png" alt="TASTING NOTE" class="preview-card-img">
-          </div>
-          <div class="preview-card-title">TASTING NOTE</div>
-          <div class="preview-card-meta">ORIGINAL SERIES · 2026</div>
-        </a>
+        <!-- Projects rendered dynamically from /projects.json -->
+        <div id="home-projects-loading" style="display:flex;align-items:center;padding:40px 0;color:var(--text-muted);font-family:var(--font-sans);font-size:0.65rem;letter-spacing:0.1em;">Loading...</div>
 
-        <a href="neutral-interview/" class="preview-card reveal delay-2">
-          <div class="preview-img-wrap">
-            <img src="neutral-interview/album-art.png" alt="중립적인인터뷰" class="preview-card-img">
-          </div>
-          <div class="preview-card-title">중립적인인터뷰</div>
-          <div class="preview-card-meta">PRODUCTION · 2025</div>
-        </a>
-        <a href="gagosian-party-music/" class="preview-card reveal delay-3">
-          <div class="preview-img-wrap">
-            <img src="gagosian-party-music/album-art.png" alt="Gagosian Party Music Curation" class="preview-card-img">
-          </div>
-          <div class="preview-card-title">Gagosian Party Curation</div>
-          <div class="preview-card-meta">MUSIC CURATION · 2024</div>
-        </a>
-
-        <a href="deus-ex-machina/" class="preview-card reveal delay-4">
-          <div class="preview-img-wrap">
-            <img src="deus-ex-machina/album-art.png" alt="deus ex machina" class="preview-card-img">
-          </div>
-          <div class="preview-card-title">deus ex machina</div>
-          <div class="preview-card-meta">LP · 2024</div>
-        </a>
-
-        <div class="view-all-link-wrapper mobile-only reveal delay-4">
+        <div class="view-all-link-wrapper mobile-only reveal">
           <a href="/projects/" class="section-link">
             <span>View All Projects</span>
             <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
@@ -656,6 +628,51 @@
   <script src="js/reveal.js"></script>
   <script>
     sessionStorage.removeItem('artic-subpage');
+
+    // ?? Dynamic Project Cards from projects.json ??
+    fetch('/projects.json')
+      .then(r => r.json())
+      .then(projects => {
+        const container = document.getElementById('projects-preview-container');
+        if (!container) return;
+
+        // Remove loading placeholder
+        const loading = document.getElementById('home-projects-loading');
+        if (loading) loading.remove();
+
+        // Keep the mobile "View All" wrapper at end
+        const viewAllWrapper = container.querySelector('.view-all-link-wrapper');
+
+        projects.forEach((p, i) => {
+          // Image path for homepage: strip leading '../' since we're at root
+          const imgSrc = p.cover_image.replace(/^\.\.\//, '');
+          const delay = i + 1;
+          const card = document.createElement('a');
+          card.href = p.slug;
+          card.className = `preview-card reveal delay-${delay}`;
+          card.innerHTML = `
+            <div class="preview-img-wrap">
+              <img src="${imgSrc}" alt="${p.title}" class="preview-card-img">
+            </div>
+            <div class="preview-card-title">${p.title}</div>
+            <div class="preview-card-meta">${p.category} · ${p.year}</div>`;
+
+          // Insert before the View All wrapper if it exists, else append
+          if (viewAllWrapper) {
+            container.insertBefore(card, viewAllWrapper);
+          } else {
+            container.appendChild(card);
+          }
+        });
+
+        // Trigger reveal animations (reveal.js compatible)
+        if (typeof initReveal === 'function') initReveal();
+      })
+      .catch(() => {
+        const loading = document.getElementById('home-projects-loading');
+        if (loading) loading.textContent = '';
+      });
+
     document.addEventListener('DOMContentLoaded', () => {
       initNavScroll(467);
 

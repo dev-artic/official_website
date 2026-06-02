@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -1461,7 +1461,137 @@
 
   <script src="../js/shared.js"></script>
   <script>
-    </script>
+    // == Instagram Reel Embed Toggle with UI Cropping ==
+    (function() {
+      const poster = document.getElementById('reel-poster');
+      if (poster) {
+        const wrapper = poster.parentElement;
+        poster.addEventListener('click', function(e) {
+          e.stopPropagation();
+          poster.style.opacity = '0';
+          
+          setTimeout(() => {
+            // Replace with cropped Instagram Reel responsive embed
+            wrapper.innerHTML = `
+              <iframe class="video-embed-iframe" src="https://www.instagram.com/reel/C_kspT5yBi4/embed/" allowtransparency="true" frameborder="0" scrolling="no" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            `;
+          }, 300);
+        });
+      }
+    })();
+
+    // == YouTube Playlist Player Integration ==
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var ytPlayer;
+    var currentActiveEntry = null;
+
+    function onYouTubeIframeAPIReady() {
+      const ytDiv = document.createElement('div');
+      ytDiv.id = 'yt-hidden-player';
+      ytDiv.style.position = 'fixed';
+      ytDiv.style.bottom = '-100px';
+      ytDiv.style.right = '-100px';
+      ytDiv.style.width = '1px';
+      ytDiv.style.height = '1px';
+      ytDiv.style.opacity = '0.01';
+      ytDiv.style.pointerEvents = 'none';
+      ytDiv.style.zIndex = '-9999';
+      document.body.appendChild(ytDiv);
+
+      ytPlayer = new YT.Player('yt-hidden-player', {
+        height: '1',
+        width: '1',
+        videoId: '',
+        playerVars: {
+          'autoplay': 0,
+          'controls': 0,
+          'rel': 0,
+          'showinfo': 0,
+          'modestbranding': 1,
+          'playsinline': 1
+        },
+        events: {
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
+        }
+      });
+    }
+
+    const playIconHTML = '<svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+    const pauseIconHTML = '<svg class="archive-icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+
+    function setEntryState(entry, state) {
+      const iconWrapper = entry.querySelector('.archive-item-left');
+      if (!iconWrapper) return;
+      const oldIcon = iconWrapper.querySelector('.archive-icon');
+      if (oldIcon) oldIcon.remove();
+
+      if (state === 'playing') {
+        entry.classList.add('playing');
+        entry.classList.remove('paused');
+        iconWrapper.insertAdjacentHTML('afterbegin', pauseIconHTML);
+      } else if (state === 'paused') {
+        entry.classList.add('paused');
+        entry.classList.remove('playing');
+        iconWrapper.insertAdjacentHTML('afterbegin', playIconHTML);
+      } else {
+        entry.classList.remove('playing', 'paused');
+        iconWrapper.insertAdjacentHTML('afterbegin', playIconHTML);
+      }
+    }
+
+    function onPlayerStateChange(event) {
+      if (!currentActiveEntry) return;
+
+      if (event.data === YT.PlayerState.PLAYING) {
+        setEntryState(currentActiveEntry, 'playing');
+      } else if (event.data === YT.PlayerState.PAUSED) {
+        setEntryState(currentActiveEntry, 'paused');
+      } else if (event.data === YT.PlayerState.ENDED) {
+        setEntryState(currentActiveEntry, 'stopped');
+        currentActiveEntry = null;
+      }
+    }
+
+    function onPlayerError(event) {
+      console.error('YouTube Player Error:', event.data);
+      if (currentActiveEntry) {
+        setEntryState(currentActiveEntry, 'stopped');
+        currentActiveEntry = null;
+      }
+    }
+
+    document.querySelectorAll('.archive-entry[data-vid]').forEach(entry => {
+      const itemLink = entry.querySelector('.archive-item');
+      if (!itemLink) return;
+      itemLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const vid = entry.dataset.vid;
+        if (!vid || !ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+
+        if (currentActiveEntry === entry) {
+          const state = ytPlayer.getPlayerState();
+          if (state === YT.PlayerState.PLAYING) {
+            ytPlayer.pauseVideo();
+          } else {
+            ytPlayer.playVideo();
+          }
+        } else {
+          if (currentActiveEntry) {
+            setEntryState(currentActiveEntry, 'stopped');
+          }
+          currentActiveEntry = entry;
+          setEntryState(entry, 'playing');
+          ytPlayer.loadVideoById(vid);
+          ytPlayer.playVideo();
+        }
+      });
+    });
+  </script>
 
 </body>
 </html>

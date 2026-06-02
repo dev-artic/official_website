@@ -1488,6 +1488,7 @@
 
     var ytPlayer;
     var currentActiveEntry = null;
+    var fadeInterval = null;
 
     function onYouTubeIframeAPIReady() {
       const ytDiv = document.createElement('div');
@@ -1544,9 +1545,76 @@
       }
     }
 
+    function fadeIn(player, durationMs, callback) {
+      if (fadeInterval) clearInterval(fadeInterval);
+      try {
+        player.setVolume(0);
+      } catch(e) {}
+      
+      var start = 0;
+      var end = 100;
+      var step = 5;
+      var intervalTime = durationMs / (end / step);
+      
+      var currentVol = start;
+      fadeInterval = setInterval(function() {
+        currentVol += step;
+        if (currentVol >= end) {
+          currentVol = end;
+          clearInterval(fadeInterval);
+          fadeInterval = null;
+          try {
+            player.setVolume(end);
+          } catch(e) {}
+          if (callback) callback();
+        } else {
+          try {
+            player.setVolume(currentVol);
+          } catch(e) {}
+        }
+      }, intervalTime);
+    }
+
+    function fadeOut(player, durationMs, callback) {
+      if (fadeInterval) clearInterval(fadeInterval);
+      
+      var start = 100;
+      try {
+        start = player.getVolume();
+      } catch(e) {}
+      
+      if (start <= 0) {
+        if (callback) callback();
+        return;
+      }
+      
+      var end = 0;
+      var step = 5;
+      var intervalTime = durationMs / (start / step);
+      
+      var currentVol = start;
+      fadeInterval = setInterval(function() {
+        currentVol -= step;
+        if (currentVol <= end) {
+          currentVol = end;
+          clearInterval(fadeInterval);
+          fadeInterval = null;
+          try {
+            player.setVolume(0);
+          } catch(e) {}
+          if (callback) callback();
+        } else {
+          try {
+            player.setVolume(currentVol);
+          } catch(e) {}
+        }
+      }, intervalTime);
+    }
+
     function onPlayerStateChange(event) {
       if (!currentActiveEntry) return;
 
+      // Handle icons and states based on API feedback
       if (event.data === YT.PlayerState.PLAYING) {
         setEntryState(currentActiveEntry, 'playing');
       } else if (event.data === YT.PlayerState.PAUSED) {
@@ -1576,18 +1644,37 @@
         if (currentActiveEntry === entry) {
           const state = ytPlayer.getPlayerState();
           if (state === YT.PlayerState.PLAYING) {
-            ytPlayer.pauseVideo();
+            setEntryState(entry, 'paused');
+            fadeOut(ytPlayer, 600, () => {
+              ytPlayer.pauseVideo();
+            });
           } else {
+            setEntryState(entry, 'playing');
             ytPlayer.playVideo();
+            fadeIn(ytPlayer, 600);
           }
         } else {
-          if (currentActiveEntry) {
-            setEntryState(currentActiveEntry, 'stopped');
+          const prevEntry = currentActiveEntry;
+          if (prevEntry) {
+            setEntryState(prevEntry, 'stopped');
+            const state = ytPlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+              fadeOut(ytPlayer, 400, () => {
+                currentActiveEntry = entry;
+                setEntryState(entry, 'playing');
+                ytPlayer.loadVideoById(vid);
+                ytPlayer.playVideo();
+                fadeIn(ytPlayer, 600);
+              });
+              return;
+            }
           }
+          
           currentActiveEntry = entry;
           setEntryState(entry, 'playing');
           ytPlayer.loadVideoById(vid);
           ytPlayer.playVideo();
+          fadeIn(ytPlayer, 600);
         }
       });
     });

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -46,6 +46,19 @@
                     <span class="project-tag">ORIGINAL SERIES</span>
                   </div>
                   <h3 class="project-name">TASTING NOTE</h3>
+                </div>
+              </a>
+            </article>
+            <article class="project-card">
+              <a href="../the-root/" class="card-link">
+                <div class="image-wrapper">
+                  <img src="../the-root/album-art.png" alt="Bokos x artic. — Project : The Root" class="project-img">
+                </div>
+                <div class="project-info">
+                  <div class="meta-row">
+                    <span class="project-tag">ORIGINAL CONTENTS</span>
+                  </div>
+                  <h3 class="project-name">Project : The Root</h3>
                 </div>
               </a>
             </article>
@@ -202,7 +215,9 @@
           // Fallback if no cards found
           viewport.style.scrollSnapType = 'x mandatory';
         }
-      }// Track active year and trigger pop animation when it snaps/aligns to left edge
+      }
+
+      // Track active year and trigger pop animation when it snaps/aligns to left edge
       function updateActiveYear() {
         const scrollLeft = viewport.scrollLeft;
         const direction = scrollLeft > lastScrollLeft ? 'right' : 'left';

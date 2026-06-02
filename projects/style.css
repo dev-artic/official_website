@@ -59,6 +59,7 @@ body {
 /* ?? Year Nodes ?? */
 .dial-year-node {
   scroll-snap-align: center;
+  scroll-snap-stop: always; /* Force snap to every year node */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -255,7 +256,7 @@ body {
     height: 180px;
   }
   .year-title {
-    font-size: 2.8rem;
+    font-size: 2.0rem; /* Scaled down base font size for mobile */
   }
   .year-projects {
     flex-direction: column;
@@ -268,5 +269,94 @@ body {
   }
   .project-card {
     flex: 0 1 200px; /* Slightly narrower on mobile */
+  }
+}
+
+/* ?? Desktop Layout: Sticky Horizontal Timeline ?? */
+@media (min-width: 768px) {
+  .container {
+    padding: 120px var(--gutter) 40px var(--gutter);
+    max-width: 100%;
+    overflow: hidden;
+    display: block;
+  }
+
+  .dial-viewport {
+    height: 70dvh;
+    max-height: none;
+    overflow-y: hidden;
+    overflow-x: auto;
+    scroll-snap-type: none; /* Smooth vertical translation to horizontal scrolling */
+    perspective: none; /* Disable mobile 3D distortion on desktop */
+    display: flex;
+    flex-direction: row;
+    scrollbar-width: none;
+  }
+
+  .dial-spacer {
+    display: none !important; /* Spacers only needed to center mobile dial */
+  }
+
+  .dial-track {
+    flex-direction: row;
+    align-items: stretch;
+    height: 100%;
+    display: flex;
+  }
+
+  .dial-year-node {
+    flex-direction: row;
+    align-items: flex-start;
+    position: relative;
+    width: auto;
+    padding: 0 120px 0 0 !important;
+    border-right: 1px solid var(--border-color); /* Vertical divider line between years */
+    margin-right: 80px;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+
+  .dial-year-node:last-child {
+    border-right: none;
+    padding-right: 0 !important;
+    margin-right: 0;
+  }
+
+  .year-title {
+    position: sticky;
+    left: 20px;
+    top: 40px;
+    font-size: 4.8rem; /* Premium bold sizing for desktop */
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: 10;
+    color: var(--text-primary);
+    height: fit-content;
+    margin: 0;
+    padding: 0;
+    transition: color 0.3s ease;
+  }
+
+  .year-projects {
+    max-height: none !important;
+    opacity: 1 !important;
+    margin-top: 0 !important;
+    display: flex;
+    flex-direction: row;
+    gap: 48px;
+    padding: 0;
+    padding-left: 180px; /* Offset to keep cards clear of sticky title */
+    width: auto;
+    max-width: none;
+  }
+
+  .project-card {
+    flex: 0 0 260px !important; /* Fixed width for card scrolling */
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .image-wrapper {
+    aspect-ratio: 4 / 5;
   }
 }

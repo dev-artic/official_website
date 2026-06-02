@@ -130,9 +130,27 @@
 
       // Update 3D dial wheel scaling/opacity/rotation based on vertical center alignment
       function updateDial() {
+        if (window.innerWidth >= 768) {
+          // Reset inline styles on desktop to avoid conflicts with sticky/flex layout
+          nodes.forEach(node => {
+            const title = node.querySelector('.year-title');
+            title.style.transform = '';
+            title.style.opacity = '';
+            const pc = node.querySelector('.year-projects');
+            if (pc) {
+              pc.style.maxHeight = '';
+              pc.style.opacity = '';
+            }
+          });
+          return;
+        }
+
         const viewHeight = viewport.clientHeight;
         const viewRect = viewport.getBoundingClientRect();
         
+        let closestNode = null;
+        let minDistance = Infinity;
+
         nodes.forEach(node => {
           const title = node.querySelector('.year-title');
           const titleRect = title.getBoundingClientRect();
@@ -146,11 +164,11 @@
           let ratio = distanceFromCenter / maxDistance;
           ratio = Math.max(-1, Math.min(1, ratio));
           
-          // Premium 3D spherical transforms & opacity adjustments
-          const scale = 1.0 + (1.2 * (1.0 - Math.abs(ratio))); // Scale from 1.0 to 2.2
-          const opacity = 0.25 + (0.75 * (1.0 - Math.abs(ratio))); // Opacity from 0.25 to 1.0
-          const rotateX = -45 * ratio; // Rotates year backwards on spherical curvature
-          const translateY = -12 * ratio; // Sphere depth vertical offset
+          // Scaled down mobile size factor (1.0 to 1.5)
+          const scale = 1.0 + (0.5 * (1.0 - Math.abs(ratio)));
+          const opacity = 0.25 + (0.75 * (1.0 - Math.abs(ratio)));
+          const rotateX = -40 * ratio;
+          const translateY = -10 * ratio;
           
           title.style.transform = `translateY(${translateY}px) rotateX(${rotateX}deg) scale(${scale})`;
           title.style.opacity = opacity;
@@ -161,7 +179,45 @@
           } else {
             title.classList.remove('active');
           }
+
+          if (Math.abs(distanceFromCenter) < minDistance) {
+            minDistance = Math.abs(distanceFromCenter);
+            closestNode = node;
+          }
         });
+
+        // Auto-expand active node and collapse others on scroll (mobile only)
+        if (closestNode && !transitionActive && !closestNode.classList.contains('expanded')) {
+          const prevNode = document.querySelector('.dial-year-node.expanded');
+          if (prevNode !== closestNode) {
+            transitionActive = true;
+            requestAnimationFrame(transitionLoop);
+
+            // Collapse previous active node
+            if (prevNode) {
+              prevNode.classList.remove('expanded');
+              const pc = prevNode.querySelector('.year-projects');
+              if (pc) {
+                pc.style.maxHeight = '0';
+                pc.style.opacity = '0';
+              }
+            }
+
+            // Expand new active node
+            closestNode.classList.add('expanded');
+            const pc = closestNode.querySelector('.year-projects');
+            if (pc) {
+              pc.style.maxHeight = pc.scrollHeight + 'px';
+              pc.style.opacity = '1';
+            }
+
+            // Keep transition active lock for 500ms
+            setTimeout(() => {
+              transitionActive = false;
+              updateDial();
+            }, 500);
+          }
+        }
       }
 
       viewport.addEventListener('scroll', updateDial);
@@ -170,7 +226,7 @@
       // Initial calculation after render settles
       setTimeout(updateDial, 100);
 
-      // Animation loop to keep dial transforms active during expand/collapse height changes
+      // Animation loop to keep dial transforms active during height transition
       function transitionLoop() {
         if (transitionActive) {
           updateDial();
@@ -178,62 +234,28 @@
         }
       }
 
-      // Add click toggles on each year node
+      // Clicking a title will scroll it to the center (which auto-expands it)
       nodes.forEach(node => {
         const title = node.querySelector('.year-title');
-        const projectsContainer = node.querySelector('.year-projects');
-
         title.addEventListener('click', (e) => {
           e.stopPropagation();
-          const isExpanded = node.classList.contains('expanded');
+          if (window.innerWidth >= 768) return; // Only custom click logic on mobile
 
-          // Close all other expanded year nodes
-          nodes.forEach(otherNode => {
-            if (otherNode !== node && otherNode.classList.contains('expanded')) {
-              otherNode.classList.remove('expanded');
-              const pc = otherNode.querySelector('.year-projects');
-              pc.style.maxHeight = '0';
-              pc.style.opacity = '0';
-            }
+          const targetScroll = node.offsetTop - viewport.clientHeight / 2 + title.clientHeight / 2;
+          viewport.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth'
           });
-
-          transitionActive = true;
-          requestAnimationFrame(transitionLoop);
-
-          if (!isExpanded) {
-            node.classList.add('expanded');
-            projectsContainer.style.maxHeight = projectsContainer.scrollHeight + 'px';
-            projectsContainer.style.opacity = '1';
-
-            // Scroll the year header to the top portion of the viewport so cards are fully visible
-            setTimeout(() => {
-              viewport.scrollTo({
-                top: node.offsetTop - 20,
-                behavior: 'smooth'
-              });
-            }, 60);
-          } else {
-            node.classList.remove('expanded');
-            projectsContainer.style.maxHeight = '0';
-            projectsContainer.style.opacity = '0';
-
-            // Scroll collapsed node back to the center of the viewport
-            setTimeout(() => {
-              const targetScroll = node.offsetTop + 40 - viewport.clientHeight / 2;
-              viewport.scrollTo({
-                top: targetScroll,
-                behavior: 'smooth'
-              });
-            }, 60);
-          }
-
-          // Halt loop after transition finishes (650ms)
-          setTimeout(() => {
-            transitionActive = false;
-            updateDial();
-          }, 650);
         });
       });
+
+      // Desktop: Translate vertical mouse wheel scroll to horizontal container scroll
+      viewport.addEventListener('wheel', (e) => {
+        if (window.innerWidth >= 768 && e.deltaY !== 0) {
+          e.preventDefault();
+          viewport.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
     });
   </script>
 </body>

@@ -1,12 +1,11 @@
 /* -------------------------------------------------------------
- * PROJECTS / REDESIGNED DIAL VIEW ??/projects
+ * PROJECTS / HORIZONTAL TIMELINE VIEW | /projects
  * -------------------------------------------------------------
- * Vertical scroll dial picker with interactive year sections.
- * 3D spherical rotate animation on scroll.
- * Cover cards reveal smoothly on year selection.
+ * Unified horizontal timeline layout for both mobile and desktop.
+ * Horizontal scroll with magnetic card snaps.
+ * Sticky year headers with chewy snap pop transition animations.
  */
 
-/* ?? Page Layout ?? */
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -20,7 +19,7 @@ body {
 
 .container {
   width: 100%;
-  max-width: var(--max-width);
+  max-width: 100%;
   margin: 0 auto;
   padding: 100px var(--gutter) 40px var(--gutter);
   display: flex;
@@ -29,119 +28,113 @@ body {
   flex-grow: 1;
 }
 
-/* ?? Dial Picker Viewport ?? */
+/* ?? Horizontal Scroll Viewport ?? */
 .dial-viewport {
   height: 60dvh;
-  max-height: 550px;
+  max-height: 520px;
   width: 100%;
-  overflow-y: scroll;
-  scrollbar-width: none; /* Hide standard scrollbar */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none; /* Hide scrollbar */
   -ms-overflow-style: none;
   position: relative;
-  scroll-snap-type: y mandatory; /* Premium snap-to-year physics */
-  perspective: 1000px; /* Enable 3D spherical distortion */
+  display: flex;
+  flex-direction: row;
+  scroll-snap-type: x mandatory; /* Snap horizontally */
+  scroll-padding-left: 24px; /* Snap offset aligning with left margin */
 }
 
 .dial-viewport::-webkit-scrollbar {
   display: none;
 }
 
+/* Hide mobile spacers since we scroll horizontally now */
+.dial-spacer {
+  display: none !important;
+}
+
 .dial-track {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
+  height: 100%;
 }
 
-.dial-spacer {
-  height: 220px; /* Spacer to center first/last year perfectly */
-}
-
-/* ?? Year Nodes ?? */
+/* ?? Year Nodes (Horizontal Blocks) ?? */
 .dial-year-node {
-  scroll-snap-align: center;
-  scroll-snap-stop: always; /* Force snap to every year node */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  position: relative;
+  width: auto;
+  margin-right: 64px;
+  flex-shrink: 0;
+  padding: 0 !important;
+}
+
+.dial-year-node:last-child {
+  margin-right: 0;
+}
+
+/* ?? Year Header & Line Divider ?? */
+.year-header-wrapper {
   width: 100%;
-  padding: 30px 0;
-  transition: padding 0.5s ease;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
 }
 
-.dial-year-node.expanded {
-  padding: 10px 0 40px 0;
-}
-
-/* Year Title styling with 3D transform targets */
 .year-title {
-  font-family: var(--font-serif);
-  font-size: 3.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--text-primary);
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.1s linear, opacity 0.1s linear, color 0.3s ease;
-  transform-origin: center center;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  position: sticky;
+  left: 24px;
+  width: fit-content;
   margin: 0;
-  padding: 10px 0;
+  padding: 0;
+  user-select: none;
+  z-index: 10;
+  transform-origin: left center;
+  transition: color 0.3s ease;
   backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
-.year-title:hover {
-  opacity: 1 !important;
-  color: var(--text-primary);
+/* Chewy Snap Pop Animation for Year transitions */
+@keyframes chewyPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15) translateX(3px); }
+  100% { transform: scale(1); }
 }
 
-.dial-year-node.expanded .year-title {
-  color: var(--text-primary);
+.year-title.active-pop {
+  color: var(--text-primary) !important;
+  animation: chewyPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* ?? Expandable Cover Art Section ?? */
+/* ?? Horizontal Cover Cards ?? */
 .year-projects {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-              opacity 0.5s ease,
-              margin-top 0.5s ease;
   display: flex;
-  justify-content: center;
-  gap: var(--space-lg);
-  padding: 0 var(--gutter);
-  margin-top: 0;
-  width: 100%;
-  max-width: 900px;
-  will-change: max-height, opacity;
+  flex-direction: row;
+  gap: 32px;
+  width: auto;
+  max-width: none;
+  padding: 0;
 }
 
-.dial-year-node.expanded .year-projects {
-  max-height: 500px; /* Generous height for expanded cards */
-  opacity: 1;
-  margin-top: 24px;
-}
-
-/* ?? Project Card Sizing & Reveals ?? */
 .project-card {
-  flex: 0 1 240px; /* Consistent card width */
+  flex: 0 0 200px; /* Card size for mobile */
   display: flex;
   flex-direction: column;
-  transform: translateY(20px);
-  opacity: 0;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-              opacity 0.5s ease;
-  will-change: transform, opacity;
-}
-
-.dial-year-node.expanded .project-card {
-  transform: translateY(0);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   opacity: 1;
 }
-
-/* Stagger card transitions for premium visual reveal */
-.dial-year-node.expanded .project-card:nth-child(1) { transition-delay: 0.1s; }
-.dial-year-node.expanded .project-card:nth-child(2) { transition-delay: 0.25s; }
 
 .card-link {
   text-decoration: none;
@@ -151,7 +144,7 @@ body {
   height: 100%;
 }
 
-/* Image container */
+/* Image wrapper */
 .image-wrapper {
   width: 100%;
   aspect-ratio: 4 / 5;
@@ -173,7 +166,7 @@ body {
   transform: scale(1.03);
 }
 
-/* Glassmorphic Explore Tag */
+/* Explore Tag overlay */
 .image-wrapper::after {
   content: 'EXPLORE';
   position: absolute;
@@ -202,7 +195,7 @@ body {
   transform: translateY(0);
 }
 
-/* Caption metadata */
+/* Info metadata */
 .project-info {
   padding: var(--space-sm) 0;
   display: flex;
@@ -235,7 +228,7 @@ body {
   text-transform: uppercase;
 }
 
-/* ?? Footer ?? */
+/* Footer styling */
 .gallery-footer {
   border-top: 1px solid var(--border-color);
   padding: var(--space-lg) 0;
@@ -247,116 +240,35 @@ body {
   margin-top: auto;
 }
 
-/* ?? Responsive ?? */
-@media (max-width: 767px) {
-  .dial-viewport {
-    height: 65dvh;
-  }
-  .dial-spacer {
-    height: 180px;
-  }
-  .year-title {
-    font-size: 2.0rem; /* Scaled down base font size for mobile */
-  }
-  .year-projects {
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-md);
-    padding: 0;
-  }
-  .dial-year-node.expanded .year-projects {
-    max-height: 1000px; /* Accommodate stacked cards */
-  }
-  .project-card {
-    flex: 0 1 200px; /* Slightly narrower on mobile */
-  }
-}
-
-/* ?? Desktop Layout: Sticky Horizontal Timeline ?? */
+/* ?? Desktop Viewport Adjustments ?? */
 @media (min-width: 768px) {
   .container {
     padding: 120px var(--gutter) 40px var(--gutter);
-    max-width: 100%;
-    overflow: hidden;
-    display: block;
   }
 
   .dial-viewport {
     height: 70dvh;
     max-height: none;
-    overflow-y: hidden;
-    overflow-x: auto;
-    scroll-snap-type: none; /* Smooth vertical translation to horizontal scrolling */
-    perspective: none; /* Disable mobile 3D distortion on desktop */
-    display: flex;
-    flex-direction: row;
-    scrollbar-width: none;
-  }
-
-  .dial-spacer {
-    display: none !important; /* Spacers only needed to center mobile dial */
-  }
-
-  .dial-track {
-    flex-direction: row;
-    align-items: stretch;
-    height: 100%;
-    display: flex;
+    scroll-padding-left: 40px; /* Wider snapping padding on desktop */
   }
 
   .dial-year-node {
-    flex-direction: row;
-    align-items: flex-start;
-    position: relative;
-    width: auto;
-    padding: 0 120px 0 0 !important;
-    border-right: 1px solid var(--border-color); /* Vertical divider line between years */
-    margin-right: 80px;
-    scroll-snap-align: start;
-    flex-shrink: 0;
+    margin-right: 120px; /* More spacing between years on desktop */
   }
 
-  .dial-year-node:last-child {
-    border-right: none;
-    padding-right: 0 !important;
-    margin-right: 0;
+  .year-header-wrapper {
+    margin-bottom: 32px;
   }
 
   .year-title {
-    position: sticky;
-    left: 20px;
-    top: 40px;
-    font-size: 4.8rem; /* Premium bold sizing for desktop */
-    transform: none !important;
-    opacity: 1 !important;
-    z-index: 10;
-    color: var(--text-primary);
-    height: fit-content;
-    margin: 0;
-    padding: 0;
-    transition: color 0.3s ease;
+    left: 40px; /* Align with desktop gutter */
   }
 
   .year-projects {
-    max-height: none !important;
-    opacity: 1 !important;
-    margin-top: 0 !important;
-    display: flex;
-    flex-direction: row;
-    gap: 48px;
-    padding: 0;
-    padding-left: 180px; /* Offset to keep cards clear of sticky title */
-    width: auto;
-    max-width: none;
+    gap: 48px; /* Wider gap between cards on desktop */
   }
 
   .project-card {
-    flex: 0 0 260px !important; /* Fixed width for card scrolling */
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .image-wrapper {
-    aspect-ratio: 4 / 5;
+    flex: 0 0 280px; /* Larger cards on desktop */
   }
 }

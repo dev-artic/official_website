@@ -34,7 +34,7 @@
 
         <!-- Year: 2026 -->
         <div class="dial-year-node" data-year="2026">
-          <h2 class="year-title">2026</h2>
+          <div class="year-header-wrapper"><h2 class="year-title">2026</h2></div>
           <div class="year-projects">
             <article class="project-card">
               <a href="../tasting-note/" class="card-link">
@@ -54,7 +54,7 @@
 
         <!-- Year: 2025 -->
         <div class="dial-year-node" data-year="2025">
-          <h2 class="year-title">2025</h2>
+          <div class="year-header-wrapper"><h2 class="year-title">2025</h2></div>
           <div class="year-projects">
             <article class="project-card">
               <a href="../neutral-interview/" class="card-link">
@@ -74,7 +74,7 @@
 
         <!-- Year: 2024 -->
         <div class="dial-year-node" data-year="2024">
-          <h2 class="year-title">2024</h2>
+          <div class="year-header-wrapper"><h2 class="year-title">2024</h2></div>
           <div class="year-projects">
             <article class="project-card">
               <a href="../gagosian-party-music/" class="card-link">
@@ -126,128 +126,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       const viewport = document.getElementById('dial-viewport');
       const nodes = document.querySelectorAll('.dial-year-node');
-      let transitionActive = false;
-
-      // Update 3D dial wheel scaling/opacity/rotation based on vertical center alignment
-      function updateDial() {
-        if (window.innerWidth >= 768) {
-          // Reset inline styles on desktop to avoid conflicts with sticky/flex layout
-          nodes.forEach(node => {
-            const title = node.querySelector('.year-title');
-            title.style.transform = '';
-            title.style.opacity = '';
-            const pc = node.querySelector('.year-projects');
-            if (pc) {
-              pc.style.maxHeight = '';
-              pc.style.opacity = '';
-            }
-          });
-          return;
-        }
-
-        const viewHeight = viewport.clientHeight;
-        const viewRect = viewport.getBoundingClientRect();
-        
-        let closestNode = null;
-        let minDistance = Infinity;
-
-        nodes.forEach(node => {
-          const title = node.querySelector('.year-title');
-          const titleRect = title.getBoundingClientRect();
-          
-          // Calculate title center coordinate relative to viewport top
-          const titleCenter = titleRect.top + titleRect.height / 2 - viewRect.top;
-          const distanceFromCenter = titleCenter - viewHeight / 2;
-          const maxDistance = viewHeight / 2;
-          
-          // Normalized distance [-1, 1]
-          let ratio = distanceFromCenter / maxDistance;
-          ratio = Math.max(-1, Math.min(1, ratio));
-          
-          // Scaled down mobile size factor (1.0 to 1.5)
-          const scale = 1.0 + (0.5 * (1.0 - Math.abs(ratio)));
-          const opacity = 0.25 + (0.75 * (1.0 - Math.abs(ratio)));
-          const rotateX = -40 * ratio;
-          const translateY = -10 * ratio;
-          
-          title.style.transform = `translateY(${translateY}px) rotateX(${rotateX}deg) scale(${scale})`;
-          title.style.opacity = opacity;
-          
-          // Highlight year title when close to center
-          if (Math.abs(distanceFromCenter) < 45) {
-            title.classList.add('active');
-          } else {
-            title.classList.remove('active');
-          }
-
-          if (Math.abs(distanceFromCenter) < minDistance) {
-            minDistance = Math.abs(distanceFromCenter);
-            closestNode = node;
-          }
-        });
-
-        // Auto-expand active node and collapse others on scroll (mobile only)
-        if (closestNode && !transitionActive && !closestNode.classList.contains('expanded')) {
-          const prevNode = document.querySelector('.dial-year-node.expanded');
-          if (prevNode !== closestNode) {
-            transitionActive = true;
-            requestAnimationFrame(transitionLoop);
-
-            // Collapse previous active node
-            if (prevNode) {
-              prevNode.classList.remove('expanded');
-              const pc = prevNode.querySelector('.year-projects');
-              if (pc) {
-                pc.style.maxHeight = '0';
-                pc.style.opacity = '0';
-              }
-            }
-
-            // Expand new active node
-            closestNode.classList.add('expanded');
-            const pc = closestNode.querySelector('.year-projects');
-            if (pc) {
-              pc.style.maxHeight = pc.scrollHeight + 'px';
-              pc.style.opacity = '1';
-            }
-
-            // Keep transition active lock for 500ms
-            setTimeout(() => {
-              transitionActive = false;
-              updateDial();
-            }, 500);
-          }
-        }
-      }
-
-      viewport.addEventListener('scroll', updateDial);
-      window.addEventListener('resize', updateDial);
-      
-      // Initial calculation after render settles
-      setTimeout(updateDial, 100);
-
-      // Animation loop to keep dial transforms active during height transition
-      function transitionLoop() {
-        if (transitionActive) {
-          updateDial();
-          requestAnimationFrame(transitionLoop);
-        }
-      }
-
-      // Clicking a title will scroll it to the center (which auto-expands it)
-      nodes.forEach(node => {
-        const title = node.querySelector('.year-title');
-        title.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (window.innerWidth >= 768) return; // Only custom click logic on mobile
-
-          const targetScroll = node.offsetTop - viewport.clientHeight / 2 + title.clientHeight / 2;
-          viewport.scrollTo({
-            top: targetScroll,
-            behavior: 'smooth'
-          });
-        });
-      });
+      let activeYear = '';
 
       // Desktop: Translate vertical mouse wheel scroll to horizontal container scroll
       viewport.addEventListener('wheel', (e) => {
@@ -256,6 +135,51 @@
           viewport.scrollLeft += e.deltaY;
         }
       }, { passive: false });
+
+      // Track active year and trigger pop animation when it snaps/aligns to left edge
+      function updateActiveYear() {
+        let closestNode = null;
+        let minDiff = Infinity;
+        const viewRect = viewport.getBoundingClientRect();
+        
+        nodes.forEach(node => {
+          const nodeRect = node.getBoundingClientRect();
+          // Diff from scroll container left edge (taking left padding/alignment into account)
+          // On mobile left spacing is 24px, on desktop it is 40px
+          const pad = window.innerWidth >= 768 ? 40 : 24;
+          const diff = Math.abs(nodeRect.left - viewRect.left - pad);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestNode = node;
+          }
+        });
+
+        if (closestNode) {
+          const year = closestNode.dataset.year;
+          if (year !== activeYear) {
+            activeYear = year;
+            
+            // Reset active classes
+            nodes.forEach(n => {
+              const t = n.querySelector('.year-title');
+              if (t) t.classList.remove('active-pop');
+            });
+            
+            // Add elastic transition class to new active year title
+            const activeTitle = closestNode.querySelector('.year-title');
+            if (activeTitle) {
+              activeTitle.classList.add('active-pop');
+            }
+          }
+        }
+      }
+
+      // Track scroll position for header snapping transitions
+      viewport.addEventListener('scroll', updateActiveYear);
+      window.addEventListener('resize', updateActiveYear);
+      
+      // Initialize state
+      setTimeout(updateActiveYear, 100);
     });
   </script>
 </body>

@@ -1,4 +1,4 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -643,10 +643,10 @@
         // Keep the mobile "View All" wrapper at end
         const viewAllWrapper = container.querySelector('.view-all-link-wrapper');
 
+                // Build all cards ??start hidden for stagger animation
+        const createdCards = [];
         projects.forEach((p, i) => {
-          // Image path for homepage: strip leading '../' since we're at root
           const imgSrc = p.cover_image.replace(/^\.\.\//, '');
-          const delay = i + 1;
           const card = document.createElement('a');
           card.href = p.slug;
           card.className = 'preview-card';
@@ -655,18 +655,52 @@
               <img src="${imgSrc}" alt="${p.title}" class="preview-card-img">
             </div>
             <div class="preview-card-title">${p.title}</div>
-            <div class="preview-card-meta">${p.category} · ${p.year}</div>`;
+            <div class="preview-card-meta">${p.category} \u00b7 ${p.year}</div>`;
 
-          // Insert before the View All wrapper if it exists, else append
+          // Initial hidden state for stagger reveal
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(30px)';
+          card.style.transition = 'none';
+
           if (viewAllWrapper) {
             container.insertBefore(card, viewAllWrapper);
           } else {
             container.appendChild(card);
           }
+          createdCards.push(card);
         });
 
-        // Trigger reveal animations (reveal.js compatible)
-        if (typeof initReveal === 'function') initReveal();
+        // Stagger-reveal cards when the projects section enters the viewport
+        const projectsSection = container.closest('.content-section') || container;
+        const easing = 'cubic-bezier(0.16, 1, 0.3, 1)';
+
+        const revealCards = () => {
+          createdCards.forEach((card, idx) => {
+            setTimeout(() => {
+              card.style.transition = `opacity 0.55s ${easing}, transform 0.6s ${easing}`;
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            }, idx * 90);
+          });
+        };
+
+        // If section is already in view (e.g. page loaded scrolled down), fire immediately
+        const rect = projectsSection.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          // Slight delay to ensure layout is settled after cards are added
+          setTimeout(revealCards, 80);
+        } else {
+          // Otherwise observe and fire when it scrolls into view (one-shot)
+          const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                revealCards();
+                sectionObserver.disconnect();
+              }
+            });
+          }, { threshold: 0.05 });
+          sectionObserver.observe(projectsSection);
+        }
       })
       .catch(() => {
         const loading = document.getElementById('home-projects-loading');

@@ -1,11 +1,12 @@
 /* -------------------------------------------------------------
- * PROJECTS / ARCHIVE — /projects
+ * PROJECTS / REDESIGNED DIAL VIEW ??/projects
  * -------------------------------------------------------------
- * Horizontal scroll carousel with snap, gagosian-inspired spacing.
- * All cards uniform size, swipe one at a time.
+ * Vertical scroll dial picker with interactive year sections.
+ * 3D spherical rotate animation on scroll.
+ * Cover cards reveal smoothly on year selection.
  */
 
-/* ── Page Layout ── */
+/* ?? Page Layout ?? */
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -21,53 +22,125 @@ body {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 100px var(--gutter) 60px var(--gutter); /* Standard top-bottom padding leaving space for fixed nav */
+  padding: 100px var(--gutter) 40px var(--gutter);
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically center carousel on both desktop and mobile */
+  justify-content: center;
   flex-grow: 1;
 }
 
-/* ── 3. Horizontal Scroll Carousel ── */
-.projects-carousel {
-  display: flex;
-  gap: var(--space-md);
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  padding-top: 10px;
-  padding-bottom: 60px; /* Accommodate staggered translation offset */
-  margin-bottom: var(--space-xl);
-  cursor: grab;
-
-  /* Hide scrollbar for clean aesthetic */
-  scrollbar-width: none;
+/* ?? Dial Picker Viewport ?? */
+.dial-viewport {
+  height: 60dvh;
+  max-height: 550px;
+  width: 100%;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Hide standard scrollbar */
   -ms-overflow-style: none;
+  position: relative;
+  scroll-snap-type: y mandatory; /* Premium snap-to-year physics */
+  perspective: 1000px; /* Enable 3D spherical distortion */
 }
 
-.projects-carousel::-webkit-scrollbar {
+.dial-viewport::-webkit-scrollbar {
   display: none;
 }
 
-.projects-carousel:active {
-  cursor: grabbing;
-}
-
-/* ── 4. Project Card — Uniform Sizing ── */
-.project-card {
-  flex: 0 0 calc(28% - 12px); /* Editorial peek: exactly 3.5 cards visible on large desktops */
-  scroll-snap-align: start;
+.dial-track {
   display: flex;
   flex-direction: column;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  will-change: transform;
+  align-items: center;
 }
 
-/* Even-numbered cards shifted down to create a sophisticated gallery rhythm */
-.project-card:nth-child(even) {
-  transform: translateY(48px);
+.dial-spacer {
+  height: 220px; /* Spacer to center first/last year perfectly */
 }
+
+/* ?? Year Nodes ?? */
+.dial-year-node {
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 30px 0;
+  transition: padding 0.5s ease;
+}
+
+.dial-year-node.expanded {
+  padding: 10px 0 40px 0;
+}
+
+/* Year Title styling with 3D transform targets */
+.year-title {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s linear, opacity 0.1s linear, color 0.3s ease;
+  transform-origin: center center;
+  margin: 0;
+  padding: 10px 0;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.year-title:hover {
+  opacity: 1 !important;
+  color: var(--text-primary);
+}
+
+.dial-year-node.expanded .year-title {
+  color: var(--text-primary);
+}
+
+/* ?? Expandable Cover Art Section ?? */
+.year-projects {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.5s ease,
+              margin-top 0.5s ease;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: 0 var(--gutter);
+  margin-top: 0;
+  width: 100%;
+  max-width: 900px;
+  will-change: max-height, opacity;
+}
+
+.dial-year-node.expanded .year-projects {
+  max-height: 500px; /* Generous height for expanded cards */
+  opacity: 1;
+  margin-top: 24px;
+}
+
+/* ?? Project Card Sizing & Reveals ?? */
+.project-card {
+  flex: 0 1 240px; /* Consistent card width */
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.5s ease;
+  will-change: transform, opacity;
+}
+
+.dial-year-node.expanded .project-card {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Stagger card transitions for premium visual reveal */
+.dial-year-node.expanded .project-card:nth-child(1) { transition-delay: 0.1s; }
+.dial-year-node.expanded .project-card:nth-child(2) { transition-delay: 0.25s; }
 
 .card-link {
   text-decoration: none;
@@ -84,6 +157,7 @@ body {
   overflow: hidden;
   position: relative;
   background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -98,7 +172,7 @@ body {
   transform: scale(1.03);
 }
 
-/* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Explore Tag */
+/* Glassmorphic Explore Tag */
 .image-wrapper::after {
   content: 'EXPLORE';
   position: absolute;
@@ -111,7 +185,6 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
-  border-radius: 0px; /* Sharp corners matching artic. */
   font-family: var(--font-sans);
   font-size: 0.55rem;
   font-weight: 700;
@@ -133,7 +206,7 @@ body {
   padding: var(--space-sm) 0;
   display: flex;
   flex-direction: column;
-  height: 72px; /* Fixed height unifies all cards perfectly */
+  height: 72px;
   justify-content: flex-start;
 }
 
@@ -152,13 +225,6 @@ body {
   text-transform: uppercase;
 }
 
-.project-date {
-  font-size: 0.6rem;
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-}
-
 .project-name {
   font-family: var(--font-serif);
   font-size: 1.1rem;
@@ -166,81 +232,9 @@ body {
   letter-spacing: 0.02em;
   color: var(--text-primary);
   text-transform: uppercase;
-  margin-bottom: 4px;
 }
 
-.view-project-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.65rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-muted);
-  margin-top: 2px;
-  transition: color 0.3s ease;
-  position: relative;
-  padding-bottom: 2px;
-  align-self: flex-start; /* Limit line to text width */
-}
-
-.view-project-btn::after {
-  content: '';
-  position: absolute;
-  width: calc(100% - 18px); /* Exclude arrow SVG */
-  transform: scaleX(0);
-  height: 1px;
-  bottom: 0;
-  left: 0;
-  background-color: var(--text-primary);
-  transform-origin: bottom right;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.project-card:hover .view-project-btn::after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
-}
-
-.project-card:hover .view-project-btn {
-  color: var(--text-primary);
-}
-
-.arrow-icon {
-  width: 12px;
-  height: 12px;
-  fill: currentColor;
-  transition: transform 0.4s var(--ease-out-expo);
-}
-
-.project-card:hover .arrow-icon {
-  transform: translateX(4px);
-}
-
-/* ── 5. Scroll Indicator ── */
-.scroll-indicator {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-xxl);
-}
-
-.scroll-line {
-  width: 40px;
-  height: 1px;
-  background-color: var(--text-muted);
-}
-
-.scroll-text {
-  font-size: 0.6rem;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-/* ── 6. Footer ── */
+/* ?? Footer ?? */
 .gallery-footer {
   border-top: 1px solid var(--border-color);
   padding: var(--space-lg) 0;
@@ -252,110 +246,27 @@ body {
   margin-top: auto;
 }
 
-.gallery-footer p {
-  margin: 0;
-}
-
-/* ── 7. Responsive ── */
-@media (max-width: 1024px) {
-  .project-card {
-    flex: 0 0 calc(42% - 12px); /* 2.3 items visible on tablet */
-  }
-}
-
+/* ?? Responsive ?? */
 @media (max-width: 767px) {
+  .dial-viewport {
+    height: 65dvh;
+  }
+  .dial-spacer {
+    height: 180px;
+  }
+  .year-title {
+    font-size: 2.8rem;
+  }
+  .year-projects {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 0;
+  }
+  .dial-year-node.expanded .year-projects {
+    max-height: 1000px; /* Accommodate stacked cards */
+  }
   .project-card {
-    flex: 0 0 calc(75% - 12px); /* 1.3 items visible on mobile */
-  }
-
-  /* Soften vertical offset stagger on mobile to prevent extreme gaps */
-  .project-card:nth-child(even) {
-    transform: translateY(24px);
-  }
-
-  .projects-carousel {
-    padding-bottom: 36px;
-  }
-
-  .gallery-intro {
-    margin-top: var(--space-lg);
-    margin-bottom: var(--space-md);
-  }
-
-  .gallery-nav {
-    gap: var(--space-sm);
-  }
-}
-
-/* ── 8. Reduced Motion ── */
-@media (prefers-reduced-motion: reduce) {
-  .project-img,
-  .arrow-icon,
-  .project-card {
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
-/* ── 9. Scroll-driven animations progressive enhancement ── */
-@supports ((animation-timeline: view()) and (animation-range: entry)) {
-  @keyframes carouselCardScale {
-    0% {
-      scale: 0.96;
-      opacity: 0.8;
-    }
-    50% {
-      scale: 1.0;
-      opacity: 1;
-    }
-    100% {
-      scale: 0.96;
-      opacity: 0.8;
-    }
-  }
-
-  .project-card {
-    animation: carouselCardScale auto linear both;
-    animation-timeline: view(inline);
-  }
-
-  @keyframes carouselCardScaleEvenDesktop {
-    0% {
-      transform: translateY(48px) scale(0.96);
-      opacity: 0.8;
-    }
-    50% {
-      transform: translateY(48px) scale(1.0);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(48px) scale(0.96);
-      opacity: 0.8;
-    }
-  }
-
-  @keyframes carouselCardScaleEvenMobile {
-    0% {
-      transform: translateY(24px) scale(0.96);
-      opacity: 0.8;
-    }
-    50% {
-      transform: translateY(24px) scale(1.0);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(24px) scale(0.96);
-      opacity: 0.8;
-    }
-  }
-
-  .project-card:nth-child(even) {
-    animation-name: carouselCardScaleEvenDesktop;
-  }
-
-  @media (max-width: 767px) {
-    .project-card:nth-child(even) {
-      animation-name: carouselCardScaleEvenMobile;
-    }
+    flex: 0 1 200px; /* Slightly narrower on mobile */
   }
 }

@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -298,9 +298,7 @@
 
     /* Left Column: Latest Release & Metadata */
     .links-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      display: block;
     }
 
     .links-container .archive-entry {
@@ -309,6 +307,20 @@
       animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
       animation-delay: 3.0s;
       border-bottom: none;
+    }
+
+    .project-brief {
+      opacity: 0;
+      transform: translateY(14px);
+      animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
+      animation-delay: 3.1s;
+    }
+
+    .project-starring {
+      opacity: 0;
+      transform: translateY(14px);
+      animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
+      animation-delay: 3.2s;
     }
 
     .stream-label {
@@ -329,7 +341,7 @@
 
     /* Latest Featured Video Custom Styling */
     .latest-featured-item {
-      padding-top: 0px;
+      padding-top: 14px;
       padding-bottom: 12px;
     }
 
@@ -424,6 +436,7 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
+      gap: 24px;
     }
 
     .archive-icon {
@@ -476,16 +489,16 @@
       color: var(--text-primary);
     }
 
-        /* Inline video embed */
+    /* Inline video embed */
     .archive-embed {
       width: 100%;
       max-height: 0;
       overflow: hidden;
       opacity: 0;
       transform: translateY(-12px);
-      transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-                  opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
-                  transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: max-height 0.65s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.65s ease-out, 
+                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: max-height, opacity, transform;
     }
 
@@ -803,66 +816,55 @@
           <span class="toggle-icon"></span>
         </div>
         <div class="toggle-content">
-        <div class="static-content">
-          <div class="archive-entry active" data-vid="X8r2fg3240I">
-            <a class="archive-item latest-featured-item" href="javascript:void(0)">
-              <div class="archive-item-left">
-                <div class="archive-item-text">
-                  <span class="archive-item-type">CODA</span>
-                  <div class="archive-item-title-row">
-                    <span class="archive-item-title">CODA | 중립적인인터뷰</span>
-                    <span class="archive-item-date">2025.12.01</span>
+          <div class="static-content">
+            <div class="archive-entry" data-vid="X8r2fg3240I">
+              <a class="archive-item latest-featured-item" href="javascript:void(0)">
+                <div class="archive-item-left">
+                  <div class="archive-item-text">
+                    <span class="archive-item-type">Bokos</span>
+                    <div class="archive-item-title-row">
+                      <span class="archive-item-title">CODA | 중립적인인터뷰</span>
+                      <span class="archive-item-date">2025.12.02</span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+              <div class="archive-embed">
+                <div class="custom-video-poster" data-vid="X8r2fg3240I">
+                  <img class="poster-thumbnail" src="https://img.youtube.com/vi/X8r2fg3240I/maxresdefault.jpg" alt="Video Cover">
+                  <div class="poster-play-btn">
+                    <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
                   </div>
                 </div>
               </div>
-            </a>
-            <div class="archive-embed open">
-              <div class="custom-video-poster" data-vid="X8r2fg3240I">
-                <img class="poster-thumbnail" src="https://img.youtube.com/vi/X8r2fg3240I/maxresdefault.jpg" alt="Video Cover">
-                <div class="poster-play-btn">
-                  <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
-                </div>
+            </div>
+          </div>
+
+          <!-- Project Description & Info -->
+          <div class="project-brief" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; transition: border-color 0.5s ease;">
+            <p class="brief-desc-ko" style="font-family: var(--font-sans); font-size: 0.78rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 20px;">
+              <b>Bokos(보코스)의 아티스트 앨범 큐레이션 인터뷰 시리즈.</b><br>
+              격주 수요일, 다양한 창작자들과 함께 인생 앨범 3장을 이야기하며 그들의 정체성과 취향을 알아본다.
+            </p>
+            <div class="brief-meta" style="font-family: var(--font-sans); font-size: 0.65rem; color: var(--text-muted); line-height: 1.8;">
+              <div style="display: flex; gap: 24px; margin-bottom: 6px;">
+                <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Creator</span>
+                <span style="color: var(--text-secondary);">Bokos</span>
+              </div>
+              <div style="display: flex; gap: 24px; margin-bottom: 20px;">
+                <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Production</span>
+                <span style="color: var(--text-secondary);">artic.</span>
               </div>
             </div>
           </div>
-        </div>
-            </a>
-            <div class="archive-embed open">
-              <div class="custom-video-poster" data-vid="a_c4edU0Ly8">
-                <img class="poster-thumbnail" src="https://img.youtube.com/vi/a_c4edU0Ly8/maxresdefault.jpg" alt="Video Cover">
-                <div class="poster-play-btn">
-                  <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Project Description & Info -->
-        <div class="project-brief" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; transition: border-color 0.5s ease;">
-          <p class="brief-desc-ko" style="font-family: var(--font-sans); font-size: 0.78rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 20px;">
-            <b>Bokos(보코스)의 아티스트 앨범 큐레이션 인터뷰 시리즈.</b><br>
-            격주 수요일, 다양한 창작자들과 함께 인생 앨범 3장을 이야기하며 그들의 정체성과 취향을 알아본다.
-          </p>
-          <div class="brief-meta" style="font-family: var(--font-sans); font-size: 0.65rem; color: var(--text-muted); line-height: 1.8;">
-            <div style="display: flex; gap: 24px; margin-bottom: 6px;">
-              <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Creator</span>
-              <span style="color: var(--text-secondary);">Bokos</span>
-            </div>
-            <div style="display: flex; gap: 24px; margin-bottom: 20px;">
-              <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Production</span>
-              <span style="color: var(--text-secondary);">artic.</span>
-            </div>
+          <!-- Starring List -->
+          <div class="project-starring" style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 12px; transition: border-color 0.5s ease;">
+            <span style="font-family: var(--font-sans); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 12px;">STARRING</span>
+            <p style="font-family: var(--font-sans); font-size: 0.72rem; line-height: 1.8; color: var(--text-secondary); letter-spacing: 0.02em;">
+              이승준 &nbsp;•&nbsp; Hukky Shibaseki &nbsp;•&nbsp; HYPNOSIS THERAPY &nbsp;•&nbsp; Slom &nbsp;•&nbsp; 천재노창 &nbsp;•&nbsp; pH-1 &nbsp;•&nbsp; Crush &nbsp;•&nbsp; Chaeyoung of TWICE &nbsp;•&nbsp; 조원선 &nbsp;•&nbsp; 윤단비 &nbsp;•&nbsp; JINBO the SuperFreak &nbsp;•&nbsp; 김춘추(놀이도감)
+            </p>
           </div>
-        </div>
-
-        <!-- Starring List -->
-        <div class="project-starring" style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 12px; transition: border-color 0.5s ease;">
-          <span style="font-family: var(--font-sans); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 12px;">STARRING</span>
-          <p style="font-family: var(--font-sans); font-size: 0.72rem; line-height: 1.8; color: var(--text-secondary); letter-spacing: 0.02em;">
-            이승준 &nbsp;•&nbsp; Hukky Shibaseki &nbsp;•&nbsp; Slom &nbsp;•&nbsp; pH-1 &nbsp;•&nbsp; HYPNOSIS THERAPY &nbsp;•&nbsp; 천재노창 &nbsp;•&nbsp; 윤단비 &nbsp;•&nbsp; Crush &nbsp;•&nbsp; Chaeyoung of TWICE &nbsp;•&nbsp; 조원선 &nbsp;•&nbsp; JINBO the SuperFreak &nbsp;•&nbsp; 김춘추(놀이도감)
-          </p>
-        </div>
       </main>
 
       <!-- Right Column: Episodes Accordion Group -->
@@ -1136,7 +1138,13 @@
   <script>
         // -- Inline video embed toggle (close-first-then-open) --
     (function() {
+      // Stagger right column episodes animation delays dynamically
+      document.querySelectorAll('.archive-list .archive-entry').forEach((entry, idx) => {
+        entry.style.animationDelay = (3.1 + idx * 0.05) + 's';
+      });
+
       let openEntry = null;
+      let closeTimeout = null;
 
       // Preload video thumbnails for instant display
       (function preloadThumbnails() {
@@ -1156,16 +1164,25 @@
       }
 
       function closeEntry(entry, callback) {
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+          closeTimeout = null;
+        }
         entry.classList.remove('active');
         const embed = entry.querySelector('.archive-embed');
         embed.classList.remove('open');
-        setTimeout(() => {
+        closeTimeout = setTimeout(() => {
           embed.innerHTML = '';
+          closeTimeout = null;
           if (callback) callback();
         }, 400);
       }
 
       function openEntryFn(entry) {
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
+          closeTimeout = null;
+        }
         const embed = entry.querySelector('.archive-embed');
         const vid = entry.dataset.vid;
         
@@ -1193,22 +1210,20 @@
             iframe.style.transition = 'opacity 0.5s ease';
             embed.innerHTML = '';
             embed.appendChild(iframe);
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                iframe.style.opacity = '1';
-              });
-            });
+            iframe.offsetHeight; // Force layout reflow
+            iframe.style.opacity = '1';
           }, 300);
         });
 
         entry.classList.add('active');
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            embed.classList.add('open');
-            const poster = embed.querySelector('.custom-video-poster');
-            if (poster) poster.style.opacity = '1';
-          });
-        });
+        // Force layout reflow before triggering slide-open animation
+        embed.offsetHeight; 
+        embed.classList.add('open');
+        const poster = embed.querySelector('.custom-video-poster');
+        if (poster) {
+          poster.offsetHeight; // Force layout reflow
+          poster.style.opacity = '1';
+        }
         openEntry = entry;
       }
 
@@ -1231,6 +1246,14 @@
           }
         });
       });
+
+      // Automatically open the Latest Release video on page load after stagger finishes
+      setTimeout(() => {
+        const latestEntry = document.querySelector('.links-container .archive-entry');
+        if (latestEntry && !openEntry) {
+          openEntryFn(latestEntry);
+        }
+      }, 3500);
     })();
 
     // ── Mobile Accordion Toggle ──

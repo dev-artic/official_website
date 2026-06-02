@@ -54,16 +54,19 @@ def fetch_playlist_items(playlist_id: str) -> list[dict]:
             params["pageToken"] = next_page
 
         resp = requests.get(url, params=params, timeout=15)
-        if resp.status_code == 403:
-            print(f"  [ERROR] API 접근 거부 (quota 초과 또는 키 오류): {playlist_id}")
+        if resp.status_code != 200:
+            print(f"  [ERROR] API 호출 실패 (상태 코드 {resp.status_code}): {playlist_id}")
             return []
-        resp.raise_for_status()
         data = resp.json()
 
         for item in data.get("items", []):
             snippet = item["snippet"]
             vid = snippet.get("resourceId", {}).get("videoId", "")
             if not vid or vid == "deleted":
+                continue
+
+            title = snippet.get("title", "")
+            if not title or title.lower() in ("deleted video", "private video"):
                 continue
 
             pub_raw = snippet.get("publishedAt", "")
@@ -75,8 +78,9 @@ def fetch_playlist_items(playlist_id: str) -> list[dict]:
 
             items.append({
                 "videoId":     vid,
-                "title":       snippet.get("title", ""),
+                "title":       title,
                 "publishedAt": pub_str,
+                "publishedAtRaw": pub_raw
             })
 
         next_page = data.get("nextPageToken")
@@ -105,7 +109,9 @@ def build_episode_html(item: dict, ep_label: str) -> str:
     guest = ep_label
     if " | " in title:
         candidate = title.split(" | ")[0].strip()
-        if 1 < len(candidate) <= 20:
+        if len(candidate) > 20:
+            guest = candidate[:20] + "…"
+        elif len(candidate) > 0:
             guest = candidate
     elif "EP." in title:
         guest = "Episode"
@@ -140,10 +146,12 @@ def update_latest_release(html: str, newest: dict) -> str:
     guest = "최신 에피소드"
     if " | " in title:
         candidate = title.split(" | ")[0].strip()
-        if 1 < len(candidate) <= 20:
+        if len(candidate) > 20:
+            guest = candidate[:20] + "…"
+        elif len(candidate) > 0:
             guest = candidate
 
-    new_block = f"""          <div class="archive-entry active" data-vid="{vid}">
+    new_block = f"""          <div class="archive-entry" data-vid="{vid}">
             <a class="archive-item latest-featured-item" href="javascript:void(0)">
               <div class="archive-item-left">
                 <div class="archive-item-text">
@@ -155,7 +163,7 @@ def update_latest_release(html: str, newest: dict) -> str:
                 </div>
               </div>
             </a>
-            <div class="archive-embed open">
+            <div class="archive-embed">
               <div class="custom-video-poster" data-vid="{vid}">
                 <img class="poster-thumbnail" src="https://img.youtube.com/vi/{vid}/maxresdefault.jpg" alt="Video Cover">
                 <div class="poster-play-btn">
@@ -165,10 +173,69 @@ def update_latest_release(html: str, newest: dict) -> str:
             </div>
           </div>"""
 
-    # static-content 내부의 archive-entry active 블록 교체
-    pattern = r'(<div class="static-content">)\s*<div class="archive-entry active".*?</div>\s*</div>\s*(</div>)'
-    replacement = r'\1\n' + new_block + r'\n        \2'
-    updated = re.sub(pattern, replacement, html, count=1, flags=re.DOTALL)
+    # We use a stack-based parser to find the matching closing tag for <div class="static-content">
+    start_tag = '<div class="static-content">'
+    idx = html.find(start_tag)
+    if idx == -1:
+        return html
+
+    start_search = idx + len(start_tag)
+    depth = 1
+    pos = start_search
+    while depth > 0 and pos < len(html):
+        next_open = html.find('<div', pos)
+        next_close = html.find('</div>', pos)
+
+        if next_close == -1:
+            break
+
+        if next_open != -1 and next_open < next_close:
+            depth += 1
+            pos = next_open + 4
+        else:
+            depth -= 1
+            pos = next_close + 6
+
+    if depth == 0:
+        before = html[:start_search]
+        after = html[pos - 6:]
+        return before + "\n" + new_block + "\n        " + after
+
+    return html
+
+
+# ─────────────────────────────────────────────────────────────
+# 4.5 Starring 섹션을 에피소드 출연자로 자동 업데이트
+# ─────────────────────────────────────────────────────────────
+def update_starring_section(html: str) -> str:
+    section_match = re.search(r'<section class="archive-section">(.*?)</section>', html, re.DOTALL)
+    if not section_match:
+        return html
+
+    archive_section_html = section_match.group(1)
+    raw_guests = re.findall(r'<span class="archive-item-type">([^<]+)</span>', archive_section_html)
+
+    unique_guests = []
+    seen = set()
+    for g in raw_guests:
+        g_clean = g.strip()
+        g_lower = g_clean.lower()
+        if not g_clean:
+            continue
+        if g_lower in {"teaser", "pilot", "episode", "bokos", "artic.", "deleted video"}:
+            continue
+        if re.match(r'^ep\.\d+', g_lower):
+            continue
+        if g_clean not in seen:
+            seen.add(g_clean)
+            unique_guests.append(g_clean)
+
+    if not unique_guests:
+        return html
+
+    starring_str = " &nbsp;•&nbsp; ".join(unique_guests)
+    starring_pattern = r'(<div class="project-starring"[^>]*>\s*<span[^>]*>STARRING</span>\s*<p[^>]*>).*?(</p>\s*</div>)'
+    updated = re.sub(starring_pattern, r'\1\n            ' + starring_str + r'\n          \2', html, count=1, flags=re.DOTALL)
     return updated
 
 
@@ -216,9 +283,20 @@ def process_project(proj: dict) -> bool:
 
     if new_items:
         new_html_blocks = ""
+        index_base = proj.get("index_base", 1)
+        num_existing = len(set(existing_ids))
         for i, item in enumerate(new_items):
-            ep_num   = len(existing_ids) + i
-            ep_label = f"EP.{ep_num}" if ep_num > 0 else "Pilot"
+            ep_num = num_existing + i + index_base
+            if index_base == 0:
+                if ep_num == 0:
+                    ep_label = "Teaser"
+                else:
+                    ep_label = f"EP.{ep_num}"
+            else:
+                if num_existing + i == 0:
+                    ep_label = "Pilot"
+                else:
+                    ep_label = f"EP.{ep_num}"
             new_html_blocks += build_episode_html(item, ep_label)
 
         # archive-list 닫힘 태그 직전에 삽입
@@ -235,14 +313,21 @@ def process_project(proj: dict) -> bool:
         else:
             print(f"[{pid}]   WARNING: archive-list 삽입 위치를 찾지 못함 — HTML 구조 확인 필요")
 
-    # Latest Release 업데이트 (항상 최신 = 플레이리스트 마지막 항목)
+    # Latest Release 업데이트 (업로드일 데이터가 가장 최근인 항목)
     if proj.get("has_latest_release") and items:
-        newest  = items[-1]
+        newest = max(items, key=lambda x: x.get("publishedAtRaw", ""))
         new_html = update_latest_release(html, newest)
         if new_html != html:
             html     = new_html
             modified = True
             print(f"[{pid}]   Latest Release → {newest['title'][:40]}")
+
+    # Starring 리스트 최신화
+    new_html = update_starring_section(html)
+    if new_html != html:
+        html     = new_html
+        modified = True
+        print(f"[{pid}]   Starring List Updated")
 
     if modified:
         with open(html_path, "w", encoding="utf-8") as f:

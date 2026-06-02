@@ -1,4 +1,4 @@
-﻿/* -------------------------------------------------------------
+/* -------------------------------------------------------------
  * PROJECTS / HORIZONTAL TIMELINE VIEW | /projects
  * -------------------------------------------------------------
  * Unified horizontal timeline layout for both mobile and desktop.
@@ -42,6 +42,26 @@ body {
   flex-direction: row;
   scroll-snap-type: x mandatory; /* Snap horizontally */
   scroll-padding-left: 24px; /* Snap offset aligning with left margin */
+  
+  /* Smooth Gradient Wipe transition */
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 50%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 0%, #000 50%, transparent 100%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  opacity: 0;
+  transition: -webkit-mask-position 1.6s var(--ease-out-expo),
+              mask-position 1.6s var(--ease-out-expo),
+              opacity 0.6s ease-out;
+}
+
+.dial-viewport.revealed {
+  -webkit-mask-position: 0% 0;
+  mask-position: 0% 0;
+  opacity: 1;
 }
 
 .dial-viewport::-webkit-scrollbar {

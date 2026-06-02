@@ -1,4 +1,4 @@
-﻿/* -------------------------------------------------------------
+/* -------------------------------------------------------------
  * shared.js — artic. Global Behaviors
  * ------------------------------------------------------------- */
 
@@ -158,7 +158,18 @@ function initSubpageTransition() {
 
   // Collect target reveal items
   let items = [];
-  if (document.querySelector('.about-content')) {
+  if (document.getElementById('dial-viewport')) {
+    items = [document.getElementById('dial-viewport')];
+    // Clean up the mask after transition completes to ensure horizontal scrolling works perfectly
+    const viewport = document.getElementById('dial-viewport');
+    viewport.addEventListener('transitionend', function handler(e) {
+      if (e.propertyName === 'mask-position' || e.propertyName === '-webkit-mask-position') {
+        viewport.style.maskImage = 'none';
+        viewport.style.webkitMaskImage = 'none';
+        viewport.removeEventListener('transitionend', handler);
+      }
+    });
+  } else if (document.querySelector('.about-content')) {
     items = Array.from(document.querySelectorAll('.about-row'));
   } else if (document.querySelector('.container')) {
     items = Array.from(document.querySelectorAll('.project-card'));
@@ -168,8 +179,12 @@ function initSubpageTransition() {
 
   items.forEach((item, index) => {
     item.classList.add('reveal-item');
-    // Staggered delay: starting after the overlay begins fading out (0.9s)
-    item.style.transitionDelay = `${0.3 + index * 0.15}s`;
+    if (item.id === 'dial-viewport') {
+      item.style.transitionDelay = '0s';
+    } else {
+      // Staggered delay: starting after the overlay begins fading out (0.9s)
+      item.style.transitionDelay = `${0.3 + index * 0.15}s`;
+    }
   });
 
   // Trigger animations

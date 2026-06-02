@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -517,8 +517,10 @@
       transition: all 0.3s ease;
     }
 
-    .archive-item:hover {
-      padding-left: 4px;
+    .archive-item:hover,
+    .archive-entry.playing .archive-item,
+    .archive-entry.paused .archive-item {
+      padding-left: 8px;
     }
 
     .archive-item-left {
@@ -543,7 +545,9 @@
       transition: fill 0.3s ease;
     }
 
-    .archive-item:hover .archive-icon {
+    .archive-item:hover .archive-icon,
+    .archive-entry.playing .archive-icon,
+    .archive-entry.paused .archive-icon {
       fill: var(--text-primary);
     }
 
@@ -566,7 +570,9 @@
       line-height: 1.2;
     }
 
-    .archive-item:hover .archive-item-type {
+    .archive-item:hover .archive-item-type,
+    .archive-entry.playing .archive-item-type,
+    .archive-entry.paused .archive-item-type {
       color: var(--text-secondary);
     }
 
@@ -880,7 +886,7 @@
             <div class="info-subtitle">Inspired by Derrick Adams</div>
             <div class="info-desc">
               <p>
-                artic이 가고시안(@gagosian)이 주관하는 Derrick Adams (@derrickadamsny)의 개인전 기념 VIP Private Party에 뮤직 큐레이션으로 참여했습니다.
+                artic이 GAGOSIAN이 주관하는 Derrick Adams의 개인전 기념 VIP Private Party에 뮤직 큐레이션으로 참여했습니다.
               </p>
               <p>
                 artic is pleased to present our exclusive music curation for the Gagosian Private Party, inspired by Derrick Adams.
@@ -910,541 +916,7 @@
             <span class="toggle-icon"></span>
           </div>
           <div class="info-content toggle-content">
-            <div class="archive-list">
-              
-              <!-- Track 1 -->
-              <div class="archive-entry" data-vid="51r5f5OdIY0">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Nile Rodgers & CHIC</span>
-                      <span class="archive-item-title">Good Times</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 2 -->
-              <div class="archive-entry" data-vid="ZbxEyWGvWO4">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">The Whispers</span>
-                      <span class="archive-item-title">And the Beat Goes On</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 3 -->
-              <div class="archive-entry" data-vid="9PQHaStCgBE">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Tom Misch</span>
-                      <span class="archive-item-title">Beautiful Escape</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 4 -->
-              <div class="archive-entry" data-vid="EvDIZ-1anVQ">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Randy Crawford</span>
-                      <span class="archive-item-title">Street Life</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 5 -->
-              <div class="archive-entry" data-vid="1Y151-ov0cY">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Stuart Bascombe</span>
-                      <span class="archive-item-title">Mainline</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 6 -->
-              <div class="archive-entry" data-vid="RAYQTfFh4xk">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Nile Rodgers & CHIC</span>
-                      <span class="archive-item-title">Le Freak</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 7 -->
-              <div class="archive-entry" data-vid="rgf_ZFCZocA">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">McFadden & Whitehead</span>
-                      <span class="archive-item-title">Ain't No Stoppin' Us Now</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 8 -->
-              <div class="archive-entry" data-vid="z8UYBunE6Kk">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Piper</span>
-                      <span class="archive-item-title">Summer Breeze</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 9 -->
-              <div class="archive-entry" data-vid="ICXxNH_BoZk">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Change</span>
-                      <span class="archive-item-title">The Glow of Love (feat. Luther Vandross)</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 10 -->
-              <div class="archive-entry" data-vid="Bj1_gLzdcUE">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Choices</span>
-                      <span class="archive-item-title">Less Is More</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 11 -->
-              <div class="archive-entry" data-vid="Omnpu8mzX4c">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">George Benson</span>
-                      <span class="archive-item-title">Give Me the Night</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 12 -->
-              <div class="archive-entry" data-vid="3ie4rWdvhXY">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Llorca</span>
-                      <span class="archive-item-title">The Novel Sound</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 13 -->
-              <div class="archive-entry" data-vid="AnA9h85rBZc">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Kraak & Smaak</span>
-                      <span class="archive-item-title">Don't Want This to Be Over</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 14 -->
-              <div class="archive-entry" data-vid="J39Io-vmmOk">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Jamiroquai</span>
-                      <span class="archive-item-title">Little L</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 15 -->
-              <div class="archive-entry" data-vid="V4Vr38Fll4k">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Supershy</span>
-                      <span class="archive-item-title">Feel Like Makin' Love</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 16 -->
-              <div class="archive-entry" data-vid="minW-Z3dbBU">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Breakbot</span>
-                      <span class="archive-item-title">Fantasy</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 17 -->
-              <div class="archive-entry" data-vid="lTA1h9mJ4Rg">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Jamiroquai</span>
-                      <span class="archive-item-title">Falling</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 18 -->
-              <div class="archive-entry" data-vid="pinUhF0AXRk">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Third World</span>
-                      <span class="archive-item-title">Now That We Found Love</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 19 -->
-              <div class="archive-entry" data-vid="_3r72o_f-z8">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">The Blackbyrds</span>
-                      <span class="archive-item-title">Rock Creek Park</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 20 -->
-              <div class="archive-entry" data-vid="okOEKnPR0EE">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">First Choice</span>
-                      <span class="archive-item-title">Double Cross</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 21 -->
-              <div class="archive-entry" data-vid="ASBFDoTTH0w">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">The Salsoul Orchestra</span>
-                      <span class="archive-item-title">Ooh I Love It (Love Break)</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 22 -->
-              <div class="archive-entry" data-vid="di0nmSdQbsU">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Pomplamoose</span>
-                      <span class="archive-item-title">I Can't Stop Feeling Billie Jean's Face</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 23 -->
-              <div class="archive-entry" data-vid="HPyNLCThd60">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Brian Culbertson</span>
-                      <span class="archive-item-title">Step into Love</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 24 -->
-              <div class="archive-entry" data-vid="rd4ng8X1xiY">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Cory Wong (feat. Tom Misch)</span>
-                      <span class="archive-item-title">Cosmic Sans</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 25 -->
-              <div class="archive-entry" data-vid="HJ4e93eU-0E">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Pomplamoose</span>
-                      <span class="archive-item-title">Jamiroquai Bee Gees Mashup</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 26 -->
-              <div class="archive-entry" data-vid="8naZ82JUj-4">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">The Greyboy Allstars</span>
-                      <span class="archive-item-title">Soul Dream</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 27 -->
-              <div class="archive-entry" data-vid="8RWrCQeS_LE">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Jafunk (feat. Adi Oasis)</span>
-                      <span class="archive-item-title">Yellow Daze</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 28 -->
-              <div class="archive-entry" data-vid="nhyUICuE65Y">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Donna Summer</span>
-                      <span class="archive-item-title">Bad Girls</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 29 -->
-              <div class="archive-entry" data-vid="NLgcLmyrQIU">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">The Greyboy Allstars</span>
-                      <span class="archive-item-title">Fried Grease</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 30 -->
-              <div class="archive-entry" data-vid="jUs7P8YO9EI">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Stevie Wonder</span>
-                      <span class="archive-item-title">Fun Day (Remix)</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 31 -->
-              <div class="archive-entry" data-vid="bOckbm7TCu4">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">SWV</span>
-                      <span class="archive-item-title">Use Your Heart</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 32 -->
-              <div class="archive-entry" data-vid="IlMoGkt7enw">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">SWV</span>
-                      <span class="archive-item-title">Right Here</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 33 -->
-              <div class="archive-entry" data-vid="9B-UGyvgnPs">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Total</span>
-                      <span class="archive-item-title">Can't You See</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 34 -->
-              <div class="archive-entry" data-vid="p1p8OdHz94Q">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Xscape</span>
-                      <span class="archive-item-title">Who Can I Run To</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 35 -->
-              <div class="archive-entry" data-vid="eq43GTVoAuw">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Brownstone</span>
-                      <span class="archive-item-title">If You Love Me</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 36 -->
-              <div class="archive-entry" data-vid="munm6lzoR3I">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Groove Theory</span>
-                      <span class="archive-item-title">Tell Me</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 37 -->
-              <div class="archive-entry" data-vid="5-Nkknmx44Q">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">Janet Jackson</span>
-                      <span class="archive-item-title">That's The Way Love Goes</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-              <!-- Track 38 -->
-              <div class="archive-entry" data-vid="LIljpItwhVY">
-                <a class="archive-item" href="javascript:void(0)">
-                  <div class="archive-item-left">
-                    <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    <div class="archive-item-text">
-                      <span class="archive-item-type">TLC</span>
-                      <span class="archive-item-title">Creep</span>
-                    </div>
-                  </div>
-                </a>
-                <div class="archive-embed"></div>
-              </div>
-
-            </div>
+            <div class="archive-list" id="playlist-container"></div>
           </div>
         </div>
       </div>
@@ -1638,51 +1110,119 @@
       }
     }
 
-    document.querySelectorAll('.archive-entry[data-vid]').forEach(entry => {
-      const itemLink = entry.querySelector('.archive-item');
-      if (!itemLink) return;
-      itemLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        const vid = entry.dataset.vid;
-        if (!vid || !ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+    const PLAYLIST_TRACKS = [
+      { vid: "51r5f5OdIY0", artist: "Nile Rodgers & CHIC", title: "Good Times" },
+      { vid: "ZbxEyWGvWO4", artist: "The Whispers", title: "And the Beat Goes On" },
+      { vid: "9PQHaStCgBE", artist: "Tom Misch", title: "Beautiful Escape" },
+      { vid: "EvDIZ-1anVQ", artist: "Randy Crawford", title: "Street Life" },
+      { vid: "1Y151-ov0cY", artist: "Stuart Bascombe", title: "Mainline" },
+      { vid: "RAYQTfFh4xk", artist: "Nile Rodgers & CHIC", title: "Le Freak" },
+      { vid: "rgf_ZFCZocA", artist: "McFadden & Whitehead", title: "Ain't No Stoppin' Us Now" },
+      { vid: "z8UYBunE6Kk", artist: "Piper", title: "Summer Breeze" },
+      { vid: "ICXxNH_BoZk", artist: "Change", title: "The Glow of Love (feat. Luther Vandross)" },
+      { vid: "Bj1_gLzdcUE", artist: "Choices", title: "Less Is More" },
+      { vid: "Omnpu8mzX4c", artist: "George Benson", title: "Give Me the Night" },
+      { vid: "3ie4rWdvhXY", artist: "Llorca", title: "The Novel Sound" },
+      { vid: "AnA9h85rBZc", artist: "Kraak & Smaak", title: "Don't Want This to Be Over" },
+      { vid: "J39Io-vmmOk", artist: "Jamiroquai", title: "Little L" },
+      { vid: "V4Vr38Fll4k", artist: "Supershy", title: "Feel Like Makin' Love" },
+      { vid: "minW-Z3dbBU", artist: "Breakbot", title: "Fantasy" },
+      { vid: "lTA1h9mJ4Rg", artist: "Jamiroquai", title: "Falling" },
+      { vid: "pinUhF0AXRk", artist: "Third World", title: "Now That We Found Love" },
+      { vid: "_3r72o_f-z8", artist: "The Blackbyrds", title: "Rock Creek Park" },
+      { vid: "okOEKnPR0EE", artist: "First Choice", title: "Double Cross" },
+      { vid: "ASBFDoTTH0w", artist: "The Salsoul Orchestra", title: "Ooh I Love It (Love Break)" },
+      { vid: "di0nmSdQbsU", artist: "Pomplamoose", title: "I Can't Stop Feeling Billie Jean's Face" },
+      { vid: "HPyNLCThd60", artist: "Brian Culbertson", title: "Step into Love" },
+      { vid: "rd4ng8X1xiY", artist: "Cory Wong (feat. Tom Misch)", title: "Cosmic Sans" },
+      { vid: "HJ4e93eU-0E", artist: "Pomplamoose", title: "Jamiroquai Bee Gees Mashup" },
+      { vid: "8naZ82JUj-4", artist: "The Greyboy Allstars", title: "Soul Dream" },
+      { vid: "8RWrCQeS_LE", artist: "Jafunk (feat. Adi Oasis)", title: "Yellow Daze" },
+      { vid: "nhyUICuE65Y", artist: "Donna Summer", title: "Bad Girls" },
+      { vid: "NLgcLmyrQIU", artist: "The Greyboy Allstars", title: "Fried Grease" },
+      { vid: "jUs7P8YO9EI", artist: "Stevie Wonder", title: "Fun Day (Remix)" },
+      { vid: "bOckbm7TCu4", artist: "SWV", title: "Use Your Heart" },
+      { vid: "IlMoGkt7enw", artist: "SWV", title: "Right Here" },
+      { vid: "9B-UGyvgnPs", artist: "Total", title: "Can't You See" },
+      { vid: "p1p8OdHz94Q", artist: "Xscape", title: "Who Can I Run To" },
+      { vid: "eq43GTVoAuw", artist: "Brownstone", title: "If You Love Me" },
+      { vid: "munm6lzoR3I", artist: "Groove Theory", title: "Tell Me" },
+      { vid: "5-Nkknmx44Q", artist: "Janet Jackson", title: "That's The Way Love Goes" },
+      { vid: "LIljpItwhVY", artist: "TLC", title: "Creep" }
+    ];
 
-        if (currentActiveEntry === entry) {
-          const state = ytPlayer.getPlayerState();
-          if (state === YT.PlayerState.PLAYING) {
-            setEntryState(entry, 'paused');
-            fadeOut(ytPlayer, 600, () => {
-              ytPlayer.pauseVideo();
-            });
+    function renderPlaylist() {
+      const container = document.getElementById('playlist-container');
+      if (!container) return;
+
+      container.innerHTML = PLAYLIST_TRACKS.map((track, idx) => `
+        <div class="archive-entry" data-vid="${track.vid}" style="animation-delay: ${(3.3 + idx * 0.03).toFixed(2)}s;">
+          <a class="archive-item" href="javascript:void(0)">
+            <div class="archive-item-left">
+              <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <div class="archive-item-text">
+                <span class="archive-item-type">${track.artist}</span>
+                <span class="archive-item-title">${track.title}</span>
+              </div>
+            </div>
+          </a>
+          <div class="archive-embed"></div>
+        </div>
+      `).join('');
+      
+      bindPlaylistClickHandlers();
+    }
+
+    function bindPlaylistClickHandlers() {
+      document.querySelectorAll('#playlist-container .archive-entry[data-vid]').forEach(entry => {
+        const itemLink = entry.querySelector('.archive-item');
+        if (!itemLink) return;
+        itemLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          const vid = entry.dataset.vid;
+          if (!vid || !ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
+
+          if (currentActiveEntry === entry) {
+            const state = ytPlayer.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+              setEntryState(entry, 'paused');
+              fadeOut(ytPlayer, 600, () => {
+                ytPlayer.pauseVideo();
+              });
+            } else {
+              setEntryState(entry, 'playing');
+              ytPlayer.playVideo();
+              fadeIn(ytPlayer, 600);
+            }
           } else {
+            const prevEntry = currentActiveEntry;
+            if (prevEntry) {
+              setEntryState(prevEntry, 'stopped');
+              const state = ytPlayer.getPlayerState();
+              if (state === YT.PlayerState.PLAYING) {
+                fadeOut(ytPlayer, 400, () => {
+                  currentActiveEntry = entry;
+                  setEntryState(entry, 'playing');
+                  ytPlayer.loadVideoById(vid);
+                  ytPlayer.playVideo();
+                  fadeIn(ytPlayer, 600);
+                });
+                return;
+              }
+            }
+            
+            currentActiveEntry = entry;
             setEntryState(entry, 'playing');
+            ytPlayer.loadVideoById(vid);
             ytPlayer.playVideo();
             fadeIn(ytPlayer, 600);
           }
-        } else {
-          const prevEntry = currentActiveEntry;
-          if (prevEntry) {
-            setEntryState(prevEntry, 'stopped');
-            const state = ytPlayer.getPlayerState();
-            if (state === YT.PlayerState.PLAYING) {
-              fadeOut(ytPlayer, 400, () => {
-                currentActiveEntry = entry;
-                setEntryState(entry, 'playing');
-                ytPlayer.loadVideoById(vid);
-                ytPlayer.playVideo();
-                fadeIn(ytPlayer, 600);
-              });
-              return;
-            }
-          }
-          
-          currentActiveEntry = entry;
-          setEntryState(entry, 'playing');
-          ytPlayer.loadVideoById(vid);
-          ytPlayer.playVideo();
-          fadeIn(ytPlayer, 600);
-        }
+        });
       });
-    });
+    }
+
+    // Initialize playlist rendering
+    renderPlaylist();
 
     // == Mobile Accordion Toggle ==
     document.querySelectorAll('.mobile-toggle-header').forEach(header => {

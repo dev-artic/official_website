@@ -19,7 +19,34 @@
     })();
   </script>
 
-  <style>
+    <style>
+
+    /* -- Nav (initial: hidden, appears after logo animation) -- */
+    @media (min-width: 768px) {
+      .nav-bar {
+        opacity: 0;
+        transform: translateY(-12px);
+        animation: navReveal 0.7s var(--ease-out-expo) 1.8s forwards;
+      }
+
+      @keyframes navReveal {
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+
+    /* -- Hero About Button (discover) -- */
+    .hero-about-btn {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: buttonReveal 0.8s var(--ease-out-expo) 1.8s forwards;
+    }
+
+    @keyframes buttonReveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     /* — Section Link — */
 
@@ -28,8 +55,10 @@
       min-height: 100vh;
       min-height: 100dvh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      gap: 64px;
       position: relative;
     }
 
@@ -543,9 +572,9 @@
 
   <!-- ── Projects Preview ── -->
   <section class="content-section">
-    <div class="projects-row animate-on-load" style="animation-delay: 1.0s;">
+    <div class="projects-row">
       <div class="projects-preview" id="projects-preview-container">
-        <a href="tasting-note/" class="preview-card">
+        <a href="tasting-note/" class="preview-card reveal delay-1">
           <div class="preview-img-wrap">
             <img src="tasting-note/album-art.png" alt="TASTING NOTE" class="preview-card-img">
           </div>
@@ -553,15 +582,22 @@
           <div class="preview-card-meta">ORIGINAL SERIES · 2026</div>
         </a>
 
-        <a href="neutral-interview/" class="preview-card">
+        <a href="neutral-interview/" class="preview-card reveal delay-2">
           <div class="preview-img-wrap">
             <img src="neutral-interview/album-art.png" alt="중립적인인터뷰" class="preview-card-img">
           </div>
           <div class="preview-card-title">중립적인인터뷰</div>
           <div class="preview-card-meta">PRODUCTION · 2025</div>
         </a>
+        <a href="gagosian-party-music/" class="preview-card reveal delay-3">
+          <div class="preview-img-wrap">
+            <img src="gagosian-party-music/album-art.png" alt="Gagosian Party Music Curation" class="preview-card-img">
+          </div>
+          <div class="preview-card-title">Gagosian Party Curation</div>
+          <div class="preview-card-meta">MUSIC CURATION · 2024</div>
+        </a>
 
-        <a href="deus-ex-machina/" class="preview-card">
+        <a href="deus-ex-machina/" class="preview-card reveal delay-4">
           <div class="preview-img-wrap">
             <img src="deus-ex-machina/album-art.png" alt="deus ex machina" class="preview-card-img">
           </div>
@@ -569,7 +605,7 @@
           <div class="preview-card-meta">LP · 2024</div>
         </a>
 
-        <div class="view-all-link-wrapper mobile-only">
+        <div class="view-all-link-wrapper mobile-only reveal delay-4">
           <a href="/projects/" class="section-link">
             <span>View All Projects</span>
             <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
@@ -589,7 +625,7 @@
 
   <!-- ── Contact ── -->
   <section class="content-section" style="text-align: right;">
-    <a href="/contact/" class="section-link animate-on-load" style="animation-delay: 1.2s;">
+    <a href="/contact/" class="section-link reveal reveal-right">
       <span>Contact Us</span>
       <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
     </a>
@@ -610,6 +646,7 @@
 
   <!-- ── Scripts ── -->
   <script src="js/shared.js"></script>
+  <script src="js/reveal.js"></script>
   <script>
     sessionStorage.removeItem('artic-subpage');
     document.addEventListener('DOMContentLoaded', () => {

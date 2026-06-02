@@ -6,11 +6,9 @@
   <meta name="description" content="artic. — Project Archive. Art, music, and culture curation.">
   <meta name="author" content="artic.">
   <title>Projects — artic.</title>
-
   <link rel="icon" type="image/png" href="../images/favicon.png">
   <link rel="stylesheet" href="../css/design-system.css">
   <link rel="stylesheet" href="style.css">
-
   <script>
     (function(){
       var s = localStorage.getItem('artic-theme');
@@ -20,8 +18,6 @@
   </script>
 </head>
 <body>
-
-  <!-- ── Floating Navigation (same as homepage) ── -->
   <nav class="nav-bar delayed-reveal">
     <a href="/" class="nav-home visible" id="nav-home">artic.</a>
     <a href="/about/" class="nav-link">About</a>
@@ -30,10 +26,7 @@
   </nav>
 
   <div class="delayed-reveal container animate-fade-in">
-
-    <!-- Horizontal Scroll Carousel -->
     <div class="projects-carousel" id="projects-carousel">
-
       <article class="project-card">
         <a href="../tasting-note/" class="card-link">
           <div class="image-wrapper">
@@ -63,6 +56,20 @@
       </article>
 
       <article class="project-card">
+        <a href="../gagosian-party-music/" class="card-link">
+          <div class="image-wrapper">
+            <img src="../gagosian-party-music/album-art.png" alt="artic. — Gagosian Party Music Curation" class="project-img">
+          </div>
+          <div class="project-info">
+            <div class="meta-row">
+              <span class="project-tag">MUSIC CURATION</span><span class="project-date">2024</span>
+            </div>
+            <h2 class="project-name">Gagosian Party Curation</h2>
+          </div>
+        </a>
+      </article>
+
+      <article class="project-card">
         <a href="../deus-ex-machina/" class="card-link">
           <div class="image-wrapper">
             <img src="../deus-ex-machina/album-art.png" alt="arkyteccc ? deus ex machina" class="project-img">
@@ -82,7 +89,6 @@
     <p>© 2026 artic. All Rights Reserved</p>
   </footer>
 
-  <!-- Theme Toggle -->
   <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
     <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
     <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -91,7 +97,6 @@
   <script src="../js/shared.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Drag-to-scroll
       const c = document.getElementById('projects-carousel');
       if (!c) return;
       let down = false, sx, sl;
@@ -101,6 +106,5 @@
       c.addEventListener('mousemove', e => { if (!down) return; e.preventDefault(); c.scrollLeft = sl - (e.pageX - c.offsetLeft - sx) * 1.5; });
     });
   </script>
-
 </body>
 </html>

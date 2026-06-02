@@ -1527,6 +1527,202 @@
         border-color: var(--border-color);
         cursor: default;
       }
+
+      /* ── Print Modal Slider Track ── */
+      .print-modal-slider-viewport {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .print-modal-slider-track {
+        display: flex;
+        width: 200%;
+        height: 100%;
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .print-modal-slide {
+        width: 50%;
+        flex-shrink: 0;
+        height: 100%;
+        box-sizing: border-box;
+      }
+
+      .print-modal-slide.slide-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .print-modal-slide.slide-checkout {
+        display: flex;
+        flex-direction: column;
+        padding-right: 2px;
+      }
+
+      /* Checkout Active State */
+      .print-modal.is-checkout .print-modal-slider-track {
+        transform: translateX(-50%);
+      }
+
+      /* Mobile Booklet Cover Image Shrink on Checkout */
+      .print-modal-image-wrap {
+        transition: padding 0.5s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.5s ease;
+      }
+
+      .print-modal-image-wrap img {
+        transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
+      }
+
+      @media (max-width: 767px) {
+        .print-modal.is-checkout .print-modal-image-wrap {
+          padding: 20px !important;
+        }
+        .print-modal.is-checkout .print-modal-image-wrap img {
+          max-height: 12vh !important;
+        }
+      }
+
+      /* ── Modern Checkout Form Styling ── */
+      .checkout-scroll-container {
+        max-height: 48vh;
+        overflow-y: auto;
+        padding-right: 6px;
+        scrollbar-width: thin;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .checkout-scroll-container::-webkit-scrollbar {
+        width: 4px;
+      }
+      .checkout-scroll-container::-webkit-scrollbar-thumb {
+        background-color: var(--border-color);
+        border-radius: 2px;
+      }
+
+      @media (max-width: 767px) {
+        .checkout-scroll-container {
+          max-height: 40vh;
+        }
+      }
+
+      .checkout-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .checkout-label {
+        font-family: var(--font-sans);
+        font-size: 0.55rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.1em;
+      }
+
+      .checkout-input, .checkout-select, .checkout-textarea {
+        width: 100%;
+        padding: 8px 12px;
+        font-family: var(--font-sans);
+        font-size: 0.75rem;
+        background-color: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        outline: none;
+        transition: border-color 0.3s ease;
+        border-radius: 0;
+      }
+
+      .checkout-input:focus, .checkout-select:focus, .checkout-textarea:focus {
+        border-color: var(--text-primary);
+      }
+
+      .checkout-textarea {
+        resize: vertical;
+        min-height: 50px;
+      }
+
+      .checkout-summary-box {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        padding: 12px;
+        font-family: var(--font-sans);
+        font-size: 0.65rem;
+        line-height: 1.6;
+        color: var(--text-secondary);
+        transition: background-color 0.5s ease;
+      }
+
+      .checkout-summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+
+      .checkout-summary-row.total {
+        border-top: 1px solid var(--border-color);
+        padding-top: 4px;
+        margin-top: 4px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .checkout-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+        margin-bottom: 12px;
+      }
+
+      .checkout-btn {
+        flex: 1;
+        padding: 10px 16px;
+        font-family: var(--font-sans);
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+        background-color: transparent;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        border-radius: 0;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      .checkout-btn.submit {
+        background-color: var(--text-primary);
+        color: var(--bg-primary);
+        border-color: var(--text-primary);
+      }
+
+      .checkout-btn.submit:hover {
+        opacity: 0.8;
+      }
+
+      .checkout-btn.back:hover {
+        border-color: var(--text-primary);
+      }
+
+      .checkout-success-screen {
+        text-align: center;
+        padding: 40px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
   </style>
 </head>
 <body>
@@ -2029,32 +2225,30 @@
 
         modalImg.src = data.image;
         modalImg.alt = data.title;
+        modal.classList.remove('is-checkout');
         
         let badgeHtml = '';
         if (data.statusClass === 'request-purchase') {
-          badgeHtml = `<a href="https://artic-live.notion.site/ebd/1f1ffc3c3af5806088a8c6d851fe9d62" target="_blank" rel="noopener noreferrer" class="print-badge ${data.statusClass}">${data.statusText}</a>`;
+          badgeHtml = `<button type="button" class="print-badge ${data.statusClass}" id="print-action-btn">${data.statusText}</button>`;
         } else {
           badgeHtml = `<span class="print-badge ${data.statusClass}">${data.statusText}</span>`;
         }
 
-        modalInfo.innerHTML = `
-          <div class="print-modal-info-header">
-            <h2 class="print-info-title" style="font-family: var(--font-serif); font-size: 1.6rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; margin-bottom: 8px;">${data.title}</h2>
-            <div class="print-info-grid">
-              <span class="print-meta-label">Artist</span>
-              <span class="print-meta-value">${data.artists}</span>
+        const detailsHtml = `
+          <div class="print-info-grid">
+            <span class="print-meta-label">Artist</span>
+            <span class="print-meta-value">${data.artists}</span>
 
-              <span class="print-meta-label">Project</span>
-              <span class="print-meta-value">${data.album}</span>
+            <span class="print-meta-label">Project</span>
+            <span class="print-meta-value">${data.album}</span>
 
-              <span class="print-meta-label">Dimensions</span>
-              <span class="print-meta-value">${data.dimensions}</span>
+            <span class="print-meta-label">Dimensions</span>
+            <span class="print-meta-value">${data.dimensions}</span>
 
-              <span class="print-meta-label">Status</span>
-              <div class="print-meta-value">
-                <div style="font-weight: 400; color: var(--text-primary); margin-bottom: 2px;">${data.status}</div>
-                ${badgeHtml}
-              </div>
+            <span class="print-meta-label">Status</span>
+            <div class="print-meta-value">
+              <div style="font-weight: 400; color: var(--text-primary); margin-bottom: 2px;">${data.status}</div>
+              ${badgeHtml}
             </div>
           </div>
           <div class="print-modal-info-footer" style="border-top: 1px solid var(--border-color); padding-top: 24px; font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5;">
@@ -2063,6 +2257,175 @@
           </div>
         `;
 
+        let checkoutHtml = '';
+        if (data.statusClass === 'request-purchase') {
+          checkoutHtml = `
+            <div class="checkout-scroll-container">
+              <div class="checkout-form-group">
+                <label class="checkout-label">이름 *</label>
+                <input type="text" id="chk-name" class="checkout-input" required placeholder="성함을 입력하세요">
+              </div>
+              <div class="checkout-form-group">
+                <label class="checkout-label">이메일 *</label>
+                <input type="email" id="chk-email" class="checkout-input" required placeholder="example@email.com">
+              </div>
+              <div class="checkout-form-group">
+                <label class="checkout-label">연락처 *</label>
+                <input type="tel" id="chk-phone" class="checkout-input" required placeholder="010-0000-0000">
+              </div>
+              <div class="checkout-form-group">
+                <label class="checkout-label">배송지 주소 *</label>
+                <input type="text" id="chk-address" class="checkout-input" required placeholder="배송 주소를 입력하세요">
+              </div>
+              <div class="checkout-form-group">
+                <label class="checkout-label">수량 *</label>
+                <select id="chk-quantity" class="checkout-select">
+                  <option value="1">1개</option>
+                  <option value="2">2개</option>
+                  <option value="3">3개</option>
+                  <option value="4">4개</option>
+                  <option value="5">5개</option>
+                </select>
+              </div>
+              <div class="checkout-form-group">
+                <label class="checkout-label">입금자명 *</label>
+                <input type="text" id="chk-depositor" class="checkout-input" required placeholder="입금자 성함">
+              </div>
+              <div class="checkout-form-group">
+                <label class="checkout-label">요청사항</label>
+                <textarea id="chk-notes" class="checkout-textarea" placeholder="요청사항이 있으시면 적어주세요"></textarea>
+              </div>
+
+              <div class="checkout-summary-box">
+                <div class="checkout-summary-row">
+                  <span>상품 금액 (1MC1PD: The Interview)</span>
+                  <span id="chk-summary-price">15,000원</span>
+                </div>
+                <div class="checkout-summary-row">
+                  <span>배송비</span>
+                  <span>3,000원</span>
+                </div>
+                <div class="checkout-summary-row total">
+                  <span>총 합계</span>
+                  <span id="chk-summary-total">18,000원</span>
+                </div>
+                <div style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; font-size: 0.55rem; color: var(--text-muted);">
+                  계좌번호: 국민은행 123-4567-89012 (예금주: artic)
+                </div>
+              </div>
+            </div>
+
+            <div class="checkout-buttons">
+              <button type="button" class="checkout-btn back" id="chk-back-btn">돌아가기</button>
+              <button type="button" class="checkout-btn submit" id="chk-submit-btn">결제 요청하기</button>
+            </div>
+          `;
+        }
+
+        modalInfo.innerHTML = `
+          <h2 class="print-info-title" style="font-family: var(--font-serif); font-size: 1.6rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; margin-bottom: 8px;">${data.title}</h2>
+          <div class="print-modal-slider-viewport">
+            <div class="print-modal-slider-track" id="print-modal-slider-track">
+              <div class="print-modal-slide slide-details">
+                ${detailsHtml}
+              </div>
+              <div class="print-modal-slide slide-checkout">
+                ${checkoutHtml}
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (data.statusClass === 'request-purchase') {
+          const actionBtn = document.getElementById('print-action-btn');
+          const backBtn = document.getElementById('chk-back-btn');
+          const submitBtn = document.getElementById('chk-submit-btn');
+          const quantitySelect = document.getElementById('chk-quantity');
+          const chkName = document.getElementById('chk-name');
+          const chkDepositor = document.getElementById('chk-depositor');
+
+          chkName.addEventListener('input', function() {
+            chkDepositor.value = chkName.value;
+          });
+
+          quantitySelect.addEventListener('change', function() {
+            const qty = parseInt(quantitySelect.value, 10);
+            const prodPrice = 15000 * qty;
+            const totalPrice = prodPrice + 3000;
+            document.getElementById('chk-summary-price').textContent = prodPrice.toLocaleString() + '원';
+            document.getElementById('chk-summary-total').textContent = totalPrice.toLocaleString() + '원';
+          });
+
+          actionBtn.addEventListener('click', function() {
+            modal.classList.add('is-checkout');
+          });
+
+          backBtn.addEventListener('click', function() {
+            modal.classList.remove('is-checkout');
+          });
+
+          submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const name = chkName.value.trim();
+            const email = document.getElementById('chk-email').value.trim();
+            const phone = document.getElementById('chk-phone').value.trim();
+            const address = document.getElementById('chk-address').value.trim();
+            const quantity = parseInt(quantitySelect.value, 10);
+            const depositor = chkDepositor.value.trim() || name;
+            const notes = document.getElementById('chk-notes').value.trim();
+
+            if (!name || !email || !phone || !address || !depositor) {
+              alert('필수 입력 항목(*)을 모두 채워주세요.');
+              return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '제출 중...';
+            backBtn.disabled = true;
+
+            const payload = { name, email, phone, address, quantity, depositor, notes };
+
+            fetch('/api/checkout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            })
+            .then(res => {
+              if (!res.ok) throw new Error('Network response was not ok');
+              return res.json();
+            })
+            .then(resData => {
+              const total_price = 15000 * quantity + 3000;
+              const checkoutSlide = document.querySelector('.slide-checkout');
+              checkoutSlide.innerHTML = `
+                <div class="checkout-success-screen">
+                  <svg viewBox="0 0 24 24" style="width: 44px; height: 44px; fill: none; stroke: var(--text-primary); stroke-width: 1.5; margin-bottom: 16px; display: inline-block;">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <h3 style="font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">요청 완료</h3>
+                  <p style="font-family: var(--font-sans); font-size: 0.7rem; color: var(--text-secondary); line-height: 1.6; max-width: 280px; margin-left: auto; margin-right: auto;">
+                    결제 요청이 완료되었습니다.<br>
+                    안내 메일이 <b>${email}</b> 주소로 발송되었습니다.<br><br>
+                    국민은행 <b>123-4567-89012</b> (예금주: artic)<br>
+                    으로 <b>${total_price.toLocaleString()}원</b>을 입금해 주시면 확인 후 신속히 배송해 드리겠습니다.
+                  </p>
+                  <button class="checkout-btn" style="margin-top: 20px; max-width: 140px;" id="chk-success-close-btn">닫기</button>
+                </div>
+              `;
+              
+              document.getElementById('chk-success-close-btn').addEventListener('click', closeModal);
+            })
+            .catch(err => {
+              console.error(err);
+              alert('오류가 발생했습니다. 다시 시도해 주세요.');
+              submitBtn.disabled = false;
+              submitBtn.textContent = '결제 요청하기';
+              backBtn.disabled = false;
+            });
+          });
+        }
+
         modal.classList.add('is-active');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
@@ -2070,6 +2433,7 @@
 
       function closeModal() {
         modal.classList.remove('is-active');
+        modal.classList.remove('is-checkout');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
       }
@@ -2141,6 +2505,64 @@
       var elPrevBtn  = document.getElementById('play-prev-btn');
       var elNextBtn  = document.getElementById('play-next-btn');
 
+      var isStatusTransitioning = false;
+      var fadeInterval = null;
+
+      function fadeAudio(targetVolume, duration, onComplete) {
+        if (!ytPlayer || typeof ytPlayer.getVolume !== 'function') {
+          if (onComplete) onComplete();
+          return;
+        }
+        clearInterval(fadeInterval);
+        var startVol = ytPlayer.getVolume();
+        var startTime = Date.now();
+        
+        fadeInterval = setInterval(function() {
+          var elapsed = Date.now() - startTime;
+          var progress = Math.min(1, elapsed / duration);
+          var curVol = Math.round(startVol + (targetVolume - startVol) * progress);
+          ytPlayer.setVolume(curVol);
+          
+          if (progress >= 1) {
+            clearInterval(fadeInterval);
+            if (onComplete) onComplete();
+          }
+        }, 30);
+      }
+
+      function changeStatusWithFade(newStatus, duration, nextStateFn) {
+        if (isStatusTransitioning) return;
+        isStatusTransitioning = true;
+        
+        elStatus.classList.add('is-faded');
+        var halfDuration = duration / 2;
+        
+        if (newStatus === 'Paused' || newStatus === 'Ready') {
+          fadeAudio(0, halfDuration, function() {
+            if (nextStateFn) nextStateFn();
+            
+            setTimeout(function() {
+              elStatus.textContent = newStatus;
+              elStatus.classList.remove('is-faded');
+              isStatusTransitioning = false;
+            }, 50);
+          });
+        } else if (newStatus === 'Now Playing') {
+          if (nextStateFn) nextStateFn();
+          if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+            ytPlayer.setVolume(0);
+          }
+          
+          setTimeout(function() {
+            elStatus.textContent = newStatus;
+            elStatus.classList.remove('is-faded');
+            isStatusTransitioning = false;
+            
+            fadeAudio(100, halfDuration);
+          }, halfDuration);
+        }
+      }
+
       function pad(n) { return n < 10 ? '0' + n : n; }
 
       function formatTime(sec) {
@@ -2170,13 +2592,17 @@
         isPlaying = state;
         if (state) {
           widget.classList.add('is-playing');
-          elStatus.textContent = 'Now Playing';
+          if (!isStatusTransitioning) {
+            elStatus.textContent = 'Now Playing';
+          }
           // Pause icon
           elMainIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
           startProgress();
         } else {
           widget.classList.remove('is-playing');
-          elStatus.textContent = isPlaying === false && ytPlayer ? 'Paused' : 'Ready';
+          if (!isStatusTransitioning) {
+            elStatus.textContent = isPlaying === false && ytPlayer ? 'Paused' : 'Ready';
+          }
           elMainIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
           stopProgress();
         }
@@ -2265,13 +2691,12 @@
             },
             onStateChange: function(event) {
               if (event.data === YT.PlayerState.PLAYING) {
+                if (ytPlayer && typeof ytPlayer.getVolume === 'function' && !isStatusTransitioning) {
+                  ytPlayer.setVolume(100);
+                }
                 setPlaying(true);
               } else if (event.data === YT.PlayerState.PAUSED) {
-                isPlaying = false;
-                widget.classList.remove('is-playing');
-                elStatus.textContent = 'Paused';
-                elMainIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
-                stopProgress();
+                setPlaying(false);
               } else if (event.data === YT.PlayerState.ENDED) {
                 // Auto-advance to next track (next direction animation)
                 var next = (currentIdx + 1) % TRACKS.length;
@@ -2287,9 +2712,13 @@
         if (!ytPlayer || typeof ytPlayer.getPlayerState !== 'function') return;
         var state = ytPlayer.getPlayerState();
         if (state === YT.PlayerState.PLAYING) {
-          ytPlayer.pauseVideo();
+          changeStatusWithFade('Paused', 600, function() {
+            ytPlayer.pauseVideo();
+          });
         } else {
-          ytPlayer.playVideo();
+          changeStatusWithFade('Now Playing', 600, function() {
+            ytPlayer.playVideo();
+          });
         }
       });
 

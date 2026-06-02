@@ -28,7 +28,7 @@ body {
   flex-grow: 1;
 }
 
-/* ?? Horizontal Scroll Viewport ?? */
+/* ???? Horizontal Scroll Viewport ???? */
 .dial-viewport {
   height: 60dvh;
   max-height: 520px;
@@ -48,9 +48,16 @@ body {
   display: none;
 }
 
-/* Hide mobile spacers since we scroll horizontally now */
-.dial-spacer {
-  display: none !important;
+/* Spacer adjustments for horizontal timeline */
+.dial-spacer:first-child {
+  display: none !important; /* No spacer needed at the start */
+}
+
+.dial-spacer:last-child {
+  display: block !important;
+  height: 100%;
+  width: calc(100vw - 24px); /* Mobile: viewport width minus left padding (24px) to allow full scroll & snap */
+  flex-shrink: 0;
 }
 
 .dial-track {
@@ -60,7 +67,7 @@ body {
   height: 100%;
 }
 
-/* ?? Year Nodes (Horizontal Blocks) ?? */
+/* ???? Year Nodes (Horizontal Blocks) ???? */
 .dial-year-node {
   display: flex;
   flex-direction: column;
@@ -75,7 +82,7 @@ body {
   margin-right: 0;
 }
 
-/* ?? Year Header & Line Divider ?? */
+/* ???? Year Header & Line Divider ???? */
 .year-header-wrapper {
   width: 100%;
   border-bottom: 1px solid var(--border-color);
@@ -126,7 +133,7 @@ body {
   animation: chewySlideLeft 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* ?? Horizontal Cover Cards ?? */
+/* ???? Horizontal Cover Cards ???? */
 .year-projects {
   display: flex;
   flex-direction: row;
@@ -249,7 +256,7 @@ body {
   margin-top: auto;
 }
 
-/* ?? Desktop Viewport Adjustments ?? */
+/* ???? Desktop Viewport Adjustments ???? */
 @media (min-width: 768px) {
   .container {
     padding: 120px var(--gutter) 40px var(--gutter);
@@ -279,5 +286,9 @@ body {
 
   .project-card {
     flex: 0 0 280px; /* Larger cards on desktop */
+  }
+
+  .dial-spacer:last-child {
+    width: calc(100vw - 40px); /* Desktop: viewport width minus left padding (40px) to allow full scroll & snap */
   }
 }

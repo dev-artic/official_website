@@ -18,6 +18,7 @@ try:
     import firebase_admin
     from firebase_admin import credentials
     from firebase_admin import firestore
+    from google.oauth2.credentials import Credentials
 
     # 1. Try environment variable first
     service_account_info = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
@@ -42,6 +43,34 @@ try:
             print("Firebase Admin SDK initialized successfully via local serviceAccountKey.json.")
         except Exception as e:
             print(f"Error initializing Firebase via local file: {e}")
+
+    # 3. Try local firebase-tools user credentials (OAuth token)
+    if not firebase_initialized:
+        token_file = os.path.expanduser('~/.config/configstore/firebase-tools.json')
+        if os.path.exists(token_file):
+            try:
+                with open(token_file, 'r', encoding='utf-8') as f:
+                    creds_data = json.load(f)
+                token_info = creds_data.get('tokens', {})
+                access_token = token_info.get('access_token')
+                refresh_token = token_info.get('refresh_token')
+                client_id = creds_data.get('user', {}).get('aud')
+                
+                creds = Credentials(
+                    token=access_token,
+                    refresh_token=refresh_token,
+                    token_uri="https://oauth2.googleapis.com/token",
+                    client_id=client_id
+                )
+                
+                firebase_admin.initialize_app(creds, {
+                    'projectId': 'artic-official-home'
+                })
+                db = firestore.client()
+                firebase_initialized = True
+                print("Firebase Admin SDK initialized successfully via local firebase-tools User Token.")
+            except Exception as e:
+                print(f"Error initializing Firebase via local user token: {e}")
 
     if not firebase_initialized:
         print("No Firebase credentials found. Falling back to local SQLite database.")

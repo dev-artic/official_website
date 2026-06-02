@@ -10,6 +10,46 @@ import socketserver
 PORT = 8000
 DB_FILE = 'orders.db'
 
+# --- Firebase Admin SDK Initialization with Graceful Fallback ---
+db = None
+firebase_initialized = False
+
+try:
+    import firebase_admin
+    from firebase_admin import credentials
+    from firebase_admin import firestore
+
+    # 1. Try environment variable first
+    service_account_info = os.environ.get('FIREBASE_SERVICE_ACCOUNT')
+    if service_account_info:
+        try:
+            cert_dict = json.loads(service_account_info)
+            cred = credentials.Certificate(cert_dict)
+            firebase_admin.initialize_app(cred)
+            db = firestore.client()
+            firebase_initialized = True
+            print("Firebase Admin SDK initialized successfully via environment variable.")
+        except Exception as e:
+            print(f"Error initializing Firebase via environment variable: {e}")
+
+    # 2. Try local serviceAccountKey.json if env variable was not set/failed
+    if not firebase_initialized and os.path.exists('serviceAccountKey.json'):
+        try:
+            cred = credentials.Certificate('serviceAccountKey.json')
+            firebase_admin.initialize_app(cred)
+            db = firestore.client()
+            firebase_initialized = True
+            print("Firebase Admin SDK initialized successfully via local serviceAccountKey.json.")
+        except Exception as e:
+            print(f"Error initializing Firebase via local file: {e}")
+
+    if not firebase_initialized:
+        print("No Firebase credentials found. Falling back to local SQLite database.")
+
+except ImportError:
+    print("firebase-admin package not installed. Falling back to local SQLite database.")
+
+
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -28,6 +68,24 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
+
+
+def save_to_sqlite(name, email, phone, address, quantity, depositor, notes):
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO orders (name, email, phone, address, quantity, depositor, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (name, email, phone, address, quantity, depositor, notes))
+        conn.commit()
+        conn.close()
+        print("Checkout successfully saved to local SQLite database.")
+        return True
+    except Exception as e:
+        print(f"Error saving to SQLite: {e}")
+        return False
+
 
 def send_email(to_addr, subject, body):
     smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
@@ -60,6 +118,7 @@ def send_email(to_addr, subject, body):
         print(f"Error sending email to {to_addr}: {e}")
         return False
 
+
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/api/checkout':
@@ -83,15 +142,29 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(json.dumps({'error': 'Missing required fields'}).encode('utf-8'))
                     return
 
-                # Save to database
-                conn = sqlite3.connect(DB_FILE)
-                cursor = conn.cursor()
-                cursor.execute('''
-                    INSERT INTO orders (name, email, phone, address, quantity, depositor, notes)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (name, email, phone, address, quantity, depositor, notes))
-                conn.commit()
-                conn.close()
+                # Save Data (Firestore priority, SQLite fallback)
+                saved_to_cloud = False
+                if db is not None:
+                    try:
+                        order_data = {
+                            'name': name,
+                            'email': email,
+                            'phone': phone,
+                            'address': address,
+                            'quantity': quantity,
+                            'depositor': depositor,
+                            'notes': notes,
+                            'created_at': firestore.SERVER_TIMESTAMP
+                        }
+                        doc_ref = db.collection('orders').document()
+                        doc_ref.set(order_data)
+                        print(f"Checkout successfully saved to Firestore (ID: {doc_ref.id}).")
+                        saved_to_cloud = True
+                    except Exception as fe:
+                        print(f"Error saving to Firestore: {fe}. Falling back to SQLite.")
+                        save_to_sqlite(name, email, phone, address, quantity, depositor, notes)
+                else:
+                    save_to_sqlite(name, email, phone, address, quantity, depositor, notes)
 
                 # Send email to customer
                 total_price = 15000 * quantity + 3000
@@ -141,7 +214,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({'success': True}).encode('utf-8'))
+                self.wfile.write(json.dumps({'success': True, 'saved_to_cloud': saved_to_cloud}).encode('utf-8'))
                 
             except Exception as e:
                 self.send_response(500)
@@ -151,6 +224,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
 
 if __name__ == '__main__':
     init_db()

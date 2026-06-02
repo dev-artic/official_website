@@ -761,15 +761,19 @@
         content: '−';
       }
 
-      .toggle-icon {
-        display: none !important;
+      /* Hide content when collapsed */
+      .toggle-content {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, margin-top 0.4s ease;
+        margin-top: 0;
       }
 
-      .toggle-content {
-        max-height: none !important;
-        overflow: visible !important;
-        opacity: 1 !important;
-        margin-top: 16px !important;
+      .expanded .toggle-content {
+        max-height: 3500px; /* High enough threshold for links and playlist tracks */
+        opacity: 1;
+        margin-top: 16px;
       }
       
       .video-container .stream-group-label,
@@ -823,7 +827,7 @@
       <!-- Left Column -->
       <div class="left-column">
         <!-- Video Container -->
-        <main class="video-container info-group">
+        <main class="video-container info-group expanded">
           <div class="mobile-toggle-header">
             <span class="info-group-label video-label">Documentary / Reel</span>
             <span class="toggle-icon"></span>
@@ -842,7 +846,7 @@
         </main>
 
         <!-- Artist Spotlight -->
-        <div class="info-group">
+        <div class="info-group expanded">
           <div class="mobile-toggle-header">
             <span class="info-group-label artist-label">Artist Spotlight</span>
             <span class="toggle-icon"></span>
@@ -865,7 +869,7 @@
       <!-- Right Column -->
       <div class="right-column">
         <!-- Music Curation (Instagram Caption Style) -->
-        <div class="info-group">
+        <div class="info-group expanded">
           <div class="mobile-toggle-header">
             <span class="info-group-label curation-label">Music Curation</span>
             <span class="toggle-icon"></span>
@@ -899,7 +903,7 @@
         </div>
 
         <!-- Playlist Tracks Section -->
-        <div class="info-group">
+        <div class="info-group expanded">
           <div class="mobile-toggle-header">
             <span class="info-group-label playlist-label">Playlist (38)</span>
             <span class="toggle-icon"></span>
@@ -1675,6 +1679,16 @@
           ytPlayer.loadVideoById(vid);
           ytPlayer.playVideo();
           fadeIn(ytPlayer, 600);
+        }
+      });
+    });
+
+    // == Mobile Accordion Toggle ==
+    document.querySelectorAll('.mobile-toggle-header').forEach(header => {
+      header.addEventListener('click', function() {
+        if (window.innerWidth <= 767) {
+          const parent = this.parentElement;
+          parent.classList.toggle('expanded');
         }
       });
     });

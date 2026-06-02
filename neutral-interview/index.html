@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -715,8 +715,8 @@
         gap: 48px !important;
       }
 
-      /* Static Latest Release Header styling on mobile */
-      .latest-release-header {
+      /* Latest Release Header styling on mobile */
+      .links-container .mobile-toggle-header {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
@@ -725,7 +725,7 @@
         user-select: none;
       }
 
-      .latest-release-header::after {
+      .links-container .mobile-toggle-header::after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -737,6 +737,11 @@
         transform-origin: left center;
         will-change: transform;
         animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+      }
+
+      /* Latest Release Toggle Icon Spin-In */
+      .links-container .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.0s forwards;
       }
     }
 
@@ -792,10 +797,12 @@
     <div class="content-columns">
 
       <!-- Left Column: Latest Release & Credits -->
-      <main class="links-container">
-        <div class="latest-release-header">
+      <main class="links-container expanded">
+        <div class="mobile-toggle-header">
           <span class="archive-group-label stream-label">Latest Release</span>
+          <span class="toggle-icon"></span>
         </div>
+        <div class="toggle-content">
         <div class="static-content">
           <div class="archive-entry active" data-vid="a_c4edU0Ly8">
             <a class="archive-item latest-featured-item" href="javascript:void(0)">
@@ -849,7 +856,7 @@
 
       <!-- Right Column: Episodes Accordion Group -->
       <section class="archive-section">
-        <div class="archive-group">
+        <div class="archive-group expanded">
           <div class="mobile-toggle-header">
             <span class="archive-group-label film-label">episodes</span>
             <span class="toggle-icon"></span>

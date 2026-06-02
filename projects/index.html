@@ -184,7 +184,8 @@
 
         if (targetCard) {
           // Calculate the target scroll position for this card to align with scroll-padding-left
-          const targetScrollLeft = targetCard.offsetLeft - pad;
+          const cardRect = targetCard.getBoundingClientRect();
+          const targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - pad;
           
           viewport.scrollTo({
             left: targetScrollLeft,
@@ -267,7 +268,9 @@
             const firstCard = node.querySelector('.project-card');
             if (firstCard) {
               const pad = window.innerWidth >= 768 ? 40 : 24;
-              const targetScrollLeft = firstCard.offsetLeft - pad;
+              const viewRect = viewport.getBoundingClientRect();
+              const cardRect = firstCard.getBoundingClientRect();
+              const targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - pad;
 
               if (wheelTimeout) clearTimeout(wheelTimeout);
               if (snapTimeout) clearTimeout(snapTimeout);

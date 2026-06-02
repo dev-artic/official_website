@@ -9,6 +9,7 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="preload" href="album-art.png" as="image">
   
   <!-- CSS Linkage from parent for design-system tokens -->
   <link rel="stylesheet" href="../css/design-system.css">
@@ -396,24 +397,24 @@
       color: var(--text-secondary);
     }
 
-    /* Inline video embed */
+        /* Inline video embed */
     .archive-embed {
       max-height: 0;
       overflow: hidden;
       opacity: 0;
-      transform: translateY(-8px) scaleY(0.96);
-      transform-origin: top center;
-      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                  padding 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-                  opacity 0.4s ease,
-                  transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(-12px);
+      transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                  padding 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                  opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+                  transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: max-height, opacity, transform;
     }
 
     .archive-embed.open {
-      max-height: 300px;
+      max-height: 380px;
       padding: 12px 0 20px;
       opacity: 1;
-      transform: translateY(0) scaleY(1);
+      transform: translateY(0);
     }
 
     .archive-embed iframe {
@@ -1300,9 +1301,26 @@
 
   <script src="../js/shared.js"></script>
   <script>
-    // ── Inline video embed toggle (close-first-then-open) ──
+        // -- Inline video embed toggle (close-first-then-open) --
     (function() {
       let openEntry = null;
+
+      // Preload video thumbnails for instant display
+      (function preloadThumbnails() {
+        document.querySelectorAll('.archive-entry[data-vid]').forEach(entry => {
+          const vid = entry.dataset.vid;
+          if (vid) {
+            const img = new Image();
+            img.src = 'https://img.youtube.com/vi/' + vid + '/maxresdefault.jpg';
+          }
+        });
+      })();
+
+      // Set the default open entry so the JS knows it is open on load
+      const initialOpen = document.querySelector('.archive-entry.active');
+      if (initialOpen) {
+        openEntry = initialOpen;
+      }
 
       function closeEntry(entry, callback) {
         entry.classList.remove('active');
@@ -1311,16 +1329,16 @@
         setTimeout(() => {
           embed.innerHTML = '';
           if (callback) callback();
-        }, 500);
+        }, 400);
       }
 
       function openEntryFn(entry) {
         const embed = entry.querySelector('.archive-embed');
         const vid = entry.dataset.vid;
         
-        // Render custom premium video poster to prevent raw YouTube UI pop on open
+        // Render custom video poster with opacity 0 initially for fade-in transition
         embed.innerHTML = `
-          <div class="custom-video-poster" data-vid="${vid}">
+          <div class="custom-video-poster" data-vid="${vid}" style="opacity: 0; transition: opacity 0.4s ease;">
             <img class="poster-thumbnail" src="https://img.youtube.com/vi/${vid}/maxresdefault.jpg" alt="Video Cover">
             <div class="poster-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
@@ -1328,19 +1346,35 @@
           </div>
         `;
         
-        // Clean poster click transition -> loads actual youtube autoplay iframe smoothly
+        // Clean poster click transition -> loads actual youtube autoplay iframe with fade-in
         embed.querySelector('.custom-video-poster').addEventListener('click', function(e) {
           e.stopPropagation();
           const poster = this;
           poster.style.opacity = '0';
           setTimeout(() => {
-            embed.innerHTML = '<iframe src="https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0&modestbranding=1';
+            iframe.allow = "autoplay; encrypted-media";
+            iframe.allowFullscreen = true;
+            iframe.style.opacity = '0';
+            iframe.style.transition = 'opacity 0.5s ease';
+            embed.innerHTML = '';
+            embed.appendChild(iframe);
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                iframe.style.opacity = '1';
+              });
+            });
           }, 300);
         });
 
         entry.classList.add('active');
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => embed.classList.add('open'));
+          requestAnimationFrame(() => {
+            embed.classList.add('open');
+            const poster = embed.querySelector('.custom-video-poster');
+            if (poster) poster.style.opacity = '1';
+          });
         });
         openEntry = entry;
       }
@@ -1350,11 +1384,9 @@
           e.preventDefault();
 
           if (openEntry === entry) {
-            // Toggle off
             closeEntry(entry);
             openEntry = null;
           } else if (openEntry) {
-            // Close current first, then open new with a relaxed 150ms breathing transition
             const toOpen = entry;
             closeEntry(openEntry, () => {
               setTimeout(() => {
@@ -1362,7 +1394,6 @@
               }, 150);
             });
           } else {
-            // Nothing open, just open
             openEntryFn(entry);
           }
         });

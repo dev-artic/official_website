@@ -217,7 +217,62 @@ function initSubpageTransition() {
   });
 }
 
-// ── 6. Init ──
+// ── 6. artic.le Text Swap Animation (To Be Updated) ──
+function initArticleMenu() {
+  const links = document.querySelectorAll('.nav-artic-le');
+  if (links.length === 0) return;
+
+  // Insert transition helper style if not already present
+  if (!document.getElementById('artic-le-transition-style')) {
+    const style = document.createElement('style');
+    style.id = 'artic-le-transition-style';
+    style.textContent = `
+      .nav-artic-le {
+        transition: opacity 0.25s ease, color 0.3s ease !important;
+      }
+      .nav-artic-le.nav-link-fade {
+        opacity: 0 !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  links.forEach(link => {
+    let isTransitioning = false;
+    
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isTransitioning) return;
+      isTransitioning = true;
+      
+      // 1. Fade out
+      link.classList.add('nav-link-fade');
+      
+      setTimeout(() => {
+        // 2. Change text to "to be updated"
+        link.textContent = 'to be updated';
+        // 3. Fade back in
+        link.classList.remove('nav-link-fade');
+        
+        // Keep it for 1.5 seconds
+        setTimeout(() => {
+          // 4. Fade out again
+          link.classList.add('nav-link-fade');
+          
+          setTimeout(() => {
+            // 5. Revert text to "artic.le"
+            link.textContent = 'artic.le';
+            // 6. Fade back in
+            link.classList.remove('nav-link-fade');
+            isTransitioning = false;
+          }, 250); // fade out duration
+        }, 1500); // text display duration
+      }, 250); // fade out duration
+    });
+  });
+}
+
+// ── 7. Init ──
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('theme-toggle');
   if (btn) btn.addEventListener('click', toggleTheme);
@@ -225,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSubpageNav();
   initMobileNav();
   initSubpageTransition();
+  initArticleMenu();
 });
 
 // Apply theme before DOM ready

@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — Art, Culture, and Archive. About us.">
+  <meta name="description" content="artic. — Quarterly. Notion database-driven webzine.">
   <meta name="author" content="artic.">
-  <title>About — artic.</title>
+  <title>Quarterly — artic.</title>
 
   <link rel="icon" type="image/png" href="../images/favicon.png">
   <link rel="stylesheet" href="../css/design-system.css">
@@ -61,10 +61,6 @@
       display: none;
     }
 
-    .about-row:nth-child(2)::before {
-      animation-delay: 0.5s;
-    }
-
     .about-row:first-child {
       border-top: none;
       padding-top: var(--space-xl);
@@ -78,6 +74,7 @@
       line-height: 1.25;
       letter-spacing: 0.01em;
       color: var(--text-primary);
+      text-transform: uppercase;
     }
 
     /* ── Description block ── */
@@ -97,7 +94,7 @@
       margin-bottom: var(--space-lg);
     }
 
-    /* ── Action Links (Instagram & YouTube Pill Buttons) ── */
+    /* ── Action Links ── */
     .about-actions {
       display: flex;
       gap: 12px;
@@ -131,18 +128,6 @@
       border-color: var(--text-primary);
       color: var(--bg-primary);
       transform: translateY(-1px);
-    }
-
-    .about-action svg {
-      width: 10px;
-      height: 10px;
-      fill: var(--text-primary);
-      transition: fill 0.4s ease, transform 0.4s ease;
-    }
-
-    .about-action:hover svg {
-      fill: var(--bg-primary);
-      transform: scale(1.1);
     }
 
     /* ── Large Logo Image ── */
@@ -188,7 +173,7 @@
       text-transform: uppercase;
       color: var(--text-muted);
       transition: border-color 0.5s ease;
-      text-align: right; /* Consistent with other subpages */
+      text-align: right;
     }
 
     @keyframes borderWipe {
@@ -211,7 +196,7 @@
         padding-bottom: 60px;
       }
       .about-row {
-        padding: var(--space-lg) 0; /* Tighter padding on desktop to allow beautiful vertical centering */
+        padding: var(--space-lg) 0;
       }
       .about-row:first-child {
         padding-top: 0;
@@ -223,7 +208,7 @@
 
     @media (max-width: 767px) {
       .about-content {
-        padding-top: 90px !important; /* Elegant breathing room on mobile */
+        padding-top: 90px !important;
       }
 
       .about-row {
@@ -232,7 +217,6 @@
         padding: var(--space-xl) 0;
       }
 
-      /* Staggered mobile typography - smaller & offset */
       .about-headline {
         font-size: clamp(1.25rem, 5.5vw, 1.45rem) !important;
         line-height: 1.4 !important;
@@ -242,7 +226,6 @@
         text-align: left !important;
       }
 
-      /* English Desc shifted right */
       .about-desc-en {
         font-size: 0.72rem !important;
         line-height: 1.85 !important;
@@ -253,7 +236,6 @@
         margin-bottom: 20px !important;
       }
 
-      /* Korean Desc shifted left */
       .about-desc-ko {
         font-size: 0.68rem !important;
         line-height: 1.85 !important;
@@ -264,7 +246,6 @@
         margin-bottom: 28px !important;
       }
 
-      /* Action buttons aligned right to match English block */
       .about-actions {
         justify-content: flex-end !important;
         width: 100% !important;
@@ -278,7 +259,6 @@
         letter-spacing: 0.12em !important;
       }
 
-      /* Free-spirited Logo Off-center Placement */
       .about-logo-wrap {
         align-self: flex-start !important;
         margin-left: 0px !important;
@@ -287,10 +267,9 @@
       }
 
       .about-logo-img {
-        max-width: 120px !important; /* Exquisite small typography logo */
+        max-width: 120px !important;
       }
 
-      /* Extended text shifted right/staggered */
       .about-extended {
         font-size: 0.72rem !important;
         line-height: 1.85 !important;
@@ -307,55 +286,47 @@
   <!-- Floating Navigation -->
   <nav class="nav-bar delayed-reveal">
     <a href="/" class="nav-home visible" id="nav-home">artic.</a>
-    <a href="/about/" class="nav-link active">About</a>
+    <a href="/about/" class="nav-link">About</a>
     <a href="/projects/" class="nav-link">Projects</a>
     <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-    <a href="/quarterly/" class="nav-link">Quarterly</a>
+    <a href="/quarterly/" class="nav-link active">Quarterly</a>
     <a href="/contact/" class="nav-link">Contact</a>
   </nav>
 
   <div class="delayed-reveal about-content animate-fade-in">
 
-    <!-- Row 1: Headline + Description -->
+    <!-- Row 1: Curation Headline + Details -->
     <div class="about-row">
       <div>
-        <h1 class="about-headline">artic. illuminates artists' message,<br>bringing their creative voice to life.</h1>
+        <h1 class="about-headline">QUARTERLY.<br>Curation of art & music.</h1>
       </div>
       <div>
         <p class="about-desc-en">
-          artic. is a creative brand aiming to create the most aesthetic and experimental contents
-          focused on artists' message.
+          This space will publish webzine editorials dynamically backed by our Notion database,
+          delivering structured insights for each quarter.
         </p>
         <p class="about-desc-ko">
-          artic.은 창작자가 의도한 메시지에 집중하며<br>
-          이를 가장 아름다운 방식으로 조명합니다.
+          분기별 결산 노션 데이터베이스를 기반으로 작동하는<br>
+          아티스틱 웹진 에디토리얼이 곧 이곳에 연동 발행됩니다.
         </p>
         <div class="about-actions">
-          <a href="https://instagram.com/artic.live" class="about-action" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.948-.2-4.358-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-            Follow
-          </a>
-          <a href="https://youtube.com/@artic_live" class="about-action" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
-            YouTube
+          <a href="javascript:void(0)" class="about-action nav-artic-le">
+            to be updated
           </a>
         </div>
       </div>
     </div>
 
-    <!-- Row 2: Logo + Extended Description -->
+    <!-- Row 2: Visual Placeholder -->
     <div class="about-row">
       <div class="about-logo-wrap">
         <img src="../images/logo-type-black.png" alt="artic." class="about-logo-img">
       </div>
       <div>
         <p class="about-extended">
-          artic. stands for artists' attic—<br>
-          a symbolic place where the initial message of an artist
-          emerges. With the most profound respect for
-          the message intended by the artist, artic.
-          pursues a border-crossing, limit-pushing,<br>
-          media-bending approach to creativity.
+          Stay tuned. Each quarter, we reflect on key artist albums,<br>
+          curated playlists, and visual documentaries to bring<br>
+          a cohesive editorial layout to artic. subscribers.
         </p>
       </div>
     </div>

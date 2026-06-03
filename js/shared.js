@@ -286,7 +286,7 @@ function initArticleMenu() {
         vertical-align: bottom;
         white-space: nowrap;
         overflow: hidden;
-        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, color 0.3s ease !important;
+        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease !important;
       }
       .nav-artic-le.nav-link-fade {
         opacity: 0 !important;
@@ -329,18 +329,21 @@ function initArticleMenu() {
           link.classList.add('nav-link-fade');
           
           setTimeout(() => {
-            // 7. Revert text and target width
-            link.textContent = 'artic.le';
+            // 7. Start reverting target width (takes 600ms bezier transition)
             link.style.width = initialWidth + 'px';
             
-            // 8. Fade back in
-            link.classList.remove('nav-link-fade');
-            
-            // 9. Clear explicit width after transition finishes
+            // 8. Wait for width transition to contract halfway, then swap text and fade back in
             setTimeout(() => {
-              link.style.width = '';
-              isTransitioning = false;
-            }, 600); // matching bezier duration
+              link.textContent = 'artic.le';
+              link.classList.remove('nav-link-fade');
+              
+              // 9. Clear explicit width after transition completely finishes
+              setTimeout(() => {
+                link.style.width = '';
+                isTransitioning = false;
+              }, 300); // remaining width duration (600 - 300 = 300ms)
+            }, 300); // offset to allow width animation to contract halfway before text fades in
+            
           }, 250); // fade out duration
         }, 1500); // text display duration
       }, 250); // fade out duration

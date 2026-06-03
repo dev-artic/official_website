@@ -1,3 +1,5 @@
 orders.db
 .DS_Store
 serviceAccountKey.json
+.env
+functions/.env

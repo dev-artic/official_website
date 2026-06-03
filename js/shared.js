@@ -287,7 +287,7 @@ function initArticleMenu() {
         white-space: nowrap;
         overflow: hidden;
         transition-property: width, opacity, transform, color !important;
-        transition-duration: 0.6s, 0.25s, 0.5s, 0.3s !important;
+        transition-duration: 0.6s, 0.4s, 0.5s, 0.3s !important;
         transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), ease !important;
       }
       .nav-open .nav-bar .nav-artic-le.nav-link-fade,
@@ -306,64 +306,66 @@ function initArticleMenu() {
       if (isTransitioning) return;
       isTransitioning = true;
       
-      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
-      let initialWidth = 0;
-      
-      if (isDesktop) {
-        // 1. Lock current width
-        initialWidth = link.scrollWidth;
-        link.style.width = initialWidth + 'px';
-        link.offsetHeight; // force reflow
-      }
-      
-      // 2. Fade out (takes 250ms)
-      link.classList.add('nav-link-fade');
-      
-      setTimeout(() => {
-        // 3. Swap text to "to be updated"
-        link.textContent = 'to be updated';
-        
-        // 4. Fade back in (takes 250ms with bezier on mobile)
-        link.classList.remove('nav-link-fade');
+      const isMobile = window.innerWidth < 768;
+
+      if (isMobile) {
+        // --- Mobile Logic: Fade out, swap text, fade back in (No width layout shifting) ---
+        link.classList.add('nav-link-fade');
         
         setTimeout(() => {
-          if (isDesktop) {
-            // 5. Expand width (takes 600ms bezier transition)
-            const targetWidth = link.scrollWidth;
-            link.style.width = targetWidth + 'px';
-          }
+          link.textContent = 'to be updated';
+          link.classList.remove('nav-link-fade');
           
-          // Keep display for 1.5 seconds
           setTimeout(() => {
-            // 6. Fade out again (takes 250ms)
             link.classList.add('nav-link-fade');
             
             setTimeout(() => {
-              // 7. Swap text back to "artic.le"
               link.textContent = 'artic.le';
-              
-              // 8. Fade back in (takes 250ms)
               link.classList.remove('nav-link-fade');
               
               setTimeout(() => {
-                if (isDesktop) {
-                  // 9. Contract width back to initial (takes 600ms bezier transition)
-                  link.style.width = initialWidth + 'px';
-                  
-                  setTimeout(() => {
-                    link.style.width = '';
-                    isTransitioning = false;
-                  }, 600);
-                } else {
-                  isTransitioning = false;
-                }
-              }, 250); // fade in duration
-              
+                isTransitioning = false;
+              }, 400); // match mobile opacity transition duration
             }, 250); // fade out duration
-          }, 1500); // text display duration
+          }, 1500); // display duration
+        }, 250); // fade out duration
+        
+      } else {
+        // --- Desktop Logic: Retain width bezier logic alongside text fade ---
+        const initialWidth = link.scrollWidth;
+        link.style.width = initialWidth + 'px';
+        
+        // Force layout reflow
+        link.offsetHeight;
+        
+        link.classList.add('nav-link-fade');
+        
+        setTimeout(() => {
+          link.textContent = 'to be updated';
+          const targetWidth = link.scrollWidth;
+          link.style.width = targetWidth + 'px';
           
-        }, 250); // fade in duration
-      }, 250); // fade out duration
+          link.classList.remove('nav-link-fade');
+          
+          setTimeout(() => {
+            link.classList.add('nav-link-fade');
+            
+            setTimeout(() => {
+              link.style.width = initialWidth + 'px';
+              
+              setTimeout(() => {
+                link.textContent = 'artic.le';
+                link.classList.remove('nav-link-fade');
+                
+                setTimeout(() => {
+                  link.style.width = '';
+                  isTransitioning = false;
+                }, 300); // matching remaining width transition duration
+              }, 300); // contract halfway
+            }, 250); // fade out duration
+          }, 1500); // display duration
+        }, 250); // fade out duration
+      }
     });
   });
 }

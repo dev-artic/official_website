@@ -2392,7 +2392,7 @@
 
             const payload = { name, email, phone, address, quantity, depositor, notes };
 
-            fetch('/api/checkout', {
+            fetch('https://us-central1-artic-official-home.cloudfunctions.net/checkout', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload)

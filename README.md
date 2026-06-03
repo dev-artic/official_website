@@ -66,29 +66,53 @@ Homepage/
 
 ---
 
-## 🚀 GitHub Pages 배포 가이드 (3분 완성)
+## 🔄 개발, 테스트 및 배포 워크플로우 (Development, Testing & Deployment)
 
-이 보일러플레이트는 정적 HTML/CSS 기반이므로, 복잡한 빌드 워크플로우 없이 GitHub 상에서 클릭 몇 번으로 즉시 호스팅 배포가 가능합니다.
+artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다. 개발자가 로컬에서 코드를 수정하고, 테스트를 거쳐, 프로덕션 라이브 서버에 안전하게 배포하기까지의 일련의 워크플로우와 역할 구분을 정리합니다.
 
-### 1단계: 코드를 GitHub 리포지토리에 푸시
-현재 로컬에 작성된 뼈대 파일들을 리포지토리의 `main` 브랜치로 커밋 및 푸시합니다.
-```bash
-git add .
-git commit -m "feat: setup premium art gallery and webzine boilerplate"
-git push origin main
+```mermaid
+graph TD
+    Local[1. 로컬 개발 & 테스트] -->|git push| Git[2. GitHub 원격 저장소]
+    Git -->|GitHub Actions 빌드| GHPages[3. 프론트엔드 배포 - GitHub Pages]
+    Local -->|firebase deploy| Functions[4. 백엔드 API 배포 - Firebase Functions]
 ```
 
-### 2단계: 리포지토리 Pages 설정
-1. GitHub 리포지토리 페이지(`https://github.com/dev-artic/official_website`)로 이동합니다.
-2. 우측 상단의 **Settings** 탭을 클릭합니다.
-3. 좌측 사이드바의 **Code and automation** 아래에서 **Pages**를 선택합니다.
-4. **Build and deployment** 섹션의 Source 옵션이 **Deploy from a branch**로 되어 있는지 확인합니다.
-5. Branch 설정에서 **`main`** 브랜치와 **`/(root)`** 폴더를 지정한 뒤, 우측의 **Save** 버튼을 누릅니다.
+### 1. 개발 및 테스트 단계 (Local Development & Testing)
+* **프론트엔드 정적 요소 개발**:
+  * `index.html` 및 개별 상세 페이지의 HTML/CSS/JS 코드를 직접 수정합니다.
+  * 신규 콘텐츠 추가는 `projects.json` 단일 소스에 신규 항목을 Prepend(맨 앞에 삽입)하여 등록합니다.
+* **로컬 웹 서버 가동**:
+  * 파이썬 스크립트인 `server.py`를 실행하여 로컬 호스트 테스트 서버(`http://localhost:8000`)를 가동합니다.
+  ```bash
+  python3 server.py
+  ```
+  * **API 샌드박싱 테스트**: 로컬 테스트 도중 waitlist 가입이나 checkout 주문 폼을 작성하면, `server.py` 내부에 구현된 파이썬 API 핸들러가 이를 가로채 프로젝트 루트에 있는 로컬 SQLite 데이터베이스인 `orders.db` 파일에 적재합니다. 실 배포 전 백엔드 흐름을 오프라인에서 안전하게 디버깅할 수 있습니다.
 
-### 3단계: 배포 확인
-* 세팅을 완료하면 상단에 `Your site is live at...` 문구와 함께 호스팅 주소가 표시됩니다.
-* 몇 초 후 배포가 완료되며, 본 리포지토리에 설정된 CNAME 규칙에 따라 연결된 커스텀 도메인인 **`https://artic.live/`** 주소로 접속하면, 전 세계 어디서든 모던한 아트 갤러리 웹진 홈페이지를 확인하실 수 있습니다!
+### 2. 프론트엔드 배포 단계 (Frontend Live Deployment)
+* **배포처**: **GitHub Pages** (커스텀 도메인 매핑: `CNAME`에 지정된 `artic.live`)
+* **역할**: 텍스트 수정, 레이아웃 변경, 신규 프로젝트 추가(`projects.json` 및 개별 페이지) 등 모든 **정적 웹 콘텐츠의 라이브 릴리즈**를 담당합니다.
+* **배포 순서**:
+  1. 로컬 테스트가 완료된 정적 파일들을 커밋합니다.
+  2. GitHub 원격 리포지토리의 `main` 브랜치에 코드를 푸시합니다.
+     ```bash
+     git add .
+     git commit -m "style: refine page layouts"
+     git push origin main
+     ```
+  3. 푸시가 일어나면 GitHub의 자동 빌드/배포 기능이 트리거되어 약 1~2분 이내에 `https://artic.live` 주소로 전격 자동 배포됩니다.
+  * **예외 (콘텐츠 자동 갱신)**: 매주 월요일 오전 9시에는 깃허브 액션 워크플로우인 `.github/workflows/update-playlists.yml`이 작동하여 자동으로 유튜브 API를 스캔해 관련 마크업을 변경하고 저장소에 자동으로 커밋/푸시를 수행하므로, 깃허브 페이지를 통해 자동으로 콘텐츠가 최신 상태로 유지됩니다.
 
+### 3. 백엔드 및 API 배포 단계 (Backend Serverless Deployment)
+* **배포처**: **Firebase Cloud Functions** (프로젝트 ID: `artic-official-home`)
+* **역할**: 대기명단 이메일 검증(`functions/index.js` 내의 `waitlist`), 결제 및 이메일 자동 발송(`functions/index.js` 내의 `checkout`) 등 **서버 측 서버리스 백엔드 API 동작**을 담당합니다.
+  * *참고: 혼선을 방지하기 위해 `firebase.json` 내의 `"hosting"` 설정은 일괄 해지/비활성화 처리되었으며, Firebase는 오직 백엔드 API 가동 용도로만 독립 활용됩니다. 호스팅을 비활성화해도 API 통신에는 아무 지장이 없습니다.*
+* **배포 순서**:
+  1. API 동작을 결정하는 백엔드 코드인 `functions/index.js` 또는 `functions/package.json` 등을 수정합니다.
+  2. 로컬 테스트(에뮬레이터)를 완료한 후 아래 명령어로 Firebase Cloud Functions 클라우드 서버에 백엔드 코드를 배포합니다.
+     ```bash
+     npx firebase-tools deploy --only functions
+     ```
+  3. 프론트엔드 페이지(`artic.live`)의 브라우저 런타임에서 사용자가 가입 폼을 클릭하면, Javascript가 Firebase Cloud Functions의 다이렉트 외부 HTTPS URL(`https://us-central1-artic-official-home.cloudfunctions.net/...`)로 직접 POST API를 쏘아 통신이 완료됩니다.
 
 ---
 

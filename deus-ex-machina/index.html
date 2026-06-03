@@ -1595,11 +1595,32 @@
       }
 
       @media (max-width: 767px) {
-        .print-modal.is-checkout .print-modal-image-wrap {
+        /* Shrink image wrap on checkout and success */
+        .print-modal.is-checkout .print-modal-image-wrap,
+        .print-modal.is-success .print-modal-image-wrap {
           padding: 20px !important;
         }
-        .print-modal.is-checkout .print-modal-image-wrap img {
+        .print-modal.is-checkout .print-modal-image-wrap img,
+        .print-modal.is-success .print-modal-image-wrap img {
           max-height: 12vh !important;
+        }
+        
+        /* Shrink info panel layout space to prevent overflow */
+        .print-modal.is-checkout .print-modal-info,
+        .print-modal.is-success .print-modal-info {
+          padding: 24px 20px !important;
+          gap: 16px !important;
+        }
+
+        /* Set scroll container height limits to fit small screens */
+        .print-modal.is-checkout .checkout-scroll-container {
+          max-height: 30vh !important;
+        }
+
+        /* Lock outer container from scrolling when form or success is active */
+        .print-modal.is-checkout .print-modal-container,
+        .print-modal.is-success .print-modal-container {
+          overflow: hidden !important;
         }
       }
 

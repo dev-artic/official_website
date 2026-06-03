@@ -166,6 +166,17 @@ exports.waitlist = onRequest((req, res) => {
         return;
       }
 
+      // Check duplicate email
+      const snapshot = await db.collection("quarterly_subscribers")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+
+      if (!snapshot.empty) {
+        res.status(400).json({ error: "This email is already registered. Stay tuned!" });
+        return;
+      }
+
       const subscriberData = {
         email,
         created_at: FieldValue.serverTimestamp(),

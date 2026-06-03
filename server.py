@@ -140,6 +140,19 @@ def save_subscriber_to_sqlite(email):
         return False
 
 
+def check_subscriber_duplicate(email):
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute('SELECT 1 FROM quarterly_subscribers WHERE email = ? LIMIT 1', (email,))
+        row = cursor.fetchone()
+        conn.close()
+        return row is not None
+    except Exception as e:
+        print(f"Error checking subscriber duplicate in SQLite: {e}")
+        return False
+
+
 def send_email(to_addr, subject, body):
     smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
     smtp_port = int(os.environ.get('SMTP_PORT', '587'))
@@ -293,6 +306,15 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 saved_to_cloud = False
                 if db is not None:
                     try:
+                        # Check Firestore duplicate
+                        docs = db.collection('quarterly_subscribers').where('email', '==', email).limit(1).get()
+                        if len(docs) > 0:
+                            self.send_response(400)
+                            self.send_header('Content-type', 'application/json')
+                            self.end_headers()
+                            self.wfile.write(json.dumps({'error': 'This email is already registered. Stay tuned!'}).encode('utf-8'))
+                            return
+
                         subscriber_data = {
                             'email': email,
                             'created_at': firestore.SERVER_TIMESTAMP
@@ -303,8 +325,20 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                         saved_to_cloud = True
                     except Exception as fe:
                         print(f"Error saving subscriber to Firestore: {fe}. Falling back to SQLite.")
+                        if check_subscriber_duplicate(email):
+                            self.send_response(400)
+                            self.send_header('Content-type', 'application/json')
+                            self.end_headers()
+                            self.wfile.write(json.dumps({'error': 'This email is already registered. Stay tuned!'}).encode('utf-8'))
+                            return
                         save_subscriber_to_sqlite(email)
                 else:
+                    if check_subscriber_duplicate(email):
+                        self.send_response(400)
+                        self.send_header('Content-type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({'error': 'This email is already registered. Stay tuned!'}).encode('utf-8'))
+                        return
                     save_subscriber_to_sqlite(email)
 
                 self.send_response(200)

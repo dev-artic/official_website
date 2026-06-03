@@ -288,7 +288,7 @@ function initArticleMenu() {
         overflow: hidden;
         transition-property: width, opacity, transform, color !important;
         transition-duration: 0.6s, 0.25s, 0.5s, 0.3s !important;
-        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), ease, cubic-bezier(0.16, 1, 0.3, 1), ease !important;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), ease !important;
       }
       .nav-open .nav-bar .nav-artic-le.nav-link-fade,
       .nav-artic-le.nav-link-fade {
@@ -306,49 +306,63 @@ function initArticleMenu() {
       if (isTransitioning) return;
       isTransitioning = true;
       
-      // 1. Lock current width based on scrollWidth
-      const initialWidth = link.scrollWidth;
-      link.style.width = initialWidth + 'px';
+      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+      let initialWidth = 0;
       
-      // Force layout reflow
-      link.offsetHeight;
+      if (isDesktop) {
+        // 1. Lock current width
+        initialWidth = link.scrollWidth;
+        link.style.width = initialWidth + 'px';
+        link.offsetHeight; // force reflow
+      }
       
-      // 2. Fade out
+      // 2. Fade out (takes 250ms)
       link.classList.add('nav-link-fade');
       
       setTimeout(() => {
-        // 3. Change text to "to be updated"
+        // 3. Swap text to "to be updated"
         link.textContent = 'to be updated';
-        // 4. Measure new target width and transition width
-        const targetWidth = link.scrollWidth;
-        link.style.width = targetWidth + 'px';
         
-        // 5. Fade back in
+        // 4. Fade back in (takes 250ms with bezier on mobile)
         link.classList.remove('nav-link-fade');
         
-        // Keep it for 1.5 seconds
         setTimeout(() => {
-          // 6. Fade out again
-          link.classList.add('nav-link-fade');
+          if (isDesktop) {
+            // 5. Expand width (takes 600ms bezier transition)
+            const targetWidth = link.scrollWidth;
+            link.style.width = targetWidth + 'px';
+          }
           
+          // Keep display for 1.5 seconds
           setTimeout(() => {
-            // 7. Start reverting target width (takes 600ms bezier transition)
-            link.style.width = initialWidth + 'px';
+            // 6. Fade out again (takes 250ms)
+            link.classList.add('nav-link-fade');
             
-            // 8. Wait for width transition to contract halfway, then swap text and fade back in
             setTimeout(() => {
+              // 7. Swap text back to "artic.le"
               link.textContent = 'artic.le';
+              
+              // 8. Fade back in (takes 250ms)
               link.classList.remove('nav-link-fade');
               
-              // 9. Clear explicit width after transition completely finishes
               setTimeout(() => {
-                link.style.width = '';
-                isTransitioning = false;
-              }, 300); // remaining width duration (600 - 300 = 300ms)
-            }, 300); // offset to allow width animation to contract halfway before text fades in
-            
-          }, 250); // fade out duration
-        }, 1500); // text display duration
+                if (isDesktop) {
+                  // 9. Contract width back to initial (takes 600ms bezier transition)
+                  link.style.width = initialWidth + 'px';
+                  
+                  setTimeout(() => {
+                    link.style.width = '';
+                    isTransitioning = false;
+                  }, 600);
+                } else {
+                  isTransitioning = false;
+                }
+              }, 250); // fade in duration
+              
+            }, 250); // fade out duration
+          }, 1500); // text display duration
+          
+        }, 250); // fade in duration
       }, 250); // fade out duration
     });
   });

@@ -286,8 +286,11 @@ function initArticleMenu() {
         vertical-align: bottom;
         white-space: nowrap;
         overflow: hidden;
-        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease !important;
+        transition-property: width, opacity, transform, color !important;
+        transition-duration: 0.6s, 0.25s, 0.5s, 0.3s !important;
+        transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), ease, cubic-bezier(0.16, 1, 0.3, 1), ease !important;
       }
+      .nav-open .nav-bar .nav-artic-le.nav-link-fade,
       .nav-artic-le.nav-link-fade {
         opacity: 0 !important;
       }

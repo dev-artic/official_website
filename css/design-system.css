@@ -426,29 +426,12 @@ img { display: block; max-width: 100%; }
     padding: var(--space-xs) 0 !important;
   }
 
-  /* Sequencing for Fade & Slide Down */
-  .nav-open .nav-bar .nav-home {
+  /* Sequencing for Fade & Slide Down using dynamic --nav-idx variables */
+  .nav-open .nav-bar .nav-home,
+  .nav-open .nav-bar .nav-link {
     opacity: 1 !important;
     transform: translateY(0);
-    transition-delay: 0.1s;
-  }
-
-  .nav-open .nav-bar .nav-link:nth-child(2) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.18s;
-  }
-
-  .nav-open .nav-bar .nav-link:nth-child(3) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.26s;
-  }
-
-  .nav-open .nav-bar .nav-link:nth-child(4) {
-    opacity: 1;
-    transform: translateY(0);
-    transition-delay: 0.34s;
+    transition-delay: calc(0.1s + var(--nav-idx) * 0.08s);
   }
 }
 

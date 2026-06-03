@@ -12,24 +12,45 @@ function buildNavigationBar() {
 
   const pathname = window.location.pathname;
 
-  const isAbout = pathname.includes('/about/');
-  const isProjects = pathname.includes('/projects/') || 
-                     pathname.includes('/deus-ex-machina/') || 
-                     pathname.includes('/gagosian-party-music/') || 
-                     pathname.includes('/neutral-interview/') || 
-                     pathname.includes('/tasting-note/') || 
-                     pathname.includes('/the-root/');
-  const isQuarterly = pathname.includes('/quarterly/');
-  const isContact = pathname.includes('/contact/');
+  // Unified Navigator menu definition (shared by both desktop and mobile views)
+  const menuItems = [
+    { name: 'About', href: '/about/' },
+    { name: 'Projects', href: '/projects/' },
+    { name: 'artic.le', href: 'javascript:void(0)' },
+    { name: 'Quarterly', href: '/quarterly/' },
+    { name: 'Contact', href: '/contact/' }
+  ];
 
-  nav.innerHTML = `
-    <a href="/" class="${homeClasses}" id="nav-home">artic.</a>
-    <a href="/about/" class="nav-link ${isAbout ? 'active' : ''}">About</a>
-    <a href="/projects/" class="nav-link ${isProjects ? 'active' : ''}">Projects</a>
-    <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-    <a href="/quarterly/" class="nav-link ${isQuarterly ? 'active' : ''}">Quarterly</a>
-    <a href="/contact/" class="nav-link ${isContact ? 'active' : ''}">Contact</a>
-  `;
+  const isProjectsActive = pathname.includes('/projects/') || 
+                           pathname.includes('/deus-ex-machina/') || 
+                           pathname.includes('/gagosian-party-music/') || 
+                           pathname.includes('/neutral-interview/') || 
+                           pathname.includes('/tasting-note/') || 
+                           pathname.includes('/the-root/');
+
+  // Generate Navigation links dynamically
+  // --nav-idx CSS custom properties are automatically assigned for modular transition delays
+  let linksHtml = `<a href="/" class="${homeClasses}" id="nav-home" style="--nav-idx: 0;">artic.</a>\n`;
+
+  menuItems.forEach((item, index) => {
+    const isArticle = item.name === 'artic.le';
+    let isActive = false;
+
+    if (!isArticle) {
+      if (item.href === '/projects/') {
+        isActive = isProjectsActive;
+      } else {
+        isActive = pathname.includes(item.href);
+      }
+    }
+
+    const activeClass = isActive ? 'active' : '';
+    const articleClass = isArticle ? 'nav-artic-le' : '';
+
+    linksHtml += `    <a href="${item.href}" class="nav-link ${activeClass} ${articleClass}" style="--nav-idx: ${index + 1};">${item.name}</a>\n`;
+  });
+
+  nav.innerHTML = linksHtml;
 }
 
 // ── 1. Theme (Dark/Light) ──

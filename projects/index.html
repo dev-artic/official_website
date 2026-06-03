@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -58,7 +58,7 @@
     (function() {
       var track = document.querySelector('.dial-track');
 
-      fetch('../projects.json')
+      fetch('../projects.json', { cache: 'no-cache' })
         .then(function(r) { return r.json(); })
         .then(function(projects) {
           var loadingEl = document.getElementById('projects-loading');
@@ -77,7 +77,7 @@
             node.className = 'dial-year-node';
             node.dataset.year = year;
             var cards = byYear[year].map(function(p) {
-              return '<article class="project-card"><a href="' + p.slug + '" class="card-link"><div class="image-wrapper"><img src="' + p.cover_image + '" alt="' + p.client + ' \u2014 ' + p.title + '" class="project-img"></div><div class="project-info"><div class="meta-row"><span class="project-tag">' + p.category + '</span></div><h3 class="project-name">' + p.title + '</h3></div></a></article>';
+              return '<article class="project-card"><a href="' + p.slug + '" class="card-link"><div class="image-wrapper"><img src="' + p.cover_image + '" alt="' + p.client + ' \u2014 ' + p.title + '" class="project-img" loading="lazy"></div><div class="project-info"><div class="meta-row"><span class="project-tag">' + p.category + '</span></div><h3 class="project-name">' + p.title + '</h3></div></a></article>';
             }).join('');
             node.innerHTML = '<div class="year-header-wrapper"><h2 class="year-title"><span>' + year + '</span></h2></div><div class="year-projects">' + cards + '</div>';
             if (bottomSpacer) {

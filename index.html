@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -8,6 +8,7 @@
   <title>artic.</title>
 
   <link rel="icon" type="image/png" href="images/favicon.png">
+  <link rel="preload" as="image" href="images/logo-black.png">
   <link rel="stylesheet" href="css/design-system.css">
   <link rel="stylesheet" href="css/animations.css">
 
@@ -630,7 +631,7 @@
     sessionStorage.removeItem('artic-subpage');
 
     // ?? Dynamic Project Cards from projects.json ??
-    fetch('./projects.json')
+    fetch('./projects.json', { cache: 'no-cache' })
       .then(r => r.json())
       .then(projects => {
         const container = document.getElementById('projects-preview-container');
@@ -643,16 +644,20 @@
         // Keep the mobile "View All" wrapper at end
         const viewAllWrapper = container.querySelector('.view-all-link-wrapper');
 
-                // Build all cards ??start hidden for stagger animation
+        // Build all cards
         const createdCards = [];
         projects.forEach((p, i) => {
           const imgSrc = p.cover_image.replace(/^\.\.\//, '');
           const card = document.createElement('a');
           card.href = p.slug;
           card.className = 'preview-card';
+          
+          // 첫 2개 카드(LCP 대상)는 프리로드 효과와 높은 페치 우선순위, 그 외는 지연 로딩
+          const loadingAttr = i < 2 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+          
           card.innerHTML = `
             <div class="preview-img-wrap">
-              <img src="${imgSrc}" alt="${p.title}" class="preview-card-img">
+              <img src="${imgSrc}" alt="${p.title}" class="preview-card-img" ${loadingAttr}>
             </div>
             <div class="preview-card-title">${p.title}</div>
             <div class="preview-card-meta">${p.category} \u00b7 ${p.year}</div>`;

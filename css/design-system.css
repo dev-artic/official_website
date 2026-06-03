@@ -238,7 +238,7 @@ img { display: block; max-width: 100%; }
 
 /* ── Utility ── */
 .animate-fade-in {
-  animation: pageReveal 1s var(--ease-out-expo) forwards;
+  animation: pageReveal 1.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 
 @keyframes pageReveal {

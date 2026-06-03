@@ -24,8 +24,9 @@ Homepage/
 │       ├── gallery.css   # 웹진 카드 및 커스텀 CTA 버튼 스타일
 │       └── footer.css    # 미니멀 에디토리얼 하단 영역
 └── js/
-    ├── app.js            # 상단 메뉴 스크롤 트리거 및 모바일 햄버거 토글 컨트롤러
-    └── reveal.js         # Intersection Observer API 기반 고성능 스크롤 페이드 애니메이션
+    ├── app.js            # 상단 메뉴 스크롤 트리거 컨트롤러
+    ├── reveal.js         # Intersection Observer API 기반 고성능 스크롤 페이드 애니메이션
+    └── shared.js         # [중요] 다크모드 상태 관리(시간대/수동 토글), 모바일 햄버거 토글 및 공통 아코디언 컴포넌트 제어
 ```
 
 ---
@@ -37,46 +38,31 @@ Homepage/
 ```css
 :root {
   /* 폰트 지정 */
-  --font-serif: 'Cormorant Garamond', serif; /* 클래식 헤더 */
-  --font-sans: 'Inter', sans-serif;         /* 가독성 높은 본문 */
+  --font-logo: 'ITCGaramond', 'Georgia', serif;
+  --font-serif: 'KakaoBig', -apple-system, sans-serif; /* 헤더 및 타이틀 */
+  --font-sans: 'KakaoSmall', system-ui, sans-serif;   /* 가독성 높은 본문 */
 
   /* 라이트 모드 컬러 */
-  --bg-primary: #FAF9F6;       /* 갤러리 웜 화이트 */
-  --text-primary: #111111;     /* 딥 옵시디언 블랙 */
-  --accent: #B89047;           /* 샴페인 골드 액센트 */
+  --bg-primary: #FFFFFF;       /* 갤러리 미니멀 화이트 */
+  --text-primary: #000000;     /* 딥 블랙 */
+  --accent: #000000;           /* 액센트 컬러 */
 }
 
-/* 시스템 다크모드 설정 (사용자 OS 설정에 따라 자동 변환) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: #0A0A0A;     /* 벨벳 블랙 */
-    --text-primary: #F3F3F3;   /* 리넨 화이트 */
-    --accent: #D4AF37;         /* 클래식 골드 */
-  }
+/* 시스템 및 수동 다크모드 설정 (localStorage 상태와 시간에 따라 자동으로 전환) */
+.dark-mode {
+  --bg-primary: #1A1A1A;       /* 딥 다크 블랙 */
+  --text-primary: #FAFAFA;     /* 소프트 화이트 */
+  --accent: #FAFAFA;
 }
 ```
 
 ---
 
-## ✍️ 웹진 기사(아티클) 추가 방법
+## ✍️ 웹진 기사(아티클) 및 프로젝트 추가 방법
 
-새로운 기사나 아트웍 카드를 메인 그리드에 추가하려면, `index.html` 내 `<div class="grid-editorial">` 태그 안에 아래의 에디토리얼 카드 마크업을 복사해서 붙여넣기만 하면 됩니다:
+이 보일러플레이트는 `index.html`에 프로젝트를 수동으로 하드코딩하지 않습니다. 대신 **`/projects.json` 단일 파일의 데이터 소스를 바탕으로 프로젝트 카드를 동적으로 렌더링**하도록 설계되었습니다.
 
-```html
-<article class="art-card col-4 reveal">
-  <div class="art-card-media zoom-frame">
-    <!-- 이미지 태그(<img>)를 넣거나 플레이스홀더 SVG를 배치할 수 있습니다. -->
-    <img src="YOUR_IMAGE_PATH.jpg" alt="기사 이미지">
-  </div>
-  <div class="art-card-details">
-    <span class="meta-tag">카테고리 / 이슈 번호</span>
-    <a href="#" class="art-card-title"><h4>기사 제목 (세리프)</h4></a>
-    <p>기사 본문에 대한 짧은 요약 또는 아티스틱 설명글입니다.</p>
-    <span class="text-meta">작성일자</span>
-  </div>
-</article>
-```
-* **`.reveal`**: 화면 스크롤 시 아래에서 위로 부드럽게 페이드인되는 시네마틱 애니메이션이 자동으로 적용됩니다.
+따라서 기사나 프로젝트를 새로 추가할 때에는 아래 하단의 **[부록: 프로젝트 추가 방법 (단일 데이터 소스 구조)](#부록-프로젝트-추가-방법-단일-데이터-소스-구조)** 가이드라인을 참조하시어 `projects.json` 데이터 작성과 함께 프로젝트 디렉토리를 추가해 주시기 바랍니다.
 
 ---
 
@@ -101,7 +87,7 @@ git push origin main
 
 ### 3단계: 배포 확인
 * 세팅을 완료하면 상단에 `Your site is live at...` 문구와 함께 호스팅 주소가 표시됩니다.
-* 몇 초 후 **`https://dev-artic.github.io/official_website/`** 주소로 접속하면, 전 세계 어디서든 모던한 아트 갤러리 웹진 홈페이지를 확인하실 수 있습니다!
+* 몇 초 후 배포가 완료되며, 본 리포지토리에 설정된 CNAME 규칙에 따라 연결된 커스텀 도메인인 **`https://artic.live/`** 주소로 접속하면, 전 세계 어디서든 모던한 아트 갤러리 웹진 홈페이지를 확인하실 수 있습니다!
 
 
 ---

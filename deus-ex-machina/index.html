@@ -372,6 +372,12 @@
       display: flex;
       align-items: baseline;
       gap: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .play-track-info:hover .play-track-title {
+      opacity: 0.6;
     }
 
     .play-track-num {
@@ -402,7 +408,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: color 0.3s ease;
+      transition: color 0.3s ease, opacity 0.3s ease;
     }
 
     .play-track-status {
@@ -595,6 +601,38 @@
     }
     .play-widget.is-playing .play-track-status {
       color: var(--text-primary);
+    }
+
+    /* Lyrics area */
+    .play-lyrics-wrap {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+                  opacity 0.4s ease, 
+                  margin-top 0.4s ease,
+                  padding-top 0.4s ease;
+      margin-top: 0;
+      border-top: 1px solid transparent;
+      padding-top: 0;
+    }
+
+    .play-lyrics-wrap.expanded {
+      max-height: 120px;
+      opacity: 1;
+      margin-top: 16px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+    }
+
+    .play-lyrics-content {
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--text-muted);
+      white-space: pre-line;
+      text-align: left;
     }
 
     /* Stream group label (matches archive group labels) */
@@ -1924,6 +1962,10 @@
               <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none"/></svg>
             </button>
           </div>
+          <!-- Lyrics Toggle Area -->
+          <div class="play-lyrics-wrap" id="play-lyrics-wrap">
+            <div class="play-lyrics-content">가사 업데이트 예정</div>
+          </div>
         </div>
       </div>
 
@@ -2672,8 +2714,10 @@
       var progressInterval = null;
 
       // DOM refs
-      var widget     = document.getElementById('play-widget');
-      var elNum      = document.getElementById('play-track-num');
+      var widget       = document.getElementById('play-widget');
+      var elTrackInfo  = widget ? widget.querySelector('.play-track-info') : null;
+      var elLyricsWrap = document.getElementById('play-lyrics-wrap');
+      var elNum        = document.getElementById('play-track-num');
       var elTitle    = document.getElementById('play-track-title');
       var elStatus   = document.getElementById('play-track-status');
       var elCurrent  = document.getElementById('play-current');
@@ -2812,7 +2856,6 @@
         direction = direction || 'next';
 
         // Trigger direction-specific text transition keyframe animation
-        var elTrackInfo = document.querySelector('.play-track-info');
         if (elTrackInfo) {
           elTrackInfo.classList.remove('track-anim-out-up', 'track-anim-out-down', 'track-anim-in-up', 'track-anim-in-down');
           
@@ -2944,6 +2987,13 @@
           elBarFill.classList.remove('is-seeking');
         }, 500);
       });
+
+      // ── Toggle Lyrics Area ──
+      if (elTrackInfo && elLyricsWrap) {
+        elTrackInfo.addEventListener('click', function() {
+          elLyricsWrap.classList.toggle('expanded');
+        });
+      }
 
       // Initialize UI
       updateTrackUI(0);

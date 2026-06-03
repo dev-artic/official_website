@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -549,6 +549,15 @@
       .content-section {
         padding: var(--space-xl) var(--gutter);
       }
+      /* Hide project metadata on mobile homepage previews */
+      .projects-preview .preview-card-title,
+      .projects-preview .preview-card-meta {
+        display: none !important;
+      }
+      /* Keep mobile cards tightly packed without gaps */
+      .projects-preview {
+        gap: 0 !important;
+      }
     }
   </style>
 </head>
@@ -677,6 +686,9 @@
           createdCards.push(card);
         });
 
+        // Initialize mobile scroll position to leftmost card
+        container.scrollLeft = 0;
+
         // Stagger-reveal cards when the projects section enters the viewport
         const projectsSection = container.closest('.content-section') || container;
         const easing = 'cubic-bezier(0.16, 1, 0.3, 1)';
@@ -703,7 +715,7 @@
               sectionObserver.disconnect();
             }
           });
-        }, { threshold: 0.15 });
+        }, { threshold: 0.45 });
         sectionObserver.observe(projectsSection);
       })
       .catch(() => {

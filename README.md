@@ -374,6 +374,46 @@ Multi-lingual (typically Korean and English) narrative description columns.
 npx firebase deploy --only functions
 ```
 
+### 5.5 듀얼 코어 데이터베이스 시스템 (Dual-Core DB System)
+
+artic. 홈페이지는 정적 콘텐츠의 영속성, 실시간 트랜잭션, 그리고 에디토리얼 큐레이션의 편의성을 동시에 만족하기 위해 **Firebase**와 **Notion DB**를 병용하는 **듀얼 코어 DB 시스템**으로 설계되었습니다.
+
+1. **Firebase Firestore (실시간 트랜잭션 코어)**:
+   - **용도**: 독자들의 활발한 동적 상호작용 및 고객 데이터 저장.
+   - **대상 컬렉션**:
+     - `orders`: 도서 및 물리적 굿즈 구매 주문 정보.
+     - `quarterly_subscribers`: 이메일 기반 대기 명단 신청 정보 (Quarterly 소식지 구독자).
+   - **특징**: Cloud Functions 백엔드 트리거와 다이렉트 연동되어 엄격한 스키마 유효성 검사 및 CORS 차단 정책이 즉각 적용됩니다.
+
+2. **Notion DB (에디토리얼 큐레이션 코어)**:
+   - **용도**: 아티스트 다큐멘터리, 플레이리스트, 비주얼 크리틱 등 정기 웹진 콘텐츠 관리.
+   - **대상 데이터베이스**: `분기별 결산` (Notion Database ID: `653b6d15-ac9b-4ea3-b284-da77852f424e`)
+   - **특징**: 비개발자 팀원들도 Notion 워크스페이스 상에서 직관적으로 문서를 편집하고 미디어를 아카이빙할 수 있으며, 데이터 필드(`아카이빙일`, `연도`, `Q`, `업로드 확정`)를 활용해 퍼블리싱 상태를 정교하게 컨트롤합니다.
+
+### 5.6 Notion DB 로컬 스캔 및 퍼블리싱 프리뷰 파이프라인
+
+콘텐츠가 노션에서 업데이트되었을 때 자동 Git Push를 통한 강제 무중단 배포를 진행하는 대신, **로컬 호스트 환경에서 렌더링 결과와 레이아웃을 우선 검증**할 수 있도록 하는 사전 동기화 파이프라인을 구축합니다.
+
+```
+[ Notion DB (분기별 결산) ] 
+      │ (업로드 확정 체크 필터링)
+      ▼ 
+[ Local Scan 스크립트 실행 ] ──▶ 로컬 데이터 파일 갱신 (JSON/SQLite)
+      │
+      ▼
+[ Localhost Server (server.py) ] ──▶ 개발 환경 웹뷰 사전 검증 및 레이아웃 조정
+      │
+      ▼ (개발자 수동 확인 완료 후)
+[ Git Commit & Deploy ] ──▶ 프로덕션 (GitHub Pages / Firebase) 배포 확정
+```
+
+- **Notion 로컬 스캔 동기화 도구 (`scripts/notion_sync.py`) `[To be updated]`**:
+  - Notion API SDK를 사용하여 `분기별 결산` 데이터베이스에서 `업로드 확정` 체크박스가 활성화된 페이지만 필터링해 스캔합니다.
+  - 각 페이지의 제목, 발행 정보, 본문 블록 구조를 긁어와 로컬 웹진 전용 JSON (`quarterly/data.json`) 또는 로컬 데이터베이스에 캐싱 적재합니다.
+- **로컬호스트 프리뷰 서버 (`server.py`) `[To be updated]`**:
+  - 로컬 환경의 Python 개발 서버가 빌드된 `quarterly/data.json` 데이터 원본을 마운트하여 `/quarterly/` 프리뷰 웹페이지를 동적 라우팅으로 렌더링합니다.
+  - 배포 전에 브라우저에서 디자인 시스템과의 정렬 상태, 이미지 로드, Bezier 트랜지션을 완벽하게 디버깅할 수 있습니다.
+
 ---
 
 ## 부록: 프로젝트 추가 방법 (단일 데이터 소스 구조)

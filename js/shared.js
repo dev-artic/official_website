@@ -1,6 +1,36 @@
-/* -------------------------------------------------------------
- * shared.js — artic. Global Behaviors
- * ------------------------------------------------------------- */
+// ── 0. Dynamic Navigation Bar ──
+function buildNavigationBar() {
+  const nav = document.querySelector('.nav-bar');
+  if (!nav) return;
+
+  // Extract and preserve original classes of #nav-home (e.g. 'animate-on-load', 'visible')
+  const originalHome = nav.querySelector('#nav-home');
+  let homeClasses = 'nav-home';
+  if (originalHome) {
+    homeClasses = originalHome.className || 'nav-home';
+  }
+
+  const pathname = window.location.pathname;
+
+  const isAbout = pathname.includes('/about/');
+  const isProjects = pathname.includes('/projects/') || 
+                     pathname.includes('/deus-ex-machina/') || 
+                     pathname.includes('/gagosian-party-music/') || 
+                     pathname.includes('/neutral-interview/') || 
+                     pathname.includes('/tasting-note/') || 
+                     pathname.includes('/the-root/');
+  const isQuarterly = pathname.includes('/quarterly/');
+  const isContact = pathname.includes('/contact/');
+
+  nav.innerHTML = `
+    <a href="/" class="${homeClasses}" id="nav-home">artic.</a>
+    <a href="/about/" class="nav-link ${isAbout ? 'active' : ''}">About</a>
+    <a href="/projects/" class="nav-link ${isProjects ? 'active' : ''}">Projects</a>
+    <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
+    <a href="/quarterly/" class="nav-link ${isQuarterly ? 'active' : ''}">Quarterly</a>
+    <a href="/contact/" class="nav-link ${isContact ? 'active' : ''}">Contact</a>
+  `;
+}
 
 // ── 1. Theme (Dark/Light) ──
 function initTheme() {
@@ -106,9 +136,12 @@ function initMobileNav() {
     }
   });
 
-  // Close nav when clicking a link
+  // Close nav when clicking a link (except for the artic.le menu to keep overlay waiting)
   nav.querySelectorAll('.nav-link, .nav-home').forEach(link => {
     link.addEventListener('click', () => {
+      if (link.classList.contains('nav-artic-le')) {
+        return;
+      }
       document.body.classList.remove('nav-open');
     });
   });
@@ -298,6 +331,9 @@ function initArticleMenu() {
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('theme-toggle');
   if (btn) btn.addEventListener('click', toggleTheme);
+
+  // Dynamic Navigation rendering must occur before initializing sub-nav or article behaviors
+  buildNavigationBar();
 
   initSubpageNav();
   initMobileNav();

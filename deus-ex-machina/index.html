@@ -1693,10 +1693,11 @@
 
       .checkout-buttons {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
+        gap: 12px;
         margin-top: 16px;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
+        padding-right: 10px;
+        box-sizing: border-box;
       }
 
       .checkout-btn {
@@ -1714,8 +1715,10 @@
         border-radius: 0;
         text-align: center;
         text-decoration: none;
-        width: 100%;
-        box-sizing: border-box;
+      }
+
+      .checkout-buttons .checkout-btn {
+        flex: 1;
       }
 
       .checkout-btn.submit {

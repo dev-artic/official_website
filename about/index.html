@@ -31,11 +31,11 @@
       padding-top: 80px; /* space for floating nav */
     }
 
-    /* ── Row: Two-column split ── */
+    /* ── Asymmetric Grid Layout ── */
     .about-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(40px, 8vw, 120px);
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: clamp(40px, 8vw, 100px);
       padding: var(--space-xxl) 0;
       position: relative;
       align-items: start;
@@ -52,17 +52,16 @@
       background-color: var(--border-color);
       transform: scaleX(0);
       transform-origin: left center;
-      animation: borderWipe 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.5s ease;
       will-change: transform;
-      transition: background-color 0.5s ease;
+    }
+
+    .about-row.revealed::before {
+      transform: scaleX(1);
     }
 
     .about-row:first-child::before {
       display: none;
-    }
-
-    .about-row:nth-child(2)::before {
-      animation-delay: 0.5s;
     }
 
     .about-row:first-child {
@@ -70,29 +69,65 @@
       padding-top: var(--space-xl);
     }
 
-    /* ── Headline ── */
+    /* ── Typography & Animation ── */
+    .reveal-item {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity;
+    }
+
+    .revealed .reveal-item {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .revealed .reveal-item-delayed {
+      transition-delay: 0.15s;
+    }
+
+    /* ── Headline Block ── */
     .about-headline {
       font-family: var(--font-serif);
-      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-size: clamp(2.2rem, 5.5vw, 3.6rem);
       font-weight: 700;
-      line-height: 1.25;
-      letter-spacing: 0.01em;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      text-transform: none; /* Allows natural mixed casing */
+    }
+
+    .about-origin-en {
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+      font-weight: 400;
+    }
+
+    .about-origin-ko {
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* ── Philosophy Block ── */
+    .about-subheadline {
+      font-family: var(--font-serif);
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
+      font-weight: 400;
+      line-height: 1.55;
+      letter-spacing: -0.01em;
       color: var(--text-primary);
     }
 
-    /* ── Description block ── */
-    .about-desc-en {
+    .about-philosophy-ko {
       font-family: var(--font-sans);
-      font-size: 0.82rem;
-      line-height: 1.75;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-md);
-    }
-
-    .about-desc-ko {
-      font-family: var(--font-sans);
-      font-size: 0.78rem;
-      line-height: 1.75;
+      font-size: 0.8rem;
+      line-height: 1.8;
       color: var(--text-muted);
       margin-bottom: var(--space-lg);
     }
@@ -102,7 +137,7 @@
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 24px;
+      margin-top: var(--space-md);
     }
 
     .about-action {
@@ -145,37 +180,6 @@
       transform: scale(1.1);
     }
 
-    /* ── Large Logo Image ── */
-    .about-logo-wrap {
-      align-self: center;
-      overflow: hidden;
-    }
-
-    .about-logo-img {
-      width: 100%;
-      max-width: 400px;
-      height: auto;
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
-    }
-
-    .about-logo-wrap:hover .about-logo-img {
-      transform: scale(1.02);
-      opacity: 0.9;
-    }
-
-    .dark-mode .about-logo-img {
-      filter: invert(1);
-    }
-
-    /* ── Extended Description ── */
-    .about-extended {
-      font-family: var(--font-sans);
-      font-size: 0.82rem;
-      line-height: 1.75;
-      color: var(--text-secondary);
-      align-self: center;
-    }
-
     /* ── Footer ── */
     .about-footer {
       max-width: var(--max-width);
@@ -188,11 +192,7 @@
       text-transform: uppercase;
       color: var(--text-muted);
       transition: border-color 0.5s ease;
-      text-align: right; /* Consistent with other subpages */
-    }
-
-    @keyframes borderWipe {
-      to { transform: scaleX(1); }
+      text-align: right;
     }
 
     /* ── Responsive ── */
@@ -211,7 +211,7 @@
         padding-bottom: 60px;
       }
       .about-row {
-        padding: var(--space-lg) 0; /* Tighter padding on desktop to allow beautiful vertical centering */
+        padding: var(--space-xl) 0;
       }
       .about-row:first-child {
         padding-top: 0;
@@ -223,7 +223,7 @@
 
     @media (max-width: 767px) {
       .about-content {
-        padding-top: 90px !important; /* Elegant breathing room on mobile */
+        padding-top: 90px !important;
       }
 
       .about-row {
@@ -232,72 +232,37 @@
         padding: var(--space-xl) 0;
       }
 
-      /* Staggered mobile typography - smaller & offset */
       .about-headline {
-        font-size: clamp(1.25rem, 5.5vw, 1.45rem) !important;
-        line-height: 1.4 !important;
-        letter-spacing: -0.01em !important;
-        font-weight: 500 !important;
-        margin-bottom: 24px !important;
-        text-align: left !important;
+        font-size: clamp(1.8rem, 8vw, 2.4rem) !important;
+        line-height: 1.2 !important;
       }
 
-      /* English Desc shifted right */
-      .about-desc-en {
+      .about-origin-en {
+        font-size: 0.8rem !important;
+      }
+
+      .about-origin-ko {
         font-size: 0.72rem !important;
-        line-height: 1.85 !important;
-        color: var(--text-secondary) !important;
-        text-align: right !important;
-        margin-left: 18% !important;
-        max-width: 82% !important;
-        margin-bottom: 20px !important;
       }
 
-      /* Korean Desc shifted left */
-      .about-desc-ko {
-        font-size: 0.68rem !important;
-        line-height: 1.85 !important;
-        color: var(--text-muted) !important;
-        text-align: left !important;
-        margin-right: 18% !important;
-        max-width: 82% !important;
-        margin-bottom: 28px !important;
+      .about-subheadline {
+        font-size: clamp(1.15rem, 5vw, 1.45rem) !important;
+        line-height: 1.5 !important;
       }
 
-      /* Action buttons aligned right to match English block */
+      .about-philosophy-ko {
+        font-size: 0.72rem !important;
+      }
+
       .about-actions {
-        justify-content: flex-end !important;
         width: 100% !important;
         gap: 8px !important;
-        margin-top: 16px !important;
       }
 
       .about-action {
         padding: 8px 14px !important;
         font-size: 0.55rem !important;
         letter-spacing: 0.12em !important;
-      }
-
-      /* Free-spirited Logo Off-center Placement */
-      .about-logo-wrap {
-        align-self: flex-start !important;
-        margin-left: 0px !important;
-        margin-top: 12px !important;
-        margin-bottom: 0px !important;
-      }
-
-      .about-logo-img {
-        max-width: 120px !important; /* Exquisite small typography logo */
-      }
-
-      /* Extended text shifted right/staggered */
-      .about-extended {
-        font-size: 0.72rem !important;
-        line-height: 1.85 !important;
-        color: var(--text-secondary) !important;
-        text-align: left !important;
-        margin-left: 15% !important;
-        max-width: 85% !important;
       }
     }
   </style>
@@ -314,49 +279,52 @@
     <a href="/contact/" class="nav-link">Contact</a>
   </nav>
 
-  <div class="delayed-reveal about-content animate-fade-in">
+  <div class="about-content">
 
-    <!-- Row 1: Headline + Description -->
-    <div class="about-row">
+    <!-- Row 1: Brand Origin (Identity) -->
+    <div class="about-row reveal-row">
       <div>
-        <h1 class="about-headline">artic. illuminates artists' message,<br>bringing their creative voice to life.</h1>
+        <h1 class="about-headline reveal-item">
+          artic.<br>
+          stands for<br>
+          artists' attic.
+        </h1>
       </div>
       <div>
-        <p class="about-desc-en">
-          artic. is a creative brand aiming to create the most aesthetic and experimental contents
-          focused on artists' message.
-        </p>
-        <p class="about-desc-ko">
-          artic.은 창작자가 의도한 메시지에 집중하며<br>
-          이를 가장 아름다운 방식으로 조명합니다.
-        </p>
-        <div class="about-actions">
-          <a href="https://instagram.com/artic.live" class="about-action" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.948-.2-4.358-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-            Follow
-          </a>
-          <a href="https://youtube.com/@artic_live" class="about-action" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
-            YouTube
-          </a>
+        <div class="reveal-item reveal-item-delayed">
+          <p class="about-origin-en">
+            A symbolic space where the raw, initial voice of a creator emerges.
+          </p>
+          <p class="about-origin-ko">
+            창작자의 가공되지 않은 첫 목소리가 피어나는 상징적인 공간입니다.
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- Row 2: Logo + Extended Description -->
-    <div class="about-row">
-      <div class="about-logo-wrap">
-        <img src="../images/logo-type-black.png" alt="artic." class="about-logo-img">
+    <!-- Row 2: Philosophy (Core Value) -->
+    <div class="about-row reveal-row">
+      <div>
+        <h2 class="about-subheadline reveal-item">
+          With profound respect for the artist's original intent, we pursue a border-crossing, media-bending approach to visual culture.
+        </h2>
       </div>
       <div>
-        <p class="about-extended">
-          artic. stands for artists' attic—<br>
-          a symbolic place where the initial message of an artist
-          emerges. With the most profound respect for
-          the message intended by the artist, artic.
-          pursues a border-crossing, limit-pushing,<br>
-          media-bending approach to creativity.
-        </p>
+        <div class="reveal-item reveal-item-delayed">
+          <p class="about-philosophy-ko">
+            우리는 창작자의 온전한 의도를 지키고 조명하기 위해 경계를 허물고 매체를 넘나드는 실험적인 크리에이티브를 지향합니다.
+          </p>
+          <div class="about-actions">
+            <a href="https://instagram.com/artic.live" class="about-action" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.948-.2-4.358-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+              Follow
+            </a>
+            <a href="https://youtube.com/@artic_live" class="about-action" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
+              YouTube
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -374,6 +342,31 @@
   </button>
 
   <script src="../js/shared.js"></script>
+  <script>
+    // Scroll Reveal Intersection Observer
+    document.addEventListener('DOMContentLoaded', () => {
+      const rows = document.querySelectorAll('.reveal-row');
+      
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, self) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            self.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      rows.forEach(row => {
+        observer.observe(row);
+      });
+    });
+  </script>
 
 </body>
 </html>

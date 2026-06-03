@@ -66,53 +66,107 @@ Homepage/
 
 ---
 
-## 🔄 개발, 테스트 및 배포 워크플로우 (Development, Testing & Deployment)
+## 🔄 개발, 테스트 및 배포 프로세스 (Development, Testing & Deployment Process)
 
-artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다. 개발자가 로컬에서 코드를 수정하고, 테스트를 거쳐, 프로덕션 라이브 서버에 안전하게 배포하기까지의 일련의 워크플로우와 역할 구분을 정리합니다.
+artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다. 개발자가 로컬에서 코드를 작성하고, 테스트를 거쳐, 최종 프로덕션 환경에 배포하기까지의 단계별 흐름과 각 단계에서 관여하는 핵심 파일들을 정의합니다.
 
 ```mermaid
 graph TD
-    Local[1. 로컬 개발 & 테스트] -->|git push| Git[2. GitHub 원격 저장소]
-    Git -->|GitHub Actions 빌드| GHPages[3. 프론트엔드 배포 - GitHub Pages]
-    Local -->|firebase deploy| Functions[4. 백엔드 API 배포 - Firebase Functions]
+    subgraph 1. 개발 단계 (Development)
+        DevStatic[정적 마크업/디자인 작성]
+        DevBackend[백엔드 API 및 로직 구현]
+        DevBatch[배치 자동화 스크립트 정의]
+    end
+
+    subgraph 2. 테스트 단계 (Testing)
+        TestStatic[server.py 실행 & 로컬 웹뷰 검증]
+        TestSandbox[orders.db 적재 & API 샌드박싱]
+        TestBackend[Firebase 로컬 에뮬레이터 실행]
+    end
+
+    subgraph 3. 배포 단계 (Deployment)
+        PushGit[Git Commit & Push] --> GHPages[GitHub Pages 자동 서빙 - artic.live]
+        DeployFirebase[Firebase CLI deploy] --> CloudFunctions[Firebase Functions API 작동]
+        CronJob[GitHub Actions Cron 트리거] --> UpdateContent[유튜브 플레이리스트 스캔 & 마크업 자동 갱신]
+    end
+
+    DevStatic --> TestStatic
+    DevBackend --> TestBackend
+    DevBatch --> TestSandbox
+    
+    TestStatic & TestSandbox & TestBackend --> PushGit & DeployFirebase & CronJob
 ```
 
-### 1. 개발 및 테스트 단계 (Local Development & Testing)
-* **프론트엔드 정적 요소 개발**:
-  * `index.html` 및 개별 상세 페이지의 HTML/CSS/JS 코드를 직접 수정합니다.
-  * 신규 콘텐츠 추가는 `projects.json` 단일 소스에 신규 항목을 Prepend(맨 앞에 삽입)하여 등록합니다.
-* **로컬 웹 서버 가동**:
-  * 파이썬 스크립트인 `server.py`를 실행하여 로컬 호스트 테스트 서버(`http://localhost:8000`)를 가동합니다.
-  ```bash
-  python3 server.py
-  ```
-  * **API 샌드박싱 테스트**: 로컬 테스트 도중 waitlist 가입이나 checkout 주문 폼을 작성하면, `server.py` 내부에 구현된 파이썬 API 핸들러가 이를 가로채 프로젝트 루트에 있는 로컬 SQLite 데이터베이스인 `orders.db` 파일에 적재합니다. 실 배포 전 백엔드 흐름을 오프라인에서 안전하게 디버깅할 수 있습니다.
+### 1️⃣ 개발 단계 (Development Phase)
 
-### 2. 프론트엔드 배포 단계 (Frontend Live Deployment)
-* **배포처**: **GitHub Pages** (커스텀 도메인 매핑: `CNAME`에 지정된 `artic.live`)
-* **역할**: 텍스트 수정, 레이아웃 변경, 신규 프로젝트 추가(`projects.json` 및 개별 페이지) 등 모든 **정적 웹 콘텐츠의 라이브 릴리즈**를 담당합니다.
-* **배포 순서**:
-  1. 로컬 테스트가 완료된 정적 파일들을 커밋합니다.
-  2. GitHub 원격 리포지토리의 `main` 브랜치에 코드를 푸시합니다.
-     ```bash
-     git add .
-     git commit -m "style: refine page layouts"
-     git push origin main
-     ```
-  3. 푸시가 일어나면 GitHub의 자동 빌드/배포 기능이 트리거되어 약 1~2분 이내에 `https://artic.live` 주소로 전격 자동 배포됩니다.
-  * **예외 (콘텐츠 자동 갱신)**: 매주 월요일 오전 9시에는 깃허브 액션 워크플로우인 `.github/workflows/update-playlists.yml`이 작동하여 자동으로 유튜브 API를 스캔해 관련 마크업을 변경하고 저장소에 자동으로 커밋/푸시를 수행하므로, 깃허브 페이지를 통해 자동으로 콘텐츠가 최신 상태로 유지됩니다.
+이 단계에서는 화면을 구성하는 정적 콘텐츠를 추가하거나, 비즈니스 로직을 처리할 백엔드 API와 자동화 스크립트를 작성합니다.
 
-### 3. 백엔드 및 API 배포 단계 (Backend Serverless Deployment)
-* **배포처**: **Firebase Cloud Functions** (프로젝트 ID: `artic-official-home`)
-* **역할**: 대기명단 이메일 검증(`functions/index.js` 내의 `waitlist`), 결제 및 이메일 자동 발송(`functions/index.js` 내의 `checkout`) 등 **서버 측 서버리스 백엔드 API 동작**을 담당합니다.
-  * *참고: 혼선을 방지하기 위해 `firebase.json` 내의 `"hosting"` 설정은 일괄 해지/비활성화 처리되었으며, Firebase는 오직 백엔드 API 가동 용도로만 독립 활용됩니다. 호스팅을 비활성화해도 API 통신에는 아무 지장이 없습니다.*
-* **배포 순서**:
-  1. API 동작을 결정하는 백엔드 코드인 `functions/index.js` 또는 `functions/package.json` 등을 수정합니다.
-  2. 로컬 테스트(에뮬레이터)를 완료한 후 아래 명령어로 Firebase Cloud Functions 클라우드 서버에 백엔드 코드를 배포합니다.
-     ```bash
-     npx firebase-tools deploy --only functions
-     ```
-  3. 프론트엔드 페이지(`artic.live`)의 브라우저 런타임에서 사용자가 가입 폼을 클릭하면, Javascript가 Firebase Cloud Functions의 다이렉트 외부 HTTPS URL(`https://us-central1-artic-official-home.cloudfunctions.net/...`)로 직접 POST API를 쏘아 통신이 완료됩니다.
+* **정적 프론트엔드 마크업 및 디자인 수정**
+  * 메인 뼈대 및 디자인 시스템 설정: **`index.html`**, **`css/design-system.css`**, **`css/main.css`** 등의 정적 파일을 직접 수정합니다.
+  * 신규 에디토리얼 아티클 및 프로젝트 추가: 단일 데이터 소스인 **`projects.json`** 파일에 항목 정보를 추가하고, 해당 프로젝트 이름으로 폴더를 생성하여 상세 페이지 마크업(예: **`deus-ex-machina/index.html`**, **`tasting-note/index.html`**)을 작성합니다.
+  * 노션 아카이빙 데이터 사전 동기화: 노션 DB(`분기별 결산`)의 문서를 로컬로 미리 내려받기 위해 **`scripts/notion_sync.py`** 스크립트를 작성 및 편집합니다.
+* **동적 백엔드 API 로직 구현**
+  * 대기명단 가입 검증 및 주문/이메일 자동 발송: **`functions/index.js`** 파일에서 이메일 정규식 검증(`waitlist` 함수) 및 토스뱅크 입금 안내 / Daum SMTP 연동 메일 발송(`checkout` 함수) 비즈니스 로직을 구현 및 수정합니다.
+* **콘텐츠 자동 갱신 배치 스크립트 작성**
+  * 유튜브 플레이리스트 동기화 규칙 정의: 매주 유튜브 채널의 최신 영상 리스트를 긁어오기 위한 **`scripts/update_playlists.py`** 스크립트와 대상 프로젝트들의 정보를 담은 **`scripts/playlist_config.py`** 파일을 갱신합니다.
+
+---
+
+### 2️⃣ 테스트 단계 (Testing & Verification Phase)
+
+코드를 라이브 서버에 반영하기 전에 로컬 샌드박스 및 에뮬레이터 환경에서 정상 작동 여부를 정밀하게 검증합니다.
+
+* **로컬 웹 서버 가동 및 웹뷰 디자인 확인**
+  * 로컬 개발 서버 실행: 로컬 호스트 테스트 서버(`http://localhost:8000`)를 위해 파이썬 기반 로컬 서버 스크립트인 **`server.py`**를 실행합니다.
+    ```bash
+    python3 server.py
+    ```
+  * 로컬 브라우저에서 디자인 시스템과의 정렬 상태, CSS Bezier 트랜지션, 반응형 스크롤 리빌 애니메이션 등을 다각도로 디버깅합니다.
+* **API 샌드박싱 테스트 (Offline Mocking)**
+  * 로컬 호스트 환경에서 waitlist 신청이나 checkout 주문 폼을 작성해 제출하면, **`server.py`** 내부에 통합된 로컬 API 핸들러가 Firebase Functions로의 실제 외부 호출을 가로챕니다.
+  * 가로챈 요청 데이터를 프로젝트 루트에 위치한 로컬 SQLite 데이터베이스인 **`orders.db`** 파일에 즉시 적재하여, 실제 백엔드 연동 없이도 프론트-백 간의 데이터 명세와 흐름을 완전히 독립적인 샌드박스 내에서 검증할 수 있습니다.
+* **백엔드 Firebase Functions 로컬 에뮬레이터 검증**
+  * 백엔드 API 및 이메일 발송 기능이 정상 작동하는지 Firebase 에뮬레이터 툴킷으로 테스트합니다.
+  * **`functions`** 디렉토리 내에서 에뮬레이터를 구동하여 로컬 환경에서 API 통신 및 모의 Firestore 트리거를 수행합니다.
+    ```bash
+    # functions 디렉토리 내부
+    npm install
+    npx firebase emulators:start
+    ```
+  * **`functions/.env`** 파일에 임시 SMTP 자격증명을 할당하여 실제 발송 흐름까지 모의 검증합니다.
+
+---
+
+### 3️⃣ 배포 단계 (Deployment Phase)
+
+로컬 검증이 완료된 정적 콘텐츠와 동적 백엔드 API를 프로덕션 환경에 각각 독립적으로 배포합니다.
+
+* **A. 정적 프론트엔드 호스팅 배포 (GitHub Pages)**
+  * **관여 파일**: **`index.html`**, **`css/`** 폴더 내 스타일시트, **`js/`** 폴더 내 자바스크립트, 데이터 원본 **`projects.json`**, 커스텀 도메인 파일 **`CNAME`**
+  * **배포 흐름**:
+    1. 로컬에서 수정 및 테스트 완료한 정적 웹 파일들을 깃 스테이징에 추가하고 커밋합니다.
+    2. GitHub 원격 리포지토리의 `main` 브랜치에 코드를 푸시합니다.
+       ```bash
+       git add .
+       git commit -m "style: refine article page transitions"
+       git push origin main
+       ```
+    3. 푸시가 감지되면 GitHub Actions의 내부 배포 러너가 동작하여, **`CNAME`**에 설정된 커스텀 도메인 `artic.live`를 타겟으로 약 1~2분 이내에 정적 호스팅 사이트를 프로덕션에 자동 배포합니다.
+* **B. 동적 백엔드 API 배포 (Firebase Cloud Functions)**
+  * **관여 파일**: **`functions/index.js`**, **`functions/package.json`**, 설정 파일 **`firebase.json`**
+  * **배포 흐름**:
+    1. 혼선을 줄이기 위해 **`firebase.json`** 설정 파일 내의 `"hosting"` 설정이 비활성화(`hosting:disable` 등)되어 프론트엔드가 오직 GitHub Pages로만 서빙되는 것을 보장합니다. (호스팅이 꺼져 있어도 Functions 가동 및 API 통신에는 아무 문제가 없습니다.)
+    2. Firebase CLI 명령어를 사용하여 로컬에서 완성된 Functions 코드를 Google Firebase Cloud 인프라에 배포합니다.
+       ```bash
+       npx firebase-tools deploy --only functions
+       ```
+    3. 배포 완료 후, 브라우저에서 사용자가 버튼을 클릭하면 클라이언트 스크립트가 Firebase Functions의 전용 고유 외부 HTTPS 엔드포인트 URL(`https://us-central1-artic-official-home.cloudfunctions.net/...`)로 직접 POST 호출을 전송해 실시간 통신이 이루어집니다.
+* **C. 배치 스크립트 배포 및 자동 갱신 (GitHub Actions)**
+  * **관여 파일**: GitHub Actions 워크플로우 정의 파일 **`.github/workflows/update-playlists.yml`**, 유튜브 갱신 스크립트 **`scripts/update_playlists.py`**
+  * **배포 및 작동 방식**:
+    1. 해당 자동화 워크플로우가 구성된 소스 코드를 `main` 브랜치에 푸시해 둡니다.
+    2. 등록된 GitHub Actions 워크플로우는 매주 월요일 오전 9시(KST)가 되면 크론 트리거를 통해 백그라운드에서 자동으로 기동됩니다.
+    3. 유튜브 API를 호출하여 최신 에피소드를 스캔하고 정적 마크업을 동적으로 수정한 뒤, 변경사항을 원격 `main` 브랜치에 봇 계정으로 자동 커밋 및 푸시합니다. 이 푸시가 다시 GitHub Pages 정적 배포를 트리거하여 사이트의 최신 플레이리스트 콘텐츠가 무중단으로 반영됩니다.
 
 ---
 

@@ -293,7 +293,7 @@ function initArticleMenu() {
       .nav-open .nav-bar .nav-artic-le.nav-link-fade,
       .nav-artic-le.nav-link-fade {
         opacity: 0 !important;
-        transform: translateY(-8px) !important;
+        transition-delay: 0s !important;
       }
     `;
     document.head.appendChild(style);

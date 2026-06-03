@@ -186,6 +186,10 @@ def send_email(to_addr, subject, body):
 
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        super().end_headers()
+
     def do_POST(self):
         if self.path == '/api/checkout':
             content_length = int(self.headers['Content-Length'])
@@ -359,5 +363,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     init_db()
     print(f"Starting Custom artic. Server on port {PORT}...")
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
         httpd.serve_forever()

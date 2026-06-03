@@ -287,12 +287,14 @@ function initArticleMenu() {
         white-space: nowrap;
         overflow: hidden;
         transition-property: width, opacity, transform, color !important;
-        transition-duration: 0.6s, 0.4s, 0.5s, 0.3s !important;
+        transition-duration: 0.6s, 0.4s, 0.4s, 0.3s !important;
         transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), ease !important;
+        transform: translateY(0);
       }
       .nav-open .nav-bar .nav-artic-le.nav-link-fade,
       .nav-artic-le.nav-link-fade {
         opacity: 0 !important;
+        transform: translateY(-8px) !important;
       }
     `;
     document.head.appendChild(style);

@@ -139,3 +139,46 @@ exports.checkout = onRequest((req, res) => {
     }
   });
 });
+
+exports.waitlist = onRequest((req, res) => {
+  cors(req, res, async () => {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
+    if (req.method !== "POST") {
+      res.status(405).json({ error: "Method not allowed" });
+      return;
+    }
+
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({ error: "Email is required" });
+        return;
+      }
+
+      // Simple email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        res.status(400).json({ error: "Invalid email format" });
+        return;
+      }
+
+      const subscriberData = {
+        email,
+        created_at: FieldValue.serverTimestamp(),
+      };
+
+      const docRef = await db.collection("quarterly_subscribers").add(subscriberData);
+      console.log(`Waitlist subscriber successfully saved to Firestore (ID: ${docRef.id}).`);
+
+      res.status(200).json({ success: true, saved_to_cloud: true, id: docRef.id });
+    } catch (err) {
+      console.error("Internal server error during waitlist submission:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+

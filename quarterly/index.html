@@ -130,35 +130,105 @@
       transform: translateY(-1px);
     }
 
-    /* ── Large Logo Image ── */
-    .about-logo-wrap {
-      align-self: center;
-      overflow: hidden;
+    /* ── Waitlist Form Style ── */
+    .waitlist-container {
+      margin-top: 32px;
+      position: relative;
+      min-height: 48px;
     }
 
-    .about-logo-img {
+    #waitlist-toggle-btn {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .waitlist-form {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
       width: 100%;
-      max-width: 400px;
-      height: auto;
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+      max-width: 320px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
 
-    .about-logo-wrap:hover .about-logo-img {
-      transform: scale(1.02);
-      opacity: 0.9;
+    .waitlist-form.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      position: relative;
     }
 
-    .dark-mode .about-logo-img {
-      filter: invert(1);
-    }
-
-    /* ── Extended Description ── */
-    .about-extended {
+    .waitlist-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 10px 0;
       font-family: var(--font-sans);
-      font-size: 0.82rem;
-      line-height: 1.75;
-      color: var(--text-secondary);
-      align-self: center;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .waitlist-form input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    .waitlist-form button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .waitlist-form button svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text-primary);
+      stroke-width: 2;
+      fill: none;
+      transition: stroke 0.3s ease, transform 0.3s ease;
+    }
+
+    .waitlist-form button:hover svg {
+      transform: translateX(2px);
+    }
+    
+    .waitlist-form button:disabled svg {
+      stroke: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .waitlist-message {
+      font-family: var(--font-sans);
+      font-size: 0.65rem;
+      margin-top: 12px;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: all 0.4s ease;
+    }
+
+    .waitlist-message.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .waitlist-message.success {
+      color: var(--text-primary);
+    }
+
+    .waitlist-message.error {
+      color: #E06C75;
     }
 
     /* ── Footer ── */
@@ -208,75 +278,51 @@
 
     @media (max-width: 767px) {
       .about-content {
-        padding-top: 90px !important;
+        padding-top: 80px !important;
       }
 
       .about-row {
         grid-template-columns: 1fr;
-        gap: var(--space-xl);
-        padding: var(--space-xl) 0;
+        gap: var(--space-lg);
+        padding: var(--space-lg) 0;
       }
 
       .about-headline {
-        font-size: clamp(1.25rem, 5.5vw, 1.45rem) !important;
-        line-height: 1.4 !important;
+        font-size: clamp(1.4rem, 6vw, 1.7rem) !important;
+        line-height: 1.35 !important;
         letter-spacing: -0.01em !important;
-        font-weight: 500 !important;
-        margin-bottom: 24px !important;
+        font-weight: 600 !important;
+        margin-bottom: 16px !important;
         text-align: left !important;
       }
 
       .about-desc-en {
-        font-size: 0.72rem !important;
-        line-height: 1.85 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.8 !important;
         color: var(--text-secondary) !important;
-        text-align: right !important;
-        margin-left: 18% !important;
-        max-width: 82% !important;
-        margin-bottom: 20px !important;
+        text-align: left !important;
+        margin-left: 0 !important;
+        max-width: 100% !important;
+        margin-bottom: 16px !important;
       }
 
       .about-desc-ko {
-        font-size: 0.68rem !important;
-        line-height: 1.85 !important;
+        font-size: 0.72rem !important;
+        line-height: 1.8 !important;
         color: var(--text-muted) !important;
         text-align: left !important;
-        margin-right: 18% !important;
-        max-width: 82% !important;
-        margin-bottom: 28px !important;
+        margin-right: 0 !important;
+        max-width: 100% !important;
+        margin-bottom: 0 !important;
       }
 
-      .about-actions {
-        justify-content: flex-end !important;
-        width: 100% !important;
-        gap: 8px !important;
-        margin-top: 16px !important;
+      .waitlist-container {
+        margin-top: 24px;
+        margin-bottom: 24px;
       }
 
-      .about-action {
-        padding: 8px 14px !important;
-        font-size: 0.55rem !important;
-        letter-spacing: 0.12em !important;
-      }
-
-      .about-logo-wrap {
-        align-self: flex-start !important;
-        margin-left: 0px !important;
-        margin-top: 12px !important;
-        margin-bottom: 0px !important;
-      }
-
-      .about-logo-img {
-        max-width: 120px !important;
-      }
-
-      .about-extended {
-        font-size: 0.72rem !important;
-        line-height: 1.85 !important;
-        color: var(--text-secondary) !important;
-        text-align: left !important;
-        margin-left: 15% !important;
-        max-width: 85% !important;
+      .waitlist-form {
+        max-width: 100%;
       }
     }
   </style>
@@ -295,38 +341,32 @@
 
   <div class="delayed-reveal about-content animate-fade-in">
 
-    <!-- Row 1: Curation Headline + Details -->
+    <!-- Row 1: Headline + Description & Waitlist -->
     <div class="about-row">
       <div>
         <h1 class="about-headline">QUARTERLY.<br>Curation of art & music.</h1>
+        
+        <div class="waitlist-container">
+          <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
+          <form id="waitlist-form" class="waitlist-form">
+            <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required>
+            <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
+              <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+          <div id="waitlist-message" class="waitlist-message"></div>
+        </div>
       </div>
       <div>
         <p class="about-desc-en">
-          This space will publish webzine editorials dynamically backed by our Notion database,
-          delivering structured insights for each quarter.
+          Stay tuned. Each quarter, we reflect on key artist albums,
+          curated playlists, and visual documentaries to bring
+          a cohesive editorial layout to artic. subscribers.
         </p>
         <p class="about-desc-ko">
-          분기별 결산 노션 데이터베이스를 기반으로 작동하는<br>
-          아티스틱 웹진 에디토리얼이 곧 이곳에 연동 발행됩니다.
-        </p>
-        <div class="about-actions">
-          <a href="javascript:void(0)" class="about-action nav-artic-le">
-            to be updated
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row 2: Visual Placeholder -->
-    <div class="about-row">
-      <div class="about-logo-wrap">
-        <img src="../images/logo-type-black.png" alt="artic." class="about-logo-img">
-      </div>
-      <div>
-        <p class="about-extended">
-          Stay tuned. Each quarter, we reflect on key artist albums,<br>
-          curated playlists, and visual documentaries to bring<br>
-          a cohesive editorial layout to artic. subscribers.
+          조금만 기다려주세요. 아티스트 앨범, 큐레이팅된 플레이리스트, 그리고
+          비주얼 다큐멘터리를 매 분기마다 깊이 있게 조명하여, artic. 구독자들을
+          위한 조화롭고 완성도 높은 에디토리얼 레이아웃을 선보일 예정입니다.
         </p>
       </div>
     </div>
@@ -345,6 +385,71 @@
   </button>
 
   <script src="../js/shared.js"></script>
+  <script>
+    // Waitlist Form Interactivity
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('waitlist-toggle-btn');
+      const form = document.getElementById('waitlist-form');
+      const emailInput = document.getElementById('waitlist-email');
+      const submitBtn = document.getElementById('waitlist-submit-btn');
+      const messageDiv = document.getElementById('waitlist-message');
+
+      if (toggleBtn && form) {
+        toggleBtn.addEventListener('click', () => {
+          // Hide button and reveal form
+          toggleBtn.style.opacity = '0';
+          toggleBtn.style.pointerEvents = 'none';
+          setTimeout(() => {
+            toggleBtn.style.display = 'none';
+            form.classList.add('active');
+            emailInput.focus();
+          }, 300);
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = emailInput.value.trim();
+          if (!email) return;
+
+          // Submitting state
+          submitBtn.disabled = true;
+          emailInput.disabled = true;
+          messageDiv.className = 'waitlist-message';
+          messageDiv.textContent = '';
+
+          fetch('/api/waitlist', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: email })
+          })
+          .then(res => {
+            if (!res.ok) {
+              return res.json().then(err => { throw new Error(err.error || 'Submission failed') });
+            }
+            return res.json();
+          })
+          .then(data => {
+            // Success state
+            messageDiv.className = 'waitlist-message success active';
+            messageDiv.textContent = 'You have successfully joined the waitlist.';
+            form.style.opacity = '0.3';
+            form.style.pointerEvents = 'none';
+          })
+          .catch(err => {
+            // Error state
+            submitBtn.disabled = false;
+            emailInput.disabled = false;
+            messageDiv.className = 'waitlist-message error active';
+            messageDiv.textContent = err.message || 'An error occurred. Please try again.';
+          });
+        });
+      }
+    });
+  </script>
 
 </body>
 </html>

@@ -228,7 +228,11 @@ function initArticleMenu() {
     style.id = 'artic-le-transition-style';
     style.textContent = `
       .nav-artic-le {
-        transition: opacity 0.25s ease, color 0.3s ease !important;
+        display: inline-block !important;
+        vertical-align: bottom;
+        white-space: nowrap;
+        overflow: hidden;
+        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, color 0.3s ease !important;
       }
       .nav-artic-le.nav-link-fade {
         opacity: 0 !important;
@@ -245,26 +249,44 @@ function initArticleMenu() {
       if (isTransitioning) return;
       isTransitioning = true;
       
-      // 1. Fade out
+      // 1. Lock current width based on scrollWidth
+      const initialWidth = link.scrollWidth;
+      link.style.width = initialWidth + 'px';
+      
+      // Force layout reflow
+      link.offsetHeight;
+      
+      // 2. Fade out
       link.classList.add('nav-link-fade');
       
       setTimeout(() => {
-        // 2. Change text to "to be updated"
+        // 3. Change text to "to be updated"
         link.textContent = 'to be updated';
-        // 3. Fade back in
+        // 4. Measure new target width and transition width
+        const targetWidth = link.scrollWidth;
+        link.style.width = targetWidth + 'px';
+        
+        // 5. Fade back in
         link.classList.remove('nav-link-fade');
         
         // Keep it for 1.5 seconds
         setTimeout(() => {
-          // 4. Fade out again
+          // 6. Fade out again
           link.classList.add('nav-link-fade');
           
           setTimeout(() => {
-            // 5. Revert text to "artic.le"
+            // 7. Revert text and target width
             link.textContent = 'artic.le';
-            // 6. Fade back in
+            link.style.width = initialWidth + 'px';
+            
+            // 8. Fade back in
             link.classList.remove('nav-link-fade');
-            isTransitioning = false;
+            
+            // 9. Clear explicit width after transition finishes
+            setTimeout(() => {
+              link.style.width = '';
+              isTransitioning = false;
+            }, 600); // matching bezier duration
           }, 250); // fade out duration
         }, 1500); // text display duration
       }, 250); // fade out duration

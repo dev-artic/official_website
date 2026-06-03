@@ -95,6 +95,13 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quarterly_subscribers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -113,6 +120,23 @@ def save_to_sqlite(name, email, phone, address, quantity, depositor, notes):
         return True
     except Exception as e:
         print(f"Error saving to SQLite: {e}")
+        return False
+
+
+def save_subscriber_to_sqlite(email):
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO quarterly_subscribers (email)
+            VALUES (?)
+        ''', (email,))
+        conn.commit()
+        conn.close()
+        print("Waitlist subscriber successfully saved to local SQLite database.")
+        return True
+    except Exception as e:
+        print(f"Error saving subscriber to SQLite: {e}")
         return False
 
 
@@ -239,6 +263,49 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
                 send_email(email, customer_subject, customer_body)
                 send_email(admin_email, admin_subject, admin_body)
+
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': True, 'saved_to_cloud': saved_to_cloud}).encode('utf-8'))
+                
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode('utf-8'))
+        elif self.path == '/api/waitlist':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_data.decode('utf-8'))
+                email = data.get('email')
+
+                if not email:
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'error': 'Email is required'}).encode('utf-8'))
+                    return
+
+                # Save Data (Firestore priority, SQLite fallback)
+                saved_to_cloud = False
+                if db is not None:
+                    try:
+                        subscriber_data = {
+                            'email': email,
+                            'created_at': firestore.SERVER_TIMESTAMP
+                        }
+                        doc_ref = db.collection('quarterly_subscribers').document()
+                        doc_ref.set(subscriber_data)
+                        print(f"Waitlist subscriber successfully saved to Firestore (ID: {doc_ref.id}).")
+                        saved_to_cloud = True
+                    except Exception as fe:
+                        print(f"Error saving subscriber to Firestore: {fe}. Falling back to SQLite.")
+                        save_subscriber_to_sqlite(email)
+                else:
+                    save_subscriber_to_sqlite(email)
 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')

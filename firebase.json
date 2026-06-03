@@ -15,6 +15,10 @@
       {
         "source": "/api/checkout",
         "function": "checkout"
+      },
+      {
+        "source": "/api/waitlist",
+        "function": "waitlist"
       }
     ]
   },

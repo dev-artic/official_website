@@ -287,9 +287,8 @@ function initArticleMenu() {
         white-space: nowrap;
         overflow: hidden;
         transition-property: width, opacity, transform, color !important;
-        transition-duration: 0.6s, 0.4s, 0.4s, 0.3s !important;
+        transition-duration: 0.6s, 0.3s, 0.3s, 0.3s !important;
         transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), ease !important;
-        transform: translateY(0);
       }
       .nav-open .nav-bar .nav-artic-le.nav-link-fade,
       .nav-artic-le.nav-link-fade {
@@ -327,10 +326,10 @@ function initArticleMenu() {
               
               setTimeout(() => {
                 isTransitioning = false;
-              }, 400); // match mobile opacity transition duration
-            }, 250); // fade out duration
+              }, 300); // match mobile opacity transition duration
+            }, 300); // wait for full fade out (300ms)
           }, 1500); // display duration
-        }, 250); // fade out duration
+        }, 300); // wait for full fade out (300ms)
         
       } else {
         // --- Desktop Logic: Retain width bezier logic alongside text fade ---
@@ -364,9 +363,9 @@ function initArticleMenu() {
                   isTransitioning = false;
                 }, 300); // matching remaining width transition duration
               }, 300); // contract halfway
-            }, 250); // fade out duration
+            }, 300); // wait for full fade out (300ms)
           }, 1500); // display duration
-        }, 250); // fade out duration
+        }, 300); // wait for full fade out (300ms)
       }
     });
   });

@@ -93,8 +93,10 @@
       /* Stacked group centered vertically in the viewport initially */
       transform: translateY(calc(50dvh - 310px));
       will-change: transform;
+    }
+    .reveal-active .album-showcase {
       /* Phase 3: slides up vertically */
-      animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+      animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards;
     }
 
     @keyframes showcaseSlideUp {
@@ -122,8 +124,10 @@
       margin-bottom: 0;
       flex-shrink: 0;
       will-change: width, height; /* Hardware acceleration for layout resize */
+    }
+    .reveal-active .album-art-wrapper {
       /* Phase 3: album cover shrinks when sliding up */
-      animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+      animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards;
     }
 
     @keyframes albumShrink {
@@ -137,8 +141,10 @@
     @media (min-width: 768px) {
       .album-art-wrapper {
         left: calc(50% - 140px); /* Perfectly centered horizontally relative to the showcase container */
-        animation: albumSlideLeft 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards,
-                   albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+      }
+      .reveal-active .album-art-wrapper {
+        animation: albumSlideLeft 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.0s forwards,
+                   albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards;
       }
     }
 
@@ -158,9 +164,11 @@
       will-change: transform;
       /* Phase 1: fade in */
       opacity: 0;
-      animation: albumFadeIn 1s ease 0.3s forwards;
       transition: transform 0.6s var(--ease-out-expo);
       cursor: pointer;
+    }
+    .reveal-active .album-art {
+      animation: albumFadeIn 1s ease 0s forwards;
     }
 
     @keyframes albumFadeIn {
@@ -178,8 +186,10 @@
       opacity: 0;
       clip-path: inset(0 100% 0 0);
       transform: translateY(10px);
+    }
+    .reveal-active .album-info {
       /* Phase 2: wipe open with organic bezier curve */
-      animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
+      animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards;
     }
 
     @keyframes infoWipeRevealMobile {
@@ -211,12 +221,17 @@
     @media (min-width: 768px) {
       .album-info {
         transform: translateX(-15px);
-        animation: infoWipeRevealDesktop 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards;
+      }
+      .reveal-active .album-info {
+        animation: infoWipeRevealDesktop 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.0s forwards;
       }
     }
 
     /* ── Section Title Wipes ── */
-    .stream-label, .film-label, .print-label, .play-label {
+    .reveal-active .stream-label,
+    .reveal-active .film-label,
+    .reveal-active .print-label,
+    .reveal-active .play-label {
       opacity: 0;
       clip-path: inset(0 100% 0 0);
       animation: labelWipe 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -233,17 +248,17 @@
       }
     }
 
-    .stream-label { animation-delay: 2.9s; }
-    .film-label   { animation-delay: 2.9s; }
-    .print-label  { animation-delay: 3.1s; }
-    .play-label   { animation-delay: 2.7s; }
+    .reveal-active .stream-label { animation-delay: 3.6s; }
+    .reveal-active .film-label   { animation-delay: 3.6s; }
+    .reveal-active .print-label  { animation-delay: 3.8s; }
+    .reveal-active .play-label   { animation-delay: 3.4s; }
 
     /* ── Links & Archive Stagger ── */
     @keyframes sectionReveal {
       to { opacity: 1; }
     }
 
-    .link-item {
+    .reveal-active .link-item {
       opacity: 0;
       transform: translateY(14px);
       animation: linkCardIn 0.45s var(--ease-out-expo) forwards;
@@ -253,17 +268,17 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .link-item:nth-child(1) { animation-delay: 3.0s; }
-    .link-item:nth-child(2) { animation-delay: 3.05s; }
-    .link-item:nth-child(3) { animation-delay: 3.1s; }
-    .link-item:nth-child(4) { animation-delay: 3.15s; }
-    .link-item:nth-child(5) { animation-delay: 3.2s; }
-    .link-item:nth-child(6) { animation-delay: 3.25s; }
-    .link-item:nth-child(7) { animation-delay: 3.3s; }
-    .link-item:nth-child(8) { animation-delay: 3.35s; }
-    .link-item:nth-child(9) { animation-delay: 3.4s; }
+    .reveal-active .link-item:nth-child(1) { animation-delay: 3.7s; }
+    .reveal-active .link-item:nth-child(2) { animation-delay: 3.75s; }
+    .reveal-active .link-item:nth-child(3) { animation-delay: 3.8s; }
+    .reveal-active .link-item:nth-child(4) { animation-delay: 3.85s; }
+    .reveal-active .link-item:nth-child(5) { animation-delay: 3.9s; }
+    .reveal-active .link-item:nth-child(6) { animation-delay: 3.95s; }
+    .reveal-active .link-item:nth-child(7) { animation-delay: 4.0s; }
+    .reveal-active .link-item:nth-child(8) { animation-delay: 4.05s; }
+    .reveal-active .link-item:nth-child(9) { animation-delay: 4.1s; }
 
-    .archive-entry {
+    .reveal-active .archive-entry {
       border-bottom: 1px solid var(--border-color);
       opacity: 0;
       transform: translateY(14px);
@@ -271,16 +286,16 @@
     }
 
     /* Film items stagger (starts at 3.1s, overlapping 50% with Stream) */
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.1s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.15s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.2s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.25s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(5) { animation-delay: 3.3s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 3.35s; }
+    .reveal-active .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.8s; }
+    .reveal-active .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.85s; }
+    .reveal-active .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.9s; }
+    .reveal-active .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.95s; }
+    .reveal-active .archive-group:nth-of-type(1) .archive-entry:nth-child(5) { animation-delay: 4.0s; }
+    .reveal-active .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 4.05s; }
 
     /* Print items stagger (starts at 3.3s, overlapping 50% with Film) */
-    .archive-group:nth-of-type(2) .archive-entry:nth-child(1) { animation-delay: 3.3s; }
-    .archive-group:nth-of-type(2) .archive-entry:nth-child(2) { animation-delay: 3.35s; }
+    .reveal-active .archive-group:nth-of-type(2) .archive-entry:nth-child(1) { animation-delay: 4.0s; }
+    .reveal-active .archive-group:nth-of-type(2) .archive-entry:nth-child(2) { animation-delay: 4.05s; }
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
@@ -290,7 +305,9 @@
       gap: var(--space-xl);
       margin-bottom: 120px;
       opacity: 0;
-      animation: sectionReveal 0.5s ease 2.8s forwards;
+    }
+    .reveal-active .content-columns {
+      animation: sectionReveal 0.5s ease 3.5s forwards;
     }
 
     @media (min-width: 768px) {
@@ -337,7 +354,7 @@
       transition: border-color 0.5s ease;
     }
 
-    .play-label { animation-delay: 2.9s; }
+    .reveal-active .play-label { animation-delay: 2.6s; }
 
     /* Widget card */
     .play-widget {
@@ -794,7 +811,9 @@
     /* Footer — reveal after content */
     footer {
       opacity: 0;
-      animation: sectionReveal 0.5s ease 3.5s forwards;
+    }
+    .reveal-active footer {
+      animation: sectionReveal 0.5s ease 4.2s forwards;
     }
 
     .artist-name {
@@ -1174,12 +1193,17 @@
         transform: scale(1.647);
         transform-origin: center center;
         will-change: transform !important;
-        animation: albumShrinkMobile 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards !important;
+      }
+      .reveal-active .album-art-wrapper {
+        animation: albumShrinkMobile 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards !important;
       }
 
       .album-info {
-        animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards,
-                   infoShiftUpMobile 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards !important;
+        will-change: transform, opacity !important;
+      }
+      .reveal-active .album-info {
+        animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards,
+                   infoShiftUpMobile 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.4s forwards !important;
       }
 
       .mobile-toggle-header {
@@ -1206,18 +1230,18 @@
       }
 
       /* Stream Header Border Staggered Wipe */
-      .links-container .mobile-toggle-header::after {
-        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
+      .reveal-active .links-container .mobile-toggle-header::after {
+        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 3.4s forwards;
       }
 
       /* Film Header Border Staggered Wipe */
-      .archive-group:nth-of-type(1) .mobile-toggle-header::after {
-        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.9s forwards;
+      .reveal-active .archive-group:nth-of-type(1) .mobile-toggle-header::after {
+        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 3.6s forwards;
       }
 
       /* Print Header Border Staggered Wipe */
-      .archive-group:nth-of-type(2) .mobile-toggle-header::after {
-        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 3.1s forwards;
+      .reveal-active .archive-group:nth-of-type(2) .mobile-toggle-header::after {
+        animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 3.8s forwards;
       }
       
       .toggle-icon {
@@ -1233,18 +1257,18 @@
       }
 
       /* Stream Toggle Icon Spin-In */
-      .links-container .toggle-icon {
-        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.0s forwards;
+      .reveal-active .links-container .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.7s forwards;
       }
 
       /* Film Toggle Icon Spin-In */
-      .archive-group:nth-of-type(1) .toggle-icon {
-        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.2s forwards;
+      .reveal-active .archive-group:nth-of-type(1) .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.9s forwards;
       }
 
       /* Print Toggle Icon Spin-In */
-      .archive-group:nth-of-type(2) .toggle-icon {
-        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 3.4s forwards;
+      .reveal-active .archive-group:nth-of-type(2) .toggle-icon {
+        animation: spinIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 4.1s forwards;
       }
 
       .mobile-toggle-header:hover .toggle-icon {

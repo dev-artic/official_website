@@ -387,6 +387,7 @@ img { display: block; max-width: 100%; }
 
   /* Sidebar Links stack vertically and right-aligned */
   .nav-link {
+    position: relative !important;
     width: auto;
     padding: var(--space-xs) 0 !important;
     font-size: 1.15rem;
@@ -406,6 +407,7 @@ img { display: block; max-width: 100%; }
   }
 
   .nav-home {
+    position: relative !important;
     width: auto;
     max-width: none !important;
     opacity: 0 !important;
@@ -432,6 +434,24 @@ img { display: block; max-width: 100%; }
     opacity: 1 !important;
     transform: translateY(0);
     transition-delay: calc(0.1s + var(--nav-idx) * 0.08s);
+  }
+
+  /* Active Menu Link Shift Offset & Dot Indicator (Mobile viewports only) */
+  .nav-open .nav-bar .nav-link.active,
+  .nav-open .nav-bar .nav-home.active {
+    transform: translateX(-16px) !important;
+    color: #FFFFFF !important;
+  }
+
+  .nav-open .nav-bar .nav-link.active::after,
+  .nav-open .nav-bar .nav-home.active::after {
+    content: '•';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    color: #FFFFFF;
   }
 }
 

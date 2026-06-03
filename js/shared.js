@@ -310,23 +310,43 @@ function initArticleMenu() {
       const isMobile = window.innerWidth < 768;
 
       if (isMobile) {
-        // --- Mobile Logic: Fade out, swap text, fade back in (No width layout shifting) ---
+        // --- Mobile Logic: Expand via bezier on click, revert via pure fade without layout shift ---
+        const initialWidth = link.scrollWidth;
+        link.style.width = initialWidth + 'px';
+        
+        // Force layout reflow
+        link.offsetHeight;
+
         link.classList.add('nav-link-fade');
         
         setTimeout(() => {
           link.textContent = 'to be updated';
+          const targetWidth = link.scrollWidth;
+          link.style.width = targetWidth + 'px';
+          
           link.classList.remove('nav-link-fade');
           
           setTimeout(() => {
             link.classList.add('nav-link-fade');
             
             setTimeout(() => {
+              // Revert: disable width transition temporarily to reset instantly
+              link.style.transition = 'none';
               link.textContent = 'artic.le';
+              link.style.width = initialWidth + 'px';
+              
+              // Force reflow
+              link.offsetHeight;
+              
+              // Restore transition attributes
+              link.style.transition = '';
+              
               link.classList.remove('nav-link-fade');
               
               setTimeout(() => {
+                link.style.width = '';
                 isTransitioning = false;
-              }, 300); // match mobile opacity transition duration
+              }, 300); // match fade-in duration
             }, 300); // wait for full fade out (300ms)
           }, 1500); // display duration
         }, 300); // wait for full fade out (300ms)

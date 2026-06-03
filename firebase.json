@@ -1,27 +1,4 @@
 {
-  "hosting": {
-    "public": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**",
-      "functions/**",
-      "orders.db",
-      "requirements.txt",
-      "server.py",
-      "serviceAccountKey.json"
-    ],
-    "rewrites": [
-      {
-        "source": "/api/checkout",
-        "function": "checkout"
-      },
-      {
-        "source": "/api/waitlist",
-        "function": "waitlist"
-      }
-    ]
-  },
   "functions": {
     "source": "functions"
   }

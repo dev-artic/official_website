@@ -2540,7 +2540,12 @@
 
             const payload = { name, email, phone, address, quantity, depositor, notes };
 
-            fetch('https://us-central1-artic-official-home.cloudfunctions.net/checkout', {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const apiUrl = isLocal 
+              ? 'http://127.0.0.1:5001/artic-official-home/us-central1/checkout' 
+              : 'https://us-central1-artic-official-home.cloudfunctions.net/checkout';
+
+            fetch(apiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(payload)

@@ -68,33 +68,41 @@ Homepage/
 
 ## 🔄 개발, 테스트 및 배포 프로세스 (Development, Testing & Deployment Process)
 
-artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다. 개발자가 로컬에서 코드를 작성하고, 테스트를 거쳐, 최종 프로덕션 환경에 배포하기까지의 단계별 흐름과 각 단계에서 관여하는 핵심 파일들을 정의합니다.
+artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다. 개발자가 로컬에서 코드를 작성하고, 로컬 스테이징 환경에서 무비용으로 완벽하게 연동 검증을 거친 뒤, 최종 프로덕션 환경에 안전하게 배포하기까지의 통합 워크플로우를 정의합니다.
 
 ```mermaid
 graph TD
-    subgraph 1. 개발 단계 (Development)
-        DevStatic[정적 마크업/디자인 작성]
-        DevBackend[백엔드 API 및 로직 구현]
-        DevBatch[배치 자동화 스크립트 정의]
+    subgraph 💻 1. 개발 단계 (Development Phase)
+        DevStatic[HTML/CSS/JS 수정]
+        DevBackend[functions/index.js 수정 - Node.js]
+        DevSync[Notion DB 스캔 스크립트 작성]
     end
 
-    subgraph 2. 테스트 단계 (Testing)
-        TestStatic[server.py 실행 & 로컬 웹뷰 검증]
-        TestSandbox[orders.db 적재 & API 샌드박싱]
-        TestBackend[Firebase 로컬 에뮬레이터 실행]
+    subgraph 🧪 2. 로컬 스테이징 검증 단계 (Local Staging & Testing)
+        WebServ["로컬 웹 서버 가동 <br> server.py :8000"]
+        AutoSwitch{"API 호스트 자동 분기 <br> window.location.hostname"}
+        FirebaseEmul["Firebase Local Emulator Suite <br> Functions :5001 / Suite UI :4000"]
+        LocalFirestore[("가상 Firestore DB <br> Emulator :8080")]
+        SQLiteFallback[("SQLite 백업 <br> orders.db")]
+
+        WebServ -->|브라우저 로드| AutoSwitch
+        AutoSwitch -->|Localhost 접속 시| FirebaseEmul
+        AutoSwitch -.->|Java가 없는 가벼운 디버깅 시| SQLiteFallback
+        FirebaseEmul -->|데이터 적재| LocalFirestore
     end
 
-    subgraph 3. 배포 단계 (Deployment)
-        PushGit[Git Commit & Push] --> GHPages[GitHub Pages 자동 서빙 - artic.live]
-        DeployFirebase[Firebase CLI deploy] --> CloudFunctions[Firebase Functions API 작동]
-        CronJob[GitHub Actions Cron 트리거] --> UpdateContent[유튜브 플레이리스트 스캔 & 마크업 자동 갱신]
+    subgraph 🚀 3. 프로덕션 배포 단계 (Production Deploy Phase)
+        PushGit[Git Commit & Push] --> GHPages[GitHub Pages 정적 호스팅 <br> artic.live]
+        DeployFB[Firebase CLI deploy] --> CloudFunctions[Firebase Cloud Functions API]
+        CloudFunctions -->|실시간 적재| FirestoreProd[("실서비스 Firestore DB")]
     end
 
-    DevStatic --> TestStatic
-    DevBackend --> TestBackend
-    DevBatch --> TestSandbox
-    
-    TestStatic & TestSandbox & TestBackend --> PushGit & DeployFirebase & CronJob
+    DevStatic --> WebServ
+    DevBackend --> FirebaseEmul
+    DevSync --> SQLiteFallback
+
+    FirebaseEmul -->|검증 완료된 Node.js 코드 수정 없이 그대로| DeployFB
+    WebServ -->|정적 마크업 커밋 & 푸시| PushGit
 ```
 
 ### 1️⃣ 개발 단계 (Development Phase)
@@ -105,46 +113,48 @@ graph TD
   * 메인 뼈대 및 디자인 시스템 설정: **`index.html`**, **`css/design-system.css`**, **`css/main.css`** 등의 정적 파일을 직접 수정합니다.
   * 신규 에디토리얼 아티클 및 프로젝트 추가: 단일 데이터 소스인 **`projects.json`** 파일에 항목 정보를 추가하고, 해당 프로젝트 이름으로 폴더를 생성하여 상세 페이지 마크업(예: **`deus-ex-machina/index.html`**, **`tasting-note/index.html`**)을 작성합니다.
   * 노션 아카이빙 데이터 사전 동기화: 노션 DB(`분기별 결산`)의 문서를 로컬로 미리 내려받기 위해 **`scripts/notion_sync.py`** 스크립트를 작성 및 편집합니다.
-* **동적 백엔드 API 로직 구현**
-  * 대기명단 가입 검증 및 주문/이메일 자동 발송: **`functions/index.js`** 파일에서 이메일 정규식 검증(`waitlist` 함수) 및 토스뱅크 입금 안내 / Daum SMTP 연동 메일 발송(`checkout` 함수) 비즈니스 로직을 구현 및 수정합니다.
+* **동적 백엔드 API 및 이메일 로직 구현 (단일 코드베이스)**
+  * 대기명단 가입 검증 및 주문/이메일 자동 발송: **`functions/index.js`** 파일에서 이메일 정규식 검증(`waitlist` 함수) 및 토스뱅크 입금 안내 / Daum SMTP 연동 메일 발송(`checkout` 함수) 비즈니스 로직을 **Node.js**로 구현 및 수정합니다. 파이썬 로직으로 번역할 필요 없이 이 파일 하나만 개발/유지보수합니다.
 * **콘텐츠 자동 갱신 배치 스크립트 작성**
   * 유튜브 플레이리스트 동기화 규칙 정의: 매주 유튜브 채널의 최신 영상 리스트를 긁어오기 위한 **`scripts/update_playlists.py`** 스크립트와 대상 프로젝트들의 정보를 담은 **`scripts/playlist_config.py`** 파일을 갱신합니다.
 
 ---
 
-### 2️⃣ 테스트 단계 (Testing & Verification Phase)
+### 2️⃣ 로컬 스테이징 검증 단계 (Local Staging & Testing Phase)
 
-코드를 라이브 서버에 반영하기 전에 로컬 샌드박스 및 에뮬레이터 환경에서 정상 작동 여부를 정밀하게 검증합니다.
+실서버 배포 전, 로컬 환경에 완벽한 **'스테이징 서버'** 인프라를 구축하여 비용 없이 데이터 흐름 및 발송 로직을 검증합니다.
 
-* **로컬 웹 서버 가동 및 웹뷰 디자인 확인**
-  * 로컬 개발 서버 실행: 로컬 호스트 테스트 서버(`http://localhost:8000`)를 위해 파이썬 기반 로컬 서버 스크립트인 **`server.py`**를 실행합니다.
-    ```bash
-    python3 server.py
-    ```
-  * 로컬 브라우저에서 디자인 시스템과의 정렬 상태, CSS Bezier 트랜지션, 반응형 스크롤 리빌 애니메이션 등을 다각도로 디버깅합니다.
-* **API 샌드박싱 테스트 (Offline Mocking)**
-  * 로컬 호스트 환경에서 waitlist 신청이나 checkout 주문 폼을 작성해 제출하면, **`server.py`** 내부에 통합된 로컬 API 핸들러가 Firebase Functions로의 실제 외부 호출을 가로챕니다.
-  * 가로챈 요청 데이터를 프로젝트 루트에 위치한 로컬 SQLite 데이터베이스인 **`orders.db`** 파일에 즉시 적재하여, 실제 백엔드 연동 없이도 프론트-백 간의 데이터 명세와 흐름을 완전히 독립적인 샌드박스 내에서 검증할 수 있습니다.
-* **백엔드 Firebase Functions 로컬 에뮬레이터 검증**
-  * 백엔드 API 및 이메일 발송 기능이 정상 작동하는지 Firebase 에뮬레이터 툴킷으로 테스트합니다.
-  * **`functions`** 디렉토리 내에서 에뮬레이터를 구동하여 로컬 환경에서 API 통신 및 모의 Firestore 트리거를 수행합니다.
-    ```bash
-    # functions 디렉토리 내부
-    npm install
-    npx firebase emulators:start
-    ```
-  * **`functions/.env`** 파일에 임시 SMTP 자격증명을 할당하여 실제 발송 흐름까지 모의 검증합니다.
+* **사전 요구 사항**
+  * Firebase 에뮬레이터를 가동하기 위해 로컬 컴퓨터에 **Java Runtime Environment (JRE / OpenJDK 26 이상)** 및 Node.js 설치가 필요합니다.
+* **로컬 스테이징 서버 기동 방법**
+  1. **프론트엔드 웹 서버 구동**: 프로젝트 루트에서 아래 파이썬 스크립트를 가동하여 `http://localhost:8000` 주소로 정적 리소스를 서빙합니다.
+     ```bash
+     python3 server.py
+     ```
+  2. **Firebase 로컬 에뮬레이터 가동**: 프로젝트 루트에서 아래 CLI 명령어를 통해 에뮬레이터를 실행합니다.
+     ```bash
+     npx firebase-tools emulators:start
+     ```
+     * **`firebase.json`**의 구성에 따라 가상 Functions 서버(포트 `5001`), 가상 Firestore DB(포트 `8080`), 에뮬레이터 통합 대시보드 UI(포트 `4000`)가 개인 하드웨어 자원으로 가동되며, **이로 인한 클라우드 사용 요금은 100% 무료(0원)**입니다.
+* **API 호스트 자동 스위칭 (CORS & Environment Routing)**
+  * 프론트엔드 자바스크립트는 브라우저의 `window.location.hostname`이 `localhost` 혹은 `127.0.0.1`인 경우, 수동 설정 변경 없이 자동으로 로컬 에뮬레이터 백엔드 API 주소(**`http://127.0.0.1:5001/...`**)를 가리키도록 설계되어 있습니다.
+  * 실제 운영 도메인(`artic.live`)에 올라가면 자동으로 프로덕션 Cloud Functions URL로 동적 라우팅됩니다.
+* **로컬 가상 데이터 적재 및 모의 이메일 확인**
+  * 로컬 브라우저에서 가입이나 결제 폼을 제출하면, 로컬 Firestore 에뮬레이터에 실시간으로 데이터가 입력됩니다.
+  * [http://127.0.0.1:4000](http://127.0.0.1:4000) (Suite UI) 대시보드에 접속하여 인메모리 데이터의 정합성을 확인하고, SMTP 이메일 발송 결과 로그를 완벽하게 모니터링할 수 있습니다.
+* **SQLite 샌드박스 백업 (Fallback Mocking)**
+  * 자바 런타임이 없는 컴퓨터 환경이거나 백엔드 로직 수정이 불필요한 단순 레이아웃 디버깅 시에는, **`server.py`** 자체의 내장 HTTP POST 핸들러가 `/api/...` 요청을 받아 로컬 SQLite 파일인 **`orders.db`**에 데이터를 보관해 주는 Fallback 로직을 제공합니다.
 
 ---
 
 ### 3️⃣ 배포 단계 (Deployment Phase)
 
-로컬 검증이 완료된 정적 콘텐츠와 동적 백엔드 API를 프로덕션 환경에 각각 독립적으로 배포합니다.
+로컬 스테이징 환경에서 검증을 완벽하게 마친 정적 콘텐츠와 동적 백엔드 API를 프로덕션 라이브 환경에 각각 독립적으로 배포합니다.
 
 * **A. 정적 프론트엔드 호스팅 배포 (GitHub Pages)**
   * **관여 파일**: **`index.html`**, **`css/`** 폴더 내 스타일시트, **`js/`** 폴더 내 자바스크립트, 데이터 원본 **`projects.json`**, 커스텀 도메인 파일 **`CNAME`**
   * **배포 흐름**:
-    1. 로컬에서 수정 및 테스트 완료한 정적 웹 파일들을 깃 스테이징에 추가하고 커밋합니다.
+    1. 로컬 스테이징 검증이 완료된 정적 파일들을 커밋합니다.
     2. GitHub 원격 리포지토리의 `main` 브랜치에 코드를 푸시합니다.
        ```bash
        git add .
@@ -156,11 +166,11 @@ graph TD
   * **관여 파일**: **`functions/index.js`**, **`functions/package.json`**, 설정 파일 **`firebase.json`**
   * **배포 흐름**:
     1. 혼선을 줄이기 위해 **`firebase.json`** 설정 파일 내의 `"hosting"` 설정이 비활성화(`hosting:disable` 등)되어 프론트엔드가 오직 GitHub Pages로만 서빙되는 것을 보장합니다. (호스팅이 꺼져 있어도 Functions 가동 및 API 통신에는 아무 문제가 없습니다.)
-    2. Firebase CLI 명령어를 사용하여 로컬에서 완성된 Functions 코드를 Google Firebase Cloud 인프라에 배포합니다.
+    2. Firebase CLI 명령어를 사용하여 로컬 스테이징 에뮬레이터에서 **검증을 마친 동일한 Node.js 파일(`functions/index.js`)**을 변경 없이 Google Firebase Cloud 인프라에 즉시 배포합니다.
        ```bash
        npx firebase-tools deploy --only functions
        ```
-    3. 배포 완료 후, 브라우저에서 사용자가 버튼을 클릭하면 클라이언트 스크립트가 Firebase Functions의 전용 고유 외부 HTTPS 엔드포인트 URL(`https://us-central1-artic-official-home.cloudfunctions.net/...`)로 직접 POST 호출을 전송해 실시간 통신이 이루어집니다.
+    3. 배포 성공 후, 실서비스 사용자가 폼을 제출하면 클라이언트 브라우저가 클라우드상의 전용 고유 외부 HTTPS 엔드포인트 URL(`https://us-central1-artic-official-home.cloudfunctions.net/...`)로 직접 POST 호출을 보냅니다.
 * **C. 배치 스크립트 배포 및 자동 갱신 (GitHub Actions)**
   * **관여 파일**: GitHub Actions 워크플로우 정의 파일 **`.github/workflows/update-playlists.yml`**, 유튜브 갱신 스크립트 **`scripts/update_playlists.py`**
   * **배포 및 작동 방식**:

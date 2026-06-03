@@ -415,8 +415,10 @@
           messageDiv.className = 'waitlist-message';
           messageDiv.textContent = '';
 
-          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '8000';
-          const apiUrl = isLocal ? '/api/waitlist' : 'https://us-central1-artic-official-home.cloudfunctions.net/waitlist';
+          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const apiUrl = isLocal 
+            ? 'http://127.0.0.1:5001/artic-official-home/us-central1/waitlist' 
+            : 'https://us-central1-artic-official-home.cloudfunctions.net/waitlist';
 
           fetch(apiUrl, {
             method: 'POST',

@@ -2821,6 +2821,15 @@
           
           setTimeout(function() {
             updateTrackUI(idx);
+            
+            // Defer setPlaying/status text update to 250ms to match the fade out of track info
+            if (autoplay) {
+              setPlaying(true);
+            } else {
+              setPlaying(false);
+              elStatus.textContent = 'Ready';
+            }
+            
             elTrackInfo.classList.remove(outClass);
             
             var inClass = direction === 'prev' ? 'track-anim-in-down' : 'track-anim-in-up';
@@ -2828,16 +2837,19 @@
           }, 250); // 250ms matches the fade out keyframe animation duration
         } else {
           updateTrackUI(idx);
+          if (autoplay) {
+            setPlaying(true);
+          } else {
+            setPlaying(false);
+            elStatus.textContent = 'Ready';
+          }
         }
 
         if (!ytPlayer || typeof ytPlayer.loadVideoById !== 'function') return;
         if (autoplay) {
           ytPlayer.loadVideoById(TRACKS[idx].vid);
-          setPlaying(true);
         } else {
           ytPlayer.cueVideoById(TRACKS[idx].vid);
-          setPlaying(false);
-          elStatus.textContent = 'Ready';
         }
       }
 

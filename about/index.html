@@ -142,6 +142,37 @@
       margin-bottom: var(--space-lg);
     }
 
+    /* ── Logo Style ── */
+    .about-logo-wrap {
+      align-self: start;
+      margin-top: 6px;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity;
+    }
+
+    .revealed .about-logo-wrap {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .about-logo-img {
+      width: clamp(36px, 4.5vw, 48px);
+      height: auto;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+    }
+
+    .about-logo-wrap:hover .about-logo-img {
+      transform: scale(1.05);
+      opacity: 0.85;
+    }
+
+    .dark-mode .about-logo-img {
+      filter: invert(1);
+    }
+
     /* ── Action Links (Instagram & YouTube Pill Buttons) ── */
     .about-actions {
       display: flex;
@@ -319,11 +350,8 @@
 
     <!-- Row 2: Philosophy (Core Value) -->
     <div class="about-row reveal-row">
-      <div>
-        <h2 class="about-subheadline reveal-item">
-          creative<br>
-          philosophy.
-        </h2>
+      <div class="about-logo-wrap">
+        <img src="../images/logo-icon-black.png" alt="artic." class="about-logo-img">
       </div>
       <div>
         <div class="reveal-item reveal-item-delayed">

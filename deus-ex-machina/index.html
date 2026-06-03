@@ -1546,13 +1546,13 @@
 
       .print-modal-slider-track {
         display: flex;
-        width: 200%;
+        width: 300%;
         height: 100%;
         transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
       }
 
       .print-modal-slide {
-        width: 50%;
+        width: 33.333%;
         flex-shrink: 0;
         height: 100%;
         box-sizing: border-box;
@@ -1570,9 +1570,19 @@
         padding-right: 2px;
       }
 
-      /* Checkout Active State */
+      .print-modal-slide.slide-success {
+        display: flex;
+        flex-direction: column;
+        padding-right: 2px;
+      }
+
+      /* Checkout & Success Active States */
       .print-modal.is-checkout .print-modal-slider-track {
-        transform: translateX(-50%);
+        transform: translateX(-33.333%);
+      }
+
+      .print-modal.is-success .print-modal-slider-track {
+        transform: translateX(-66.666%) !important;
       }
 
       /* Mobile Booklet Cover Image Shrink on Checkout */
@@ -1689,7 +1699,6 @@
       }
 
       .checkout-btn {
-        flex: 1;
         padding: 10px 16px;
         font-family: var(--font-sans);
         font-size: 0.65rem;
@@ -1706,6 +1715,10 @@
         text-decoration: none;
       }
 
+      .checkout-buttons .checkout-btn {
+        flex: 1;
+      }
+
       .checkout-btn.submit {
         background-color: var(--text-primary);
         color: var(--bg-primary);
@@ -1718,6 +1731,62 @@
 
       .checkout-btn.back:hover {
         border-color: var(--text-primary);
+      }
+
+      /* ── Face ID Checkmark CSS Animation ── */
+      .face-id-checkmark-wrap {
+        width: 52px;
+        height: 52px;
+        margin: 0 auto 16px auto;
+        position: relative;
+      }
+
+      .face-id-svg {
+        width: 52px;
+        height: 52px;
+        display: block;
+      }
+
+      .face-id-circle {
+        stroke: var(--text-primary);
+        stroke-width: 1.5;
+        stroke-dasharray: 158;
+        stroke-dashoffset: 158;
+        stroke-linecap: round;
+        transform-origin: 50% 50%;
+        transform: rotate(-90deg);
+      }
+
+      .face-id-check {
+        stroke: var(--text-primary);
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+      }
+
+      /* Triggers when .is-success class is added to the print-modal */
+      .print-modal.is-success .face-id-circle {
+        animation: draw-circle 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.3s;
+      }
+
+      .print-modal.is-success .face-id-check {
+        animation: draw-check 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.8s;
+      }
+
+      @keyframes draw-circle {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      @keyframes draw-check {
+        to {
+          stroke-dashoffset: 0;
+        }
       }
 
       .checkout-success-screen {
@@ -2316,7 +2385,7 @@
                   <span id="chk-summary-total">18,000원</span>
                 </div>
                 <div style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; font-size: 0.55rem; color: var(--text-muted);">
-                  계좌번호: 토스뱅크 1002-1532-0842 (예금주: 김민제)
+                  * 계좌이체로만 결제 가능합니다.
                 </div>
               </div>
             </div>
@@ -2337,6 +2406,22 @@
               </div>
               <div class="print-modal-slide slide-checkout">
                 ${checkoutHtml}
+              </div>
+              <div class="print-modal-slide slide-success">
+                <div class="checkout-success-screen">
+                  <div class="face-id-checkmark-wrap">
+                    <svg class="face-id-svg" viewBox="0 0 52 52">
+                      <circle class="face-id-circle" cx="26" cy="26" r="25" fill="none"/>
+                      <path class="face-id-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                  </div>
+                  <h3 style="font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">요청 완료</h3>
+                  <p style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6; max-width: 280px; margin: 12px auto 0 auto; text-align: center;">
+                    결제 요청이 완료되었습니다.<br>
+                    상세 안내 메일이 <b id="success-email-display"></b> 주소로 발송되었습니다.
+                  </p>
+                  <button class="checkout-btn success-close-btn" style="margin-top: 24px; max-width: 140px;" id="chk-success-close-btn">닫기</button>
+                </div>
               </div>
             </div>
           </div>
@@ -2402,23 +2487,8 @@
               return res.json();
             })
             .then(resData => {
-              const total_price = 15000 * quantity + 3000;
-              const checkoutSlide = document.querySelector('.slide-checkout');
-              checkoutSlide.innerHTML = `
-                <div class="checkout-success-screen">
-                  <svg viewBox="0 0 24 24" style="width: 44px; height: 44px; fill: none; stroke: var(--text-primary); stroke-width: 1.5; margin-bottom: 16px; display: inline-block;">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <h3 style="font-family: var(--font-serif); font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">요청 완료</h3>
-                  <p style="font-family: var(--font-sans); font-size: 0.7rem; color: var(--text-secondary); line-height: 1.6; max-width: 280px; margin-left: auto; margin-right: auto;">
-                    결제 요청이 완료되었습니다.<br>
-                    안내 메일이 <b>${email}</b> 주소로 발송되었습니다.<br><br>
-                    토스뱅크 <b>1002-1532-0842</b> (예금주: 김민제)<br>
-                    으로 <b>${total_price.toLocaleString()}원</b>을 입금해 주시면 확인 후 신속히 배송해 드리겠습니다.
-                  </p>
-                  <button class="checkout-btn" style="margin-top: 20px; max-width: 140px;" id="chk-success-close-btn">닫기</button>
-                </div>
-              `;
+              document.getElementById('success-email-display').textContent = email;
+              modal.classList.add('is-success');
               
               document.getElementById('chk-success-close-btn').addEventListener('click', closeModal);
             })
@@ -2440,6 +2510,7 @@
       function closeModal() {
         modal.classList.remove('is-active');
         modal.classList.remove('is-checkout');
+        modal.classList.remove('is-success');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
       }

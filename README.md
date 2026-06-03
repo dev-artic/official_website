@@ -1,4 +1,4 @@
-﻿# ARTIC / Official Gallery & Webzine Boilerplate
+# ARTIC / Official Gallery & Webzine Boilerplate
 
 이 리포지토리는 예술 갤러리 및 모던 에디토리얼 웹진 스타일의 초고화질 정적 웹사이트 보일러플레이트입니다. 
 가벼운 로드 속도, 높은 디자인 완성도, SEO 강점을 가지며 빌드 엔진(Node.js/Python) 없이도 로컬 브라우저에서 즉시 개발 및 편집이 가능합니다.
@@ -106,7 +106,7 @@ git push origin main
 
 ---
 
-# ?뱷 Content Management Manual & DB Spec
+# 부록: 콘텐츠 관리 매뉴얼 & DB 스펙
 
 # Database Structure Spec & Design Component Templatization
 
@@ -331,85 +331,141 @@ Multi-lingual (typically Korean and English) narrative description columns.
 | **Desktop (>=768px)** | 2-Column Row (`.content-columns`) | Stays expanded (Static Grid) | `padding-left: var(--gutter)` (40-80px aligned) | Shrinks from `280px` to `170px` on Phase 3 animation |
 | **Mobile (<768px)** | 1-Column Vertical Stack | Collapsable via `.mobile-toggle-header` | `padding-left: var(--gutter)` (24px gutter snap) | Shrinks from `280px` to `170px` centering dynamically |
 
+---
+
+## 5. Firebase 백엔드 및 주문 관리 시스템
+
+이 리포지토리는 프론트엔드 정적 호스팅(GitHub Pages)과 독립된 서버리스 백엔드(Firebase Cloud Functions & Firestore) 하이브리드 아키텍처를 사용합니다.
+
+### 5.1 아키텍처 흐름
+1. **결제/구독 요청 (Client)**: 
+   - `deus-ex-machina` 등의 프로젝트 상세 페이지에 임베드된 결제 폼에서 필수 입력값 검증 후 POST 요청을 보냅니다.
+   - API Endpoint: `https://us-central1-artic-official-home.cloudfunctions.net/checkout`
+2. **주문 처리 (Firebase Cloud Functions)**:
+   - 요청 데이터를 파싱하여 유효성 및 필드 검증을 거칩니다.
+   - 주문 내역 데이터를 Firestore 데이터베이스(`orders` 컬렉션)에 고유 ID 문서로 저장합니다.
+   - Nodemailer 및 Daum 스마트워크 SMTP 서비스(`smtp.daum.net:465`)를 통해 고객과 관리자(`admin@artic.live`)에게 자동 이메일 안내장을 발송합니다.
+3. **결제 대기 및 처리 (Noreply / Manual)**:
+   - 고객에게는 토스뱅크 계좌번호와 수량별 합계 금액(상품가 15,000원 * 수량 + 배송비 3,000원) 및 입금 요청 정보가 메일로 전달됩니다.
+   - 관리자는 메일 알림 수신 후, 실시간으로 입금 여부를 수동 매칭하여 상품을 배송합니다.
+
+### 5.2 Firestore 데이터베이스 스펙 (`orders` 컬렉션)
+각 주문 레코드는 다음과 같은 구조로 기록됩니다:
+* `name` (string): 주문자/신청자 이름
+* `email` (string): 이메일 주소 (안내 이메일 수신용)
+* `phone` (string): 연락처 (배송 안내용)
+* `address` (string): 배송지 주소
+* `quantity` (number): 주문 상품 수량 (개당 15,000원)
+* `depositor` (string): 입금자명 (주문자와 다를 경우 지정, 기본값은 `name`)
+* `notes` (string): 추가 요청사항/메모
+* `created_at` (server timestamp): Firestore 서버 타임스탬프 기준으로 기록된 주문 생성 일시
+
+### 5.3 백엔드 개발 및 로컬 테스트 환경
+백엔드 로컬 테스트 및 관리를 위해 Firebase CLI 환경을 지원합니다:
+1. **의존성 설치**:
+   ```bash
+   cd functions
+   npm install
+   ```
+2. **로컬 에뮬레이터 실행**:
+   `functions` 디렉토리 혹은 루트에서 Firebase Local Emulator Suite를 실행하여 백엔드 트리거 및 Firestore 로컬 동작을 모의 테스트할 수 있습니다.
+   ```bash
+   npx firebase emulators:start
+   ```
+3. **환경 변수 구성 (.env)**:
+   `functions/.env` 파일에 SMTP 인증 자격증명을 설정해야 메일 발송이 정상 동작합니다.
+   ```env
+   SMTP_HOST=smtp.daum.net
+   SMTP_PORT=465
+   SMTP_USER=admin@artic.live
+   SMTP_PASSWORD=your_app_password
+   ADMIN_EMAIL=admin@artic.live
+   ```
+
+### 5.4 백엔드 배포 가이드
+수정된 Functions 백엔드 코드는 Firebase CLI를 통해 즉시 배포할 수 있습니다:
+```bash
+npx firebase deploy --only functions
+```
 
 ---
 
-## ?뱥 ?꾨줈?앺듃 異붽? 諛⑸쾿 (?⑥씪 ?곗씠???뚯뒪 援ъ“)
+## 부록: 프로젝트 추가 방법 (단일 데이터 소스 구조)
 
-### 媛쒖슂
+### 개요
 
-紐⑤뱺 ?꾨줈?앺듃 硫뷀??곗씠?곕뒗 **/projects.json** ???섎굹???뚯씪濡?愿由щ맗?덈떎.  
-???뚯씪???섏젙?섎㈃ **?덊솕硫??꾨━酉??뱀뀡**怨?**?꾨줈?앺듃 ?꾩뭅?대툕 ?섏씠吏**媛 ?숈떆???먮룞 諛섏쁺?⑸땲??
+모든 프로젝트 메타데이터는 **/projects.json** 하나의 파일로 관리됩니다.  
+이 파일을 수정하면 **첫 화면 프리뷰 섹션**과 **프로젝트 아카이브 페이지**가 동시에 자동 반영됩니다.
 
-`
-projects.json  ???⑥씪 ?먮낯 ?뚯뒪
-    ?쒋?? fetch() ??index.html (?덊솕硫?preview 移대뱶)
-    ?붴?? fetch() ??projects/index.html (?곕룄蹂??ㅼ씠??酉?
-`
+```
+projects.json - 단일 원본 소스
+    ├── fetch() -> index.html (첫 화면 preview 카드)
+    └── fetch() -> projects/index.html (연도별 슬라이드 뷰)
+```
 
-### ?좉퇋 ?꾨줈?앺듃 異붽? ?덉감
+### 신규 프로젝트 추가 절차
 
-#### Step 1. ?꾨줈?앺듃 ?대뜑 ?앹꽦
+#### Step 1. 프로젝트 폴더 생성
 
-`
+```
 Homepage/
-?붴?? {slug}/           ?????대뜑 (?? my-new-project)
-    ?쒋?? index.html    ???꾨줈?앺듃 ?곸꽭 ?섏씠吏
-    ?붴?? album-art.png ??而ㅻ쾭 ?대?吏 (4:5 鍮꾩쑉 沅뚯옣)
-`
+└── {slug}/           (예: my-new-project)
+    ├── index.html    - 프로젝트 상세 페이지
+    └── album-art.png - 커버 이미지 (4:5 비율 권장)
+```
 
-#### Step 2. projects.json ????ぉ 異붽?
+#### Step 2. projects.json 항목 추가
 
-?뚯씪 ?곷떒????媛앹껜瑜?**prepend** (理쒖떊???좎?):
+파일 상단에 객체를 **prepend** (최신순 유지):
 
-`json
+```json
 [
   {
     "id": "{slug}",
-    "title": "?꾨줈?앺듃 ??댄?",
-    "client": "?대씪?댁뼵?몃챸 ?먮뒗 artic.",
+    "title": "프로젝트 타이틀",
+    "client": "클라이언트명 또는 artic.",
     "category": "ORIGINAL SERIES | PRODUCTION | MUSIC CURATION | LP | ORIGINAL CONTENTS",
     "year": 2026,
     "cover_image": "../{slug}/album-art.png",
     "slug": "/{slug}/"
   },
-  ...湲곗〈 ??ぉ??..
+  ...기존 항목들...
 ]
-`
+```
 
-> **cover_image 寃쎈줈 洹쒖튃**: projects.json? ?ъ씠??猷⑦듃(/)?먯꽌 ?쒕튃?섎?濡?  
-> ?대?吏 寃쎈줈??../ ?묐몢???ъ슜 (?? ../the-root/album-art.png).  
-> ?덊솕硫??뚮뜑留???JS媛 ../ ??猷⑦듃 寃쎈줈濡??먮룞 蹂?섑빀?덈떎.
+> **cover_image 경로 규칙**: projects.json은 사이트 루트(/)에서 서빙되므로  
+> 이미지 경로는 ../ 접두사 사용 (예: ../the-root/album-art.png).  
+> 첫 화면 렌더링 시 JS가 ../를 루트 경로로 자동 변환합니다.
 
-#### Step 3. index.html ?곸꽭 ?섏씠吏 ?묒꽦
+#### Step 3. index.html 상세 페이지 작성
 
-?꾨줈?앺듃 ?깃꺽???곕씪 湲곗〈 ?쒗뵆由?以??섎굹瑜?蹂듭궗???ъ슜:
+프로젝트 성격에 따라 기존 템플릿 중 하나를 복사하여 사용:
 
-| ?쒗뵆由?| 李멸퀬 ?뚯씪 | ?ъ슜 ?쒕굹由ъ삤 |
+| 템플릿 | 참고 파일 | 사용 시나리오 |
 |--------|-----------|--------------|
-| 鍮꾨뵒???꾩뭅?대툕 ?쒕━利?| 	he-root/index.html | ?ㅽ걧/?명꽣酉??먰뵾?뚮뱶 ?쒕━利?|
-| ?ㅽ듃由щ컢 留곹겕 + ?곸긽 | deus-ex-machina/index.html | LP/?⑤쾾 |
-| ?먮젅?댁뀡 + ?띿뒪??| gagosian-party-music/index.html | ?대깽???먮젅?댁뀡 |
-| ?먰뵾?뚮뱶 + ?띿뒪??鍮꾪룊 | 	asting-note/index.html | ?ㅻ━吏???쒕━利?|
+| 비디오 아카이브 시리즈 | the-root/index.html | 다큐/인터뷰 에피소드 시리즈 |
+| 스트리밍 링크 + 영상 | deus-ex-machina/index.html | LP/음반 |
+| 큐레이션 + 플레이리스트 | gagosian-party-music/index.html | 이벤트 큐레이션 |
+| 에피소드 + 텍스트 비평 | tasting-note/index.html | 오리지널 시리즈 |
 
 #### Step 4. Push
 
-`ash
+```bash
 git add projects.json {slug}/ 
 git commit -m "feat: add {project title}"
 git push origin main
-`
+```
 
-??GitHub Pages媛 ?먮룞 鍮뚮뱶/諛고룷?⑸땲?? ?덊솕硫?+ ?꾨줈?앺듃 ?섏씠吏 ?숈떆 諛섏쁺.
+GitHub Pages가 자동 빌드/배포합니다. 첫 화면 + 프로젝트 페이지 동시 반영.
 
 ---
 
-### YouTube ?뚮젅?대━?ㅽ듃 ?먮룞 媛깆떊 (Project : The Root ?꾩슜)
+### YouTube 플레이리스트 자동 갱신 (Project : The Root 전용)
 
-scripts/update_the_root.py + .github/workflows/update-the-root.yml?쇰줈 二?1???먮룞 ?ㅽ뻾?⑸땲??
+`scripts/update_the_root.py` + `.github/workflows/update-the-root.yml`로 주 1회 자동 실행됩니다.
 
-| ?ㅼ젙 ??ぉ | 媛?|
+| 설정 항목 | 값 |
 |----------|-----|
-| ?먮룞 ?ㅽ뻾 二쇨린 | 留ㅼ＜ ?붿슂??KST ?ㅼ쟾 9??|
-| ?섎룞 ?ㅽ뻾 | GitHub ??Actions ??"Update The Root Playlist" ??Run workflow |
-| ?꾩슂 Secret | YOUTUBE_API_KEY (Settings ??Secrets ??Actions) |
+| 자동 실행 주기 | 매주 화요일 KST 오전 9시 |
+| 수동 실행 | GitHub -> Actions -> "Update The Root Playlist" -> Run workflow |
+| 필요 Secret | YOUTUBE_API_KEY (Settings -> Secrets -> Actions) |

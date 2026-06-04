@@ -3,3 +3,6 @@ orders.db
 serviceAccountKey.json
 .env
 functions/.env
+
+scratch/
+scratch

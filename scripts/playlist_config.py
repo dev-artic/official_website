@@ -21,7 +21,7 @@ PROJECTS = [
     # ─────────────────────────────────────────────────────────────
     {
         "id":               "the-root",
-        "html_path":        "the-root/index.html",
+        "html_path":        "src/projects/the-root.html",
         "playlist_id_env":  "THE_ROOT_PLAYLIST_ID",
         "playlist_id":      "PLz166z7qN-0yOh9VmQndP_dG4iHzLm9g1",
         "has_latest_release": True,
@@ -33,7 +33,7 @@ PROJECTS = [
     # ─────────────────────────────────────────────────────────────
     {
         "id":               "tasting-note",
-        "html_path":        "tasting-note/index.html",
+        "html_path":        "src/projects/tasting-note.html",
         "playlist_id_env":  "TASTING_NOTE_PLAYLIST_ID",
         "playlist_id":      "PL5pgihOzM4-RbM38hhEY6JbQCex-BlOCj",
         "has_latest_release": True,
@@ -45,7 +45,7 @@ PROJECTS = [
     # ─────────────────────────────────────────────────────────────
     {
         "id":               "neutral-interview",
-        "html_path":        "neutral-interview/index.html",
+        "html_path":        "src/projects/neutral-interview.html",
         "playlist_id_env":  "NEUTRAL_INTERVIEW_PLAYLIST_ID",
         "playlist_id":      "PL5pgihOzM4-QUtVSXe1k5EilGNAWifH_c",
         "has_latest_release": True,

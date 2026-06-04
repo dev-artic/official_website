@@ -389,7 +389,7 @@ const waitlistFormContent = `<!--
   [Embedded Form Component] Join the Waitlist
   
   API INTEGRATION SPECIFICATION:
-    - Endpoint (Production): POST https://us-central1-artic-official-home.cloudfunctions.net/waitlist
+    - Endpoint (Production): POST https://waitlist-4n2xy6gsxa-uc.a.run.app
     - Endpoint (Staging/Local): POST http://127.0.0.1:5001/artic-official-home/us-central1/waitlist
     - Method: POST
     - Content-Type: application/json
@@ -535,7 +535,7 @@ const checkoutFormContent = `<!--
   [Popup Form Component] Purchase/Order Checkout
   
   API INTEGRATION SPECIFICATION:
-    - Endpoint (Production): POST https://us-central1-artic-official-home.cloudfunctions.net/checkout
+    - Endpoint (Production): POST https://checkout-4n2xy6gsxa-uc.a.run.app
     - Endpoint (Staging/Local): POST http://localhost:8000/api/checkout (Node server proxy)
     - Method: POST
     - Content-Type: application/json

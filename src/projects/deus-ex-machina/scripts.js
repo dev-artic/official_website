@@ -368,7 +368,7 @@
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             const apiUrl = isLocal 
               ? 'http://127.0.0.1:5001/artic-official-home/us-central1/checkout' 
-              : 'https://us-central1-artic-official-home.cloudfunctions.net/checkout';
+              : 'https://checkout-4n2xy6gsxa-uc.a.run.app';
 
             fetch(apiUrl, {
               method: 'POST',

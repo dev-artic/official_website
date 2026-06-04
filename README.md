@@ -1,589 +1,267 @@
-# ARTIC / Official Gallery & Webzine Boilerplate
+# ARTIC / Official Gallery & Webzine Website
 
-이 리포지토리는 예술 갤러리 및 모던 에디토리얼 웹진 스타일의 초고화질 정적 웹사이트 보일러플레이트입니다. 
-가벼운 로드 속도, 높은 디자인 완성도, SEO 강점을 가지며 빌드 엔진(Node.js/Python) 없이도 로컬 브라우저에서 즉시 개발 및 편집이 가능합니다.
+이 리포지토리는 예술 갤러리 및 모던 에디토리얼 웹진 스타일의 초고화질 정적 웹사이트입니다.
+중복과 하드코딩을 배제한 **디자인 템플릿 엔진 시스템**이 구축되어 있어, 구조적이고 깔끔한 소스 관리와 효율적인 데이터/용량 최적화를 제공합니다.
 
 ---
 
-## 📂 폴더 구조 및 아키텍처
+## 📂 폴더 구조 및 아키텍처 (Repository Directory Layout)
 
-프레임워크 없이도 모듈화된 관리가 가능하도록 구조적으로 설계되었습니다:
+중복 마크업을 제거하고 재사용성을 최대화하도록 템플릿과 소스 콘텐츠 디렉토리가 완벽히 분리되어 있습니다.
 
 ```
 Homepage/
-├── index.html            # 메인 HTML5 뼈대 (웹진의 에디토리얼 그리드 구조)
-├── css/
-│   ├── main.css          # 모든 CSS 모듈을 모아서 로드하는 진입점
-│   ├── design-system.css # [중요] 디자인 토큰 (CSS 변수: 색상, 폰트, 여백 설정 및 자동 다크모드)
-│   ├── base.css          # 기본 리셋 및 프리미엄 미니멀 스크롤바 디자인
-│   ├── layout.css        # 비대칭 에디토리얼 그리드 및 컨테이너 레이아웃
-│   ├── typography.css    # 럭셔리 세리프와 지오메트릭 산세리프 폰트 페어링
-│   ├── animations.css    # cinematic 페이드 인, 스크롤 리빌, 마우스 오버 줌 트랜지션
+├── index.html            # [빌드본] 메인 HTML (템플릿 컴파일 결과물)
+├── src/                  # [원본 소스] 각 페이지별 고유 콘텐츠 조각 및 메타데이터
+│   ├── index.html        # 메인 홈 화면 콘텐츠 소스
+│   ├── about.html        # About 페이지 콘텐츠 소스
+│   ├── contact.html      # Contact 페이지 콘텐츠 소스
+│   ├── quarterly.html    # Quarterly 페이지 콘텐츠 소스
+│   ├── projects.html     # Projects 페이지 콘텐츠 소스
+│   └── projects/         # 개별 프로젝트 상세 페이지 콘텐츠 소스
+│       ├── deus-ex-machina.html
+│       ├── gagosian-party-music.html
+│       ├── neutral-interview.html
+│       ├── tasting-note.html
+│       └── the-root.html
+├── templates/            # [공통 디자인 템플릿] 일괄 레이아웃 및 조립용 조각들
+│   ├── layouts/
+│   │   ├── base.html             # 일반 페이지용 마스터 레이아웃 쉘 (HEADER, FOOTER 주입)
+│   │   └── project-detail.html   # 프로젝트 상세 페이지용 마스터 레이아웃 쉘 (양열 그리드 구조)
+│   ├── global/
+│   │   ├── header.html           # 상단 내비게이션 바 및 다크모드/라이트모드 토글 버튼
+│   │   ├── footer.html           # 표준 하단 저작권 텍스트
+│   │   └── popup.html            # 전역 글래스모피즘 모달/팝업 레이아웃 컨테이너
 │   └── components/
-│       ├── navbar.css    # 반투명 글래스모피즘 플로팅 상단 메뉴
-│       ├── gallery.css   # 웹진 카드 및 커스텀 CTA 버튼 스타일
-│       └── footer.css    # 미니멀 에디토리얼 하단 영역
-└── js/
-    ├── app.js            # 상단 메뉴 스크롤 트리거 컨트롤러
-    ├── reveal.js         # Intersection Observer API 기반 고성능 스크롤 페이드 애니메이션
-    └── shared.js         # [중요] 다크모드 상태 관리(시간대/수동 토글), 모바일 햄버거 토글 및 공통 아코디언 컴포넌트 제어
+│       ├── base/
+│       │   ├── project-card.html     # 프로젝트 연도별 그리드 카드 템플릿
+│       │   ├── button.html           # 표준 글래스모피즘 호버 버튼 (Follow / YouTube 등)
+│       │   └── button-link.html      # 하위 페이지 이동용 밑줄 드로잉/화살표 트랜지션 텍스트 링크 버튼
+│       ├── forms/
+│       │   ├── waitlist-form-embedded.html # 이메일 대기명단 구독 폼 (quarterly 등 임베드용)
+│       │   └── checkout-form-popup.html    # LP/CD 주문용 체크아웃 폼 (deus-ex-machina 등 팝업용)
+│       └── projects/
+│           ├── player.html                 # 오디오 플레이어 핵심 마크업
+│           ├── lyric-and-tracklist.html    # 스와이프 가능한 가사 및 트랙리스트 카러셀
+│           ├── streaming-platforms.html    # 음원 사이트 외부 스트리밍 바로가기 카드 레이아웃
+│           ├── video-archive.html          # 유튜브 비디오 아코디언 아카이브 래퍼
+│           ├── featured-video.html         # 커스텀 썸네일 포스터 및 재생 트리거가 내장된 단일 비디오 레이아웃
+│           ├── text-curation.html          # 한/영 대조 텍스트 큐레이션 블록
+│           └── music-playlist.html         # VIP 파티 큐레이션 인라인 오디오 플레이 리스트
+├── scripts/              # [자동화 및 빌드 스크립트]
+│   ├── build_pages.js          # [핵심] src/ 소스들과 templates/ 디자인을 결합해 정적 사이트를 빌드하는 컴파일러
+│   ├── create_all_templates.js # templates/ 폴더 내의 각 HTML 템플릿 요소들을 물리적으로 작성/생성해 주는 도구
+│   ├── validate_templates.js   # 템플릿 파일들의 정합성과 필수 스키마 주석 유무를 검사하는 도구
+│   ├── playlist_config.py      # 유튜브 자동 동기화 대상 프로젝트 설정
+│   └── update_playlists.py     # 유튜브 API와 통신하여 최신 에피소드를 src/ 소스 파일에 동기화해 주는 스크립트
+├── css/                  # [스타일시트 토큰]
+│   ├── design-system.css # [중요] 디자인 시스템 토큰 (색상, 여백, 폰트 변수 및 자동 다크모드 제어)
+│   └── animations.css    # cinematic 페이드인, 스크롤 리빌, 마우스오버 줌 트랜지션 등
+├── js/                   # [클라이언트 스크립트]
+│   └── shared.js         # 다크모드 상태 관리, 모바일 햄버거 토글, 아코디언/카러셀 모션 등 공통 로직
+├── functions/            # [백엔드 API] Node.js 기반 Firebase Cloud Functions 코드베이스
+├── projects.json         # 메인 프리뷰 렌더링용 단일 데이터 소스
+├── server.js             # [로컬 스테이징] 로컬 디바이스용 HTTP 웹 서버 및 SQLite Proxy API 서버
+└── orders.db             # 로컬 테스트용 SQLite 가상 주문 데이터베이스
 ```
 
 ---
 
-## 🎨 테마 및 스타일 커스터마이징 (디자인 토큰)
+## 🔄 개발, 테스트 및 배포 프로세스 (Operations & Deployment Process)
 
-사이트의 전체적인 색상이나 서체, 애니메이션 느낌을 변경하고 싶다면, 개별 CSS를 뒤질 필요 없이 **`css/design-system.css`** 파일만 수정하면 됩니다:
-
-```css
-:root {
-  /* 폰트 지정 */
-  --font-logo: 'ITCGaramond', 'Georgia', serif;
-  --font-serif: 'KakaoBig', -apple-system, sans-serif; /* 헤더 및 타이틀 */
-  --font-sans: 'KakaoSmall', system-ui, sans-serif;   /* 가독성 높은 본문 */
-
-  /* 라이트 모드 컬러 */
-  --bg-primary: #FFFFFF;       /* 갤러리 미니멀 화이트 */
-  --text-primary: #000000;     /* 딥 블랙 */
-  --accent: #000000;           /* 액센트 컬러 */
-}
-
-/* 시스템 및 수동 다크모드 설정 (localStorage 상태와 시간에 따라 자동으로 전환) */
-.dark-mode {
-  --bg-primary: #1A1A1A;       /* 딥 다크 블랙 */
-  --text-primary: #FAFAFA;     /* 소프트 화이트 */
-  --accent: #FAFAFA;
-}
-```
-
----
-
-## ✍️ 웹진 기사(아티클) 및 프로젝트 추가 방법
-
-이 보일러플레이트는 `index.html`에 프로젝트를 수동으로 하드코딩하지 않습니다. 대신 **`/projects.json` 단일 파일의 데이터 소스를 바탕으로 프로젝트 카드를 동적으로 렌더링**하도록 설계되었습니다.
-
-따라서 기사나 프로젝트를 새로 추가할 때에는 아래 하단의 **[부록: 프로젝트 추가 방법 (단일 데이터 소스 구조)](#부록-프로젝트-추가-방법-단일-데이터-소스-구조)** 가이드라인을 참조하시어 `projects.json` 데이터 작성과 함께 프로젝트 디렉토리를 추가해 주시기 바랍니다.
-
----
-
-## 🔄 개발, 테스트 및 배포 프로세스 (Development, Testing & Deployment Process)
-
-artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다. 개발자가 로컬에서 코드를 작성하고, 로컬 스테이징 환경에서 무비용으로 완벽하게 연동 검증을 거친 뒤, 최종 프로덕션 환경에 안전하게 배포하기까지의 통합 워크플로우를 정의합니다.
+artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다.
 
 ```mermaid
 graph TD
     subgraph 💻 1. 개발 단계 (Development Phase)
-        DevStatic[HTML/CSS/JS 수정]
+        DevSrc[src/ & templates/ 파일 수정]
         DevBackend[functions/index.js 수정 - Node.js]
-        DevSync[Notion DB 스캔 스크립트 작성]
     end
 
-    subgraph 🧪 2. 로컬 스테이징 검증 단계 (Local Staging & Testing)
-        WebServ["로컬 웹 서버 가동 <br> server.py :8000"]
+    subgraph ⚙️ 2. 컴파일 및 빌드 (Compilation)
+        NodeBuild[node scripts/build_pages.js 실행] --> FinalHTML[index.html 및 하위 index.html들 생성]
+        FinalHTML -.-> StylesHead[스타일 태그를 헤드 영역으로 통합 최적화]
+    end
+
+    subgraph 🧪 3. 로컬 스테이징 검증 (Local Staging & Testing)
+        NodeServ["로컬 웹/API 서버 가동 <br> server.js :8000"]
         AutoSwitch{"API 호스트 자동 분기 <br> window.location.hostname"}
         FirebaseEmul["Firebase Local Emulator Suite <br> Functions :5001 / Suite UI :4000"]
         LocalFirestore[("가상 Firestore DB <br> Emulator :8080")]
-        SQLiteFallback[("SQLite 백업 <br> orders.db")]
+        SQLiteBackup[("SQLite 데이터 백업 <br> orders.db")]
 
-        WebServ -->|브라우저 로드| AutoSwitch
+        NodeServ -->|브라우저 로드| AutoSwitch
         AutoSwitch -->|Localhost 접속 시| FirebaseEmul
-        AutoSwitch -.->|Java가 없는 가벼운 디버깅 시| SQLiteFallback
+        AutoSwitch -.->|Firebase emulator 미기동 시 Fallback| SQLiteBackup
         FirebaseEmul -->|데이터 적재| LocalFirestore
     end
 
-    subgraph 🚀 3. 프로덕션 배포 단계 (Production Deploy Phase)
+    subgraph 🚀 4. 프로덕션 배포 단계 (Production Deploy Phase)
         PushGit[Git Commit & Push] --> GHPages[GitHub Pages 정적 호스팅 <br> artic.live]
         DeployFB[Firebase CLI deploy] --> CloudFunctions[Firebase Cloud Functions API]
-        CloudFunctions -->|실시간 적재| FirestoreProd[("실서비스 Firestore DB")]
     end
 
-    DevStatic --> WebServ
+    DevSrc --> NodeBuild
+    NodeBuild --> NodeServ
     DevBackend --> FirebaseEmul
-    DevSync --> SQLiteFallback
 
-    FirebaseEmul -->|검증 완료된 Node.js 코드 수정 없이 그대로| DeployFB
-    WebServ -->|정적 마크업 커밋 & 푸시| PushGit
+    FirebaseEmul -->|검증 완료된 Node.js 코드 배포| DeployFB
+    NodeBuild -->|빌드된 정적 HTML 커밋 & 푸시| PushGit
 ```
 
 ### 1️⃣ 개발 단계 (Development Phase)
-
-이 단계에서는 화면을 구성하는 정적 콘텐츠를 추가하거나, 비즈니스 로직을 처리할 백엔드 API와 자동화 스크립트를 작성합니다.
-
-* **정적 프론트엔드 마크업 및 디자인 수정**
-  * 메인 뼈대 및 디자인 시스템 설정: **`index.html`**, **`css/design-system.css`**, **`css/main.css`** 등의 정적 파일을 직접 수정합니다.
-  * 신규 에디토리얼 아티클 및 프로젝트 추가: 단일 데이터 소스인 **`projects.json`** 파일에 항목 정보를 추가하고, 해당 프로젝트 이름으로 폴더를 생성하여 상세 페이지 마크업(예: **`deus-ex-machina/index.html`**, **`tasting-note/index.html`**)을 작성합니다.
-  * 노션 아카이빙 데이터 사전 동기화: 노션 DB(`분기별 결산`)의 문서를 로컬로 미리 내려받기 위해 **`scripts/notion_sync.py`** 스크립트를 작성 및 편집합니다.
-* **동적 백엔드 API 및 이메일 로직 구현 (단일 코드베이스)**
-  * 대기명단 가입 검증 및 주문/이메일 자동 발송: **`functions/index.js`** 파일에서 이메일 정규식 검증(`waitlist` 함수) 및 토스뱅크 입금 안내 / Daum SMTP 연동 메일 발송(`checkout` 함수) 비즈니스 로직을 **Node.js**로 구현 및 수정합니다. 파이썬 로직으로 번역할 필요 없이 이 파일 하나만 개발/유지보수합니다.
-* **콘텐츠 자동 갱신 배치 스크립트 작성**
-  * 유튜브 플레이리스트 동기화 규칙 정의: 매주 유튜브 채널의 최신 영상 리스트를 긁어오기 위한 **`scripts/update_playlists.py`** 스크립트와 대상 프로젝트들의 정보를 담은 **`scripts/playlist_config.py`** 파일을 갱신합니다.
+* **프론트엔드/디자인 수정**:
+  * 중복 마크업을 직접 고치지 않고, `templates/` 의 마스터 레이아웃(`layouts/base.html`, `project-detail.html`) 이나 공통 템플릿들을 수정합니다.
+  * 각 페이지의 본문 내용은 `src/` 폴더 아래의 파일(예: `src/about.html` 또는 `src/projects/deus-ex-machina.html`)에 Front Matter와 함께 최소한의 스타일/스크립트/마크업으로 기재합니다.
+* **컴파일 및 빌드 실행**:
+  * 소스 작성이 끝나면 프로젝트 루트에서 아래의 컴파일 스크립트를 기동합니다.
+    ```bash
+    node scripts/build_pages.js
+    ```
+  * 이 도구는 `templates/`에 기재된 글래스모피즘 모달, 헤더/푸터, 오디오 플레이어, Waitlist/Checkout 폼 등을 `src/` 본문과 결합하여 최종 HTML을 빌드하며, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 추출/병합해 줍니다.
+* **백엔드 API 로직 개발**:
+  * 대기명단 가입 및 결제 주문 처리는 **`functions/index.js`** 파일에서 Node.js를 기반으로 구현 및 관리됩니다.
 
 ---
 
 ### 2️⃣ 로컬 스테이징 검증 단계 (Local Staging & Testing Phase)
+실서버 배포 전, 로컬 환경에서 정적 라우팅 및 데이터 적재, 이메일 발송 기능을 완벽히 사전 검증합니다.
 
-실서버 배포 전, 로컬 환경에 완벽한 **'스테이징 서버'** 인프라를 구축하여 비용 없이 데이터 흐름 및 발송 로직을 검증합니다.
-
-* **사전 요구 사항**
-  * Firebase 에뮬레이터를 가동하기 위해 로컬 컴퓨터에 **Java Runtime Environment (JRE / OpenJDK 26 이상)** 및 Node.js 설치가 필요합니다.
-* **로컬 스테이징 서버 기동 방법**
-  1. **프론트엔드 웹 서버 구동**: 프로젝트 루트에서 아래 파이썬 스크립트를 가동하여 `http://localhost:8000` 주소로 정적 리소스를 서빙합니다.
+1. **로컬 스테이징 서버 기동**:
+   * 프론트엔드 및 데이터 프록시를 구동하기 위해 아래 명령어를 실행하여 `http://localhost:8000` 주소로 로컬 서버를 실행합니다.
      ```bash
-     python3 server.py
+     node server.js
      ```
-  2. **Firebase 로컬 에뮬레이터 가동**: 프로젝트 루트에서 아래 CLI 명령어를 통해 에뮬레이터를 실행합니다.
+2. **Firebase 로컬 에뮬레이터 실행**:
+   * 로컬에서 Cloud Functions 백엔드와 Firestore를 모의하기 위해 아래 명령어를 구동합니다 (JRE 설치 필요).
      ```bash
      npx firebase-tools emulators:start
      ```
-     * **`firebase.json`**의 구성에 따라 가상 Functions 서버(포트 `5001`), 가상 Firestore DB(포트 `8080`), 에뮬레이터 통합 대시보드 UI(포트 `4000`)가 개인 하드웨어 자원으로 가동되며, **이로 인한 클라우드 사용 요금은 100% 무료(0원)**입니다.
-* **API 호스트 자동 스위칭 (CORS & Environment Routing)**
-  * 프론트엔드 자바스크립트는 브라우저의 `window.location.hostname`이 `localhost` 혹은 `127.0.0.1`인 경우, 수동 설정 변경 없이 자동으로 로컬 에뮬레이터 백엔드 API 주소(**`http://127.0.0.1:5001/...`**)를 가리키도록 설계되어 있습니다.
-  * 실제 운영 도메인(`artic.live`)에 올라가면 자동으로 프로덕션 Cloud Functions URL로 동적 라우팅됩니다.
-* **로컬 가상 데이터 적재 및 모의 이메일 확인**
-  * 로컬 브라우저에서 가입이나 결제 폼을 제출하면, 로컬 Firestore 에뮬레이터에 실시간으로 데이터가 입력됩니다.
-  * [http://127.0.0.1:4000](http://127.0.0.1:4000) (Suite UI) 대시보드에 접속하여 인메모리 데이터의 정합성을 확인하고, SMTP 이메일 발송 결과 로그를 완벽하게 모니터링할 수 있습니다.
-* **SQLite 샌드박스 백업 (Fallback Mocking)**
-  * 자바 런타임이 없는 컴퓨터 환경이거나 백엔드 로직 수정이 불필요한 단순 레이아웃 디버깅 시에는, **`server.py`** 자체의 내장 HTTP POST 핸들러가 `/api/...` 요청을 받아 로컬 SQLite 파일인 **`orders.db`**에 데이터를 보관해 주는 Fallback 로직을 제공합니다.
+   * 브라우저가 `localhost` 도메인에 있을 경우, 클라이언트 스크립트는 실서비스 백엔드가 아닌 로컬 가상 Functions 서버(`http://127.0.0.1:5001`)로 자동 스위칭됩니다.
+3. **SMTP 모의 이메일 및 데이터 체크**:
+   * 결제 폼 제출 시 Suite UI(`http://127.0.0.1:4000`) 대시보드에서 가상 적재 데이터와 이메일 발송 로그를 체크합니다.
+   * Firebase 에뮬레이터를 켜지 않고 가볍게 UI/정적 빌드 검증을 진행할 때는, `server.js`가 로컬 SQLite 파일인 `orders.db`에 주문 데이터를 대체 보관(Fallback)하여 에러를 방지합니다.
 
 ---
 
 ### 3️⃣ 배포 단계 (Deployment Phase)
-
-로컬 스테이징 환경에서 검증을 완벽하게 마친 정적 콘텐츠와 동적 백엔드 API를 프로덕션 라이브 환경에 각각 독립적으로 배포합니다.
-
-* **A. 정적 프론트엔드 호스팅 배포 (GitHub Pages)**
-  * **관여 파일**: **`index.html`**, **`css/`** 폴더 내 스타일시트, **`js/`** 폴더 내 자바스크립트, 데이터 원본 **`projects.json`**, 커스텀 도메인 파일 **`CNAME`**
-  * **배포 흐름**:
-    1. 로컬 스테이징 검증이 완료된 정적 파일들을 커밋합니다.
-    2. GitHub 원격 리포지토리의 `main` 브랜치에 코드를 푸시합니다.
-       ```bash
-       git add .
-       git commit -m "style: refine article page transitions"
-       git push origin main
-       ```
-    3. 푸시가 감지되면 GitHub Actions의 내부 배포 러너가 동작하여, **`CNAME`**에 설정된 커스텀 도메인 `artic.live`를 타겟으로 약 1~2분 이내에 정적 호스팅 사이트를 프로덕션에 자동 배포합니다.
-* **B. 동적 백엔드 API 배포 (Firebase Cloud Functions)**
-  * **관여 파일**: **`functions/index.js`**, **`functions/package.json`**, 설정 파일 **`firebase.json`**
-  * **배포 흐름**:
-    1. 혼선을 줄이기 위해 **`firebase.json`** 설정 파일 내의 `"hosting"` 설정이 비활성화(`hosting:disable` 등)되어 프론트엔드가 오직 GitHub Pages로만 서빙되는 것을 보장합니다. (호스팅이 꺼져 있어도 Functions 가동 및 API 통신에는 아무 문제가 없습니다.)
-    2. Firebase CLI 명령어를 사용하여 로컬 스테이징 에뮬레이터에서 **검증을 마친 동일한 Node.js 파일(`functions/index.js`)**을 변경 없이 Google Firebase Cloud 인프라에 즉시 배포합니다.
-       ```bash
-       npx firebase-tools deploy --only functions
-       ```
-    3. 배포 성공 후, 실서비스 사용자가 폼을 제출하면 클라이언트 브라우저가 클라우드상의 전용 고유 외부 HTTPS 엔드포인트 URL(`https://us-central1-artic-official-home.cloudfunctions.net/...`)로 직접 POST 호출을 보냅니다.
-* **C. 배치 스크립트 배포 및 자동 갱신 (GitHub Actions)**
-  * **관여 파일**: GitHub Actions 워크플로우 정의 파일 **`.github/workflows/update-playlists.yml`**, 유튜브 갱신 스크립트 **`scripts/update_playlists.py`**
-  * **배포 및 작동 방식**:
-    1. 해당 자동화 워크플로우가 구성된 소스 코드를 `main` 브랜치에 푸시해 둡니다.
-    2. 등록된 GitHub Actions 워크플로우는 매주 월요일 오전 9시(KST)가 되면 크론 트리거를 통해 백그라운드에서 자동으로 기동됩니다.
-    3. 유튜브 API를 호출하여 최신 에피소드를 스캔하고 정적 마크업을 동적으로 수정한 뒤, 변경사항을 원격 `main` 브랜치에 봇 계정으로 자동 커밋 및 푸시합니다. 이 푸시가 다시 GitHub Pages 정적 배포를 트리거하여 사이트의 최신 플레이리스트 콘텐츠가 무중단으로 반영됩니다.
+* **A. 프론트엔드 배포 (GitHub Pages)**:
+  * 로컬에서 `node scripts/build_pages.js` 실행 후, 컴파일 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.
+    ```bash
+    git add .
+    git commit -m "feat: compile static changes and update about sections"
+    git push origin main
+    ```
+  * GitHub Actions가 감지 후 `CNAME`에 등록된 커스텀 도메인 `artic.live`를 타겟으로 정적 사이트를 배포합니다.
+* **B. 백엔드 Functions 배포**:
+  * 수정된 비즈니스 로직은 Firebase CLI로 프로덕션 인프라에 배포합니다:
+    ```bash
+    npx firebase-tools deploy --only functions
+    ```
+* **C. 유튜브 플레이리스트 갱신 자동화 (GitHub Actions Workflow)**:
+  * 매주 월요일 오전 9시(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
+  * 워크플로우가 자동으로 `scripts/update_playlists.py`를 실행해 유튜브 API로 최신 비디오들을 가져와 `src/projects/*.html` 소스를 갱신하고, 즉시 `node scripts/build_pages.js`를 기동하여 최종 HTML들을 다시 빌드한 뒤 원격지에 자동 커밋 및 푸시를 적용합니다.
 
 ---
 
-# 부록: 콘텐츠 관리 매뉴얼 & DB 스펙
+## 🎨 디자인 템플릿 구성 및 사용법
 
-# Database Structure Spec & Design Component Templatization
+### 1. 글로벌 레이아웃 및 쉘 (`templates/layouts/`)
+* **`base.html`**:
+  * **사용처**: `index.html` (메인 홈), `about`, `projects`, `contact`, `quarterly` 등 일반 정적 페이지.
+  * **구성**: 공통 `<head>`, `<nav>` 네비게이션, 푸터, `shared.js` 스크립트를 내포하고 있으며, 각 페이지의 본문이 `{{CONTENT}}` 자리에 주입됩니다.
+* **`project-detail.html`**:
+  * **사용처**: `deus-ex-machina`, `tasting-note`, `the-root` 등 개별 프로젝트/앨범 소개 스마트링크 페이지.
+  * **구성**: 대형 앨범 아트쇼케이스 커버 영역 및 좌우 2단 그리드 컬럼(`{{LEFT_COLUMN_CONTENT}}`, `{{RIGHT_COLUMN_CONTENT}}`) 레이아웃을 제공합니다.
 
-This specification outlines the unified data models, design templates, and interactive state rules for the artic. website. It defines the exact mapping between structured database entities and frontend UI/UX interactions to ensure high-fidelity consistency when creating new pages or adding content.
+### 2. 베이스 UI 컴포넌트 (`templates/components/base/`)
+* **`button-link.html` [Arrow Text Link]**:
+  * **마크업 사용**: `<a href="{url}" class="section-link {class}"><span>{text}</span><svg ...></a>`
+  * **특징**: 호버 시 하단에 밑줄이 동적으로 그려지고 화살표 SVG 아이콘이 오른쪽으로 4px 쉬프트하는 모션이 내장되어 있습니다. 홈 화면이나 하위페이지 이동 시 템플릿 바인딩됩니다.
+* **`button.html` [Glass Action Button]**:
+  * **마크업 사용**: `<a href="{url}" class="about-action"> {svg} {text} </a>`
+  * **특징**: 반투명 글래스 배경을 가지고 있으며, 호버 시 배경이 텍스트 색상으로 바뀌고 아이콘 크기가 1.1배 커지는 액션 버튼입니다. Waitlist 가입 버튼이나 Instagram, YouTube 등의 링크용으로 템플릿 바인딩됩니다.
 
----
+### 3. 백엔드 연동 폼 컴포넌트 (`templates/components/forms/`)
+* **`waitlist-form-embedded.html` [구독/대기 폼 - embedded 타입]**:
+  * **사용처**: `quarterly/` 등 페이지 내부 임베드 섹션.
+  * **데이터 매핑**: 로컬 SQLite `quarterly_subscribers` 테이블 및 실서버 Cloud Functions `/waitlist` API를 경유하여 Firestore `quarterly_subscribers` 컬렉션에 적재됩니다.
+* **`checkout-form-popup.html` [주문 폼 - popup 타입]**:
+  * **사용처**: `deus-ex-machina/` 등 LP/CD 구매 팝업 모달.
+  * **데이터 매핑**: 로컬 SQLite `orders` 테이블 및 실서버 Cloud Functions `/checkout` API를 경유하여 Firestore `orders` 컬렉션에 적재됩니다.
 
-## 1. Core Architecture Data Model
-
-### 1.1 Homepage Entity (`homepage`)
-The main gateway coordinates site-wide sub-page navigation and features the premium interactive horizontal project showcase.
-* **Fields**:
-  * `navigator_links` (`Link[]`): List of navigation links (About, Projects, Contact).
-  * `featured_projects` (`ProjectMeta[]`): List of projects showcased on the main slide.
-* **UX Interaction Rules**:
-  * **Logo Animating**: The central logo splits on load, followed by a simultaneous 1.8s delayed reveal of the navigation bar and the `discover` button.
-  * **Discover Button Alignment**: Statically locked at `top: calc(50% + 100px)` (exactly 64px below the centered logo) on all screen heights.
-  * **Selected Projects Slide**: Left-aligned scroll track using native hardware-accelerated CSS snaps (`scroll-snap-type: x mandatory` and `-webkit-overflow-scrolling: touch`) on mobile touch devices. Desktop supports mouse drag.
-
-### 1.2 Project Metadata Schema (`Project`)
-Each project record represents a distinct archive smartlink page. It contains core metadata and an array of nested dynamic content sections.
-* **Fields**:
-  * `id` (`string`): Unique slug ID (e.g., `tasting-note`).
-  * `title` (`string`): Official project name.
-  * `artist` (`string`): Artist or creator name.
-  * `client` (`string`): Branding client. Defaults to `"artic."` if it is an original series.
-  * `category` (`string`): Project category (e.g., `ORIGINAL SERIES`, `PRODUCTION`, `MUSIC CURATION`, `LP`).
-  * `year` (`integer`): Release or archive year.
-  * `release_date` (`string`): Format `YYYY.MM.DD` or `YYYY.MM` for timeline tracking.
-  * `cover_image` (`string`): Path relative to resources.
-  * `sections` (`Section[]`): Ordered array of section components.
+### 4. 프로젝트 특화 컴포넌트 (`templates/components/projects/`)
+* **`player.html`**: 중앙 오디오 플레이 위젯 및 프로그레스바 트랙.
+* **`lyric-and-tracklist.html`**: 드래그 잠금식 트랙리스트 및 실시간 싱크 가사 카러셀 뷰포트.
+* **`featured-video.html`**: 커스텀 비주얼 포스터와 재생용 중앙 버튼이 포함된 단일 추천 비디오 위젯.
 
 ---
 
-## 2. Project Page Section Templatization
+## ✍️ 신규 프로젝트 추가 가이드 (단일 데이터 소스 템플릿화)
 
-Every project detail page utilizes a standard two-column content grid (`.content-columns`) on desktop that collapses into a single-column stack on mobile. Sections are categorized by content type (`type`), each dictating a specific layout and interaction flow.
+모든 프로젝트 목록 메타데이터는 **/projects.json** 단일 소스로 관리되며, 추가 절차는 다음과 같이 템플릿화되었습니다.
 
-```mermaid
-graph TD
-    Project[Project Document] --> Meta[Metadata: cover, client, year, category]
-    Project --> Sections[Sections Array]
-    Sections --> S1["Link List (Stream/Print)"]
-    Sections --> S2["Video Archive (Accordion Play)"]
-    Sections --> S3["Latest Release (Featured Video)"]
-    Sections --> S4["Music Playlist (Back-Audio Player)"]
-    Sections --> S5["Text Curation / Spotlight"]
-```
+### Step 1. 프로젝트 콘텐츠 소스 작성
+1. `src/projects/` 폴더 아래에 신규 프로젝트명으로 소스 파일(예: `src/projects/my-new-release.html`)을 작성합니다.
+2. 상단에 Front Matter 설정(타이틀, 레이아웃 등)을 기재합니다:
+   ```html
+   ---
+   layout: project-detail
+   title: "My New Release"
+   subtitle: "LP / Album"
+   description: "Artist's new visual critique and tracks."
+   cover_image: "album-art.png"
+   ---
+   <style>
+     /* 프로젝트 고유의 스타일 정의 */
+   </style>
 
----
+   <div slot="left">
+     {{STREAMING_PLATFORMS}}
+     {{PLAYER}}
+     {{LYRIC_AND_TRACKLIST}}
+     <button id="order-open-btn" class="about-action">BUY ALBUM</button>
+   </div>
 
-## 3. Section Types & Interaction Matrix
+   <div slot="right">
+     {{VIDEO_ARCHIVE}}
+     {{TEXT_CURATION}}
+   </div>
 
-### 3.1 Link List (`link_list`)
-A collection of external platform links or document downloads.
-* **Use Cases**: `Stream` (Spotify/Apple Music links), `Print` (Lyrics PDF/Interviews).
-* **HTML Component Template**:
-  ```html
-  <main class="links-container expanded">
-    <div class="mobile-toggle-header">
-      <span class="archive-group-label stream-label">Stream</span>
-      <span class="toggle-icon"></span>
-    </div>
-    <div class="toggle-content">
-      <a href="{url}" target="_blank" class="link-item">
-        <div class="platform-info">
-          <div class="platform-logo">{svg}</div>
-          <span class="platform-name">{platform}</span>
-        </div>
-        <span class="listen-badge">{badge_text}</span>
-      </a>
-    </div>
-  </main>
-  ```
-* **Interactivity Rules**:
-  - **Desktop**: Renders as a clean, static side column (typically Left).
-  - **Mobile**: Becomes an accordion container that loads `.expanded` by default. Toggles collapsing/expanding when clicking the `.mobile-toggle-header`.
+   <div slot="popup">
+     <div class="checkout-modal-header"><h2>주문하기</h2></div>
+     {{CHECKOUT_FORM}}
+     <button id="chk-submit" class="about-action" style="width:100%">입금 확인 요청</button>
+   </div>
 
----
-
-### 3.2 Video Archive (`video_archive`)
-An interactive playlist of archive visualizers, documentaries, or listening sessions.
-* **Use Cases**: `Film`, `Episodes`.
-* **HTML Component Template**:
-  ```html
-  <div class="archive-group expanded">
-    <div class="mobile-toggle-header">
-      <span class="archive-group-label film-label">Film</span>
-      <span class="toggle-icon"></span>
-    </div>
-    <div class="archive-list toggle-content">
-      <div class="archive-entry" data-vid="{youtube_id}">
-        <a class="archive-item" href="javascript:void(0)">
-          <div class="archive-item-left">
-            <svg class="archive-icon">{svg}</svg>
-            <div>
-              <span class="archive-item-type">{sub_type}</span>
-              <span class="archive-item-title">{title}</span>
-            </div>
-          </div>
-        </a>
-        <div class="archive-embed"></div>
-      </div>
-    </div>
-  </div>
-  ```
-* **Interactivity Rules**:
-  - **Iframe Embedding (Accordion Play)**: Clicking an `.archive-item` swaps out the empty `.archive-embed` with a responsive YouTube iframe player.
-  - **Exclusive Playback**: Only one video inside the archive list can play at a time. Activating a video pauses/closes any other playing embed in the grid.
-  - **Desktop Grid**: Renders as a 2-column list.
-  - **Mobile Accordion**: Header toggle collapses/expands the entire group list smoothly.
-
----
-
-### 3.3 Latest Release (`latest_release_video`)
-A featured, highly visible single video section with full credit lists and text briefs.
-* **Use Cases**: `Latest Release` on Tasting Note or Neutral Interview.
-* **HTML Component Template**:
-  ```html
-  <main class="links-container expanded">
-    <div class="mobile-toggle-header">
-      <span class="archive-group-label stream-label">Latest Release</span>
-      <span class="toggle-icon"></span>
-    </div>
-    <div class="toggle-content">
-      <div class="static-content">
-        <div class="archive-entry active" data-vid="{youtube_id}">
-          <!-- Featured Header Item -->
-          <div class="archive-embed open">
-            <div class="custom-video-poster" data-vid="{youtube_id}">
-              <img class="poster-thumbnail" src="{poster_url}">
-              <div class="poster-play-btn">{play_svg}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Follow-up Credits/Brief -->
-      <div class="project-brief">{brief_html}</div>
-      <div class="project-starring">{starring_html}</div>
-    </div>
-  </main>
-  ```
-* **Interactivity Rules**:
-  - **Default State**: Initialized as `.expanded` and `.open`. The video poster loads immediately.
-  - **Play Trigger**: Clicking the video poster replaces it dynamically with a YouTube Iframe player that autoplay-triggers.
-  - **Desktop Layout**: Locked in the Left Column.
-  - **Mobile Layout**: Positions itself at the absolute top of the page below the cover art.
-
----
-
-### 3.4 Music Playlist (`music_playlist`)
-An inline audio player playlist integrated with a background player engine.
-* **Use Cases**: Gagosian Party Playlist.
-* **HTML Component Template**:
-  ```html
-  <div class="info-group expanded">
-    <div class="mobile-toggle-header">
-      <span class="info-group-label playlist-label">Playlist</span>
-      <span class="toggle-icon"></span>
-    </div>
-    <div class="info-content toggle-content">
-      <div class="archive-list">
-        <div class="archive-entry" data-vid="{youtube_audio_id}">
-          <a class="archive-item" href="javascript:void(0)">
-            <div class="archive-item-left">
-              <svg class="archive-icon">{play_pause_svg}</svg>
-              <div class="archive-item-text">
-                <span class="archive-item-type">{artist}</span>
-                <span class="archive-item-title">{title}</span>
-              </div>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-  ```
-* **Interactivity Rules**:
-  - **Hidden API Engine**: Spawns an off-screen `1x1` pixel YouTube player iframe inside a hidden container on first page interaction.
-  - **Inline Playlist Toggles**: Track items render `.playing` or `.paused` active states. Clicking an active playing track paused it. SVGs toggle dynamically between triangle and pause bars.
-  - **Volume Fading Cross-Fades**:
-    - Pausing fades audio volume from 100 to 0 over 600ms before pausing.
-    - Play/Resume starts at 0 volume and fades up to 100 over 600ms.
-    - Track Switching fades out the active track (400ms), stops, loads the new track, and fades in (600ms).
-
----
-
-### 3.5 Text Curation (`text_curation`)
-Multi-lingual (typically Korean and English) narrative description columns.
-* **Use Cases**: `Artist Spotlight`, `Music Curation`.
-* **HTML Component Template**:
-  ```html
-  <div class="info-group expanded">
-    <div class="mobile-toggle-header">
-      <span class="info-group-label artist-label">Spotlight</span>
-      <span class="toggle-icon"></span>
-    </div>
-    <div class="info-content toggle-content">
-      <h2 class="info-title">{title}</h2>
-      <div class="info-subtitle">{subtitle}</div>
-      <div class="info-desc">
-        <p>{body_ko}</p>
-        <p class="en-translation">{body_en}</p>
-        <!-- Optional Key-Value Metadata Grid -->
-        <div class="info-meta-list">
-          <div class="info-meta-item">
-            <span class="info-meta-key">{key}</span>
-            <span>{value}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  ```
-
----
-
-## 4. Responsive Device Layout Rules
-
-| Screen Viewport | Grid Structure | Collapsibility | Alignment / Gutters | Cover Art Sizing |
-| :--- | :--- | :--- | :--- | :--- |
-| **Desktop (>=768px)** | 2-Column Row (`.content-columns`) | Stays expanded (Static Grid) | `padding-left: var(--gutter)` (40-80px aligned) | Shrinks from `280px` to `170px` on Phase 3 animation |
-| **Mobile (<768px)** | 1-Column Vertical Stack | Collapsable via `.mobile-toggle-header` | `padding-left: var(--gutter)` (24px gutter snap) | Shrinks from `280px` to `170px` centering dynamically |
-
----
-
-## 5. Firebase 백엔드 및 주문 관리 시스템
-
-이 리포지토리는 프론트엔드 정적 호스팅(GitHub Pages)과 독립된 서버리스 백엔드(Firebase Cloud Functions & Firestore) 하이브리드 아키텍처를 사용합니다.
-
-### 5.1 아키텍처 흐름
-1. **결제/구독 요청 (Client)**: 
-   - `deus-ex-machina` 등의 프로젝트 상세 페이지에 임베드된 결제 폼에서 필수 입력값 검증 후 POST 요청을 보냅니다.
-   - API Endpoint: `https://us-central1-artic-official-home.cloudfunctions.net/checkout`
-2. **주문 처리 (Firebase Cloud Functions)**:
-   - 요청 데이터를 파싱하여 유효성 및 필드 검증을 거칩니다.
-   - 주문 내역 데이터를 Firestore 데이터베이스(`orders` 컬렉션)에 고유 ID 문서로 저장합니다.
-   - Nodemailer 및 Daum 스마트워크 SMTP 서비스(`smtp.daum.net:465`)를 통해 고객과 관리자(`admin@artic.live`)에게 자동 이메일 안내장을 발송합니다.
-3. **결제 대기 및 처리 (Noreply / Manual)**:
-   - 고객에게는 토스뱅크 계좌번호와 수량별 합계 금액(상품가 15,000원 * 수량 + 배송비 3,000원) 및 입금 요청 정보가 메일로 전달됩니다.
-   - 관리자는 메일 알림 수신 후, 실시간으로 입금 여부를 수동 매칭하여 상품을 배송합니다.
-
-### 5.2 Firestore 데이터베이스 스펙 (`orders` 컬렉션)
-각 주문 레코드는 다음과 같은 구조로 기록됩니다:
-* `name` (string): 주문자/신청자 이름
-* `email` (string): 이메일 주소 (안내 이메일 수신용)
-* `phone` (string): 연락처 (배송 안내용)
-* `address` (string): 배송지 주소
-* `quantity` (number): 주문 상품 수량 (개당 15,000원)
-* `depositor` (string): 입금자명 (주문자와 다를 경우 지정, 기본값은 `name`)
-* `notes` (string): 추가 요청사항/메모
-* `created_at` (server timestamp): Firestore 서버 타임스탬프 기준으로 기록된 주문 생성 일시
-
-### 5.3 백엔드 개발 및 로컬 테스트 환경
-백엔드 로컬 테스트 및 관리를 위해 Firebase CLI 환경을 지원합니다:
-1. **의존성 설치**:
-   ```bash
-   cd functions
-   npm install
-   ```
-2. **로컬 에뮬레이터 실행**:
-   `functions` 디렉토리 혹은 루트에서 Firebase Local Emulator Suite를 실행하여 백엔드 트리거 및 Firestore 로컬 동작을 모의 테스트할 수 있습니다.
-   ```bash
-   npx firebase emulators:start
-   ```
-3. **환경 변수 구성 (.env)**:
-   `functions/.env` 파일에 SMTP 인증 자격증명을 설정해야 메일 발송이 정상 동작합니다.
-   ```env
-   SMTP_HOST=smtp.daum.net
-   SMTP_PORT=465
-   SMTP_USER=admin@artic.live
-   SMTP_PASSWORD=your_app_password
-   ADMIN_EMAIL=admin@artic.live
+   <script>
+     /* 플레이어 이벤트를 트리거하는 커스텀 스크립트 작성 */
+   </script>
    ```
 
-### 5.4 백엔드 배포 가이드
-수정된 Functions 백엔드 코드는 Firebase CLI를 통해 즉시 배포할 수 있습니다:
-```bash
-npx firebase deploy --only functions
-```
-
-### 5.5 듀얼 코어 데이터베이스 시스템 (Dual-Core DB System)
-
-artic. 홈페이지는 정적 콘텐츠의 영속성, 실시간 트랜잭션, 그리고 에디토리얼 큐레이션의 편의성을 동시에 만족하기 위해 **Firebase**와 **Notion DB**를 병용하는 **듀얼 코어 DB 시스템**으로 설계되었습니다.
-
-1. **Firebase Firestore (실시간 트랜잭션 코어)**:
-   - **용도**: 독자들의 활발한 동적 상호작용 및 고객 데이터 저장.
-   - **대상 컬렉션**:
-     - `orders`: 도서 및 물리적 굿즈 구매 주문 정보.
-     - `quarterly_subscribers`: 이메일 기반 대기 명단 신청 정보 (Quarterly 소식지 구독자).
-   - **특징**: Cloud Functions 백엔드 트리거와 다이렉트 연동되어 엄격한 스키마 유효성 검사 및 CORS 차단 정책이 즉각 적용됩니다.
-
-2. **Notion DB (에디토리얼 큐레이션 코어)**:
-   - **용도**: 아티스트 다큐멘터리, 플레이리스트, 비주얼 크리틱 등 정기 웹진 콘텐츠 관리.
-   - **대상 데이터베이스**: `분기별 결산` (Notion Database ID: `653b6d15-ac9b-4ea3-b284-da77852f424e`)
-   - **특징**: 비개발자 팀원들도 Notion 워크스페이스 상에서 직관적으로 문서를 편집하고 미디어를 아카이빙할 수 있으며, 데이터 필드(`아카이빙일`, `연도`, `Q`, `업로드 확정`)를 활용해 퍼블리싱 상태를 정교하게 컨트롤합니다.
-
-### 5.6 Notion DB 로컬 스캔 및 퍼블리싱 프리뷰 파이프라인
-
-콘텐츠가 노션에서 업데이트되었을 때 자동 Git Push를 통한 강제 무중단 배포를 진행하는 대신, **로컬 호스트 환경에서 렌더링 결과와 레이아웃을 우선 검증**할 수 있도록 하는 사전 동기화 파이프라인을 구축합니다.
-
-```
-[ Notion DB (분기별 결산) ] 
-      │ (업로드 확정 체크 필터링)
-      ▼ 
-[ Local Scan 스크립트 실행 ] ──▶ 로컬 데이터 파일 갱신 (JSON/SQLite)
-      │
-      ▼
-[ Localhost Server (server.py) ] ──▶ 개발 환경 웹뷰 사전 검증 및 레이아웃 조정
-      │
-      ▼ (개발자 수동 확인 완료 후)
-[ Git Commit & Deploy ] ──▶ 프로덕션 (GitHub Pages / Firebase) 배포 확정
-```
-
-- **Notion 로컬 스캔 동기화 도구 (`scripts/notion_sync.py`) `[To be updated]`**:
-  - Notion API SDK를 사용하여 `분기별 결산` 데이터베이스에서 `업로드 확정` 체크박스가 활성화된 페이지만 필터링해 스캔합니다.
-  - 각 페이지의 제목, 발행 정보, 본문 블록 구조를 긁어와 로컬 웹진 전용 JSON (`quarterly/data.json`) 또는 로컬 데이터베이스에 캐싱 적재합니다.
-- **로컬호스트 프리뷰 서버 (`server.py`) `[To be updated]`**:
-  - 로컬 환경의 Python 개발 서버가 빌드된 `quarterly/data.json` 데이터 원본을 마운트하여 `/quarterly/` 프리뷰 웹페이지를 동적 라우팅으로 렌더링합니다.
-  - 배포 전에 브라우저에서 디자인 시스템과의 정렬 상태, 이미지 로드, Bezier 트랜지션을 완벽하게 디버깅할 수 있습니다.
-
----
-
-## 부록: 프로젝트 추가 방법 (단일 데이터 소스 구조)
-
-### 개요
-
-모든 프로젝트 메타데이터는 **/projects.json** 하나의 파일로 관리됩니다.  
-이 파일을 수정하면 **첫 화면 프리뷰 섹션**과 **프로젝트 아카이브 페이지**가 동시에 자동 반영됩니다.
-
-```
-projects.json - 단일 원본 소스
-    ├── fetch() -> index.html (첫 화면 preview 카드)
-    └── fetch() -> projects/index.html (연도별 슬라이드 뷰)
-```
-
-### 신규 프로젝트 추가 절차
-
-#### Step 1. 프로젝트 폴더 생성
-
-```
-Homepage/
-└── {slug}/           (예: my-new-project)
-    ├── index.html    - 프로젝트 상세 페이지
-    └── album-art.png - 커버 이미지 (4:5 비율 권장)
-```
-
-#### Step 2. projects.json 항목 추가
-
-파일 상단에 객체를 **prepend** (최신순 유지):
-
+### Step 2. projects.json 메타데이터 추가
+`/projects.json` 파일의 최상단에 새 프로젝트 메타데이터를 **prepend** 합니다 (최신작 순서 정렬):
 ```json
-[
   {
-    "id": "{slug}",
-    "title": "프로젝트 타이틀",
-    "client": "클라이언트명 또는 artic.",
-    "category": "ORIGINAL SERIES | PRODUCTION | MUSIC CURATION | LP | ORIGINAL CONTENTS",
+    "id": "my-new-release",
+    "title": "My New Release",
+    "client": "artic.",
+    "category": "LP",
     "year": 2026,
-    "cover_image": "../{slug}/album-art.png",
-    "slug": "/{slug}/"
-  },
-  ...기존 항목들...
-]
+    "cover_image": "../my-new-release/album-art.png",
+    "slug": "/my-new-release/"
+  }
 ```
 
-> **cover_image 경로 규칙**: projects.json은 사이트 루트(/)에서 서빙되므로  
-> 이미지 경로는 ../ 접두사 사용 (예: ../the-root/album-art.png).  
-> 첫 화면 렌더링 시 JS가 ../를 루트 경로로 자동 변환합니다.
-
-#### Step 3. index.html 상세 페이지 작성
-
-프로젝트 성격에 따라 기존 템플릿 중 하나를 복사하여 사용:
-
-| 템플릿 | 참고 파일 | 사용 시나리오 |
-|--------|-----------|--------------|
-| 비디오 아카이브 시리즈 | the-root/index.html | 다큐/인터뷰 에피소드 시리즈 |
-| 스트리밍 링크 + 영상 | deus-ex-machina/index.html | LP/음반 |
-| 큐레이션 + 플레이리스트 | gagosian-party-music/index.html | 이벤트 큐레이션 |
-| 에피소드 + 텍스트 비평 | tasting-note/index.html | 오리지널 시리즈 |
-
-#### Step 4. Push
-
-```bash
-git add projects.json {slug}/ 
-git commit -m "feat: add {project title}"
-git push origin main
-```
-
-GitHub Pages가 자동 빌드/배포합니다. 첫 화면 + 프로젝트 페이지 동시 반영.
-
----
-
-### YouTube 플레이리스트 일괄 자동 갱신 (통합 동기화 시스템)
-
-`scripts/update_playlists.py` 스크립트와 `.github/workflows/update-playlists.yml` 워크플로우를 통해 등록된 모든 프로젝트의 YouTube 플레이리스트를 일괄 갱신합니다.
-
-* **동작 방식**: 
-  - `scripts/playlist_config.py`에 정의된 각 프로젝트 설정을 순회하며 YouTube Data API v3를 활용하여 최신 동영상 목록을 동기화합니다.
-  - 신규 에피소드를 HTML의 아카이브 그룹(`.archive-group`)에 자동 추가하며, `Latest Release` 영역의 영상도 자동으로 최신 상태로 교체합니다.
-
-| 설정 항목 | 값 |
-|----------|-----|
-| 자동 실행 주기 | 매주 월요일 KST 오전 9시 (UTC 00:00) |
-| 수동 실행 | GitHub -> Actions -> "Sync All YouTube Playlists" -> Run workflow |
-| 필요 Secrets | MJ_YOUTUBE_API_KEY (기본 API Key)<br>THE_ROOT_PLAYLIST_ID (선택 사항)<br>TASTING_NOTE_PLAYLIST_ID (선택 사항)<br>NEUTRAL_INTERVIEW_PLAYLIST_ID (선택 사항) |
+### Step 3. 빌드 및 테스트
+1. 로컬에서 컴파일러를 돌려 페이지를 빌드합니다.
+   ```bash
+   node scripts/build_pages.js
+   ```
+2. `my-new-release/index.html` 파일이 템플릿 기반으로 정상적으로 컴파일되어 빌드되었는지 확인하고 로컬 스테이징(`server.js`)을 켜서 확인합니다.
+3. 깃에 추가 후 푸시합니다.
+   ```bash
+   git add projects.json src/ my-new-release/
+   git commit -m "feat: add my-new-release project via templates"
+   git push origin main
+   ```

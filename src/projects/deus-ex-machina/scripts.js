@@ -114,7 +114,6 @@
     })();
 
     // ── Print Modal Control ──
-    setTimeout(function() {
     (function() {
       const PRINT_DATA = {
         '1mc1pd': {
@@ -424,7 +423,6 @@
         }
       });
     })();
-    }, 3800);
 
     // ── Mobile Accordion Toggle ──
     document.querySelectorAll('.mobile-toggle-header').forEach(header => {
@@ -439,7 +437,6 @@
     // ═══════════════════════════════════════════════════
     // PLAY Widget — YouTube IFrame Audio Player
     // ═══════════════════════════════════════════════════
-    setTimeout(function() {
     (function() {
       const pageLoadTime = Date.now();
       const TRACKS = [
@@ -2784,4 +2781,3 @@
       // ── End Carousel logic ───────────────────────────────────────────
 
     })();
-    }, 3800);

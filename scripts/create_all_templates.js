@@ -159,6 +159,10 @@ const baseLayoutContent = `<!DOCTYPE html>
   <link rel="stylesheet" href="{{PATH_DEPTH}}css/animations.css">
   <script>
     (function(){
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
@@ -194,6 +198,10 @@ const projectLayoutContent = `<!DOCTYPE html>
   <link rel="stylesheet" href="{{PATH_DEPTH}}css/design-system.css">
   <script>
     (function(){
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }

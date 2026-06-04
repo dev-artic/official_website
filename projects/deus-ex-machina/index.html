@@ -11,6 +11,10 @@
   <link rel="stylesheet" href="../../css/design-system.css">
   <script>
     (function(){
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
@@ -2516,7 +2520,6 @@
     })();
 
     // ── Print Modal Control ──
-    setTimeout(function() {
     (function() {
       const PRINT_DATA = {
         '1mc1pd': {
@@ -2905,7 +2908,6 @@
         }
       });
     })();
-    }, 3800);
 
     // ── Mobile Accordion Toggle ──
     document.querySelectorAll('.mobile-toggle-header').forEach(header => {
@@ -2920,7 +2922,6 @@
     // ═══════════════════════════════════════════════════
     // PLAY Widget — YouTube IFrame Audio Player
     // ═══════════════════════════════════════════════════
-    setTimeout(function() {
     (function() {
       const pageLoadTime = Date.now();
       const TRACKS = [
@@ -5265,7 +5266,6 @@
       // ── End Carousel logic ───────────────────────────────────────────
 
     })();
-    }, 3800);
 </script>
 </body>
 </html>

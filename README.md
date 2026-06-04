@@ -33,12 +33,18 @@ Homepage/
 │   ├── contact.html      # Contact 페이지 본문 소스
 │   ├── quarterly.html    # Quarterly 페이지 본문 소스
 │   ├── projects.html     # Projects 페이지 본문 소스
-│   └── projects/         # 개별 프로젝트 상세 페이지 본문 소스
-│       ├── deus-ex-machina.html
-│       ├── gagosian-party-music.html
-│       ├── neutral-interview.html
-│       ├── tasting-note.html
-│       └── the-root.html
+│   └── projects/         # [물리적 슬라이싱 구조] 개별 프로젝트 상세 페이지 콘텐츠 프래그먼트
+│       ├── deus-ex-machina/
+│       ├── gagosian-party-music/
+│       ├── neutral-interview/
+│       ├── tasting-note/
+│       └── the-root/
+│           ├── meta.json     # 프로젝트 메타데이터 (제목, 아티스트, 커버 아트 경로 등)
+│           ├── left.html     # 왼쪽 열 레이아웃 (플레이어 위젯, 스트리밍 바로가기 등)
+│           ├── right.html    # 오른쪽 열 레이아웃 (유튜브 아코디언 아카이브 등)
+│           ├── styles.css    # 프로젝트별 고유 CSS 스타일 재정의
+│           ├── scripts.js    # 프로젝트별 개별 클라이언트 JS 제어 스크립트
+│           └── popup.html    # [선택] 프로젝트별 고유 구매 모달 팝업 바디
 ├── templates/            # [공통 디자인 템플릿] 일괄 레이아웃 및 조립용 조각들
 │   ├── layouts/
 │   │   ├── base.html             # 일반 페이지용 마스터 레이아웃 쉘 (HEADER, FOOTER 주입)
@@ -175,7 +181,7 @@ graph TD
     ```
 * **C. 유튜브 플레이리스트 갱신 자동화 (GitHub Actions Workflow)**:
   * 매주 월요일 오전 9시(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
-  * 워크플로우가 자동으로 `scripts/update_playlists.py`를 실행해 유튜브 API로 최신 비디오들을 가져와 `src/projects/*.html` 소스를 갱신하고, 즉시 `node scripts/build_pages.js`를 기동하여 최종 HTML들을 다시 빌드한 뒤 원격지에 자동 커밋 및 푸시를 적용합니다.
+  * 워크플로우가 자동으로 `scripts/update_playlists.py`를 실행해 유튜브 API로 최신 비디오들을 가져와 `src/projects/[slug]/left.html` 및 `right.html` 소스를 갱신하고, 즉시 `node scripts/build_pages.js`를 기동하여 최종 HTML들을 다시 빌드한 뒤 원격지에 자동 커밋 및 푸시를 적용합니다.
 
 ---
 
@@ -212,47 +218,64 @@ graph TD
 
 ---
 
-## ✍️ 신규 프로젝트 추가 가이드 (단일 데이터 소스 템플릿화)
+## ✍️ 신규 프로젝트 추가 가이드 (물리 분할 프래그먼트 및 데이터 템플릿화)
 
 모든 프로젝트 목록 메타데이터는 **/projects.json** 단일 소스로 관리되며, 추가 절차는 다음과 같이 템플릿화되었습니다.
 
-### Step 1. 프로젝트 콘텐츠 소스 작성
-1. `src/projects/` 폴더 아래에 신규 프로젝트명으로 소스 파일(예: `src/projects/my-new-release.html`)을 작성합니다.
-2. 상단에 Front Matter 설정(타이틀, 레이아웃 등)을 기재합니다:
-   ```html
-   ---
-   layout: project-detail
-   title: "My New Release"
-   subtitle: "LP / Album"
-   description: "Artist's new visual critique and tracks."
-   cover_image: "album-art.png"
-   ---
-   <style>
-     /* 프로젝트 고유의 스타일 정의 */
-   </style>
+### Step 1. 프로젝트 콘텐츠 소스 작성 (프래그먼트 분할형)
+1. `src/projects/` 폴더 아래에 신규 프로젝트명으로 폴더(예: `src/projects/my-new-release/`)를 생성합니다.
+2. 폴더 내부에 다음 파일들을 작성합니다:
 
-   <div slot="left">
-     {{STREAMING_PLATFORMS}}
-     {{PLAYER}}
-     {{LYRIC_AND_TRACKLIST}}
-     <button id="order-open-btn" class="about-action">BUY ALBUM</button>
-   </div>
+#### 1) **meta.json** (메타데이터 설정)
+`path_depth`와 제목, 아티스트, 커버 아트, 장르 등을 정의합니다.
+```json
+{
+  "path_depth": "../",
+  "title": "My New Release",
+  "artist": "Artist Name",
+  "meta": "LP \u00b7 2026",
+  "cover_image": "album-art.png"
+}
+```
 
-   <div slot="right">
-     {{VIDEO_ARCHIVE}}
-     {{TEXT_CURATION}}
-   </div>
+#### 2) **left.html** (왼쪽 컬럼 내용)
+```html
+<main class="links-container expanded">
+  <div class="mobile-toggle-header">
+    <span class="archive-group-label stream-label">Latest Release</span>
+    <span class="toggle-icon"></span>
+  </div>
+  <div class="toggle-content">
+    <div class="static-content">
+      <!-- 최신 영상 자동 업데이트 영역 -->
+    </div>
+    
+    <div class="project-brief" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+      <p class="brief-desc-ko">앨범 소개 내용이 이곳에 들어갑니다.</p>
+    </div>
+  </div>
+</main>
+```
 
-   <div slot="popup">
-     <div class="checkout-modal-header"><h2>주문하기</h2></div>
-     {{CHECKOUT_FORM}}
-     <button id="chk-submit" class="about-action" style="width:100%">입금 확인 요청</button>
-   </div>
+#### 3) **right.html** (오른쪽 컬럼 내용 - 유튜브 아카이브 등)
+```html
+<section class="archive-section">
+  <div class="archive-group expanded">
+    <div class="mobile-toggle-header">
+      <span class="archive-group-label film-label">episodes</span>
+      <span class="toggle-icon"></span>
+    </div>
+    <div class="archive-list toggle-content">
+      <!-- 에피소드 아카이브 엔트리가 쌓일 곳 -->
+    </div>
+  </div>
+</section>
+```
 
-   <script>
-     /* 플레이어 이벤트를 트리거하는 커스텀 스크립트 작성 */
-   </script>
-   ```
+#### 4) **styles.css** 및 **scripts.js** (프로젝트 고유의 스타일 및 클라이언트 스크립트)
+* 필요 시 커스텀 스타일이나 오디오/비디오 제어 이벤트를 작성합니다. 없더라도 빈 파일로 생성해 둡니다.
+
+---
 
 ### Step 2. projects.json 메타데이터 추가
 `/projects.json` 파일의 최상단에 새 프로젝트 메타데이터를 **prepend** 합니다 (최신작 순서 정렬):
@@ -268,15 +291,17 @@ graph TD
   }
 ```
 
+---
+
 ### Step 3. 빌드 및 테스트
 1. 로컬에서 컴파일러를 돌려 페이지를 빌드합니다.
    ```bash
    node scripts/build_pages.js
    ```
-2. `my-new-release/index.html` 파일이 템플릿 기반으로 정상적으로 컴파일되어 빌드되었는지 확인하고 로컬 스테이징(`server.js`)을 켜서 확인합니다.
+2. `my-new-release/index.html` 파일이 프래그먼트 조각들과 `project-detail.html` 레이아웃 마스터를 조합하여 정상적으로 컴파일되었는지 검증하고 로컬 스테이징(`server.js`) 서버를 켜서 확인합니다.
 3. 깃에 추가 후 푸시합니다.
    ```bash
-   git add projects.json src/ my-new-release/
-   git commit -m "feat: add my-new-release project via templates"
+   git add projects.json src/projects/my-new-release/ my-new-release/
+   git commit -m "feat: add my-new-release project via split fragments"
    git push origin main
    ```

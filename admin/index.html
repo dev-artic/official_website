@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="artic. — Administrator Portal">
+  <meta name="author" content="artic.">
+  <title>Admin Portal — artic.</title>
+  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <script>
+    (function(){
+      var s = localStorage.getItem('artic-theme');
+      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
+      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
+    })();
+  </script>
+  
+<style>
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .admin-wrap {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+    padding-top: 100px;
+    padding-bottom: 80px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .admin-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .admin-title .sub-title {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+  }
+
+  /* Auth Form */
+  .auth-container {
+    max-width: 360px;
+    width: 100%;
+    margin: auto;
+    padding: 32px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .auth-title {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .auth-input {
+    width: 100%;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    margin-bottom: 16px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    outline: none;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .auth-btn {
+    width: 100%;
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    padding: 12px;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+  }
+
+  .auth-btn:hover {
+    opacity: 0.9;
+  }
+
+  .auth-error {
+    color: #E06C75;
+    font-size: 0.65rem;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* Dashboard Content */
+  .dashboard-container {
+    display: none;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Tabs Navigation */
+  .admin-tabs {
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0;
+    margin-bottom: 24px;
+  }
+
+  .admin-tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 4px;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+  }
+
+  .admin-tab-btn.active {
+    color: var(--text-primary);
+  }
+
+  .admin-tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--text-primary);
+  }
+
+  /* Tab Panes */
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  /* Tables and Data list */
+  .admin-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+  }
+
+  table.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    text-align: left;
+  }
+
+  table.admin-table th, table.admin-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  table.admin-table th {
+    background-color: var(--bg-card);
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.6rem;
+  }
+
+  table.admin-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Status badge styles */
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 2px;
+  }
+
+  .status-badge.for-sale {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+  }
+
+  .status-badge.not-for-sale {
+    background-color: rgba(149, 165, 166, 0.15);
+    color: #95a5a6;
+  }
+
+  .status-badge.out-of-stock {
+    background-color: rgba(230, 126, 34, 0.15);
+    color: #e67e22;
+  }
+
+  .status-badge.sold-out {
+    background-color: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+  }
+
+  .status-badge.sent-success {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: #2ecc71;
+  }
+
+  .status-badge.sent-failed {
+    background-color: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+  }
+
+  /* Forms & Editors */
+  .edit-form-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .edit-input {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 6px 10px;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    outline: none;
+    width: 80px;
+  }
+
+  .edit-select {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 6px 10px;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    outline: none;
+  }
+
+  .action-btn-sm {
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    padding: 6px 12px;
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+  }
+
+  .action-btn-sm:hover {
+    opacity: 0.85;
+  }
+
+  .action-btn-sm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Add product card */
+  .admin-card {
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .admin-card-title {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .grid-form-cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  @media (min-width: 768px) {
+    .grid-form-cols {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .form-col-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-col-group label {
+    font-family: var(--font-sans);
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .form-col-group input, .form-col-group select {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    outline: none;
+  }
+</style>
+</head>
+<body>
+
+  <nav class="nav-bar delayed-reveal">
+  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
+  <a href="/about/" class="nav-link">About</a>
+  <a href="/projects/" class="nav-link">Projects</a>
+  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
+  <a href="/quarterly/" class="nav-link">Quarterly</a>
+  <a href="/contact/" class="nav-link">Contact</a>
+</nav>
+
+<!-- Theme Toggle (Integrated inside Header) -->
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+  
+  
+
+
+
+<div class="admin-wrap">
+  <!-- Authentication Form -->
+  <div class="auth-container" id="admin-auth-box">
+    <h2 class="auth-title">Admin Login</h2>
+    <input type="password" class="auth-input" id="admin-password" placeholder="PASSWORD" required>
+    <button class="auth-btn" id="admin-login-btn">ENTER</button>
+    <div class="auth-error" id="admin-auth-error">Incorrect password. Access denied.</div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard-container" id="admin-dashboard-box">
+    <div class="admin-title">
+      <span>Admin Dashboard</span>
+      <span class="sub-title">artic. management console</span>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" data-tab="products">Products</button>
+      <button class="admin-tab-btn" data-tab="orders">Orders</button>
+      <button class="admin-tab-btn" data-tab="subscribers">Subscribers</button>
+    </div>
+
+    <!-- Products Pane -->
+    <div class="tab-pane active" id="pane-products">
+      <div class="admin-card">
+        <h3 class="admin-card-title">Add / Update Product</h3>
+        <form id="product-form">
+          <div class="grid-form-cols">
+            <div class="form-col-group">
+              <label>Product ID *</label>
+              <input type="text" id="prod-id" placeholder="e.g. 1mc1pd" required>
+            </div>
+            <div class="form-col-group">
+              <label>Name *</label>
+              <input type="text" id="prod-name" placeholder="e.g. 1MC1PD: The Interview" required>
+            </div>
+            <div class="form-col-group">
+              <label>Price (₩) *</label>
+              <input type="number" id="prod-price" placeholder="e.g. 15000" required min="0">
+            </div>
+            <div class="form-col-group">
+              <label>Inventory *</label>
+              <input type="number" id="prod-inventory" placeholder="e.g. 10" required min="0">
+            </div>
+          </div>
+          <div class="grid-form-cols" style="margin-top: 16px;">
+            <div class="form-col-group">
+              <label>Status *</label>
+              <select id="prod-status">
+                <option value="for-sale">For Sale (판매중)</option>
+                <option value="not-for-sale">Not For Sale (비매품)</option>
+                <option value="out-of-stock">Out of Stock (품절)</option>
+                <option value="sold-out">Sold Out (완판)</option>
+              </select>
+            </div>
+            <div class="form-col-group" style="justify-content: flex-end;">
+              <button type="submit" class="auth-btn" style="padding: 10px;">Save Product</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product Name</th>
+              <th>Price</th>
+              <th>Inventory</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Orders Pane -->
+    <div class="tab-pane" id="pane-orders">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Customer</th>
+              <th>Email</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Depositor</th>
+              <th>Address & Phone</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="orders-table-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Subscribers Pane -->
+    <div class="tab-pane" id="pane-subscribers">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Welcome Mail Status</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody id="subscribers-table-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+  <footer class="about-footer">
+  © 2026 artic. All Rights Reserved
+</footer>
+
+  <script src="../js/shared.js"></script>
+  <script>
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const authBox = document.getElementById('admin-auth-box');
+    const dashboardBox = document.getElementById('admin-dashboard-box');
+    const passwordInput = document.getElementById('admin-password');
+    const loginBtn = document.getElementById('admin-login-btn');
+    const authError = document.getElementById('admin-auth-error');
+
+    const tabButtons = document.querySelectorAll('.admin-tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    let adminToken = localStorage.getItem('artic-admin-token') || '';
+
+    // Tab Switching
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(`pane-${tab}`).classList.add('active');
+      });
+    });
+
+    function checkAuth() {
+      if (adminToken === 'articadmin2026') {
+        authBox.style.display = 'none';
+        dashboardBox.style.display = 'flex';
+        loadDashboardData();
+      } else {
+        authBox.style.display = 'block';
+        dashboardBox.style.display = 'none';
+      }
+    }
+
+    loginBtn.addEventListener('click', () => {
+      const pass = passwordInput.value.trim();
+      if (pass === 'articadmin2026') {
+        adminToken = 'articadmin2026';
+        localStorage.setItem('artic-admin-token', adminToken);
+        authError.style.display = 'none';
+        checkAuth();
+      } else {
+        authError.style.display = 'block';
+      }
+    });
+
+    passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        loginBtn.click();
+      }
+    });
+
+    // Load Data
+    function loadDashboardData() {
+      fetch('/api/admin/data', {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
+      .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem('artic-admin-token');
+          adminToken = '';
+          checkAuth();
+          throw new Error('Unauthorized');
+        }
+        return res.json();
+      })
+      .then(data => {
+        renderProducts(data.products);
+        renderOrders(data.orders);
+        renderSubscribers(data.subscribers);
+      })
+      .catch(err => {
+        console.error('Error fetching admin data:', err);
+      });
+    }
+
+    function renderProducts(products) {
+      const tbody = document.getElementById('products-table-body');
+      tbody.innerHTML = '';
+
+      if (!products || products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No products registered.</td></tr>`;
+        return;
+      }
+
+      products.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:700;">${p.id}</td>
+          <td>${p.name}</td>
+          <td>₩${p.price.toLocaleString()}</td>
+          <td>${p.inventory}</td>
+          <td><span class="status-badge ${p.status}">${p.status.replace(/-/g, ' ')}</span></td>
+          <td>
+            <button class="action-btn-sm" onclick="editProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, ${p.inventory}, '${p.status}')">Edit</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.editProduct = function(id, name, price, inventory, status) {
+      document.getElementById('prod-id').value = id;
+      document.getElementById('prod-name').value = name;
+      document.getElementById('prod-price').value = price;
+      document.getElementById('prod-inventory').value = inventory;
+      document.getElementById('prod-status').value = status;
+      document.getElementById('prod-name').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Product form submission
+    const prodForm = document.getElementById('product-form');
+    prodForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('prod-id').value.trim();
+      const name = document.getElementById('prod-name').value.trim();
+      const price = Number(document.getElementById('prod-price').value);
+      const inventory = Number(document.getElementById('prod-inventory').value);
+      const status = document.getElementById('prod-status').value;
+
+      fetch('/api/admin/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ id, name, price, inventory, status })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to save product');
+        return res.json();
+      })
+      .then(() => {
+        prodForm.reset();
+        loadDashboardData();
+      })
+      .catch(err => {
+        alert(err.message);
+      });
+    });
+
+    function renderOrders(orders) {
+      const tbody = document.getElementById('orders-table-body');
+      tbody.innerHTML = '';
+
+      if (!orders || orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">No orders received yet.</td></tr>`;
+        return;
+      }
+
+      orders.forEach(o => {
+        const total = (o.price || 15000) * o.quantity + 3000;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:700;">${o.id}</td>
+          <td style="font-weight:700;">${o.name}</td>
+          <td><a href="mailto:${o.email}" style="color:inherit; text-decoration:underline;">${o.email}</a></td>
+          <td>${o.product_name || o.product_id || '1MC1PD: The Interview'}</td>
+          <td>${o.quantity}</td>
+          <td style="font-weight:700;">₩${total.toLocaleString()}</td>
+          <td>${o.depositor}</td>
+          <td style="font-size:0.65rem; max-width:240px; line-height:1.4;">
+            <div><b>Addr:</b> ${o.address}</div>
+            <div><b>Phone:</b> ${o.phone}</div>
+            ${o.notes ? `<div style="color:var(--text-muted);"><b>Notes:</b> ${o.notes}</div>` : ''}
+          </td>
+          <td>${new Date(o.created_at).toLocaleString('ko-KR')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderSubscribers(subscribers) {
+      const tbody = document.getElementById('subscribers-table-body');
+      tbody.innerHTML = '';
+
+      if (!subscribers || subscribers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No subscribers yet.</td></tr>`;
+        return;
+      }
+
+      subscribers.forEach(s => {
+        const mailStatusClass = s.welcome_email_sent === 1 ? 'sent-success' : 'sent-failed';
+        const mailStatusText = s.welcome_email_sent === 1 ? 'SENT' : 'PENDING';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:700;">${s.id}</td>
+          <td><a href="mailto:${s.email}" style="color:inherit; text-decoration:underline;">${s.email}</a></td>
+          <td>${s.name || '-'}</td>
+          <td style="text-transform:uppercase;">${s.type || 'quarterly'}</td>
+          <td><span class="status-badge ${mailStatusClass}">${mailStatusText}</span></td>
+          <td>${new Date(s.created_at).toLocaleString('ko-KR')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    checkAuth();
+  });
+
+</script>
+</body>
+</html>

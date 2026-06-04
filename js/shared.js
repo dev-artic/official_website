@@ -1,3 +1,9 @@
+// ── Global Scroll Position Reset on Page Reload ──
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
 // ── 0. Dynamic Navigation Bar ──
 function buildNavigationBar() {
   const nav = document.querySelector('.nav-bar');
@@ -391,6 +397,207 @@ function initArticleMenu() {
   });
 }
 
+// ── Dynamic Height Transitions for centered layouts ──
+function initDynamicHeightTransitions() {
+  const target = document.querySelector('.about-content, .contact-wrap');
+  if (!target) return;
+
+  let lastHeight = target.offsetHeight;
+  let lastTop = target.getBoundingClientRect().top + window.scrollY;
+
+  const observer = new ResizeObserver(entries => {
+    for (let entry of entries) {
+      const newHeight = target.offsetHeight;
+      const newRect = target.getBoundingClientRect();
+      const newTop = newRect.top + window.scrollY;
+
+      if (newHeight !== lastHeight) {
+        const currentTransform = window.getComputedStyle(target).transform;
+        let currentY = 0;
+        if (currentTransform && currentTransform !== 'none') {
+          const matrix = new DOMMatrix(currentTransform);
+          currentY = matrix.m42;
+        }
+
+        const rawNewTop = newTop - currentY;
+        const rawOldTop = lastTop - currentY;
+        const layoutShift = rawNewTop - rawOldTop;
+
+        if (Math.abs(layoutShift) > 0.5) {
+          target.style.transition = 'none';
+          target.style.transform = `translateY(${-layoutShift}px)`;
+          
+          target.offsetHeight; // force reflow
+
+          target.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+          target.style.transform = 'translateY(0)';
+        }
+
+        lastHeight = newHeight;
+        lastTop = newTop;
+      }
+    }
+  });
+
+  observer.observe(target);
+
+  target.addEventListener('transitionend', (e) => {
+    if (e.propertyName === 'transform') {
+      target.style.transition = '';
+      target.style.transform = '';
+      lastTop = target.getBoundingClientRect().top + window.scrollY;
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    lastHeight = target.offsetHeight;
+    lastTop = target.getBoundingClientRect().top + window.scrollY;
+  });
+}
+
+// ── Waitlist Form Interactivity ──
+function initWaitlistForm() {
+  const form = document.getElementById('waitlist-form');
+  if (!form) return;
+
+  const toggleBtn = document.getElementById('waitlist-toggle-btn');
+  const nameInput = document.getElementById('waitlist-name');
+  const emailInput = document.getElementById('waitlist-email');
+  const submitBtn = document.getElementById('waitlist-submit-btn');
+  const messageDiv = document.getElementById('waitlist-message');
+  const fieldsWrapper = form.querySelector('.waitlist-fields-wrapper');
+  const btnWrapper = document.getElementById('waitlist-btn-wrapper');
+  const formWrapper = document.getElementById('waitlist-form-wrapper');
+  const messageWrapper = document.getElementById('waitlist-message-wrapper');
+  const container = document.querySelector('.waitlist-container');
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      if (btnWrapper) btnWrapper.classList.remove('active');
+      if (formWrapper) formWrapper.classList.add('active');
+      if (nameInput) {
+        setTimeout(() => nameInput.focus(), 250);
+      }
+    });
+  }
+
+  // Input event listeners to clear error outlines instantly
+  if (nameInput) {
+    nameInput.addEventListener('input', () => {
+      nameInput.classList.remove('waitlist-input-error');
+    });
+  }
+  if (emailInput) {
+    emailInput.addEventListener('input', () => {
+      emailInput.classList.remove('waitlist-input-error');
+    });
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+
+    let hasError = false;
+
+    // Clear previous validation states
+    if (nameInput) nameInput.classList.remove('waitlist-input-error');
+    if (emailInput) emailInput.classList.remove('waitlist-input-error');
+    if (fieldsWrapper) fieldsWrapper.classList.remove('waitlist-shake');
+
+    // 1. Name validation
+    if (!name) {
+      if (nameInput) {
+        nameInput.classList.add('waitlist-input-error');
+        nameInput.focus();
+      }
+      hasError = true;
+    }
+
+    // 2. Email validation (Format check)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      if (emailInput) {
+        emailInput.classList.add('waitlist-input-error');
+        if (!hasError) emailInput.focus();
+      }
+      hasError = true;
+    }
+
+    // Tactile shake response for invalid submissions
+    if (hasError) {
+      if (fieldsWrapper) {
+        // Force reflow to restart keyframe animation
+        fieldsWrapper.offsetHeight;
+        fieldsWrapper.classList.add('waitlist-shake');
+      }
+      return;
+    }
+
+    // Disable inputs and start submitting visual feedback
+    if (nameInput) nameInput.disabled = true;
+    if (emailInput) emailInput.disabled = true;
+    if (submitBtn) submitBtn.disabled = true;
+    
+    if (container) container.classList.add('submitting');
+    form.classList.add('submitting');
+    if (messageWrapper) messageWrapper.classList.remove('active');
+    
+    if (messageDiv) messageDiv.innerHTML = '';
+
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const apiUrl = isLocal 
+      ? '/api/waitlist' 
+      : 'https://waitlist-4n2xy6gsxa-uc.a.run.app';
+
+    // Promise to ensure the loading line states last at least 800ms for smooth cinematic feel
+    const animPromise = new Promise(resolve => setTimeout(resolve, 800));
+
+    const fetchPromise = fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: name, email: email })
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(err => { throw new Error(err.error || 'Submission failed') });
+      }
+      return res.json();
+    });
+
+    Promise.all([fetchPromise, animPromise])
+    .then(([data]) => {
+      if (container) container.classList.remove('submitting');
+      if (formWrapper) formWrapper.classList.remove('active');
+
+      if (messageDiv) {
+        messageDiv.innerHTML = `
+          <div class="success-title">STAY TUNED.</div>
+          <div class="success-desc">We will share our official release with you first.</div>
+        `;
+      }
+      if (messageWrapper) messageWrapper.classList.add('active');
+    })
+    .catch(err => {
+      // Restore form fields in case of API errors (e.g. duplicate email)
+      if (nameInput) nameInput.disabled = false;
+      if (emailInput) emailInput.disabled = false;
+      if (submitBtn) submitBtn.disabled = false;
+      if (container) container.classList.remove('submitting');
+      form.classList.remove('submitting');
+      
+      if (messageDiv) {
+        messageDiv.className = 'waitlist-message error';
+        messageDiv.textContent = err.message || 'An error occurred. Please try again.';
+      }
+      if (messageWrapper) messageWrapper.classList.add('active');
+    });
+  });
+}
+
 // ── 7. Init ──
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('theme-toggle');
@@ -403,6 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initSubpageTransition();
   initArticleMenu();
+  initDynamicHeightTransitions();
+  initWaitlistForm();
 });
 
 // Apply theme before DOM ready

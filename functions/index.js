@@ -92,43 +92,76 @@ exports.checkout = onRequest((req, res) => {
     }
 
     try {
-      const { name, email, phone, address, quantity, depositor, notes } = req.body;
+      const { product_id, name, email, phone, address, quantity, depositor, notes } = req.body;
       const qty = parseInt(quantity || "1", 10);
       const depName = depositor || name;
       const chkNotes = notes || "";
 
-      if (!name || !email || !phone || !address) {
+      if (!product_id || !name || !email || !phone || !address) {
         res.status(400).json({ error: "Missing required fields" });
         return;
       }
 
-      // 1. Write to Firestore
-      const orderData = {
-        name,
-        email,
-        phone,
-        address,
-        quantity: qty,
-        depositor: depName,
-        notes: chkNotes,
-        created_at: FieldValue.serverTimestamp(),
-      };
+      // Check product status and stock
+      const productRef = db.collection("products").doc(product_id);
+      let orderId = "";
+      let productName = "";
+      let productPrice = 15000;
 
-      const docRef = await db.collection("orders").add(orderData);
-      console.log(`Checkout successfully saved to Firestore (ID: ${docRef.id}).`);
+      await db.runTransaction(async (transaction) => {
+        const productDoc = await transaction.get(productRef);
+        if (!productDoc.exists) {
+          throw new Error("Product not found");
+        }
+        const pData = productDoc.data();
+        if (pData.status !== "for-sale") {
+          throw new Error("Product is not available for purchase");
+        }
+        if (pData.inventory < qty) {
+          throw new Error("Insufficient product inventory");
+        }
 
-      // 2. Prepare receipt emails (Plaintext fallback + Template HTML)
-      const totalPrice = 15000 * qty + 3000;
-      const customerSubject = "[artic.] 1MC1PD: The Interview 결제 요청 완료";
+        productName = pData.name;
+        productPrice = pData.price;
+
+        const newInventory = pData.inventory - qty;
+        const newStatus = newInventory === 0 ? "out-of-stock" : "for-sale";
+
+        transaction.update(productRef, { inventory: newInventory, status: newStatus });
+
+        const orderData = {
+          name,
+          email,
+          phone,
+          address,
+          quantity: qty,
+          depositor: depName,
+          notes: chkNotes,
+          product_id,
+          product_name: productName,
+          price: productPrice,
+          created_at: FieldValue.serverTimestamp(),
+        };
+
+        const newOrderRef = db.collection("orders").doc();
+        orderId = newOrderRef.id;
+        transaction.set(newOrderRef, orderData);
+      });
+
+      console.log(`Checkout successfully saved to Firestore (ID: ${orderId}).`);
+
+      // Prepare receipt emails
+      const totalPrice = productPrice * qty + 3000;
+      const customerSubject = `[artic.] ${productName} 결제 요청 완료`;
       const customerBody = `안녕하세요, ${name}님. artic. 입니다.
 
-'1MC1PD: The Interview' 결제 요청이 접수되었습니다.
+'${productName}' 결제 요청이 접수되었습니다.
 아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.
 
 [주문 정보]
-- 상품명: 1MC1PD: The Interview (Limited Edition)
+- 상품명: ${productName}
 - 수량: ${qty}개
-- 총 결제 금액: ${totalPrice.toLocaleString()}원 (상품가 15,000원 * 수량 + 배송비 3,000원)
+- 총 결제 금액: ${totalPrice.toLocaleString()}원 (상품가 ${productPrice.toLocaleString()}원 * 수량 + 배송비 3,000원)
 - 입금자명: ${depName}
 - 배송지 주소: ${address}
 - 연락처: ${phone}
@@ -145,7 +178,7 @@ exports.checkout = onRequest((req, res) => {
 
       const adminEmail = process.env.ADMIN_EMAIL || "admin@artic.live";
       const adminSubject = `[ADMIN] 새로운 결제 요청 접수 - ${name}님`;
-      const adminBody = `새로운 '1MC1PD: The Interview' 결제 요청이 접수되었습니다.
+      const adminBody = `새로운 '${productName}' 결제 요청이 접수되었습니다.
 
 [신청 정보]
 - 신청자명: ${name}
@@ -158,20 +191,19 @@ exports.checkout = onRequest((req, res) => {
 
 입금 및 주소를 확인해 주시기 바랍니다.`;
 
-      // 3. Load HTML Email Templates and compile
       const { customerTemplate, adminTemplate } = getTemplates();
       let customerHtml = null;
       let adminHtml = null;
 
       if (customerTemplate) {
         const bodyHtml = `<p>안녕하세요, <strong>${name}</strong>님. artic. 입니다.</p>
-<p><strong>'1MC1PD: The Interview'</strong> 결제 요청이 접수되었습니다.<br>
+<p><strong>'${productName}'</strong> 결제 요청이 접수되었습니다.<br>
 아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.</p>`;
 
         const dataTableHtml = `<table class="data-table">
   <tr>
     <td class="label">상품명</td>
-    <td class="value">1MC1PD: The Interview (Limited Edition)</td>
+    <td class="value">${productName}</td>
   </tr>
   <tr>
     <td class="label">수량</td>
@@ -179,7 +211,7 @@ exports.checkout = onRequest((req, res) => {
   </tr>
   <tr>
     <td class="label">총 결제 금액</td>
-    <td class="value"><span class="bold">${totalPrice.toLocaleString()}원</span> (상품가 15,000원 * 수량 + 배송비 3,000원)</td>
+    <td class="value"><span class="bold">${totalPrice.toLocaleString()}원</span> (상품가 ${productPrice.toLocaleString()}원 * 수량 + 배송비 3,000원)</td>
   </tr>
   <tr>
     <td class="label">입금자명</td>
@@ -206,7 +238,7 @@ exports.checkout = onRequest((req, res) => {
       }
 
       if (adminTemplate) {
-        const adminBodyHtml = `<p>새로운 <strong>'1MC1PD: The Interview'</strong> 결제 요청이 접수되었습니다.</p>`;
+        const adminBodyHtml = `<p>새로운 <strong>'${productName}'</strong> 결제 요청이 접수되었습니다.</p>`;
 
         const adminDataTableHtml = `<table class="data-table">
   <tr>
@@ -244,14 +276,13 @@ exports.checkout = onRequest((req, res) => {
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
           .replace("{{DATA_TABLE}}", adminDataTableHtml)
           .replace("{{DB_COLLECTION}}", "orders")
-          .replace("{{DB_DOC_ID}}", docRef.id);
+          .replace("{{DB_DOC_ID}}", orderId);
       }
 
-      // 4. Send emails
       await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
       await sendEmail({ to: adminEmail, subject: adminSubject, body: adminBody, html: adminHtml });
 
-      res.status(200).json({ success: true, saved_to_cloud: true, order_id: docRef.id });
+      res.status(200).json({ success: true, saved_to_cloud: true, order_id: orderId });
     } catch (err) {
       console.error("Internal server error during checkout:", err);
       res.status(500).json({ error: err.message });
@@ -282,15 +313,13 @@ exports.waitlist = onRequest((req, res) => {
         return;
       }
 
-      // Simple email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         res.status(400).json({ error: "Invalid email format" });
         return;
       }
 
-      // Check duplicate email
-      const snapshot = await db.collection("quarterly_subscribers")
+      const snapshot = await db.collection("subscribers")
         .where("email", "==", email)
         .limit(1)
         .get();
@@ -303,17 +332,17 @@ exports.waitlist = onRequest((req, res) => {
       const subscriberData = {
         name,
         email,
+        type: "quarterly",
+        welcome_email_sent: false,
         created_at: FieldValue.serverTimestamp(),
       };
 
-      const docRef = await db.collection("quarterly_subscribers").add(subscriberData);
+      const docRef = await db.collection("subscribers").add(subscriberData);
       console.log(`Waitlist subscriber successfully saved to Firestore (ID: ${docRef.id}).`);
 
-      // Count total subscribers
-      const countSnapshot = await db.collection("quarterly_subscribers").get();
+      const countSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").get();
       const totalCount = countSnapshot.size;
 
-      // 1. Prepare Waitlist emails
       const customerSubject = "[artic.] Join Waitlist 등록 완료";
       const customerBody = `안녕하세요, ${name}님. artic. 입니다.
 
@@ -337,9 +366,8 @@ We will share our official release with you first."
 - 가입 일시: ${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (KST)
 - 현재 총 등록 인원: ${totalCount}명
 
-Firestore 컬렉션 quarterly_subscribers에 적재되었습니다.`;
+Firestore 컬렉션 subscribers에 적재되었습니다.`;
 
-      // 2. Load HTML Email Templates and compile
       const { customerTemplate, adminTemplate } = getTemplates();
       let customerHtml = null;
       let adminHtml = null;
@@ -398,18 +426,111 @@ Firestore 컬렉션 quarterly_subscribers에 적재되었습니다.`;
           .replace("{{TITLE}}", "새로운 Waitlist 가입 알림")
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
           .replace("{{DATA_TABLE}}", adminDataTableHtml)
-          .replace("{{DB_COLLECTION}}", "quarterly_subscribers")
+          .replace("{{DB_COLLECTION}}", "subscribers")
           .replace("{{DB_DOC_ID}}", docRef.id);
       }
 
-      // 3. Send emails
-      await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
+      const emailSentCustomer = await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
       await sendEmail({ to: adminEmail, subject: adminSubject, body: adminBody, html: adminHtml });
+
+      if (emailSentCustomer) {
+        await docRef.update({ welcome_email_sent: true });
+      }
 
       res.status(200).json({ success: true, saved_to_cloud: true, id: docRef.id, total_subscribers: totalCount });
     } catch (err) {
       console.error("Internal server error during waitlist submission:", err);
       res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+exports.products = onRequest((req, res) => {
+  cors(req, res, async () => {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    if (req.method !== "GET") {
+      res.status(405).json({ error: "Method not allowed" });
+      return;
+    }
+    try {
+      const snapshot = await db.collection("products").get();
+      if (snapshot.empty) {
+        // Seed default products in firestore
+        const p1 = { id: "1mc1pd", name: "1MC1PD: The Interview", price: 15000, inventory: 10, status: "for-sale" };
+        const p2 = { id: "lyric-booklet", name: "Lyric Booklet", price: 0, inventory: 0, status: "not-for-sale" };
+        await db.collection("products").doc(p1.id).set(p1);
+        await db.collection("products").doc(p2.id).set(p2);
+        res.status(200).json([p1, p2]);
+        return;
+      }
+      const products = [];
+      snapshot.forEach(doc => products.push(doc.data()));
+      res.status(200).json(products);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+exports.admin = onRequest((req, res) => {
+  cors(req, res, async () => {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== "articadmin2026") {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    if (req.method === "GET") {
+      try {
+        const productsSnap = await db.collection("products").get();
+        const products = [];
+        productsSnap.forEach(d => products.push(d.data()));
+
+        const ordersSnap = await db.collection("orders").orderBy("created_at", "desc").get();
+        const orders = [];
+        ordersSnap.forEach(d => {
+          const o = d.data();
+          if (o.created_at) o.created_at = o.created_at.toDate().toISOString();
+          orders.push({ id: d.id, ...o });
+        });
+
+        const subscribersSnap = await db.collection("subscribers").orderBy("created_at", "desc").get();
+        const subscribers = [];
+        subscribersSnap.forEach(d => {
+          const s = d.data();
+          if (s.created_at) s.created_at = s.created_at.toDate().toISOString();
+          subscribers.push({ id: d.id, ...s });
+        });
+
+        res.status(200).json({ products, orders, subscribers });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    } else if (req.method === "POST") {
+      try {
+        const { id, name, price, inventory, status } = req.body;
+        if (!id || !name || price === undefined || inventory === undefined || !status) {
+          res.status(400).json({ error: "Missing required fields" });
+          return;
+        }
+
+        const productData = {
+          id,
+          name,
+          price: Number(price),
+          inventory: Number(inventory),
+          status
+        };
+
+        await db.collection("products").doc(id).set(productData);
+        res.status(200).json({ success: true });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    } else {
+      res.status(405).json({ error: "Method not allowed" });
     }
   });
 });

@@ -21,6 +21,7 @@ const waitlistFormRaw = fs.readFileSync(path.join(templatesDir, 'components/form
 const checkoutFormRaw = fs.readFileSync(path.join(templatesDir, 'components/forms/checkout-form-popup.html'), 'utf8');
 const playerRaw = fs.readFileSync(path.join(templatesDir, 'components/projects/player.html'), 'utf8');
 const lyricRaw = fs.readFileSync(path.join(templatesDir, 'components/projects/lyric-and-tracklist.html'), 'utf8');
+const productShowcasePopupRaw = fs.readFileSync(path.join(templatesDir, 'components/projects/product-showcase-popup.html'), 'utf8');
 
 // Global Style Collector
 let pageStyles = new Set();
@@ -42,6 +43,7 @@ const waitlistFormTpl = parseTemplate(waitlistFormRaw);
 const checkoutFormTpl = parseTemplate(checkoutFormRaw);
 const playerTpl = parseTemplate(playerRaw);
 const lyricTpl = parseTemplate(lyricRaw);
+const productShowcasePopupTpl = parseTemplate(productShowcasePopupRaw);
 const headerTpl = parseTemplate(headerTemplate);
 const footerTpl = parseTemplate(footerTemplate);
 const popupTpl = parseTemplate(popupTemplate);
@@ -115,6 +117,12 @@ function replaceComponents(html, depth, isLayoutLevel = false, slug = '') {
     if (lyricTpl.styles) pageStyles.add(lyricTpl.styles);
   }
 
+  // Substitute Product Showcase popup
+  if (result.includes('{{PRODUCT_SHOWCASE_POPUP}}')) {
+    result = result.replace(/\{\{PRODUCT_SHOWCASE_POPUP\}\}/g, productShowcasePopupTpl.markup);
+    if (productShowcasePopupTpl.styles) pageStyles.add(productShowcasePopupTpl.styles);
+  }
+
   // ── DYNAMIC BUTTON TEMPLATIZATION ──
   // 1. Text Link with arrow transition (.section-link)
   const sectionLinkRegex = /<a\s+href="([^"]+)"\s+class="section-link([^"]*)"([^>]*)>\s*<span>([^<]+)<\/span>\s*<svg[^>]*>[^]*?<\/svg>\s*<\/a>/gi;
@@ -153,7 +161,8 @@ const staticPages = [
   { src: 'about.html', dest: 'about/index.html' },
   { src: 'contact.html', dest: 'contact/index.html' },
   { src: 'quarterly.html', dest: 'quarterly/index.html' },
-  { src: 'projects.html', dest: 'projects/index.html' }
+  { src: 'projects.html', dest: 'projects/index.html' },
+  { src: 'admin.html', dest: 'admin/index.html' }
 ];
 
 staticPages.forEach(p => {
@@ -210,6 +219,10 @@ staticPages.forEach(p => {
     .replace(/\{\{CONTENT\}\}/g, pageContent);
 
   const destFullPath = path.join(baseDir, p.dest);
+  const destDir = path.dirname(destFullPath);
+  if (!fs.existsSync(destDir)) {
+    fs.mkdirSync(destDir, { recursive: true });
+  }
   fs.writeFileSync(destFullPath, finalHtml, 'utf8');
   console.log(`Compiled page source: ${p.src} -> ${p.dest}`);
 });
@@ -249,7 +262,7 @@ projectDirs.forEach(slugName => {
   // Format script tag
   let additionalScripts = '';
   if (scriptsContent) {
-    additionalScripts = `<script>\n${scriptsContent}\n</script>`;
+    additionalScripts = `<script>\n${replaceComponents(scriptsContent, depth, false)}\n</script>`;
   }
 
   // Inject popup modal
@@ -272,6 +285,9 @@ projectDirs.forEach(slugName => {
   leftContent = replaceComponents(leftContent, depth, false);
   rightContent = replaceComponents(rightContent, depth, false);
 
+  // Pre-compile layout to substitute layout-level components (like PRODUCT_SHOWCASE_POPUP)
+  const compiledLayout = replaceComponents(projectLayout, depth, false, slugName);
+
   // Combine component styles and page custom styles
   if (stylesContent) pageStyles.add(stylesContent);
 
@@ -284,7 +300,7 @@ projectDirs.forEach(slugName => {
   let headerHtml = replaceComponents('{{HEADER}}', depth, true);
   let footerHtml = replaceComponents('{{FOOTER}}', depth, true);
 
-  let finalHtml = projectLayout
+  let finalHtml = compiledLayout
     .replace(/\{\{PROJECT_TITLE\}\}/g, meta.title || '')
     .replace(/\{\{PROJECT_ARTIST\}\}/g, meta.artist || '')
     .replace(/\{\{PROJECT_META\}\}/g, meta.meta || '')

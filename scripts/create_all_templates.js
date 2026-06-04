@@ -233,6 +233,8 @@ const projectLayoutContent = `<!DOCTYPE html>
 
   </div>
 
+  {{PRODUCT_SHOWCASE_POPUP}}
+
   {{FOOTER}}
 
   <script src="{{PATH_DEPTH}}js/shared.js"></script>
@@ -722,11 +724,11 @@ const checkoutFormContent = `<!--
   <div class="checkout-form-group">
     <label class="checkout-label">수량 *</label>
     <select id="chk-quantity" class="checkout-select">
-      <option value="1">1개 (15,000원 + 배송비 3,000원)</option>
-      <option value="2">2개 (30,000원 + 배송비 3,000원)</option>
-      <option value="3">3개 (45,000원 + 배송비 3,000원)</option>
-      <option value="4">4개 (60,000원 + 배송비 3,000원)</option>
-      <option value="5">5개 (75,000원 + 배송비 3,000원)</option>
+      <option value="1">1개</option>
+      <option value="2">2개</option>
+      <option value="3">3개</option>
+      <option value="4">4개</option>
+      <option value="5">5개</option>
     </select>
   </div>
   <div class="checkout-form-group">
@@ -999,6 +1001,24 @@ const musicPlaylistContent = `<!-- VIP Party Curation Audio Playlist -->
 </div>
 `;
 
+// components/projects/product-showcase-popup.html
+const productShowcasePopupContent = `<!-- Reusable Product Showcase / Checkout Modal Container -->
+<div class="print-modal" id="print-modal" aria-hidden="true" role="dialog">
+  <div class="print-modal-overlay" id="print-modal-overlay"></div>
+  <div class="print-modal-container">
+    <button class="print-modal-close" id="print-modal-close" aria-label="Close modal">&times;</button>
+    <div class="print-modal-content" id="print-modal-content">
+      <div class="print-modal-image-wrap">
+        <img id="print-modal-image" src="" alt="Product Cover Image">
+      </div>
+      <div class="print-modal-info" id="print-modal-info">
+        <!-- Dynamic content like product details, specs, status, and checkout form are injected here by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 // Write Projects component files
 fs.writeFileSync(path.join(templatesDir, 'components/projects/player.html'), playerContent, 'utf8');
 fs.writeFileSync(path.join(templatesDir, 'components/projects/lyric-and-tracklist.html'), lyricAndTracklistContent, 'utf8');
@@ -1007,5 +1027,6 @@ fs.writeFileSync(path.join(templatesDir, 'components/projects/video-archive.html
 fs.writeFileSync(path.join(templatesDir, 'components/projects/featured-video.html'), featuredVideoContent, 'utf8');
 fs.writeFileSync(path.join(templatesDir, 'components/projects/text-curation.html'), textCurationContent, 'utf8');
 fs.writeFileSync(path.join(templatesDir, 'components/projects/music-playlist.html'), musicPlaylistContent, 'utf8');
+fs.writeFileSync(path.join(templatesDir, 'components/projects/product-showcase-popup.html'), productShowcasePopupContent, 'utf8');
 
 console.log("All layouts and components design templates created successfully!");

@@ -143,6 +143,39 @@
         }
       };
 
+      // Fetch dynamic statuses from database to populate PRINT_DATA
+      fetch('/api/products')
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch products');
+          return res.json();
+        })
+        .then(products => {
+          products.forEach(p => {
+            if (PRINT_DATA[p.id]) {
+              const item = PRINT_DATA[p.id];
+              item.price = p.price;
+              if (p.status === 'for-sale') {
+                item.statusClass = 'request-purchase';
+                item.statusText = 'Request Purchase';
+                item.status = `₩${p.price.toLocaleString()} (In Stock: ${p.inventory})`;
+              } else if (p.status === 'out-of-stock') {
+                item.statusClass = 'out-of-stock';
+                item.statusText = 'Out of Stock';
+                item.status = 'Out of Stock';
+              } else if (p.status === 'sold-out') {
+                item.statusClass = 'sold-out';
+                item.statusText = 'Sold Out';
+                item.status = 'Sold Out';
+              } else {
+                item.statusClass = 'not-for-sale';
+                item.statusText = 'Not For Sale';
+                item.status = 'Not For Sale';
+              }
+            }
+          });
+        })
+        .catch(err => console.error('Error fetching product data:', err));
+
       const modal = document.getElementById('print-modal');
       const overlay = document.getElementById('print-modal-overlay');
       const closeBtn = document.getElementById('print-modal-close');
@@ -190,61 +223,24 @@
         let checkoutHtml = '';
         if (data.statusClass === 'request-purchase') {
           checkoutHtml = `
-            <div class="checkout-scroll-container">
-              <div class="checkout-form-group">
-                <label class="checkout-label">이름 *</label>
-                <input type="text" id="chk-name" class="checkout-input" required placeholder="성함을 입력하세요">
+            {{CHECKOUT_FORM}}
+            <div class="checkout-summary-box">
+              <div class="checkout-summary-row">
+                <span>상품 금액 (${data.title})</span>
+                <span id="chk-summary-price">${(data.price || 15000).toLocaleString()}원</span>
               </div>
-              <div class="checkout-form-group">
-                <label class="checkout-label">이메일 *</label>
-                <input type="email" id="chk-email" class="checkout-input" required placeholder="example@email.com">
+              <div class="checkout-summary-row">
+                <span>배송비</span>
+                <span>3,000원</span>
               </div>
-              <div class="checkout-form-group">
-                <label class="checkout-label">연락처 *</label>
-                <input type="tel" id="chk-phone" class="checkout-input" required placeholder="010-0000-0000">
+              <div class="checkout-summary-row total">
+                <span>총 합계</span>
+                <span id="chk-summary-total">${((data.price || 15000) + 3000).toLocaleString()}원</span>
               </div>
-              <div class="checkout-form-group">
-                <label class="checkout-label">배송지 주소 *</label>
-                <input type="text" id="chk-address" class="checkout-input" required placeholder="배송 주소를 입력하세요">
-              </div>
-              <div class="checkout-form-group">
-                <label class="checkout-label">수량 *</label>
-                <select id="chk-quantity" class="checkout-select">
-                  <option value="1">1개</option>
-                  <option value="2">2개</option>
-                  <option value="3">3개</option>
-                  <option value="4">4개</option>
-                  <option value="5">5개</option>
-                </select>
-              </div>
-              <div class="checkout-form-group">
-                <label class="checkout-label">입금자명 *</label>
-                <input type="text" id="chk-depositor" class="checkout-input" required placeholder="입금자 성함">
-              </div>
-              <div class="checkout-form-group">
-                <label class="checkout-label">요청사항</label>
-                <textarea id="chk-notes" class="checkout-textarea" placeholder="요청사항이 있으시면 적어주세요"></textarea>
-              </div>
-
-              <div class="checkout-summary-box">
-                <div class="checkout-summary-row">
-                  <span>상품 금액 (1MC1PD: The Interview)</span>
-                  <span id="chk-summary-price">15,000원</span>
-                </div>
-                <div class="checkout-summary-row">
-                  <span>배송비</span>
-                  <span>3,000원</span>
-                </div>
-                <div class="checkout-summary-row total">
-                  <span>총 합계</span>
-                  <span id="chk-summary-total">18,000원</span>
-                </div>
-                <div style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; font-size: 0.55rem; color: var(--text-muted);">
-                  * 계좌이체로만 결제 가능합니다.
-                </div>
+              <div style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; font-size: 0.55rem; color: var(--text-muted);">
+                * 계좌이체로만 결제 가능합니다.
               </div>
             </div>
-
             <div class="checkout-buttons">
               <button type="button" class="checkout-btn back" id="chk-back-btn">돌아가기</button>
               <button type="button" class="checkout-btn submit" id="chk-submit-btn">결제 요청하기</button>
@@ -321,7 +317,7 @@
 
           quantitySelect.addEventListener('change', function() {
             const qty = parseInt(quantitySelect.value, 10);
-            const prodPrice = 15000 * qty;
+            const prodPrice = (data.price || 15000) * qty;
             const totalPrice = prodPrice + 3000;
             document.getElementById('chk-summary-price').textContent = prodPrice.toLocaleString() + '원';
             document.getElementById('chk-summary-total').textContent = totalPrice.toLocaleString() + '원';
@@ -363,7 +359,7 @@
               submitBtn.textContent = '제출 중' + '.'.repeat(dotCount);
             }, 400);
 
-            const payload = { name, email, phone, address, quantity, depositor, notes };
+            const payload = { product_id: key, name, email, phone, address, quantity, depositor, notes };
 
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             const apiUrl = isLocal 

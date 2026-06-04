@@ -59,7 +59,7 @@ function parseFrontMatter(content) {
     const parts = line.split(':');
     if (parts.length >= 2) {
       const key = parts[0].trim();
-      const val = parts.slice(1).join(':').trim().replace(/^"(.*)"$/, '$1');
+      const val = parts.slice(1).join(':').trim().replace(/^["'](.*)["']$/, '$1');
       data[key] = val;
     }
   });
@@ -67,12 +67,14 @@ function parseFrontMatter(content) {
 }
 
 // Component substitution engine
-function replaceComponents(html, depth, isLayoutLevel = false) {
+function replaceComponents(html, depth, isLayoutLevel = false, slug = '') {
   let result = html;
 
   if (isLayoutLevel) {
     // Compile Header, Footer & Popup templates (adapting path depth)
-    const compiledHeader = headerTpl.markup.replace(/\{\{PATH_DEPTH\}\}/g, depth);
+    const compiledHeader = headerTpl.markup
+      .replace(/\{\{PATH_DEPTH\}\}/g, depth)
+      .replace(/\{\{NAV_EXTRA_CLASS\}\}/g, (slug === 'index.html' ? '' : 'delayed-reveal'));
     if (headerTpl.styles) pageStyles.add(headerTpl.styles);
 
     const compiledFooter = footerTpl.markup.replace(/\{\{PATH_DEPTH\}\}/g, depth);
@@ -186,14 +188,14 @@ staticPages.forEach(p => {
     .replace(/<script>[\s\S]*?<\/script>/gi, '');
 
   // Perform substitution
-  pageContent = replaceComponents(pageContent, depth, false);
+  pageContent = replaceComponents(pageContent, depth, false, p.dest);
 
   // Combine component styles and page custom styles
   if (srcStyles) pageStyles.add(srcStyles);
   
-  let additionalHead = '';
+  let additionalHead = data.additional_head || '';
   if (pageStyles.size > 0) {
-    additionalHead = `<style>\n${Array.from(pageStyles).join('\n\n')}\n</style>`;
+    additionalHead += `\n<style>\n${Array.from(pageStyles).join('\n\n')}\n</style>`;
   }
 
   // Assemble base page layout (inject headers at layout-level = true)
@@ -203,8 +205,8 @@ staticPages.forEach(p => {
     .replace(/\{\{PATH_DEPTH\}\}/g, depth)
     .replace(/\{\{ADDITIONAL_HEAD\}\}/g, additionalHead)
     .replace(/\{\{ADDITIONAL_SCRIPTS\}\}/g, additionalScripts)
-    .replace(/\{\{HEADER\}\}/g, replaceComponents('{{HEADER}}', depth, true))
-    .replace(/\{\{FOOTER\}\}/g, replaceComponents('{{FOOTER}}', depth, true))
+    .replace(/\{\{HEADER\}\}/g, replaceComponents('{{HEADER}}', depth, true, p.dest))
+    .replace(/\{\{FOOTER\}\}/g, replaceComponents('{{FOOTER}}', depth, true, p.dest))
     .replace(/\{\{CONTENT\}\}/g, pageContent);
 
   const destFullPath = path.join(baseDir, p.dest);
@@ -284,8 +286,8 @@ projectDirs.forEach(slugName => {
 
   let finalHtml = projectLayout
     .replace(/\{\{PROJECT_TITLE\}\}/g, meta.title || '')
-    .replace(/\{\{PROJECT_SUBTITLE\}\}/g, meta.subtitle || '')
-    .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, meta.description || '')
+    .replace(/\{\{PROJECT_ARTIST\}\}/g, meta.artist || '')
+    .replace(/\{\{PROJECT_META\}\}/g, meta.meta || '')
     .replace(/\{\{COVER_IMAGE\}\}/g, coverImage)
     .replace(/\{\{PATH_DEPTH\}\}/g, depth)
     .replace(/\{\{ADDITIONAL_HEAD\}\}/g, additionalHead)

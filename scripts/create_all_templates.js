@@ -24,7 +24,7 @@ ensureDir(path.join(templatesDir, 'components/projects'));
 // -------------------------------------------------------------
 
 // global/header.html
-const headerContent = `<nav class="nav-bar delayed-reveal">
+const headerContent = `<nav class="nav-bar {{NAV_EXTRA_CLASS}}">
   <a href="/" class="nav-home visible" id="nav-home">artic.</a>
   <a href="/about/" class="nav-link">About</a>
   <a href="/projects/" class="nav-link">Projects</a>
@@ -207,17 +207,17 @@ const projectLayoutContent = `<!DOCTYPE html>
 
   <div class="page-container">
     
-    <!-- Header Showcase Section -->
-    <header class="album-showcase">
+    <!-- Album Showcase -->
+    <section class="album-showcase">
       <div class="album-art-wrapper">
         <img class="album-art" src="{{COVER_IMAGE}}" alt="{{PROJECT_TITLE}} Cover Art">
       </div>
       <div class="album-info">
+        <span class="artist-name">{{PROJECT_ARTIST}}</span>
         <h1 class="album-title">{{PROJECT_TITLE}}</h1>
-        <p class="album-subtitle">{{PROJECT_SUBTITLE}}</p>
-        <p class="album-description">{{PROJECT_DESCRIPTION}}</p>
+        <p class="album-meta">{{PROJECT_META}}</p>
       </div>
-    </header>
+    </section>
 
     <!-- Two-Column Page Detail Grid Layout -->
     <div class="content-columns">

@@ -2292,6 +2292,7 @@
 
       var isStatusTransitioning = false;
       var fadeInterval = null;
+      var hasEverPlayed = false; // tracks whether audio has ever started playing
 
       function fadeAudio(targetVolume, duration, onComplete) {
         if (!ytPlayer || typeof ytPlayer.getVolume !== 'function') {
@@ -2563,6 +2564,7 @@
                 if (ytPlayer && typeof ytPlayer.getVolume === 'function' && !isStatusTransitioning) {
                   ytPlayer.setVolume(100);
                 }
+                hasEverPlayed = true;
                 setPlaying(true);
               } else if (event.data === YT.PlayerState.PAUSED) {
                 setPlaying(false);
@@ -2585,9 +2587,17 @@
             ytPlayer.pauseVideo();
           });
         } else {
-          changeStatusWithFade('Now Playing', 600, function() {
+          // First-ever play (autoplay was blocked): skip fade, start at full volume immediately
+          if (!hasEverPlayed) {
+            if (ytPlayer && typeof ytPlayer.setVolume === 'function') {
+              ytPlayer.setVolume(100);
+            }
             ytPlayer.playVideo();
-          });
+          } else {
+            changeStatusWithFade('Now Playing', 600, function() {
+              ytPlayer.playVideo();
+            });
+          }
         }
       });
 

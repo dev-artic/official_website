@@ -1,0 +1,74 @@
+<!-- Reusable Custom Single Video Layout -->
+<div class="archive-entry active" data-vid="{{VIDEO_ID}}">
+  <a class="archive-item latest-featured-item" href="javascript:void(0)">
+    <div class="archive-item-left">
+      <div class="archive-item-text">
+        <div class="archive-item-title-row">
+          <span class="archive-item-title">{{TITLE}}</span>
+          <span class="archive-item-date">{{DATE}}</span>
+        </div>
+      </div>
+    </div>
+  </a>
+  <div class="archive-embed open">
+    <div class="custom-video-poster" data-vid="{{VIDEO_ID}}" style="opacity: 0; transition: opacity 0.8s ease;">
+      <img class="poster-thumbnail" src="https://img.youtube.com/vi/{{VIDEO_ID}}/maxresdefault.jpg" alt="Video Cover">
+      <div class="poster-play-btn">
+        <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── Featured Custom Video Poster Styles ── */
+  .custom-video-poster {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    cursor: pointer;
+    background-color: #000;
+    overflow: hidden;
+  }
+
+  .poster-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  }
+
+  .custom-video-poster:hover .poster-thumbnail {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+
+  .poster-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .poster-play-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    margin-left: 2px;
+  }
+
+  .custom-video-poster:hover .poster-play-btn {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+</style>

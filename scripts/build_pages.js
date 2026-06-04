@@ -213,58 +213,41 @@ staticPages.forEach(p => {
 });
 
 // 2. Process Project Pages
-const projectFiles = [
-  'deus-ex-machina.html',
-  'gagosian-party-music.html',
-  'neutral-interview.html',
-  'tasting-note.html',
-  'the-root.html'
+const projectDirs = [
+  'deus-ex-machina',
+  'gagosian-party-music',
+  'neutral-interview',
+  'tasting-note',
+  'the-root'
 ];
 
-projectFiles.forEach(fileName => {
-  const srcPath = path.join(srcDir, 'projects', fileName);
-  if (!fs.existsSync(srcPath)) return;
+projectDirs.forEach(slugName => {
+  const projectDir = path.join(srcDir, 'projects', slugName);
+  if (!fs.existsSync(projectDir)) return;
 
   // Reset styles for this project
   pageStyles.clear();
 
-  const rawContent = fs.readFileSync(srcPath, 'utf8');
-  const { data, body } = parseFrontMatter(rawContent);
-
-  const depth = data.path_depth || '../';
-  const coverImage = data.cover_image || 'album-art.png';
-
-  // Extract custom style blocks
-  let srcStyles = '';
-  const styleMatch = body.match(/<style>([\s\S]*?)<\/style>/i);
-  if (styleMatch) {
-    srcStyles = styleMatch[1].trim();
-  }
-
-  // Extract script blocks
-  let additionalScripts = '';
-  const scriptMatch = body.match(/<script>([\s\S]*?)<\/script>/i);
-  if (scriptMatch) {
-    additionalScripts += `<script>\n${scriptMatch[1]}\n</script>`;
-  }
-
-  // Parse columns
-  let leftContent = '';
-  const leftMatch = body.match(/<div slot="left">([\s\S]*?)<\/div>/i);
-  if (leftMatch) {
-    leftContent = leftMatch[1].trim();
-  }
-
-  let rightContent = '';
-  const rightMatch = body.match(/<div slot="right">([\s\S]*?)<\/div>/i);
-  if (rightMatch) {
-    rightContent = rightMatch[1].trim();
-  }
+  // Load files
+  const meta = JSON.parse(fs.readFileSync(path.join(projectDir, 'meta.json'), 'utf8'));
+  const stylesContent = fs.readFileSync(path.join(projectDir, 'styles.css'), 'utf8').trim();
+  const scriptsContent = fs.readFileSync(path.join(projectDir, 'scripts.js'), 'utf8').trim();
+  let leftContent = fs.readFileSync(path.join(projectDir, 'left.html'), 'utf8').trim();
+  let rightContent = fs.readFileSync(path.join(projectDir, 'right.html'), 'utf8').trim();
 
   let popupContent = '';
-  const popupMatch = body.match(/<div slot="popup">([\s\S]*?)<\/div>/i);
-  if (popupMatch) {
-    popupContent = popupMatch[1].trim();
+  const popupPath = path.join(projectDir, 'popup.html');
+  if (fs.existsSync(popupPath)) {
+    popupContent = fs.readFileSync(popupPath, 'utf8').trim();
+  }
+
+  const depth = meta.path_depth || '../';
+  const coverImage = meta.cover_image || 'album-art.png';
+
+  // Format script tag
+  let additionalScripts = '';
+  if (scriptsContent) {
+    additionalScripts = `<script>\n${scriptsContent}\n</script>`;
   }
 
   // Inject popup modal
@@ -288,7 +271,7 @@ projectFiles.forEach(fileName => {
   rightContent = replaceComponents(rightContent, depth, false);
 
   // Combine component styles and page custom styles
-  if (srcStyles) pageStyles.add(srcStyles);
+  if (stylesContent) pageStyles.add(stylesContent);
 
   let additionalHead = '';
   if (pageStyles.size > 0) {
@@ -300,9 +283,9 @@ projectFiles.forEach(fileName => {
   let footerHtml = replaceComponents('{{FOOTER}}', depth, true);
 
   let finalHtml = projectLayout
-    .replace(/\{\{PROJECT_TITLE\}\}/g, data.title || '')
-    .replace(/\{\{PROJECT_SUBTITLE\}\}/g, data.subtitle || '')
-    .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, data.description || '')
+    .replace(/\{\{PROJECT_TITLE\}\}/g, meta.title || '')
+    .replace(/\{\{PROJECT_SUBTITLE\}\}/g, meta.subtitle || '')
+    .replace(/\{\{PROJECT_DESCRIPTION\}\}/g, meta.description || '')
     .replace(/\{\{COVER_IMAGE\}\}/g, coverImage)
     .replace(/\{\{PATH_DEPTH\}\}/g, depth)
     .replace(/\{\{ADDITIONAL_HEAD\}\}/g, additionalHead)
@@ -317,7 +300,6 @@ projectFiles.forEach(fileName => {
   }
 
   // Output compilation result
-  const slugName = fileName.replace('.html', '');
   const destDir = path.join(baseDir, slugName);
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
@@ -325,7 +307,7 @@ projectFiles.forEach(fileName => {
 
   const destFullPath = path.join(destDir, 'index.html');
   fs.writeFileSync(destFullPath, finalHtml, 'utf8');
-  console.log(`Compiled project detail page: ${fileName} -> ${slugName}/index.html`);
+  console.log(`Compiled project detail page: ${slugName} -> ${slugName}/index.html`);
 });
 
 console.log("All pages compiled successfully with styling injection optimized and duplicate headers resolved!");

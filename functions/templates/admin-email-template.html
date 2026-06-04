@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{TITLE}}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+      color: #333333;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0;
+      padding: 0;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #f7f7f7;
+      padding: 40px 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .header {
+      padding: 30px 20px;
+      text-align: center;
+      background-color: #0a0a0a;
+    }
+    .header img {
+      display: block;
+      margin: 0 auto;
+      border: none;
+      outline: none;
+    }
+    .badge-container {
+      text-align: center;
+      background-color: #1a1a1a;
+      padding: 8px 20px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+    .internal-badge {
+      display: inline-block;
+      background-color: #ff3b30;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .content-table {
+      width: 100%;
+      background-color: #ffffff;
+    }
+    .content-padding {
+      padding: 40px;
+    }
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+      color: #111111;
+      line-height: 1.4;
+      text-align: left;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0 0 20px 0;
+      color: #444444;
+    }
+    /* Data table styles */
+    .data-table {
+      width: 100%;
+      margin: 24px 0;
+      border-collapse: collapse;
+      background-color: #fafafa;
+      border: 1px solid #eaeaea;
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eaeaea;
+      font-size: 13px;
+      line-height: 1.5;
+      vertical-align: top;
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table td.label {
+      width: 30%;
+      color: #666666;
+      font-weight: 500;
+      text-align: left;
+    }
+    .data-table td.value {
+      width: 70%;
+      color: #111111;
+      font-weight: 600;
+      text-align: left;
+    }
+    .bold {
+      font-weight: 600;
+      color: #111111;
+    }
+    /* DB Info Panel */
+    .db-info {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #f3f4f6;
+      border: 1px dashed #d1d5db;
+      border-radius: 4px;
+    }
+    .db-info-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .db-info-table {
+      width: 100%;
+    }
+    .db-info-table td {
+      padding: 6px 0;
+      font-size: 12px;
+      font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+      color: #4b5563;
+      border: none;
+    }
+    .db-info-table td.lbl {
+      width: 30%;
+      font-weight: bold;
+    }
+    .db-info-table td.val {
+      width: 70%;
+    }
+    .db-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .db-link:hover {
+      text-decoration: underline;
+    }
+    /* Footer styles */
+    .footer {
+      background-color: #1a1a1a;
+      padding: 30px 40px;
+      text-align: left;
+    }
+    .footer-text {
+      font-size: 11px;
+      line-height: 1.6;
+      color: #999999;
+      margin: 0;
+    }
+    @media screen and (max-width: 600px) {
+      .content-padding {
+        padding: 20px;
+      }
+      .footer {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <table class="container" align="center">
+      <tr>
+        <td class="header">
+          <img src="https://artic.live/images/logo-white.png" alt="artic." width="90">
+        </td>
+      </tr>
+      <tr>
+        <td class="badge-container">
+          <div class="internal-badge">내부 확인용 발신 (INTERNAL NOTICE)</div>
+        </td>
+      </tr>
+      <tr>
+        <td class="content-table">
+          <div class="content-padding">
+            <h1>{{TITLE}}</h1>
+            
+            {{BODY_CONTENT}}
+            
+            {{DATA_TABLE}}
+            
+            <div class="db-info">
+              <div class="db-info-title">Firestore DB Storage Info</div>
+              <table class="db-info-table">
+                <tr>
+                  <td class="lbl">Collection</td>
+                  <td class="val"><code>{{DB_COLLECTION}}</code></td>
+                </tr>
+                <tr>
+                  <td class="lbl">Doc ID</td>
+                  <td class="val"><code>{{DB_DOC_ID}}</code></td>
+                </tr>
+                <tr>
+                  <td class="lbl">Access URL</td>
+                  <td class="val">
+                    <a href="https://console.firebase.google.com/project/artic-official-home/firestore/databases/-default-/data" target="_blank" class="db-link">
+                      Go to Firebase Console &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="footer">
+          <p class="footer-text">본 메일은 시스템에 의해 생성된 관리자 확인용 자동 발신 메일입니다.</p>
+          <p class="footer-text" style="margin-top: 10px;">&copy; 2026 artic. System Admin.</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

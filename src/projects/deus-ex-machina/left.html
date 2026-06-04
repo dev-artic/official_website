@@ -1,0 +1,183 @@
+<div class="left-column">
+
+      <!-- PLAY Widget Section -->
+      <div class="play-section">
+        <span class="play-group-label play-label">Play</span>
+        <div class="play-widget" id="play-widget">
+          <!-- Track Info -->
+          <div class="play-track-info">
+            <span class="play-track-num" id="play-track-num">01</span>
+            <div class="play-track-text">
+              <span class="play-track-title" id="play-track-title">from corners to switch</span>
+              <span class="play-track-status" id="play-track-status">Ready</span>
+            </div>
+          </div>
+          <!-- Progress -->
+          <div class="play-progress-wrap">
+            <span class="play-time" id="play-current">0:00</span>
+            <div class="play-bar-track" id="play-bar-track">
+              <div class="play-bar-fill" id="play-bar-fill"></div>
+            </div>
+            <span class="play-time dur" id="play-duration">2:26</span>
+          </div>
+          <!-- Controls -->
+          <div class="play-controls">
+            <button class="play-ctrl-btn" id="play-prev-btn" aria-label="Previous track">
+              <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+              Prev
+            </button>
+            <button class="play-main-btn" id="play-main-btn" aria-label="Play">
+              <svg viewBox="0 0 24 24" id="play-main-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button class="play-ctrl-btn" id="play-next-btn" aria-label="Next track">
+              Next
+              <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+            </button>
+          </div>
+          <!-- Lyrics Toggle Area -->
+          <div class="play-lyrics-wrap" id="play-lyrics-wrap">
+            <!-- Carousel indicator dots -->
+            <div class="carousel-indicators" id="carousel-indicators">
+              <div class="carousel-dot active" data-slide="0" title="Lyrics"></div>
+              <div class="carousel-dot" data-slide="1" title="Tracklist"></div>
+            </div>
+            <!-- Carousel -->
+            <div class="carousel-viewport" id="carousel-viewport">
+              <div class="carousel-track" id="carousel-track">
+                <!-- Slide 0: Lyrics -->
+                <div class="carousel-slide">
+                  <div class="play-lyrics-content" id="play-lyrics-content"></div>
+                </div>
+                <!-- Slide 1: Tracklist -->
+                <div class="carousel-slide">
+                  <div class="tracklist-container" id="tracklist-container"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streaming Links -->
+      <main class="links-container expanded">
+        <div class="mobile-toggle-header">
+          <span class="stream-group-label stream-label">Available On</span>
+          <span class="toggle-icon"></span>
+        </div>
+        <div class="toggle-content">
+          <!-- 1. Spotify -->
+          <a href="https://open.spotify.com/album/2sf4b23cymnM6mCQw4r9Dm" target="_blank" rel="noopener noreferrer" class="link-item link-spotify">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- Spotify Official SVG Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424c-.18.295-.565.387-.86.207-2.377-1.454-5.37-1.783-8.893-.982-.336.075-.668-.135-.744-.47-.077-.337.135-.668.47-.745 3.856-.88 7.15-.503 9.822 1.13.296.18.387.563.206.86zm1.224-2.722c-.226.367-.707.487-1.074.26-2.72-1.672-6.87-2.157-10.073-1.185-.413.125-.847-.11-1.074-.522-.125-.413.11-.847.522-1.075 3.662-1.11 8.23-.574 11.365 1.353.367.227.487.708.26 1.075zm.105-2.836C14.692 8.98 9.3 8.8 6.13 9.762c-.49.15-1.008-.13-1.157-.62-.15-.49.13-1.007.62-1.157 3.66-1.11 9.6-1.9 13.784.58.442.26.586.83.324 1.27-.26.44-.83.585-1.27.323z"/>
+                </svg>
+              </div>
+              <span class="platform-name">Spotify</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+
+          <!-- 2. Apple Music -->
+          <a href="https://music.apple.com/kr/album/deus-ex-machina/1848799930" target="_blank" rel="noopener noreferrer" class="link-item link-apple">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- Apple Music Official Apple Silhouette SVG Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.51-.62.73-1.16 1.87-1.02 2.98 1.11.09 2.25-.57 2.95-1.43z"/>
+                </svg>
+              </div>
+              <span class="platform-name">Apple Music</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+
+          <!-- 3. YouTube Music -->
+          <a href="https://music.youtube.com/playlist?list=OLAK5uy_krUeRx9aT1vaNmVYZS2DUj-HmPo25r250" target="_blank" rel="noopener noreferrer" class="link-item link-youtube">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- YouTube Music Official Nested Circles SVG Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-12.5l6 4.5-6 4.5v-9z"/>
+                </svg>
+              </div>
+              <span class="platform-name">YouTube Music</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+
+          <!-- 4. Tidal -->
+          <a href="https://tidal.com/album/469958849" target="_blank" rel="noopener noreferrer" class="link-item link-tidal">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- Tidal Official Quad-Diamond Vector SVG Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M12 5.58L16.42 10 12 14.42 7.58 10 12 5.58zm0-5.58L4.42 7.58 12 15.16l7.58-7.58L12 0zm0 16.42l4.42-4.42 4.42 4.42-4.42 4.42L12 16.42zm-8.84-6.42L0 14.42l4.42 4.42 4.42-4.42-4.42-4.42z"/>
+                </svg>
+              </div>
+              <span class="platform-name">Tidal</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+
+          <!-- 5. Amazon Music -->
+          <a href="https://amazon.com/music/player/albums/B0FY74Z2VR?marketplaceId=ATVPDKIKX0DER&musicTerritory=US&ref=dm_sh_HPAT6ZlM3m0LskedhsxwNIvCI" target="_blank" rel="noopener noreferrer" class="link-item link-amazon">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- Amazon Music Official Smile-Arrow Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M18.8 14.7c-1.8 1.1-4.2 1.7-6.6 1.7-3.4 0-6.5-1.1-8.7-3-.4-.3-.1-.8.4-.6 2.3.9 5.2 1.4 8.2 1.4 2.2 0 4.5-.3 6.6-1 .6-.2.8.3.1.5zm.9-1.9c-.1-.7-.7-.6-1.2-.4-.9.3-1.9.6-2.9.8-.5.1-.6.6-.1.8.7.3 1.6.6 2.4.5.8-.1 1-.5.8-1.7zm-2-1.9c.1-.5.5-.7.9-.5.8.4 1.5.9 2.2 1.5.4.3.2.8-.2.7-.8-.2-1.6-.6-2.3-1.1-.3-.2-.5-.4-.6-.6zM3.4 12c.1 3.5 2.1 6.5 5.1 8.1.4.2.3.7-.1.6-3.3-1.1-5.7-4.1-6-7.7-.1-.5.5-.6.8-.2.2.1.2.2.2.2z"/>
+                </svg>
+              </div>
+              <span class="platform-name">Amazon Music</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+
+          <!-- 6. Melon -->
+          <a href="https://www.melon.com/album/detail.htm?albumId=11475004" target="_blank" rel="noopener noreferrer" class="link-item link-melon">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- Melon Official Abstract 'm' circle Symbol Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1.693 12.18c-.808 1.008-2.28 1.008-3.088 0-.583-.728-.583-1.942 0-2.67.808-1.008 2.28-1.008 3.088 0 .584.728.584 1.942 0 2.67zM16.924 9.1c-.808 1.008-2.28 1.008-3.088 0-.584-.728-.584-1.942 0-2.67.808-1.008 2.28-1.008 3.088 0 .584.728.584 1.942 0 2.67z"/>
+                </svg>
+              </div>
+              <span class="platform-name">Melon</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+
+          <!-- 7. Genie -->
+          <a href="https://www.genie.co.kr/detail/albumInfo?axnm=85059647" target="_blank" rel="noopener noreferrer" class="link-item link-genie">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- Genie Official Custom 'g' Symbol Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 13.5c-1 1.5-2.8 2-4.5 1.5-2-.6-3.2-2.3-3.2-4.3 0-2.5 1.8-4.5 4.3-4.5 1.8 0 3.3.9 4 2.4l-1.4.7c-.5-.9-1.5-1.6-2.6-1.6-1.6 0-2.8 1.3-2.8 3s1.2 3 2.8 3c1.1 0 2-.6 2.5-1.5H12v-1.5h3.5v4.3z"/>
+                </svg>
+              </div>
+              <span class="platform-name">Genie</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+
+          <!-- 8. Bugs -->
+          <a href="https://music.bugs.co.kr/album/20639149?wl_ref=list_ab_01" target="_blank" rel="noopener noreferrer" class="link-item link-bugs">
+            <div class="platform-info">
+              <div class="platform-logo">
+                <!-- Bugs Official 'B' note icon Logo -->
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14H9v-8h4c1.7 0 3 1.3 3 3s-1.3 3-3 3zm-2-5H11v2h1c.6 0 1-.4 1-1s-.4-1-1-1z"/>
+                </svg>
+              </div>
+              <span class="platform-name">Bugs</span>
+            </div>
+            <span class="listen-badge">Play</span>
+          </a>
+        </div>
+
+      </main>
+
+      </div>

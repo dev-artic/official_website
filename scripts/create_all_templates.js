@@ -170,9 +170,7 @@ const baseLayoutContent = `<!DOCTYPE html>
 
   {{HEADER}}
   
-  <div class="page-main-content">
-    {{CONTENT}}
-  </div>
+  {{CONTENT}}
 
   {{FOOTER}}
 
@@ -207,7 +205,7 @@ const projectLayoutContent = `<!DOCTYPE html>
 
   {{HEADER}}
 
-  <div class="container">
+  <div class="page-container">
     
     <!-- Header Showcase Section -->
     <header class="album-showcase">

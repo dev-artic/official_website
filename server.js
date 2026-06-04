@@ -6,7 +6,7 @@ const { DatabaseSync } = require('node:sqlite');
 const PORT = 8000;
 const DB_FILE = path.join(__dirname, 'orders.db');
 const USER_HOME = process.env.HOME || process.env.USERPROFILE || '';
-const LYRICS_DB_FILE = path.join(USER_HOME, '.gemini', 'antigravity', 'brain', 'cb6b594a-9879-4961-846b-0df33fc8b311', 'scratch', 'synced_lyrics_estimate.json');
+const LYRICS_DB_FILE = path.join(__dirname, 'scratch', 'synced_lyrics_estimate.json');
 
 // Initialize database
 let db;
@@ -152,21 +152,36 @@ function handleSaveLyrics(req, res, bodyText) {
     fs.writeFileSync(dbPath, JSON.stringify(database, null, 2), 'utf8');
     console.log(`Updated lyrics database in scratch for video: ${vid}`);
 
-    const htmlPath = path.join(__dirname, 'projects', 'deus-ex-machina', 'index.html');
-    let htmlContent = fs.readFileSync(htmlPath, 'utf8').replace(/\r\n/g, '\n');
+    // Update the source file scripts.js
+    const srcScriptsPath = path.join(__dirname, 'src', 'projects', 'deus-ex-machina', 'scripts.js');
+    if (fs.existsSync(srcScriptsPath)) {
+      let scriptsContent = fs.readFileSync(srcScriptsPath, 'utf8').replace(/\r\n/g, '\n');
+      const databaseJsonStr = JSON.stringify(database, null, 2);
+      const databaseJsonIndented = databaseJsonStr.replace(/\n/g, '\n      ');
 
-    const databaseJsonStr = JSON.stringify(database, null, 2);
-    const databaseJsonIndented = databaseJsonStr.replace(/\n/g, '\n      ');
+      const regexLy = /const LYRICS_DATA = \{[\s\S]*?\};\s*var currentIdx = 0;/;
+      if (regexLy.test(scriptsContent)) {
+        scriptsContent = scriptsContent.replace(regexLy, `const LYRICS_DATA = ${databaseJsonIndented};\n      var currentIdx = 0;`);
+        fs.writeFileSync(srcScriptsPath, scriptsContent.replace(/\n/g, '\r\n'), 'utf8');
+        console.log(`Injected updated lyrics database into src/projects/deus-ex-machina/scripts.js`);
 
-    const regexLy = /const LYRICS_DATA = \{[\s\S]*?\};\s*var currentIdx = 0;/;
-    if (regexLy.test(htmlContent)) {
-      htmlContent = htmlContent.replace(regexLy, `const LYRICS_DATA = ${databaseJsonIndented};\n      var currentIdx = 0;`);
-      fs.writeFileSync(htmlPath, htmlContent.replace(/\n/g, '\r\n'), 'utf8');
-      console.log(`Injected updated lyrics database into deus-ex-machina/index.html`);
-      sendJSON(res, 200, { success: true, message: 'Lyrics saved and injected successfully.' });
+        // Run build_pages.js compilation with agy-node
+        try {
+          const { execSync } = require('child_process');
+          execSync('agy-node scripts/build_pages.js', { cwd: __dirname });
+          console.log(`Successfully compiled pages after saving lyrics.`);
+          sendJSON(res, 200, { success: true, message: 'Lyrics saved and project compiled successfully.' });
+        } catch (buildErr) {
+          console.error('Failed to run build_pages.js compilation:', buildErr);
+          sendJSON(res, 500, { error: 'Lyrics saved to source but build compilation failed: ' + buildErr.message });
+        }
+      } else {
+        console.error('ERROR: LYRICS_DATA block target not found in src/projects/deus-ex-machina/scripts.js');
+        sendJSON(res, 500, { error: 'Failed to inject lyrics into scripts.js. LYRICS_DATA block not found.' });
+      }
     } else {
-      console.error('ERROR: LYRICS_DATA block target not found in index.html');
-      sendJSON(res, 500, { error: 'Failed to inject lyrics into HTML. LYRICS_DATA block not found.' });
+      console.error('ERROR: src/projects/deus-ex-machina/scripts.js does not exist.');
+      sendJSON(res, 500, { error: 'Failed to inject lyrics. Source scripts.js file not found.' });
     }
   } catch (e) {
     console.error('Error handling save-lyrics:', e);

@@ -185,6 +185,11 @@
         const data = PRINT_DATA[key];
         if (!data) return;
 
+        // Hide image until it is fully loaded to prevent cached flash
+        modalImg.style.opacity = '0';
+        modalImg.onload = function() {
+          modalImg.style.opacity = '1';
+        };
         modalImg.src = data.image;
         modalImg.alt = data.title;
         modal.classList.remove('is-checkout');
@@ -403,6 +408,15 @@
         modal.classList.remove('is-success');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+
+        // Reset/clear content after fade-out completes to avoid caching visual glitch
+        setTimeout(function() {
+          if (!modal.classList.contains('is-active')) {
+            modalImg.src = '';
+            modalImg.alt = '';
+            modalInfo.innerHTML = '';
+          }
+        }, 500);
       }
 
       // Use event delegation on the document for robustness against timing/DOM issues
@@ -2660,12 +2674,44 @@
         var isSwiping    = false;
         var threshold    = 40;
 
+        var inactivityTimeout = null;
+        function resetInactivityTimer() {
+          if (inactivityTimeout) {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = null;
+          }
+          if (currentSlide === 1) {
+            inactivityTimeout = setTimeout(function() {
+              viewport.style.transition = 'opacity 0.4s ease';
+              viewport.style.opacity = '0';
+              setTimeout(function() {
+                carTrack.style.transition = 'none';
+                goToSlide(0);
+                carTrack.offsetHeight; // force layout
+                carTrack.style.transition = '';
+                viewport.style.opacity = '1';
+                setTimeout(function() {
+                  viewport.style.transition = '';
+                }, 400);
+              }, 400);
+            }, 6000);
+          }
+        }
+
         function goToSlide(idx) {
           currentSlide = Math.max(0, Math.min(idx, dots.length - 1));
           carTrack.style.transform = 'translateX(' + (-currentSlide * 100) + '%)';
           dots.forEach(function(d, i) {
             d.classList.toggle('active', i === currentSlide);
           });
+          if (currentSlide === 0) {
+            if (inactivityTimeout) {
+              clearTimeout(inactivityTimeout);
+              inactivityTimeout = null;
+            }
+          } else {
+            resetInactivityTimer();
+          }
         }
 
         // Dot click
@@ -2781,7 +2827,22 @@
           // Mark track 0 as active initially
           var firstItem = tlContainer.querySelector('#tl-item-0');
           if (firstItem) { firstItem.classList.add('tl-active'); firstItem.style.opacity = '1'; }
+          
+          // Reset inactivity timer on scroll, wheel or touchmove
+          tlContainer.addEventListener('scroll', resetInactivityTimer);
+          tlContainer.addEventListener('wheel', resetInactivityTimer);
+          tlContainer.addEventListener('touchmove', resetInactivityTimer);
         }
+
+        // Reset inactivity timer on drag or click interaction
+        viewport.addEventListener('mousedown', resetInactivityTimer);
+        viewport.addEventListener('touchstart', resetInactivityTimer);
+        window.addEventListener('mousemove', function(e) {
+          if (isDragging) resetInactivityTimer();
+        });
+        viewport.addEventListener('touchmove', function(e) {
+          if (isSwiping) resetInactivityTimer();
+        });
 
         // ── Keep tracklist highlight in sync with player ─────────────
         document.addEventListener('play-track-changed', function(e) {
@@ -2794,7 +2855,17 @@
           });
           // Scroll the active item into view inside the tracklist
           var activeEl = document.getElementById('tl-item-' + idx);
-          if (activeEl) activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          if (activeEl && tlContainer) {
+            var containerTop = tlContainer.scrollTop;
+            var containerHeight = tlContainer.clientHeight;
+            var elemTop = activeEl.offsetTop - tlContainer.offsetTop;
+            var elemHeight = activeEl.offsetHeight;
+            if (elemTop < containerTop) {
+              tlContainer.scrollTo({ top: elemTop, behavior: 'smooth' });
+            } else if (elemTop + elemHeight > containerTop + containerHeight) {
+              tlContainer.scrollTo({ top: elemTop - containerHeight + elemHeight, behavior: 'smooth' });
+            }
+          }
         });
       })();
       // ── End Carousel logic ───────────────────────────────────────────

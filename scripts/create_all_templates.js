@@ -450,7 +450,7 @@ const waitlistFormContent = `<div class="waitlist-container">
   #waitlist-toggle-btn {
     opacity: 1;
     display: inline-flex;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.4s ease, all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .grid-collapse-wrapper:not(.active) #waitlist-toggle-btn {

@@ -1,0 +1,187 @@
+<!-- Lyric and Tracklist Component HTML Template -->
+<div class="play-lyrics-wrap" id="play-lyrics-wrap">
+  <!-- Carousel indicator dots -->
+  <div class="carousel-indicators" id="carousel-indicators">
+    <div class="carousel-dot active" data-slide="0" title="Lyrics"></div>
+    <div class="carousel-dot" data-slide="1" title="Tracklist"></div>
+  </div>
+  <!-- Carousel -->
+  <div class="carousel-viewport" id="carousel-viewport">
+    <div class="carousel-track" id="carousel-track">
+      <!-- Slide 0: Lyrics -->
+      <div class="carousel-slide">
+        <div class="play-lyrics-content" id="play-lyrics-content"></div>
+      </div>
+      <!-- Slide 1: Tracklist -->
+      <div class="carousel-slide">
+        <div class="tracklist-container" id="tracklist-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ── 1. Carousel & Layout Container ── */
+  .play-lyrics-wrap {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 0.4s ease, 
+                margin-top 0.4s ease,
+                padding-top 0.4s ease;
+    margin-top: 0;
+    border-top: 1px solid transparent;
+    padding-top: 0;
+    position: relative;
+  }
+
+  .play-lyrics-wrap.expanded {
+    max-height: 210px;
+    opacity: 1;
+    margin-top: 8px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+  }
+
+  .carousel-viewport {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    touch-action: pan-y; /* Allow vertical scroll gesture on touch screen */
+  }
+
+  .carousel-track {
+    display: flex;
+    width: 200%; /* Two slides (Lyrics, Tracklist) */
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .carousel-slide {
+    width: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── 2. Carousel Indicator Dots (Instagram-style) ── */
+  .carousel-indicators {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+
+  .carousel-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--text-muted);
+    opacity: 0.35;
+    transition: opacity 0.3s ease, width 0.3s ease;
+    cursor: pointer;
+  }
+
+  .carousel-dot.active {
+    opacity: 0.85;
+    background-color: var(--text-primary);
+  }
+
+  /* ── 3. Slide 0: Lyrics Styling ── */
+  .play-lyrics-content {
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.8;
+    color: var(--text-muted);
+    text-align: left;
+    height: 120px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    position: relative;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .play-lyrics-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lyric-line {
+    opacity: 0.35;
+    transition: opacity 0.3s ease, transform 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+    padding: 6px 0;
+    margin: 0;
+    transform-origin: left center;
+  }
+
+  .lyric-line:hover {
+    opacity: 0.7;
+  }
+
+  .lyric-line.active {
+    opacity: 1;
+    color: var(--text-primary);
+  }
+
+  /* ── 4. Slide 1: Tracklist Styling ── */
+  .tracklist-container {
+    height: 120px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 4px;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .tracklist-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tracklist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--bg-secondary);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+  }
+
+  .tracklist-item:hover {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+  }
+
+  .tracklist-item.tl-active {
+    background-color: var(--bg-primary);
+    border-color: var(--text-primary);
+  }
+
+  .tl-num {
+    font-weight: 300;
+    color: var(--text-muted);
+    margin-right: 12px;
+  }
+
+  .tl-title {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tl-dur {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

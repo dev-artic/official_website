@@ -2,7 +2,13 @@
 if ('scrollRestoration' in history) {
   history.scrollRestoration = 'manual';
 }
+// Immediate scroll reset (covers normal load)
 window.scrollTo(0, 0);
+// Also reset on pageshow (covers back/forward bfcache restores and
+// cases where the browser defers scroll restoration until after scripts run)
+window.addEventListener('pageshow', function(e) {
+  window.scrollTo(0, 0);
+});
 
 // ── 0. Dynamic Navigation Bar ──
 function buildNavigationBar() {

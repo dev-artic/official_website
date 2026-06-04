@@ -260,9 +260,16 @@ projectDirs.forEach(slugName => {
   const coverImage = meta.cover_image || 'album-art.png';
 
   // Format script tag
+  // Strip HTML comments from components before injecting into JS to avoid backtick-in-comment SyntaxErrors
+  function stripHtmlComments(str) {
+    return str.replace(/<!--[\s\S]*?-->/g, '');
+  }
   let additionalScripts = '';
   if (scriptsContent) {
-    additionalScripts = `<script>\n${replaceComponents(scriptsContent, depth, false)}\n</script>`;
+    const processedScripts = replaceComponents(scriptsContent, depth, false);
+    // Strip HTML comments only from injected component regions, not the entire script
+    const safeScripts = processedScripts.replace(/<!--[\s\S]*?-->/g, '');
+    additionalScripts = `<script>\n${safeScripts}\n</script>`;
   }
 
   // Inject popup modal
@@ -285,8 +292,17 @@ projectDirs.forEach(slugName => {
   leftContent = replaceComponents(leftContent, depth, false);
   rightContent = replaceComponents(rightContent, depth, false);
 
-  // Pre-compile layout to substitute layout-level components (like PRODUCT_SHOWCASE_POPUP)
-  const compiledLayout = replaceComponents(projectLayout, depth, false, slugName);
+  // Generate header/footer HTML first (layout-level substitution)
+  let headerHtml = replaceComponents('{{HEADER}}', depth, true, slugName);
+  let footerHtml = replaceComponents('{{FOOTER}}', depth, true, slugName);
+
+  // Inject header/footer INTO the raw layout BEFORE replaceComponents strips them
+  const layoutWithHeaderFooter = projectLayout
+    .replace(/\{\{HEADER\}\}/g, headerHtml)
+    .replace(/\{\{FOOTER\}\}/g, footerHtml);
+
+  // Now run replaceComponents on the already-injected layout (safe to use false since header/footer are gone)
+  const compiledLayout = replaceComponents(layoutWithHeaderFooter, depth, false, slugName);
 
   // Combine component styles and page custom styles
   if (stylesContent) pageStyles.add(stylesContent);
@@ -296,20 +312,15 @@ projectDirs.forEach(slugName => {
     additionalHead = `<style>\n${Array.from(pageStyles).join('\n\n')}\n</style>`;
   }
 
-  // Replace elements in header/footer/layouts
-  let headerHtml = replaceComponents('{{HEADER}}', depth, true);
-  let footerHtml = replaceComponents('{{FOOTER}}', depth, true);
-
   let finalHtml = compiledLayout
     .replace(/\{\{PROJECT_TITLE\}\}/g, meta.title || '')
     .replace(/\{\{PROJECT_ARTIST\}\}/g, meta.artist || '')
     .replace(/\{\{PROJECT_META\}\}/g, meta.meta || '')
+    .replace(/\{\{PROJECT_SUBTITLE\}\}/g, meta.subtitle || meta.title || '')
     .replace(/\{\{COVER_IMAGE\}\}/g, coverImage)
     .replace(/\{\{PATH_DEPTH\}\}/g, depth)
     .replace(/\{\{ADDITIONAL_HEAD\}\}/g, additionalHead)
     .replace(/\{\{ADDITIONAL_SCRIPTS\}\}/g, additionalScripts)
-    .replace(/\{\{HEADER\}\}/g, headerHtml)
-    .replace(/\{\{FOOTER\}\}/g, footerHtml)
     .replace(/\{\{LEFT_COLUMN_CONTENT\}\}/g, leftContent)
     .replace(/\{\{RIGHT_COLUMN_CONTENT\}\}/g, rightContent);
 

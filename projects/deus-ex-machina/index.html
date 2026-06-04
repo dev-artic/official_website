@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — deus ex machina ({{PROJECT_SUBTITLE}})">
+  <meta name="description" content="artic. — deus ex machina (deus ex machina)">
   <meta name="author" content="artic.">
-  <title>deus ex machina — {{PROJECT_SUBTITLE}} | artic.</title>
+  <title>deus ex machina — deus ex machina | artic.</title>
   <link rel="icon" type="image/png" href="../../images/favicon.png">
   <link rel="preload" href="album-art.png" as="image">
   <link rel="stylesheet" href="../../css/design-system.css">
@@ -15,6 +15,7 @@
         history.scrollRestoration = 'manual';
       }
       window.scrollTo(0, 0);
+      window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
@@ -79,6 +80,81 @@
     resize: vertical;
     min-height: 70px;
     height: 70px;
+  }
+
+/* ── Popup/Modal Core Styles ── */
+  .print-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1000;
+    display: none; /* Controlled via JS */
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+  }
+
+  .print-modal.open {
+    display: flex;
+  }
+
+  .print-modal-backdrop {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(26, 26, 26, 0.4);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .print-modal.open .print-modal-backdrop {
+    opacity: 1;
+  }
+
+  .print-modal-container {
+    position: relative;
+    z-index: 2;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 540px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  }
+
+  .print-modal.open .print-modal-container {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  .print-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.3s ease;
+  }
+
+  .print-modal-close:hover {
+    color: var(--text-primary);
+  }
+
+  .print-modal-content {
+    width: 100%;
+    height: 100%;
   }
 
 /* Reset & Base overrides for the Premium Monochrome Bright Theme */
@@ -2058,7 +2134,20 @@
 </head>
 <body>
 
-  
+  <nav class="nav-bar delayed-reveal">
+  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
+  <a href="/about/" class="nav-link">About</a>
+  <a href="/projects/" class="nav-link">Projects</a>
+  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
+  <a href="/quarterly/" class="nav-link">Quarterly</a>
+  <a href="/contact/" class="nav-link">Contact</a>
+</nav>
+
+<!-- Theme Toggle (Integrated inside Header) -->
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
 
   <div class="page-container">
     
@@ -2400,7 +2489,9 @@
   </div>
 </div>
 
-  
+  <footer class="about-footer">
+  © 2026 artic. All Rights Reserved
+</footer>
 
   <script src="../../js/shared.js"></script>
   <script>
@@ -2628,51 +2719,7 @@
         let checkoutHtml = '';
         if (data.statusClass === 'request-purchase') {
           checkoutHtml = `
-            <!--
-  [Popup Form Component] Purchase/Order Checkout
-  
-  API INTEGRATION SPECIFICATION:
-    - Endpoint (Production): POST https://checkout-4n2xy6gsxa-uc.a.run.app
-    - Endpoint (Staging/Local): POST http://localhost:8000/api/checkout (Node server proxy)
-    - Method: POST
-    - Content-Type: application/json
-    - Payload: 
-      {
-        "name": string,
-        "email": string,
-        "phone": string,
-        "address": string,
-        "quantity": number,
-        "depositor": string,
-        "notes": string
-      }
-    
-  DATABASE SCHEMA MAPPING (Firebase Firestore):
-    - Collection: `orders`
-    - Document Fields:
-      - `name`: string
-      - `email`: string
-      - `phone`: string
-      - `address`: string
-      - `quantity`: number
-      - `depositor`: string
-      - `notes`: string
-      - `created_at`: timestamp (ServerValue.TIMESTAMP / serverTimestamp())
-      
-  DATABASE SCHEMA MAPPING (Local SQLite):
-    - Table: `orders`
-    - Columns:
-      - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
-      - `name`: TEXT NOT NULL
-      - `email`: TEXT NOT NULL
-      - `phone`: TEXT NOT NULL
-      - `address`: TEXT NOT NULL
-      - `quantity`: INTEGER NOT NULL
-      - `depositor`: TEXT NOT NULL
-      - `notes`: TEXT
-      - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--->
-<div class="checkout-scroll-container">
+            <div class="checkout-scroll-container">
   <div class="checkout-form-group">
     <label class="checkout-label">이름 *</label>
     <input type="text" id="chk-name" class="checkout-input" required placeholder="성함을 입력하세요">
@@ -2890,16 +2937,19 @@
         document.body.style.overflow = '';
       }
 
-      document.querySelectorAll('.archive-entry[data-print]').forEach(entry => {
-        entry.querySelector('.archive-item').addEventListener('click', function(e) {
-          e.preventDefault();
-          const key = entry.dataset.print;
-          openModal(key);
-        });
+      // Use event delegation on the document for robustness against timing/DOM issues
+      document.addEventListener('click', function(e) {
+        const archiveItem = e.target.closest('.archive-entry[data-print] .archive-item');
+        if (!archiveItem) return;
+        e.preventDefault();
+        const entry = archiveItem.closest('.archive-entry[data-print]');
+        if (!entry) return;
+        const key = entry.dataset.print;
+        openModal(key);
       });
 
-      closeBtn.addEventListener('click', closeModal);
-      overlay.addEventListener('click', closeModal);
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (overlay) overlay.addEventListener('click', closeModal);
 
       // ESC key to close modal
       window.addEventListener('keydown', function(e) {
@@ -5023,14 +5073,20 @@
           playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
           events: {
             onReady: function(event) {
-              // Auto-play the first track once the Play section has visually faded in.
-              // The entrance animation for .content-columns starts at 2.8s and takes 0.5s (fully visible at 3.3s).
-              // We will trigger playback at 3.1s for a natural synchronization.
               var elapsed = Date.now() - pageLoadTime;
               var delay = Math.max(0, 3100 - elapsed);
               setTimeout(function() {
                 if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                  event.target.playVideo();
+                  // Attempt autoplay (may be blocked by browser policy without user gesture)
+                  try { event.target.playVideo(); } catch(e) {}
+                  // If browser blocks autoplay, no PLAYING event fires — detect after 1.5s
+                  setTimeout(function() {
+                    if (!isPlaying) {
+                      // Autoplay was blocked: show Ready state so user can click to play
+                      elStatus.textContent = 'Ready';
+                      widget.classList.remove('is-playing');
+                    }
+                  }, 1500);
                 }
               }, delay);
             },

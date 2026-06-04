@@ -163,6 +163,7 @@ const baseLayoutContent = `<!DOCTYPE html>
         history.scrollRestoration = 'manual';
       }
       window.scrollTo(0, 0);
+      window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
@@ -202,6 +203,7 @@ const projectLayoutContent = `<!DOCTYPE html>
         history.scrollRestoration = 'manual';
       }
       window.scrollTo(0, 0);
+      window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
@@ -395,32 +397,7 @@ fs.writeFileSync(path.join(templatesDir, 'components/base/button-link.html'), bu
 // -------------------------------------------------------------
 
 // components/forms/waitlist-form-embedded.html
-const waitlistFormContent = `<!--
-  [Embedded Form Component] Join the Waitlist
-  
-  API INTEGRATION SPECIFICATION:
-    - Endpoint (Production): POST https://waitlist-4n2xy6gsxa-uc.a.run.app
-    - Endpoint (Staging/Local): POST http://127.0.0.1:5001/artic-official-home/us-central1/waitlist
-    - Method: POST
-    - Content-Type: application/json
-    - Payload: { "name": "user", "email": "user@example.com" }
-    
-  DATABASE SCHEMA MAPPING (Firebase Firestore):
-    - Collection: \\\`quarterly_subscribers\\\`
-    - Document Fields:
-      - \\\`name\\\`: string
-      - \\\`email\\\`: string
-      - \\\`created_at\\\`: timestamp (ServerValue.TIMESTAMP / serverTimestamp())
-      
-  DATABASE SCHEMA MAPPING (Local SQLite):
-    - Table: \\\`quarterly_subscribers\\\`
-    - Columns:
-      - \\\`id\\\`: INTEGER PRIMARY KEY AUTOINCREMENT
-      - \\\`name\\\`: TEXT NOT NULL
-      - \\\`email\\\`: TEXT NOT NULL
-      - \\\`created_at\\\`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--->
-<div class="waitlist-container">
+const waitlistFormContent = `<div class="waitlist-container">
   <!-- Button Wrapper -->
   <div id="waitlist-btn-wrapper" class="grid-collapse-wrapper active">
     <div class="grid-collapse-content">
@@ -668,51 +645,7 @@ const waitlistFormContent = `<!--
 `;
 
 // components/forms/checkout-form-popup.html
-const checkoutFormContent = `<!--
-  [Popup Form Component] Purchase/Order Checkout
-  
-  API INTEGRATION SPECIFICATION:
-    - Endpoint (Production): POST https://checkout-4n2xy6gsxa-uc.a.run.app
-    - Endpoint (Staging/Local): POST http://localhost:8000/api/checkout (Node server proxy)
-    - Method: POST
-    - Content-Type: application/json
-    - Payload: 
-      {
-        "name": string,
-        "email": string,
-        "phone": string,
-        "address": string,
-        "quantity": number,
-        "depositor": string,
-        "notes": string
-      }
-    
-  DATABASE SCHEMA MAPPING (Firebase Firestore):
-    - Collection: \`orders\`
-    - Document Fields:
-      - \`name\`: string
-      - \`email\`: string
-      - \`phone\`: string
-      - \`address\`: string
-      - \`quantity\`: number
-      - \`depositor\`: string
-      - \`notes\`: string
-      - \`created_at\`: timestamp (ServerValue.TIMESTAMP / serverTimestamp())
-      
-  DATABASE SCHEMA MAPPING (Local SQLite):
-    - Table: \`orders\`
-    - Columns:
-      - \`id\`: INTEGER PRIMARY KEY AUTOINCREMENT
-      - \`name\`: TEXT NOT NULL
-      - \`email\`: TEXT NOT NULL
-      - \`phone\`: TEXT NOT NULL
-      - \`address\`: TEXT NOT NULL
-      - \`quantity\`: INTEGER NOT NULL
-      - \`depositor\`: TEXT NOT NULL
-      - \`notes\`: TEXT
-      - \`created_at\`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--->
-<div class="checkout-scroll-container">
+const checkoutFormContent = `<div class="checkout-scroll-container">
   <div class="checkout-form-group">
     <label class="checkout-label">이름 *</label>
     <input type="text" id="chk-name" class="checkout-input" required placeholder="성함을 입력하세요">

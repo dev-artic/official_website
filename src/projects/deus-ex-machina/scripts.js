@@ -405,16 +405,19 @@
         document.body.style.overflow = '';
       }
 
-      document.querySelectorAll('.archive-entry[data-print]').forEach(entry => {
-        entry.querySelector('.archive-item').addEventListener('click', function(e) {
-          e.preventDefault();
-          const key = entry.dataset.print;
-          openModal(key);
-        });
+      // Use event delegation on the document for robustness against timing/DOM issues
+      document.addEventListener('click', function(e) {
+        const archiveItem = e.target.closest('.archive-entry[data-print] .archive-item');
+        if (!archiveItem) return;
+        e.preventDefault();
+        const entry = archiveItem.closest('.archive-entry[data-print]');
+        if (!entry) return;
+        const key = entry.dataset.print;
+        openModal(key);
       });
 
-      closeBtn.addEventListener('click', closeModal);
-      overlay.addEventListener('click', closeModal);
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      if (overlay) overlay.addEventListener('click', closeModal);
 
       // ESC key to close modal
       window.addEventListener('keydown', function(e) {
@@ -2538,14 +2541,20 @@
           playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
           events: {
             onReady: function(event) {
-              // Auto-play the first track once the Play section has visually faded in.
-              // The entrance animation for .content-columns starts at 2.8s and takes 0.5s (fully visible at 3.3s).
-              // We will trigger playback at 3.1s for a natural synchronization.
               var elapsed = Date.now() - pageLoadTime;
               var delay = Math.max(0, 3100 - elapsed);
               setTimeout(function() {
                 if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                  event.target.playVideo();
+                  // Attempt autoplay (may be blocked by browser policy without user gesture)
+                  try { event.target.playVideo(); } catch(e) {}
+                  // If browser blocks autoplay, no PLAYING event fires — detect after 1.5s
+                  setTimeout(function() {
+                    if (!isPlaying) {
+                      // Autoplay was blocked: show Ready state so user can click to play
+                      elStatus.textContent = 'Ready';
+                      widget.classList.remove('is-playing');
+                    }
+                  }, 1500);
                 }
               }, delay);
             },

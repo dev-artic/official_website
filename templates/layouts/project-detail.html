@@ -15,6 +15,7 @@
         history.scrollRestoration = 'manual';
       }
       window.scrollTo(0, 0);
+      window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }

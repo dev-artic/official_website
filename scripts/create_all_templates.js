@@ -413,7 +413,7 @@ const waitlistFormContent = `<!--
 <div class="waitlist-container">
   <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
   
-  <form id="waitlist-form" class="waitlist-form">
+  <form id="waitlist-form" class="waitlist-form" novalidate>
     <div class="waitlist-fields-wrapper">
       <div class="waitlist-field-group">
         <input type="text" id="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
@@ -458,24 +458,23 @@ const waitlistFormContent = `<!--
   }
 
   .waitlist-form {
-    display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     max-width: 320px;
     opacity: 0;
+    max-height: 0;
+    overflow: hidden;
     transform: translateY(8px);
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
+    margin-top: 0;
   }
 
   .waitlist-form.active {
-    display: block;
     opacity: 1;
+    max-height: 120px;
     transform: translateY(0);
     pointer-events: auto;
-    position: relative;
+    margin-top: 12px;
   }
 
   /* Fields stacked layout */

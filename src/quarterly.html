@@ -362,17 +362,12 @@ body {
           Promise.all([fetchPromise, animPromise])
           .then(([data]) => {
             // Smoothly collapse form and fade in premium success messaging
-            form.style.height = form.offsetHeight + 'px';
-            // Force reflow
-            form.offsetHeight;
-            form.style.overflow = 'hidden';
-            form.style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
-            form.style.height = '0px';
+            form.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+            form.style.maxHeight = '0px';
             form.style.opacity = '0';
             form.style.marginTop = '0px';
 
             setTimeout(() => {
-              form.style.display = 'none';
               messageDiv.className = 'waitlist-message active';
               messageDiv.innerHTML = `
                 <div class="success-title">STAY TUNED.</div>

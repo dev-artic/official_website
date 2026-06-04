@@ -1,24 +1,39 @@
-# ARTIC / Official Gallery & Webzine Website
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/logo-white.png">
+    <source media="(prefers-color-scheme: light)" srcset="images/logo-black.png">
+    <img alt="artic." src="images/logo-black.png" width="220">
+  </picture>
+</p>
 
-이 리포지토리는 예술 갤러리 및 모던 에디토리얼 웹진 스타일의 초고화질 정적 웹사이트입니다.
-중복과 하드코딩을 배제한 **디자인 템플릿 엔진 시스템**이 구축되어 있어, 구조적이고 깔끔한 소스 관리와 효율적인 데이터/용량 최적화를 제공합니다.
+<p align="center">
+  <strong>Art, Culture, and Archive.</strong><br>
+  아티스트의 raw하고 순수한 최초의 메시지를 조명하는 프리미엄 에디토리얼 웹진 & 아카이빙 플랫폼.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Architecture-Modular%20Templates-black?style=flat" alt="Arch">
+  <img src="https://img.shields.io/badge/Local%20Staging-Node%20server.js-lightgrey?style=flat" alt="Staging">
+  <img src="https://img.shields.io/badge/Database-Firestore%20%26%20Notion-blue?style=flat" alt="DB">
+  <img src="https://img.shields.io/badge/Backend-Cloud%20Functions-orange?style=flat" alt="Backend">
+</p>
 
 ---
 
-## 📂 폴더 구조 및 아키텍처 (Repository Directory Layout)
+## 🏛️ 아키텍처 및 디자인 템플릿 아카이빙 (Modular Repository Layout)
 
-중복 마크업을 제거하고 재사용성을 최대화하도록 템플릿과 소스 콘텐츠 디렉토리가 완벽히 분리되어 있습니다.
+artic. 서비스는 중복 마크업을 제거하고 디자인의 일관성을 완벽히 통제할 수 있도록 **컴파일 엔진 기반 디자인 템플릿 구조**로 설계되었습니다.
 
 ```
 Homepage/
-├── index.html            # [빌드본] 메인 HTML (템플릿 컴파일 결과물)
+├── index.html            # [빌드본] 메인 홈 화면 (컴파일 결과물)
 ├── src/                  # [원본 소스] 각 페이지별 고유 콘텐츠 조각 및 메타데이터
-│   ├── index.html        # 메인 홈 화면 콘텐츠 소스
-│   ├── about.html        # About 페이지 콘텐츠 소스
-│   ├── contact.html      # Contact 페이지 콘텐츠 소스
-│   ├── quarterly.html    # Quarterly 페이지 콘텐츠 소스
-│   ├── projects.html     # Projects 페이지 콘텐츠 소스
-│   └── projects/         # 개별 프로젝트 상세 페이지 콘텐츠 소스
+│   ├── index.html        # 메인 홈 화면 본문 소스
+│   ├── about.html        # About 페이지 본문 소스
+│   ├── contact.html      # Contact 페이지 본문 소스
+│   ├── quarterly.html    # Quarterly 페이지 본문 소스
+│   ├── projects.html     # Projects 페이지 본문 소스
+│   └── projects/         # 개별 프로젝트 상세 페이지 본문 소스
 │       ├── deus-ex-machina.html
 │       ├── gagosian-party-music.html
 │       ├── neutral-interview.html
@@ -67,7 +82,7 @@ Homepage/
 
 ---
 
-## 🔄 개발, 테스트 및 배포 프로세스 (Operations & Deployment Process)
+## ⚡ 개발, 컴파일 및 로컬 스테이징 워크플로우 (Development Operations)
 
 artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다.
 
@@ -110,34 +125,34 @@ graph TD
 ```
 
 ### 1️⃣ 개발 단계 (Development Phase)
-* **프론트엔드/디자인 수정**:
-  * 중복 마크업을 직접 고치지 않고, `templates/` 의 마스터 레이아웃(`layouts/base.html`, `project-detail.html`) 이나 공통 템플릿들을 수정합니다.
+* **템플릿 중심 개발**:
+  * 상단 네비게이션, 푸터, 레이아웃 등 여러 페이지에 중복되는 구조는 `templates/layouts/` 마스터 쉘이나 `templates/global/` 파츠에서 일괄 관리합니다.
   * 각 페이지의 본문 내용은 `src/` 폴더 아래의 파일(예: `src/about.html` 또는 `src/projects/deus-ex-machina.html`)에 Front Matter와 함께 최소한의 스타일/스크립트/마크업으로 기재합니다.
-* **컴파일 및 빌드 실행**:
-  * 소스 작성이 끝나면 프로젝트 루트에서 아래의 컴파일 스크립트를 기동합니다.
+* **정적 컴파일러 실행**:
+  * 소스 작성이 완료되면 아래 명령어로 페이지 빌드를 가동합니다.
     ```bash
     node scripts/build_pages.js
     ```
-  * 이 도구는 `templates/`에 기재된 글래스모피즘 모달, 헤더/푸터, 오디오 플레이어, Waitlist/Checkout 폼 등을 `src/` 본문과 결합하여 최종 HTML을 빌드하며, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 추출/병합해 줍니다.
+  * 이 스크립트는 `templates/`에 구성된 디자인 요소들을 `src/` 본문과 결합하여 최종 HTML을 빌드하고, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 통합하는 렌더링 최적화를 수행합니다.
 * **백엔드 API 로직 개발**:
-  * 대기명단 가입 및 결제 주문 처리는 **`functions/index.js`** 파일에서 Node.js를 기반으로 구현 및 관리됩니다.
+  * 대기명단 가입 및 결제 주문 처리는 **`functions/index.js`** 파일에서 Node.js를 기반으로 안전하게 설계 및 작성됩니다.
 
 ---
 
 ### 2️⃣ 로컬 스테이징 검증 단계 (Local Staging & Testing Phase)
 실서버 배포 전, 로컬 환경에서 정적 라우팅 및 데이터 적재, 이메일 발송 기능을 완벽히 사전 검증합니다.
 
-1. **로컬 스테이징 서버 기동**:
-   * 프론트엔드 및 데이터 프록시를 구동하기 위해 아래 명령어를 실행하여 `http://localhost:8000` 주소로 로컬 서버를 실행합니다.
+1. **로컬 스테이징 서버 구동**:
+   * 프론트엔드 서비스 및 로컬 Mock DB 가동을 위해 루트 경로에서 다음 명령을 실행합니다.
      ```bash
      node server.js
      ```
-2. **Firebase 로컬 에뮬레이터 실행**:
-   * 로컬에서 Cloud Functions 백엔드와 Firestore를 모의하기 위해 아래 명령어를 구동합니다 (JRE 설치 필요).
+2. **Firebase 에뮬레이터 UI 실행**:
+   * Cloud Functions 백엔드 및 Firestore를 로컬에서 구동하기 위해 다음 명령을 실행합니다 (JRE 설치 필요).
      ```bash
      npx firebase-tools emulators:start
      ```
-   * 브라우저가 `localhost` 도메인에 있을 경우, 클라이언트 스크립트는 실서비스 백엔드가 아닌 로컬 가상 Functions 서버(`http://127.0.0.1:5001`)로 자동 스위칭됩니다.
+   * 브라우저가 `localhost` 도메인에 있을 경우, 클라이언트 스크립트는 실서비스 백엔드가 아닌 로컬 가상 Functions 서버(`http://127.0.0.1:5001`)로 자동 라우트됩니다.
 3. **SMTP 모의 이메일 및 데이터 체크**:
    * 결제 폼 제출 시 Suite UI(`http://127.0.0.1:4000`) 대시보드에서 가상 적재 데이터와 이메일 발송 로그를 체크합니다.
    * Firebase 에뮬레이터를 켜지 않고 가볍게 UI/정적 빌드 검증을 진행할 때는, `server.js`가 로컬 SQLite 파일인 `orders.db`에 주문 데이터를 대체 보관(Fallback)하여 에러를 방지합니다.
@@ -146,7 +161,7 @@ graph TD
 
 ### 3️⃣ 배포 단계 (Deployment Phase)
 * **A. 프론트엔드 배포 (GitHub Pages)**:
-  * 로컬에서 `node scripts/build_pages.js` 실행 후, 컴파일 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.
+  * 로컬에서 컴파일러(`node scripts/build_pages.js`) 실행 후, 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.
     ```bash
     git add .
     git commit -m "feat: compile static changes and update about sections"

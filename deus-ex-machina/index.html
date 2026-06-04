@@ -5033,7 +5033,10 @@
         var currentSlide = 0;
         var isDragging   = false;
         var startX       = 0;
+        var startY       = 0;
         var dragDeltaX   = 0;
+        var isScrolling  = false;
+        var isSwiping    = false;
         var threshold    = 40;
 
         function goToSlide(idx) {
@@ -5075,21 +5078,62 @@
           else goToSlide(currentSlide);
         });
 
-        // ── Touch drag (mobile swipe) ───────────────────────────────
+        // ── Touch drag (mobile swipe with mutual scroll lock) ────────
         viewport.addEventListener('touchstart', function(e) {
-          startX = e.touches[0].clientX; dragDeltaX = 0;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          dragDeltaX = 0;
+          isScrolling = false;
+          isSwiping = false;
           carTrack.style.transition = 'none';
         }, { passive: true });
+
         viewport.addEventListener('touchmove', function(e) {
-          dragDeltaX = e.touches[0].clientX - startX;
-          var baseOffset = -currentSlide * viewport.offsetWidth;
-          carTrack.style.transform = 'translateX(' + (baseOffset + dragDeltaX) + 'px)';
-        }, { passive: true });
+          var currentX = e.touches[0].clientX;
+          var currentY = e.touches[0].clientY;
+          var diffX = currentX - startX;
+          var diffY = currentY - startY;
+
+          // Determine initial drag direction after moving past threshold (8px)
+          if (!isScrolling && !isSwiping) {
+            var gestureThreshold = 8;
+            if (Math.abs(diffX) > gestureThreshold || Math.abs(diffY) > gestureThreshold) {
+              if (Math.abs(diffX) > Math.abs(diffY)) {
+                isSwiping = true;
+              } else {
+                isScrolling = true;
+              }
+            }
+          }
+
+          if (isSwiping) {
+            // Lock vertical page scroll and drag carousel
+            if (e.cancelable) e.preventDefault();
+            dragDeltaX = diffX;
+            var baseOffset = -currentSlide * viewport.offsetWidth;
+            carTrack.style.transform = 'translateX(' + (baseOffset + dragDeltaX) + 'px)';
+          }
+          // If isScrolling is true, we let the browser handle vertical page scroll naturally
+        }, { passive: false });
+
         viewport.addEventListener('touchend', function() {
           carTrack.style.transition = '';
-          if (dragDeltaX < -threshold) goToSlide(currentSlide + 1);
-          else if (dragDeltaX > threshold) goToSlide(currentSlide - 1);
-          else goToSlide(currentSlide);
+          if (isSwiping) {
+            if (dragDeltaX < -threshold) goToSlide(currentSlide + 1);
+            else if (dragDeltaX > threshold) goToSlide(currentSlide - 1);
+            else goToSlide(currentSlide);
+          } else if (isScrolling) {
+            goToSlide(currentSlide);
+          }
+          isScrolling = false;
+          isSwiping = false;
+        });
+
+        viewport.addEventListener('touchcancel', function() {
+          carTrack.style.transition = '';
+          goToSlide(currentSlide);
+          isScrolling = false;
+          isSwiping = false;
         });
 
         // ── Render tracklist (TRACKS is accessible here) ─────────────

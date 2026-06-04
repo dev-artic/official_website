@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>deus ex machina // Lyrics Sync Editor</title>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #121212;
+      --bg-card: #1A1A1A;
+      --border-color: #2D2D2D;
+      --text-primary: #FFFFFF;
+      --text-muted: #888888;
+      --accent: #E5E5E5;
+      --accent-active: #10B981;
+      --accent-danger: #EF4444;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 40px 24px;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .editor-container {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Sidebar: Controls & Player */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: sticky;
+      top: 40px;
+    }
+
+    .sidebar-section {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-section h2 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    select {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Player Wrapper */
+    .player-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background-color: #000;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    #yt-player-placeholder {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Hotkeys Guide */
+    .guide-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .guide-list kbd {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-family: monospace;
+      color: var(--text-primary);
+      margin-right: 4px;
+    }
+
+    /* Right Main Panel: Lyrics List */
+    .lyrics-panel {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .lyrics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      background-color: #222;
+    }
+
+    .btn.primary {
+      background-color: var(--text-primary);
+      color: var(--bg-primary);
+      border-color: var(--text-primary);
+    }
+
+    .btn.primary:hover {
+      opacity: 0.85;
+      background-color: var(--text-primary);
+    }
+
+    .btn.danger {
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
+    }
+
+    .btn.danger:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-color: var(--border-color);
+    }
+
+    /* Lyrics Timeline List */
+    .lyrics-timeline-container {
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lyrics-line-row {
+      display: grid;
+      grid-template-columns: 80px 100px 1fr 100px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .lyrics-line-row:hover {
+      background-color: #1A1A1A;
+    }
+
+    .lyrics-line-row.active {
+      background-color: #262626;
+      border-left: 3px solid var(--text-primary);
+    }
+
+    .lyrics-line-row.syncing-next {
+      background-color: rgba(16, 185, 129, 0.08);
+      border-left: 3px solid var(--accent-active);
+    }
+
+    .lyrics-line-index {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .lyrics-line-time {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      background-color: var(--bg-card);
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .lyrics-line-text {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .lyrics-line-row.active .lyrics-line-text {
+      font-weight: 600;
+    }
+
+    .lyrics-line-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .nudge-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .nudge-btn:hover {
+      border-color: var(--accent);
+      background-color: var(--bg-card);
+    }
+
+    /* Notification overlay */
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--text-primary);
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .big-tap-trigger {
+      width: 100%;
+      height: 80px;
+      background-color: var(--bg-card);
+      border: 2px dashed var(--border-color);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .big-tap-trigger:hover {
+      border-color: var(--accent);
+      color: var(--text-primary);
+      background-color: #222;
+    }
+
+    .big-tap-trigger:active {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="editor-container">
+    <header>
+      <div>
+        <span class="subtitle">deus ex machina</span>
+        <h1>Lyrics Sync Editor</h1>
+      </div>
+      <a href="./" style="font-size: 0.75rem; color: var(--text-muted); text-decoration: none; border-bottom: 1px dotted var(--text-muted);">Back to Album</a>
+    </header>
+
+    <div class="editor-layout">
+      <!-- Left Column -->
+      <div class="sidebar">
+        <!-- Track Selection -->
+        <div class="sidebar-section">
+          <h2>Select Track</h2>
+          <select id="track-select">
+            <!-- Populated via script -->
+          </select>
+        </div>
+
+        <!-- Player -->
+        <div class="sidebar-section">
+          <h2>Audio Player</h2>
+          <div class="player-wrapper">
+            <div id="yt-player-placeholder"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+            <span id="player-time-display">0:00 / 0:00</span>
+            <span id="player-status">Uninitialized</span>
+          </div>
+        </div>
+
+        <!-- Hotkey Guide -->
+        <div class="sidebar-section">
+          <h2>Hotkey Guide</h2>
+          <div class="guide-list">
+            <div><kbd>Space</kbd> Play/Pause (when focus is on page)</div>
+            <div><kbd>Enter</kbd> (Or Tap panel) Sync current line & advance</div>
+            <div><kbd>↑</kbd> / <kbd>↓</kbd> Nudge active line time by ±0.1s</div>
+            <div><kbd>Ctrl</kbd>+<kbd>S</kbd> Save to local server database</div>
+            <div><kbd>Double Click</kbd> any lyric line to seek audio</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="lyrics-panel">
+        <div class="lyrics-header">
+          <h2>Syncing Timeline</h2>
+          <div class="btn-group">
+            <button class="btn danger" id="btn-reset">Reset Timings</button>
+            <button class="btn" id="btn-copy">Copy JSON</button>
+            <button class="btn primary" id="btn-save">Save to Server</button>
+          </div>
+        </div>
+
+        <!-- Big Keyboard Sync Trigger -->
+        <div class="big-tap-trigger" id="tap-trigger">
+          HIT ENTER OR TAP HERE TO SYNC CURRENT LINE
+        </div>
+
+        <!-- Scrollable Lyric Items -->
+        <div class="lyrics-timeline-container" id="lyrics-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast-notif">Saved and compiled successfully!</div>
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  
+  <script>
+    const TRACKS = [
+      { vid: "DlVMIGT30_c", title: "from corners to switch", duration: "2:26" },
+      { vid: "X9mz9ldkaNY", title: "발버둥",                 duration: "3:40" },
+      { vid: "ypC5FeYc8wY", title: "기면증",                 duration: "2:30" },
+      { vid: "98P1Utmb-94", title: "곁눈박이",               duration: "3:34" },
+      { vid: "BQR87WzBsAo", title: "일조량 변환 메트로놈",    duration: "3:23" },
+      { vid: "QXozHrPAVcw", title: "043 interlude",          duration: "2:00" },
+      { vid: "U56Yo5BXpXA", title: "going through (with Yiloy)", duration: "3:50" },
+      { vid: "7OjgubVlMrk", title: "bad therapy",            duration: "3:35" },
+      { vid: "_BM0fsBFPCU", title: "오로라",                 duration: "3:39" },
+      { vid: "PNVFfAzqZGo", title: "tied.",                  duration: "2:50" },
+      { vid: "37YNUwxP6-w", title: "후일담",                 duration: "3:55" }
+    ];
+
+    let lyricsDatabase = {};
+    let currentVid = TRACKS[0].vid;
+    let localLyrics = []; // active lyric list for editing
+    let activeLineIdx = 0; // index of the line that will be stamped next
+    let activeFocusIdx = 0; // row focused for nudge operations
+    let ytPlayer = null;
+    let progressTimer = null;
+
+    // DOM Refs
+    const trackSelect = document.getElementById('track-select');
+    const lyricsContainer = document.getElementById('lyrics-container');
+    const tapTrigger = document.getElementById('tap-trigger');
+    const btnSave = document.getElementById('btn-save');
+    const btnReset = document.getElementById('btn-reset');
+    const btnCopy = document.getElementById('btn-copy');
+    const toastNotif = document.getElementById('toast-notif');
+    const playerTimeDisplay = document.getElementById('player-time-display');
+    const playerStatus = document.getElementById('player-status');
+
+    // Load initial database
+    async function loadDatabase() {
+      try {
+        const res = await fetch('/api/get-lyrics');
+        if (res.ok) {
+          lyricsDatabase = await res.json();
+          console.log('Loaded database:', lyricsDatabase);
+        } else {
+          console.warn('Failed to load lyrics from server. Fallback to empty.');
+        }
+      } catch (err) {
+        console.error('Error fetching database:', err);
+      }
+      populateTrackSelect();
+      loadTrack(TRACKS[0].vid);
+    }
+
+    function populateTrackSelect() {
+      trackSelect.innerHTML = '';
+      TRACKS.forEach((t, i) => {
+        const opt = document.createElement('option');
+        opt.value = t.vid;
+        opt.textContent = `${String(i + 1).padStart(2, '0')}. ${t.title} (${t.duration})`;
+        trackSelect.appendChild(opt);
+      });
+    }
+
+    function showToast(msg) {
+      toastNotif.textContent = msg;
+      toastNotif.classList.add('show');
+      setTimeout(() => {
+        toastNotif.classList.remove('show');
+      }, 3000);
+    }
+
+    // Load selected track
+    function loadTrack(vid) {
+      currentVid = vid;
+      
+      // Load or initialize lyrics list
+      const originalLyrics = lyricsDatabase[vid] || [];
+      localLyrics = JSON.parse(JSON.stringify(originalLyrics)); // deep copy
+
+      activeLineIdx = 0;
+      activeFocusIdx = 0;
+
+      renderLyrics();
+
+      // Load into YT player if initialized
+      if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
+        ytPlayer.cueVideoById(vid);
+        playerStatus.textContent = 'Ready';
+      }
+    }
+
+    function renderLyrics() {
+      lyricsContainer.innerHTML = '';
+      if (localLyrics.length === 0) {
+        lyricsContainer.innerHTML = '<div style="padding:20px; color:var(--text-muted); font-size:0.8rem; text-align:center;">가사가 비어있습니다.</div>';
+        return;
+      }
+
+      localLyrics.forEach((line, i) => {
+        const row = document.createElement('div');
+        row.className = 'lyrics-timeline-row';
+        if (i === activeFocusIdx) row.classList.add('active');
+        if (i === activeLineIdx) row.classList.add('syncing-next');
+
+        row.innerHTML = `
+          <span class="lyrics-line-index">${String(i + 1).padStart(2, '0')}</span>
+          <span class="lyrics-line-time" title="Click to seek">${line.time.toFixed(1)}s</span>
+          <span class="lyrics-line-text">${line.text}</span>
+          <div class="lyrics-line-actions">
+            <button class="nudge-btn" onclick="nudgeTime(${i}, -0.1, event)">-</button>
+            <button class="nudge-btn" onclick="nudgeTime(${i}, 0.1, event)">+</button>
+          </div>
+        `;
+
+        // Seek on double-click
+        row.addEventListener('dblclick', () => {
+          if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+            ytPlayer.seekTo(line.time, true);
+          }
+        });
+
+        // Set focus row on click
+        row.addEventListener('click', () => {
+          activeFocusIdx = i;
+          activeLineIdx = i;
+          renderLyrics();
+        });
+
+        lyricsContainer.appendChild(row);
+      });
+
+      // Keep active focused element in view
+      const activeEl = lyricsContainer.children[activeFocusIdx];
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // Update tap panel display text
+      if (activeLineIdx < localLyrics.length) {
+        tapTrigger.textContent = `[ENTER / CLICK HERE] SYNC LINE ${activeLineIdx + 1}: "${localLyrics[activeLineIdx].text}"`;
+      } else {
+        tapTrigger.textContent = "ALL LINES SYNCED! PRESS CTRL+S TO SAVE.";
+      }
+    }
+
+    function nudgeTime(idx, amount, e) {
+      if (e) e.stopPropagation(); // prevent row click triggers
+      if (idx >= 0 && idx < localLyrics.length) {
+        localLyrics[idx].time = Math.max(0, localLyrics[idx].time + amount);
+        renderLyrics();
+      }
+    }
+
+    // Sync trigger function
+    function recordCurrentTimestamp() {
+      if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+      if (activeLineIdx >= localLyrics.length) return;
+
+      const curTime = ytPlayer.getCurrentTime();
+      localLyrics[activeLineIdx].time = Number(curTime.toFixed(1));
+      
+      activeFocusIdx = activeLineIdx;
+      activeLineIdx = Math.min(localLyrics.length, activeLineIdx + 1);
+
+      renderLyrics();
+    }
+
+    // Save back to backend server database
+    async function saveToServer() {
+      btnSave.disabled = true;
+      try {
+        const res = await fetch('/api/save-lyrics', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            vid: currentVid,
+            lyrics: localLyrics
+          })
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+          showToast('Lyrics sync saved and index.html compiled!');
+          lyricsDatabase[currentVid] = JSON.parse(JSON.stringify(localLyrics));
+        } else {
+          showToast(`Error: ${result.error || 'Failed to save to server'}`);
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Connection failed. Server offline?');
+      }
+      btnSave.disabled = false;
+    }
+
+    // Event listeners
+    trackSelect.addEventListener('change', (e) => {
+      loadTrack(e.target.value);
+    });
+
+    btnSave.addEventListener('click', saveToServer);
+
+    btnReset.addEventListener('click', () => {
+      if (confirm('모든 라인의 타임스탬프를 0.0s로 리셋하겠습니까?')) {
+        localLyrics.forEach(line => line.time = 0);
+        activeLineIdx = 0;
+        activeFocusIdx = 0;
+        renderLyrics();
+      }
+    });
+
+    btnCopy.addEventListener('click', () => {
+      const dataStr = JSON.stringify(localLyrics, null, 2);
+      navigator.clipboard.writeText(dataStr).then(() => {
+        showToast('JSON copied to clipboard!');
+      }).catch(err => {
+        console.error(err);
+        showToast('Copy failed.');
+      });
+    });
+
+    tapTrigger.addEventListener('click', recordCurrentTimestamp);
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+      // Spacebar: Play/Pause audio
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+          const state = ytPlayer.getPlayerState();
+          if (state === YT.PlayerState.PLAYING) {
+            ytPlayer.pauseVideo();
+          } else {
+            ytPlayer.playVideo();
+          }
+        }
+      }
+
+      // Enter key: Mark current line and advance
+      if (e.code === 'Enter') {
+        e.preventDefault();
+        recordCurrentTimestamp();
+      }
+
+      // Up/Down Arrows: Nudge active focused line timing
+      if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        nudgeTime(activeFocusIdx, 0.1);
+      }
+      if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        nudgeTime(activeFocusIdx, -0.1);
+      }
+
+      // Ctrl + S: Save
+      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyS') {
+        e.preventDefault();
+        saveToServer();
+      }
+    });
+
+    // YouTube Player Initialization
+    window.onYouTubeIframeAPIReady = function() {
+      ytPlayer = new YT.Player('yt-player-placeholder', {
+        width: '100%',
+        height: '100%',
+        videoId: currentVid,
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: () => {
+            playerStatus.textContent = 'Ready';
+            startProgressLoop();
+          },
+          onStateChange: (event) => {
+            if (event.data === YT.PlayerState.PLAYING) {
+              playerStatus.textContent = 'Playing';
+            } else if (event.data === YT.PlayerState.PAUSED) {
+              playerStatus.textContent = 'Paused';
+            } else if (event.data === YT.PlayerState.ENDED) {
+              playerStatus.textContent = 'Ended';
+            }
+          }
+        }
+      });
+    };
+
+    function startProgressLoop() {
+      if (progressTimer) clearInterval(progressTimer);
+      progressTimer = setInterval(() => {
+        if (ytPlayer && typeof ytPlayer.getCurrentTime === 'function' && typeof ytPlayer.getDuration === 'function') {
+          const cur = ytPlayer.getCurrentTime();
+          const dur = ytPlayer.getDuration();
+          if (dur > 0) {
+            playerTimeDisplay.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+          }
+        }
+      }, 100);
+    }
+
+    function formatTime(sec) {
+      if (isNaN(sec) || !isFinite(sec)) return '0:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' + s : s}`;
+    }
+
+    // Init
+    loadDatabase();
+  </script>
+</body>
+</html>

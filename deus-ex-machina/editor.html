@@ -585,6 +585,16 @@
       }
     }
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function renderLyrics() {
       lyricsContainer.innerHTML = '';
       if (localLyrics.length === 0) {
@@ -601,34 +611,72 @@
         row.innerHTML = `
           <span class="lyrics-line-index">${String(i + 1).padStart(2, '0')}</span>
           <span class="lyrics-line-time" title="Click to seek">${line.time.toFixed(1)}s</span>
-          <span class="lyrics-line-text">${line.text}</span>
+          <input type="text" class="lyrics-line-input" value="${escapeHtml(line.text)}" data-idx="${i}">
           <div class="lyrics-line-actions">
             <button class="nudge-btn" onclick="nudgeTime(${i}, -0.1, event)">-</button>
             <button class="nudge-btn" onclick="nudgeTime(${i}, 0.1, event)">+</button>
+            <button class="nudge-btn split-btn" title="Split line at cursor (Ctrl+Enter)" onclick="handleSplitClick(${i}, event)">✂</button>
+            <button class="nudge-btn del-btn" title="Delete line" onclick="deleteLine(${i}, event)">×</button>
           </div>
         `;
 
-        // Seek on double-click
-        row.addEventListener('dblclick', () => {
+        const input = row.querySelector('.lyrics-line-input');
+        
+        // Input text sync
+        input.addEventListener('input', (e) => {
+          localLyrics[i].text = e.target.value;
+          if (i === activeLineIdx) {
+            tapTrigger.textContent = `[ENTER / CLICK HERE] SYNC LINE ${activeLineIdx + 1}: "${e.target.value}"`;
+          }
+        });
+
+        // Focus row when input focused
+        input.addEventListener('focus', () => {
+          if (activeFocusIdx !== i) {
+            const oldActive = lyricsContainer.querySelector('.lyrics-timeline-row.active');
+            if (oldActive) oldActive.classList.remove('active');
+            
+            activeFocusIdx = i;
+            activeLineIdx = i;
+            row.classList.add('active');
+            
+            const oldSyncing = lyricsContainer.querySelector('.lyrics-timeline-row.syncing-next');
+            if (oldSyncing) oldSyncing.classList.remove('syncing-next');
+            row.classList.add('syncing-next');
+            
+            if (activeLineIdx < localLyrics.length) {
+              tapTrigger.textContent = `[ENTER / CLICK HERE] SYNC LINE ${activeLineIdx + 1}: "${localLyrics[activeLineIdx].text}"`;
+            }
+          }
+        });
+
+        // Double click seek on row (ignoring input/button)
+        row.addEventListener('dblclick', (e) => {
+          if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+            if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+              ytPlayer.seekTo(line.time, true);
+            }
+          }
+        });
+
+        // Click seek on time badge
+        const timeBadge = row.querySelector('.lyrics-line-time');
+        timeBadge.addEventListener('click', (e) => {
+          e.stopPropagation();
           if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
             ytPlayer.seekTo(line.time, true);
           }
         });
 
-        // Set focus row on click
-        row.addEventListener('click', () => {
-          activeFocusIdx = i;
-          activeLineIdx = i;
-          renderLyrics();
-        });
-
         lyricsContainer.appendChild(row);
       });
 
-      // Keep active focused element in view
-      const activeEl = lyricsContainer.children[activeFocusIdx];
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // Keep active focused element in view if focus isn't currently inside an input
+      if (!document.activeElement || !document.activeElement.classList.contains('lyrics-line-input')) {
+        const activeEl = lyricsContainer.children[activeFocusIdx];
+        if (activeEl) {
+          activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }
 
       // Update tap panel display text
@@ -643,12 +691,66 @@
       if (e) e.stopPropagation();
       if (idx >= 0 && idx < localLyrics.length) {
         localLyrics[idx].time = Math.max(0, parseFloat((localLyrics[idx].time + amount).toFixed(1)));
-        // Update only the timestamp badge — avoids full re-render that blurs text inputs
         const rows = lyricsContainer.querySelectorAll('.lyrics-line-row');
         if (rows[idx]) {
           const badge = rows[idx].querySelector('.lyrics-line-time');
           if (badge) badge.textContent = localLyrics[idx].time.toFixed(1) + 's';
         }
+      }
+    }
+
+    function splitLine(idx, cursorPosition) {
+      if (idx < 0 || idx >= localLyrics.length) return;
+      const line = localLyrics[idx];
+      const fullText = line.text;
+      const part1 = fullText.slice(0, cursorPosition).trim();
+      const part2 = fullText.slice(cursorPosition).trim();
+
+      line.text = part1;
+
+      const newLine = {
+        time: Math.min(line.time + 0.5, 9999),
+        text: part2
+      };
+
+      localLyrics.splice(idx + 1, 0, newLine);
+
+      activeFocusIdx = idx + 1;
+      activeLineIdx = idx + 1;
+
+      renderLyrics();
+
+      setTimeout(() => {
+        const inputs = lyricsContainer.querySelectorAll('.lyrics-line-input');
+        if (inputs[idx + 1]) {
+          inputs[idx + 1].focus();
+          inputs[idx + 1].setSelectionRange(0, 0);
+        }
+      }, 50);
+    }
+
+    function handleSplitClick(idx, e) {
+      if (e) e.stopPropagation();
+      const rows = lyricsContainer.querySelectorAll('.lyrics-line-row');
+      if (rows[idx]) {
+        const input = rows[idx].querySelector('.lyrics-line-input');
+        if (input) {
+          splitLine(idx, input.selectionStart || input.value.length);
+        }
+      }
+    }
+
+    function deleteLine(idx, e) {
+      if (e) e.stopPropagation();
+      if (localLyrics.length <= 1) {
+        alert('최소 한 줄의 가사는 남겨두어야 합니다.');
+        return;
+      }
+      if (confirm(`${idx + 1}번째 가사 라인을 삭제하시겠습니까?`)) {
+        localLyrics.splice(idx, 1);
+        activeFocusIdx = Math.max(0, Math.min(activeFocusIdx, localLyrics.length - 1));
+        activeLineIdx = Math.max(0, Math.min(activeLineIdx, localLyrics.length - 1));
+        renderLyrics();
       }
     }
 

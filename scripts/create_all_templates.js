@@ -193,7 +193,7 @@ const projectLayoutContent = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="artic. — {{PROJECT_TITLE}} ({{PROJECT_ARTIST}})">
   <meta name="author" content="artic.">
-  <title>{{PROJECT_TITLE}} — {{PROJECT_ARTIST}} | artic.</title>
+  <title>{{PROJECT_TITLE}} | artic.</title>
   <link rel="icon" type="image/png" href="{{PATH_DEPTH}}images/favicon.png">
   <link rel="preload" href="{{COVER_IMAGE}}" as="image">
   <link rel="stylesheet" href="{{PATH_DEPTH}}css/design-system.css">

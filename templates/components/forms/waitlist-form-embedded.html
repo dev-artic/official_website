@@ -6,11 +6,12 @@
     - Endpoint (Staging/Local): POST http://127.0.0.1:5001/artic-official-home/us-central1/waitlist
     - Method: POST
     - Content-Type: application/json
-    - Payload: { "email": "user@example.com" }
+    - Payload: { "name": "user", "email": "user@example.com" }
     
   DATABASE SCHEMA MAPPING (Firebase Firestore):
     - Collection: `quarterly_subscribers`
     - Document Fields:
+      - `name`: string
       - `email`: string
       - `created_at`: timestamp (ServerValue.TIMESTAMP / serverTimestamp())
       
@@ -18,17 +19,34 @@
     - Table: `quarterly_subscribers`
     - Columns:
       - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+      - `name`: TEXT NOT NULL
       - `email`: TEXT NOT NULL
       - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 -->
 <div class="waitlist-container">
   <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
+  
   <form id="waitlist-form" class="waitlist-form">
-    <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required>
-    <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
-      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-    </button>
+    <div class="waitlist-fields-wrapper">
+      <div class="waitlist-field-group">
+        <input type="text" id="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
+      </div>
+      <div class="waitlist-field-group">
+        <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required autocomplete="email">
+        <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
   </form>
+
+  <div class="waitlist-loading-bar">
+    <div class="waitlist-loading-progress"></div>
+  </div>
+
   <div id="waitlist-message" class="waitlist-message"></div>
 </div>
 
@@ -37,10 +55,10 @@
   .waitlist-container {
     position: relative;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 16px;
+    min-height: 80px;
   }
 
-  /* Inherited .about-action svg zoom animation */
   .about-action svg {
     width: 10px;
     height: 10px;
@@ -54,26 +72,51 @@
 
   .waitlist-form {
     display: none;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     max-width: 320px;
-    margin-top: 12px;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transform: translateY(8px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
   }
 
   .waitlist-form.active {
-    display: flex;
+    display: block;
     opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    position: relative;
+  }
+
+  /* Fields stacked layout */
+  .waitlist-fields-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 14px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .waitlist-form.submitting .waitlist-fields-wrapper {
+    opacity: 0.3;
+    pointer-events: none;
+    transform: translateY(-4px);
+  }
+
+  .waitlist-field-group {
+    position: relative;
+    width: 100%;
   }
 
   .waitlist-form input {
-    flex: 1;
+    width: 100%;
     background: none;
     border: none;
     border-bottom: 1px solid var(--border-color);
     padding: 10px 0;
-    padding-right: 40px;
     font-family: var(--font-sans);
     font-size: 0.72rem;
     color: var(--text-primary);
@@ -86,7 +129,13 @@
     border-bottom-color: var(--text-primary);
   }
 
-  .waitlist-form button {
+  /* Soft red error styling */
+  .waitlist-form input.waitlist-input-error {
+    border-bottom-color: #E06C75 !important;
+  }
+
+  /* Submit button inside email group */
+  .waitlist-field-group button {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -101,43 +150,103 @@
     padding: 0;
   }
 
-  .waitlist-form button svg {
-    width: 10px;
-    height: 10px;
-    fill: var(--text-muted);
-    transition: fill 0.3s ease, transform 0.3s ease;
+  .waitlist-field-group button svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--text-primary);
+    transition: stroke 0.3s ease, transform 0.3s ease;
   }
 
-  .waitlist-form button:hover svg {
-    fill: var(--text-primary);
-    transform: scale(1.15);
+  .waitlist-field-group button:hover svg {
+    transform: translateX(3px);
   }
 
-  .waitlist-form button:disabled svg {
-    opacity: 0.3;
+  .waitlist-field-group button:disabled svg {
+    stroke: var(--text-muted);
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
+  /* Interactive tactile shake animation */
+  @keyframes waitlistShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  .waitlist-shake {
+    animation: waitlistShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
+  /* Sliding progress line loader */
+  .waitlist-loading-bar {
+    display: none;
+    width: 100%;
+    max-width: 320px;
+    height: 1px;
+    background-color: var(--border-color);
+    position: relative;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+
+  .waitlist-form.submitting ~ .waitlist-loading-bar {
+    display: block;
+  }
+
+  .waitlist-loading-progress {
+    width: 40%;
+    height: 100%;
+    background-color: var(--text-primary);
+    position: absolute;
+    left: -40%;
+    animation: waitlistLoading 1s infinite linear;
+  }
+
+  @keyframes waitlistLoading {
+    from { left: -40%; }
+    to { left: 100%; }
+  }
+
+  /* Success & error messages styling */
   .waitlist-message {
     font-family: var(--font-sans);
-    font-size: 0.65rem;
-    line-height: 1.5;
-    margin-top: 10px;
-    display: none;
+    margin-top: 16px;
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transform: translateY(4px);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    display: none;
+    text-align: left;
+    max-width: 320px;
   }
 
   .waitlist-message.active {
     display: block;
     opacity: 1;
+    transform: translateY(0);
   }
 
-  .waitlist-message.success {
-    color: var(--accent-success, #10B981);
+  .waitlist-message .success-title {
+    font-family: var(--font-logo);
+    font-size: 1.2rem;
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .waitlist-message .success-desc {
+    font-size: 0.65rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 
   .waitlist-message.error {
-    color: var(--accent-danger, #EF4444);
+    font-size: 0.65rem;
+    line-height: 1.5;
+    color: #E06C75;
+    letter-spacing: 0.02em;
   }
 </style>

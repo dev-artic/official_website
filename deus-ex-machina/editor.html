@@ -247,7 +247,7 @@
 
     .lyrics-line-row {
       display: grid;
-      grid-template-columns: 80px 100px 1fr 100px;
+      grid-template-columns: 52px 90px 1fr 148px;
       gap: 12px;
       align-items: center;
       padding: 12px 16px;
@@ -287,16 +287,6 @@
       border: 1px solid var(--border-color);
     }
 
-    .lyrics-line-text {
-      font-size: 0.85rem;
-      color: var(--text-primary);
-      line-height: 1.5;
-    }
-
-    .lyrics-line-row.active .lyrics-line-text {
-      font-weight: 600;
-    }
-
     .lyrics-line-actions {
       display: flex;
       gap: 6px;
@@ -321,6 +311,61 @@
     .nudge-btn:hover {
       border-color: var(--accent);
       background-color: var(--bg-card);
+    }
+
+
+    /* Inline editable text input */
+    .lyrics-line-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid transparent;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      padding: 3px 4px;
+      outline: none;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      width: 100%;
+      min-width: 0;
+    }
+    .lyrics-line-input:focus {
+      border-bottom-color: var(--accent);
+      background-color: rgba(0,0,0,0.04);
+      border-radius: 2px 2px 0 0;
+    }
+    .lyrics-line-row.active .lyrics-line-input {
+      font-weight: 600;
+    }
+
+    /* Split & delete action buttons */
+    .split-btn {
+      border-color: #A0A0A0;
+      color: #555;
+      font-size: 0.85rem;
+    }
+    .split-btn:hover {
+      border-color: #555;
+      background-color: #F5F5F5;
+      color: #111;
+    }
+    .del-btn {
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .del-btn:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Time badge — clickable to seek */
+    .lyrics-line-time {
+      cursor: pointer;
+    }
+    .lyrics-line-time:hover {
+      background-color: var(--bg-primary);
     }
 
     /* Notification overlay */
@@ -595,10 +640,15 @@
     }
 
     function nudgeTime(idx, amount, e) {
-      if (e) e.stopPropagation(); // prevent row click triggers
+      if (e) e.stopPropagation();
       if (idx >= 0 && idx < localLyrics.length) {
-        localLyrics[idx].time = Math.max(0, localLyrics[idx].time + amount);
-        renderLyrics();
+        localLyrics[idx].time = Math.max(0, parseFloat((localLyrics[idx].time + amount).toFixed(1)));
+        // Update only the timestamp badge — avoids full re-render that blurs text inputs
+        const rows = lyricsContainer.querySelectorAll('.lyrics-line-row');
+        if (rows[idx]) {
+          const badge = rows[idx].querySelector('.lyrics-line-time');
+          if (badge) badge.textContent = localLyrics[idx].time.toFixed(1) + 's';
+        }
       }
     }
 
@@ -675,7 +725,21 @@
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+      const inInput = e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA';
+
+      // Ctrl+Enter from anywhere → split focused line at cursor
+      if ((e.ctrlKey || e.metaKey) && e.code === 'Enter') {
+        e.preventDefault();
+        const inp = document.querySelector('.lyrics-line-input:focus');
+        if (inp) {
+          const idx = parseInt(inp.getAttribute('data-idx'), 10);
+          splitLine(idx, inp.selectionStart);
+        }
+        return;
+      }
+
+      // All other shortcuts require focus to NOT be inside a text input
+      if (inInput) return;
 
       // Spacebar: Play/Pause audio
       if (e.code === 'Space') {

@@ -15,7 +15,7 @@
       align-items: center;
       justify-content: flex-start;
       overflow-x: hidden;
-      padding: var(--space-md) var(--space-sm);
+      padding: 0;
       padding-top: 100px;
       position: relative;
       transition: var(--transition-theme);
@@ -31,6 +31,7 @@
       flex-direction: column;
       align-items: center;
       flex-grow: 1;
+      padding: 0 var(--space-sm);
     }
 
     @media (min-width: 768px) {
@@ -641,21 +642,7 @@
       color: var(--bg-primary);
     }
 
-    /* Footer */
-    footer {
-      width: 100%;
-      border-top: 1px solid var(--border-color);
-      padding: var(--space-lg) 0;
-      text-align: center;
-      font-size: 0.55rem;
-      color: var(--text-muted);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-top: auto;
-      transition: border-color 0.5s ease;
-      opacity: 0;
-      animation: sectionReveal 0.5s ease 3.4s forwards;
-    }
+
 
     /* Mobile overrides */
     @media (max-width: 767px) {

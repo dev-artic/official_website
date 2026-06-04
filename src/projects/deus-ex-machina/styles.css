@@ -15,7 +15,7 @@
       align-items: center;
       justify-content: flex-start;
       overflow-x: hidden;
-      padding: var(--space-md) var(--space-sm);
+      padding: 0;
       padding-top: 100px;
       position: relative;
       transition: var(--transition-theme);
@@ -36,6 +36,7 @@
       flex-direction: column;
       align-items: center;
       flex-grow: 1;
+      padding: 0 var(--space-sm);
     }
 
     /* Desktop: widen for 2-column layout */
@@ -943,13 +944,7 @@
       fill: var(--text-primary);
     }
 
-    /* Footer — reveal after content */
-    footer {
-      opacity: 0;
-    }
-    .reveal-active footer {
-      animation: sectionReveal 0.5s ease 4.2s forwards;
-    }
+
 
     .artist-name {
       font-family: var(--font-sans);
@@ -1253,22 +1248,7 @@
       transform: translateY(0);
     }
 
-    /* Elegant Footer */
-    footer {
-      width: 100%;
-      text-align: center;
-      padding: var(--space-md) 0;
-      border-top: 1px solid var(--border-color);
-      margin-top: auto;
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      letter-spacing: 0;
-      text-transform: uppercase;
-    }
 
-    footer span {
-      color: var(--text-primary);
-    }
 
     /* Animation effects */
     .animate-fade-in {

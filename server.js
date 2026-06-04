@@ -1,10 +1,12 @@
-﻿const http = require('http');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
 
 const PORT = 8000;
 const DB_FILE = path.join(__dirname, 'orders.db');
+const USER_HOME = process.env.HOME || process.env.USERPROFILE || '';
+const LYRICS_DB_FILE = path.join(USER_HOME, '.gemini', 'antigravity', 'brain', 'cb6b594a-9879-4961-846b-0df33fc8b311', 'scratch', 'synced_lyrics_estimate.json');
 
 // Initialize database
 let db;
@@ -58,7 +60,7 @@ function sendJSON(res, status, data) {
 
 function handleGetLyrics(req, res) {
   try {
-    const dbPath = 'C:\\Users\\LA723SL\\.gemini\\antigravity\\brain\\ddca7f1f-7e16-43a7-9ee5-ead2777abd97\\scratch\\synced_lyrics_estimate.json';
+    const dbPath = LYRICS_DB_FILE;
     if (fs.existsSync(dbPath)) {
       const data = fs.readFileSync(dbPath, 'utf8');
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -80,7 +82,7 @@ function handleSaveLyrics(req, res, bodyText) {
       return sendJSON(res, 400, { error: 'Missing required fields (vid, lyrics)' });
     }
 
-    const dbPath = 'C:\\Users\\LA723SL\\.gemini\\antigravity\\brain\\ddca7f1f-7e16-43a7-9ee5-ead2777abd97\\scratch\\synced_lyrics_estimate.json';
+    const dbPath = LYRICS_DB_FILE;
     let database = {};
     if (fs.existsSync(dbPath)) {
       database = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
@@ -91,7 +93,7 @@ function handleSaveLyrics(req, res, bodyText) {
     fs.writeFileSync(dbPath, JSON.stringify(database, null, 2), 'utf8');
     console.log(`Updated lyrics database in scratch for video: ${vid}`);
 
-    const htmlPath = path.join(__dirname, 'deus-ex-machina', 'index.html');
+    const htmlPath = path.join(__dirname, 'projects', 'deus-ex-machina', 'index.html');
     let htmlContent = fs.readFileSync(htmlPath, 'utf8').replace(/\r\n/g, '\n');
 
     const databaseJsonStr = JSON.stringify(database, null, 2);
@@ -177,6 +179,8 @@ function handleWaitlist(req, res, bodyText) {
       return sendJSON(res, 400, { error: 'Email is required' });
     }
 
+    let totalCount = 0;
+
     if (db) {
       // Check duplicate
       const stmt = db.prepare('SELECT 1 FROM quarterly_subscribers WHERE email = ? LIMIT 1');
@@ -188,9 +192,46 @@ function handleWaitlist(req, res, bodyText) {
       const insert = db.prepare('INSERT INTO quarterly_subscribers (email) VALUES (?)');
       insert.run(email);
       console.log(`Waitlist subscriber successfully saved to SQLite: ${email}`);
+
+      // Count total subscribers
+      const countStmt = db.prepare('SELECT COUNT(*) as count FROM quarterly_subscribers');
+      const countResult = countStmt.get();
+      totalCount = countResult.count;
     }
 
-    sendJSON(res, 200, { success: true, saved_to_cloud: false });
+    // Mock Email Output - Customer Waitlist
+    console.log('\n=== [EMAIL MOCK - Customer Waitlist] ===');
+    console.log(`To: ${email}`);
+    console.log('Subject: [artic.] Join Waitlist 등록 완료');
+    console.log(`Body:
+안녕하세요. artic. 입니다.
+
+artic.의 새로운 소식을 가장 먼저 받아보실 수 있는 대기 명단(Waitlist) 등록이 완료되었습니다.
+
+"Stay tuned. We will share our official release with you first."
+
+준비가 완료되는 대로 등록해 주신 이메일(${email})로 가장 먼저 공개 소식을 전해드리겠습니다.
+감사합니다.
+
+ⓒ 2026 artic. All Rights Reserved.`);
+    console.log('========================================\n');
+
+    // Mock Email Output - Admin Waitlist
+    console.log('=== [EMAIL MOCK - Admin Waitlist] ===');
+    console.log('To: admin@artic.live');
+    console.log(`Subject: [ADMIN] 새로운 Waitlist 구독 접수 - ${email}`);
+    console.log(`Body:
+새로운 고객이 Quarterly Join Waitlist에 가입했습니다.
+
+[신청 정보]
+- 가입 이메일: ${email}
+- 가입 일시: ${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (KST)
+- 현재 총 등록 인원: ${totalCount}명
+
+SQLite 로컬 데이터베이스 quarterly_subscribers에 적재되었습니다.`);
+    console.log('=====================================\n');
+
+    sendJSON(res, 200, { success: true, saved_to_cloud: false, total_subscribers: totalCount });
   } catch (e) {
     console.error('Error handling waitlist:', e);
     sendJSON(res, 500, { error: e.message });

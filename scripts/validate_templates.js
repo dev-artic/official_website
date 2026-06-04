@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const baseDir = 'c:/Users/LA723SL/.gemini/antigravity/Homepage';
+const baseDir = path.resolve(__dirname, '..');
 const templatesDir = path.join(baseDir, 'templates');
 
 const REQUIRED_TEMPLATES = [

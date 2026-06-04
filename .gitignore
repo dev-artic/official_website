@@ -6,3 +6,4 @@ functions/.env
 
 scratch/
 scratch
+*.log

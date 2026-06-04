@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const baseDir = 'c:/Users/LA723SL/.gemini/antigravity/Homepage';
+const baseDir = path.resolve(__dirname, '..');
 const templatesDir = path.join(baseDir, 'templates');
 const srcDir = path.join(baseDir, 'src');
 
@@ -302,14 +302,14 @@ projectDirs.forEach(slugName => {
   }
 
   // Output compilation result
-  const destDir = path.join(baseDir, slugName);
+  const destDir = path.join(baseDir, 'projects', slugName);
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
   }
 
   const destFullPath = path.join(destDir, 'index.html');
   fs.writeFileSync(destFullPath, finalHtml, 'utf8');
-  console.log(`Compiled project detail page: ${slugName} -> ${slugName}/index.html`);
+  console.log(`Compiled project detail page: ${slugName} -> projects/${slugName}/index.html`);
 });
 
 console.log("All pages compiled successfully with styling injection optimized and duplicate headers resolved!");

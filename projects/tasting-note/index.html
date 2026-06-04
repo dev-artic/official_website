@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — Project : The Root ({{PROJECT_SUBTITLE}})">
+  <meta name="description" content="artic. — TASTING NOTE ({{PROJECT_SUBTITLE}})">
   <meta name="author" content="artic.">
-  <title>Project : The Root — {{PROJECT_SUBTITLE}} | artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <title>TASTING NOTE — {{PROJECT_SUBTITLE}} | artic.</title>
+  <link rel="icon" type="image/png" href="../../images/favicon.png">
   <link rel="preload" href="album-art.png" as="image">
-  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="../../css/design-system.css">
   <script>
     (function(){
       var s = localStorage.getItem('artic-theme');
@@ -34,7 +34,7 @@
       align-items: center;
       justify-content: flex-start;
       overflow-x: hidden;
-      padding: var(--space-md) var(--space-sm);
+      padding: 0;
       padding-top: 100px;
       position: relative;
       transition: var(--transition-theme);
@@ -50,6 +50,7 @@
       flex-direction: column;
       align-items: center;
       flex-grow: 1;
+      padding: 0 var(--space-sm);
     }
 
     /* Desktop: widen for row layout in header */
@@ -59,17 +60,25 @@
       }
     }
 
-    /* ── Entry Animation — 3-Phase Sequence ── */
+    /* ══════════════════════════════════════
+       Entry Animation — 3-Phase Sequence
+       Phase 1 (0–1.2s):  Album cover fades in at its centered (or left-aligned) reference
+       Phase 2 (1.3–2.3s): Album info is wiped open with a premium bezier curve
+       Phase 3 (2.7–3.8s): Everything slides up vertically, album cover shrinks, content appears
+       ══════════════════════════════════════ */
+
     .album-showcase {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       width: 100%;
-      gap: 32px;
-      margin-bottom: 80px;
+      gap: 32px; /* Premium gap between cover and text on mobile */
+      margin-bottom: 80px; /* Generous gap below the showcase */
+      /* Stacked group centered vertically in the viewport initially */
       transform: translateY(calc(50dvh - 310px));
       will-change: transform;
+      /* Phase 3: slides up vertically */
       animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
@@ -84,20 +93,21 @@
         justify-content: flex-start;
         text-align: left;
         align-items: center;
-        gap: 48px;
-        transform: translateY(calc(50dvh - 210px));
+        gap: 48px; /* Doubled gap between cover and text */
+        transform: translateY(calc(50dvh - 210px)); /* Desktop row centered vertically */
       }
     }
 
     /* ── Album Art ── */
     .album-art-wrapper {
       position: relative;
-      z-index: 2;
+      z-index: 2; /* Layered above the text to physically cover it during Phase 1 & 2 */
       width: 280px;
       height: 280px;
       margin-bottom: 0;
       flex-shrink: 0;
-      will-change: width, height;
+      will-change: width, height; /* Hardware acceleration for layout resize */
+      /* Phase 3: album cover shrinks when sliding up */
       animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
@@ -111,7 +121,7 @@
     /* Desktop: Slide left from horizontal center */
     @media (min-width: 768px) {
       .album-art-wrapper {
-        left: calc(50% - 140px);
+        left: calc(50% - 140px); /* Perfectly centered horizontally relative to the showcase container */
         animation: albumSlideLeft 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards,
                    albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
       }
@@ -129,8 +139,9 @@
       border: 1px solid var(--border-color);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0); /* Cache decoded image on GPU */
       will-change: transform;
+      /* Phase 1: fade in */
       opacity: 0;
       animation: albumFadeIn 1s ease 0.3s forwards;
       transition: transform 0.6s var(--ease-out-expo);
@@ -148,10 +159,11 @@
     /* ── Album Info ── */
     .album-info {
       position: relative;
-      z-index: 1;
+      z-index: 1; /* Layered below the cover to ensure it emerges from behind the cover's edge */
       opacity: 0;
       clip-path: inset(0 100% 0 0);
       transform: translateY(10px);
+      /* Phase 2: wipe open with organic bezier curve */
       animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
     }
 
@@ -185,7 +197,7 @@
       }
     }
 
-    /* ── Artist Name ── */
+    /* ── Artist/Category Name (original series) ── */
     .artist-name {
       font-family: var(--font-sans);
       font-size: 0.75rem;
@@ -198,7 +210,7 @@
 
     .album-title {
       font-family: var(--font-serif);
-      font-size: 2.05rem;
+      font-size: 2.25rem;
       font-weight: 700;
       letter-spacing: 0;
       color: var(--text-primary);
@@ -208,7 +220,7 @@
 
     @media (max-width: 767px) {
       .album-title {
-        font-size: 1.65rem;
+        font-size: 1.75rem;
       }
     }
 
@@ -254,15 +266,13 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Episodes items stagger delay curves (8 items) */
+    /* Film / Episodes items stagger (starts at 3.1s) */
     .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.1s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.15s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.2s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.25s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(5) { animation-delay: 3.3s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 3.35s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(7) { animation-delay: 3.4s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(8) { animation-delay: 3.45s; }
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
@@ -284,7 +294,7 @@
       }
     }
 
-    /* Left Column: Latest Release & Metadata */
+    /* Left Column: Latest Release */
     .links-container {
       display: block;
     }
@@ -318,19 +328,52 @@
       animation-delay: 2.7s;
     }
 
+    /* Flat Monochrome Link Card */
+    .link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 0px;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+
+    .link-item:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .archive-item-date {
+      font-family: var(--font-sans);
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      transition: color 0.3s ease;
+      line-height: 1.2;
+    }
+
+    .archive-item:hover .archive-item-date,
+    .link-item:hover .archive-item-date {
+      color: var(--text-primary);
+    }
+
     .latest-release-header {
       display: block;
       font-family: var(--font-sans);
       transition: border-color 0.5s ease;
     }
-    .latest-release-header .archive-group-label {
-      margin-bottom: 4px;
-    }
 
     /* Latest Featured Video Custom Styling */
     .latest-featured-item {
       padding-top: 14px;
-      padding-bottom: 12px;
+      padding-bottom: 10px;
     }
 
     .latest-featured-item .archive-item-type {
@@ -463,20 +506,6 @@
       color: var(--text-secondary);
     }
 
-    .archive-item-date {
-      font-family: var(--font-sans);
-      font-size: 0.65rem;
-      font-weight: 500;
-      color: var(--text-muted);
-      letter-spacing: 0.02em;
-      transition: color 0.3s ease;
-      line-height: 1.2;
-    }
-
-    .archive-item:hover .archive-item-date {
-      color: var(--text-primary);
-    }
-
     /* Inline video embed */
     .archive-embed {
       width: 100%;
@@ -528,7 +557,7 @@
       filter: brightness(1.0);
     }
 
-    /* Glassmorphic Play Button */
+    /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Pill Play Button */
     .poster-play-btn {
       position: absolute;
       bottom: 16px;
@@ -541,7 +570,7 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-color);
-      border-radius: 0px;
+      border-radius: 0px; /* Sharp editorial corners matching artic. */
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
     }
@@ -589,19 +618,7 @@
       fill: var(--text-primary);
     }
 
-    /* ── Footer ── */
-    footer {
-      width: 100%;
-      border-top: 1px solid var(--border-color);
-      padding: var(--space-lg) 0;
-      text-align: center;
-      font-size: 0.55rem;
-      color: var(--text-muted);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-top: auto;
-      transition: border-color 0.5s ease;
-    }
+
 
     /* ── Mobile Accordion Styles & Overrides ── */
     .toggle-icon {
@@ -650,7 +667,7 @@
         will-change: transform;
       }
 
-      /* Episodes Header Border Staggered Wipe */
+      /* Film/Episodes Header Border Staggered Wipe */
       .archive-group:nth-of-type(1) .mobile-toggle-header::after {
         animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.9s forwards;
       }
@@ -696,7 +713,7 @@
       }
 
       .expanded .toggle-content {
-        max-height: 2500px; /* Generous height for list */
+        max-height: 1000px;
         opacity: 1;
         margin-top: 16px;
       }
@@ -752,6 +769,14 @@
       }
     }
 
+    /* Removed duplicate keyframes to prevent overriding the clip-path info reveal on mobile */
+
+    @keyframes infoShiftUpMobile {
+      to {
+        transform: translateY(0);
+      }
+    }
+
     @keyframes borderWipe {
       to {
         transform: scaleX(1);
@@ -792,11 +817,11 @@
     <!-- Album Showcase -->
     <section class="album-showcase">
       <div class="album-art-wrapper">
-        <img class="album-art" src="album-art.png" alt="Project : The Root Cover Art">
+        <img class="album-art" src="album-art.png" alt="TASTING NOTE Cover Art">
       </div>
       <div class="album-info">
-        <span class="artist-name">Bokos x artic.</span>
-        <h1 class="album-title">Project : The Root</h1>
+        <span class="artist-name">artic.</span>
+        <h1 class="album-title">TASTING NOTE</h1>
         <p class="album-meta">ORIGINAL SERIES • 2026</p>
       </div>
     </section>
@@ -812,20 +837,20 @@
         </div>
         <div class="toggle-content">
           <div class="static-content">
-            <div class="archive-entry active" data-vid="gRSwOt_GwBk">
+            <div class="archive-entry active" data-vid="3OyKOqX1tgU">
               <a class="archive-item latest-featured-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <div class="archive-item-text">
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">차승우라는 한 남자의 인생과 앨범들 | EP.7</span>
-                      <span class="archive-item-date">2026.05.20</span>
+                      <span class="archive-item-title">영원히 남을 하나의 멜로디를 향해</span>
+                      <span class="archive-item-date">2026.05.28</span>
                     </div>
                   </div>
                 </div>
               </a>
               <div class="archive-embed open">
-                <div class="custom-video-poster" data-vid="gRSwOt_GwBk" style="opacity: 0; transition: opacity 0.8s ease;">
-                  <img class="poster-thumbnail" src="https://img.youtube.com/vi/gRSwOt_GwBk/maxresdefault.jpg" alt="Video Cover">
+                <div class="custom-video-poster" data-vid="3OyKOqX1tgU" style="opacity: 0; transition: opacity 0.8s ease;">
+                  <img class="poster-thumbnail" src="https://img.youtube.com/vi/3OyKOqX1tgU/maxresdefault.jpg" alt="Video Cover">
                   <div class="poster-play-btn">
                     <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
                   </div>
@@ -837,15 +862,11 @@
           <!-- Project Description & Info -->
           <div class="project-brief" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; transition: border-color 0.5s ease;">
             <p class="brief-desc-ko" style="font-family: var(--font-sans); font-size: 0.78rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 20px;">
-              최근 작업물부터 10대 시절 인생앨범까지, 취향의 뿌리를 따라가는 인터뷰 시리즈
+              모든 답변을 취향 따라 고른 음악으로 대신하는 플레이리스트형 인터뷰
             </p>
             <div class="brief-meta" style="font-family: var(--font-sans); font-size: 0.65rem; color: var(--text-muted); line-height: 1.8;">
-              <div style="display: flex; gap: 24px; margin-bottom: 6px;">
-                <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Creator</span>
-                <span style="color: var(--text-secondary);">Bokos x artic.</span>
-              </div>
               <div style="display: flex; gap: 24px; margin-bottom: 20px;">
-                <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Production</span>
+                <span style="width: 140px; font-weight: 700; color: var(--text-primary);">Directed & Produced by</span>
                 <span style="color: var(--text-secondary);">artic.</span>
               </div>
             </div>
@@ -855,31 +876,33 @@
           <div class="project-starring" style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 12px; transition: border-color 0.5s ease;">
             <span style="font-family: var(--font-sans); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 12px;">STARRING</span>
             <p style="font-family: var(--font-sans); font-size: 0.72rem; line-height: 1.8; color: var(--text-secondary); letter-spacing: 0.02em;">
-            자이언티 &nbsp;•&nbsp; 권기백 &nbsp;•&nbsp; 최수미 &nbsp;•&nbsp; 주영 &nbsp;•&nbsp; 제이클레프 &nbsp;•&nbsp; 까데호 & Original Love &nbsp;•&nbsp; 차승우
-          </p>
+              Crush &nbsp;•&nbsp; 주혜린 &nbsp;•&nbsp; 오존(O3ohn) &nbsp;•&nbsp; 수민(SUMIN) &nbsp;•&nbsp; 박문치 &nbsp;•&nbsp; MEMI &nbsp;•&nbsp; 강지원
+            </p>
           </div>
+
       </main>
       </div>
       <!-- Right (Episodes, video lists, curation list) -->
       <div class="right-column">
         <section class="archive-section">
+
+        <!-- Episodes Accordion Group -->
         <div class="archive-group expanded">
           <div class="mobile-toggle-header">
             <span class="archive-group-label film-label">episodes</span>
             <span class="toggle-icon"></span>
           </div>
           <div class="archive-list toggle-content">
-
-            <!-- EP.0 -->
-            <div class="archive-entry" data-vid="usefAQ2yMYs">
+            
+            <div class="archive-entry" data-vid="ZfD84TkNXGw">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">Teaser</span>
+                    <span class="archive-item-type">Crush</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">Project: The Root EP.0</span>
-                      <span class="archive-item-date">2026.01.11</span>
+                      <span class="archive-item-title">Pilot</span>
+                      <span class="archive-item-date">2025.12.31</span>
                     </div>
                   </div>
                 </div>
@@ -887,16 +910,15 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.1 -->
-            <div class="archive-entry" data-vid="nvjVqcu8pa0">
+            <div class="archive-entry" data-vid="CyLnWaJIEhw">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">자이언티</span>
+                    <span class="archive-item-type">주혜린</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">휘성을 듣던 김해솔이 [POSER]를 만든 자이언티가 되기까지 | EP.1</span>
-                      <span class="archive-item-date">2026.01.14</span>
+                      <span class="archive-item-title">Kindness is Timeless</span>
+                      <span class="archive-item-date">2026.02.11</span>
                     </div>
                   </div>
                 </div>
@@ -904,16 +926,15 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.2 -->
-            <div class="archive-entry" data-vid="zyNDbezftEQ">
+            <div class="archive-entry" data-vid="qBF9UpEug_c">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">권기백</span>
+                    <span class="archive-item-type">오존(O3ohn)</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">권기백이 인생앨범 얘기하러 왔다고 임마 | EP.2 in 안양</span>
-                      <span class="archive-item-date">2026.02.04</span>
+                      <span class="archive-item-title">불편함을 고집하는 낭만</span>
+                      <span class="archive-item-date">2026.02.27</span>
                     </div>
                   </div>
                 </div>
@@ -921,16 +942,15 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.3 -->
-            <div class="archive-entry" data-vid="6c5Vi2O3dXk">
+            <div class="archive-entry" data-vid="7_0BYN3TUus">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">최수미</span>
+                    <span class="archive-item-type">수민(SUMIN)</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">세이수미 최수미가 말하는 ‘있는 그대로의 삶’ (feat. 한대음) | EP.3</span>
-                      <span class="archive-item-date">2026.02.25</span>
+                      <span class="archive-item-title">행복은 시차를 두고 다가온다</span>
+                      <span class="archive-item-date">2026.03.31</span>
                     </div>
                   </div>
                 </div>
@@ -938,16 +958,15 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.4 -->
-            <div class="archive-entry" data-vid="wsTZXHi7RXU">
+            <div class="archive-entry" data-vid="vhjjEAU6wRA">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">주영</span>
+                    <span class="archive-item-type">박문치</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">주영의 뿌리를 찾다가 맞이한 충격적 결말 | EP.4</span>
-                      <span class="archive-item-date">2026.03.18</span>
+                      <span class="archive-item-title">내가 나로서 솔직해지기</span>
+                      <span class="archive-item-date">2026.05.04</span>
                     </div>
                   </div>
                 </div>
@@ -955,16 +974,15 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.5 -->
-            <div class="archive-entry" data-vid="GmW8B9QMfew">
+            <div class="archive-entry" data-vid="OawNyCoAHpc">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">제이클레프</span>
+                    <span class="archive-item-type">MEMI</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">제이클레프의 모든 버전이 궁금해 | EP.5</span>
-                      <span class="archive-item-date">2026.04.15</span>
+                      <span class="archive-item-title">Rock은 절대 죽지 않아</span>
+                      <span class="archive-item-date">2026.05.11</span>
                     </div>
                   </div>
                 </div>
@@ -972,16 +990,15 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.6 -->
-            <div class="archive-entry" data-vid="6TglPJfO7K4">
+            <div class="archive-entry" data-vid="3OyKOqX1tgU">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">까데호 & Original Love</span>
+                    <span class="archive-item-type">강지원</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">일본 전설이 사랑에 빠진 한국 밴드 | EP.6 오리지널 러브 × 까데호 in 춘천</span>
-                      <span class="archive-item-date">2026.05.01</span>
+                      <span class="archive-item-title">영원히 남을 하나의 멜로디를 향해</span>
+                      <span class="archive-item-date">2026.05.28</span>
                     </div>
                   </div>
                 </div>
@@ -989,39 +1006,20 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.7 -->
-            <div class="archive-entry" data-vid="gRSwOt_GwBk">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">차승우</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">차승우라는 한 남자의 인생과 앨범들 | EP.7</span>
-                      <span class="archive-item-date">2026.05.20</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-          
-
-
-</div>
+          </div>
         </div>
+
       </section>
       </div>
     </div>
 
-    <footer class="about-footer">
+  </div>
+
+  <footer class="about-footer">
   © 2026 artic. All Rights Reserved
 </footer>
 
-  </div>
-
-  <script src="../js/shared.js"></script>
+  <script src="../../js/shared.js"></script>
   <script>
 // -- Inline video embed toggle (close-first-then-open) --
     (function() {

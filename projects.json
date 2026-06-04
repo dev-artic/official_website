@@ -1,12 +1,12 @@
-﻿[
+[
   {
     "id": "tasting-note",
     "title": "TASTING NOTE",
     "client": "artic.",
     "category": "ORIGINAL SERIES",
     "year": 2026,
-    "cover_image": "../tasting-note/album-art.png",
-    "slug": "/tasting-note/"
+    "cover_image": "../projects/tasting-note/album-art.png",
+    "slug": "/projects/tasting-note/"
   },
   {
     "id": "the-root",
@@ -14,8 +14,8 @@
     "client": "Bokos x artic.",
     "category": "ORIGINAL SERIES",
     "year": 2026,
-    "cover_image": "../the-root/album-art.png",
-    "slug": "/the-root/"
+    "cover_image": "../projects/the-root/album-art.png",
+    "slug": "/projects/the-root/"
   },
   {
     "id": "neutral-interview",
@@ -23,8 +23,8 @@
     "client": "artic.",
     "category": "PRODUCTION",
     "year": 2025,
-    "cover_image": "../neutral-interview/album-art.png",
-    "slug": "/neutral-interview/"
+    "cover_image": "../projects/neutral-interview/album-art.png",
+    "slug": "/projects/neutral-interview/"
   },
   {
     "id": "gagosian-party-music",
@@ -32,8 +32,8 @@
     "client": "Gagosian Gallery",
     "category": "MUSIC CURATION",
     "year": 2024,
-    "cover_image": "../gagosian-party-music/album-art.png",
-    "slug": "/gagosian-party-music/"
+    "cover_image": "../projects/gagosian-party-music/album-art.png",
+    "slug": "/projects/gagosian-party-music/"
   },
   {
     "id": "deus-ex-machina",
@@ -41,7 +41,7 @@
     "client": "artic.",
     "category": "LP",
     "year": 2024,
-    "cover_image": "../deus-ex-machina/album-art.png",
-    "slug": "/deus-ex-machina/"
+    "cover_image": "../projects/deus-ex-machina/album-art.png",
+    "slug": "/projects/deus-ex-machina/"
   }
 ]

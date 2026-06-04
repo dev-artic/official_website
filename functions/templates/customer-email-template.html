@@ -27,11 +27,13 @@
       max-width: 600px;
       margin: 0 auto;
       background-color: #ffffff;
+      border: 1px solid #eaeaea;
     }
     .header {
-      padding: 40px 20px;
+      padding: 40px 20px 30px 20px;
       text-align: center;
       background-color: #ffffff;
+      border-bottom: 1px solid #f9f9f9;
     }
     .header img {
       display: block;
@@ -44,12 +46,13 @@
       background-color: #ffffff;
     }
     .content-padding {
-      padding: 0 40px 40px 40px;
+      padding: 40px;
     }
     h1 {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 22px;
+      font-weight: normal;
+      letter-spacing: -0.01em;
       margin: 0 0 24px 0;
       color: #111111;
       line-height: 1.4;
@@ -57,33 +60,42 @@
     }
     p {
       font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.7;
       margin: 0 0 20px 0;
       color: #333333;
     }
-    /* Data table styles */
+    /* Data table styles (Borderless, elegant rows with subtle divider lines) */
     .data-table {
       width: 100%;
       margin: 30px 0;
       border-collapse: collapse;
     }
     .data-table td {
-      padding: 12px 0;
-      border: none;
+      padding: 14px 0;
+      border-bottom: 1px solid #f3f3f3;
       font-size: 14px;
       line-height: 1.5;
-      vertical-align: top;
+      vertical-align: middle;
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
     }
     .data-table td.label {
       width: 30%;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
       color: #888888;
-      font-weight: 400;
       text-align: left;
     }
     .data-table td.value {
       width: 70%;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+      font-weight: 400;
       color: #111111;
-      font-weight: 600;
       text-align: right;
     }
     .bold {
@@ -92,74 +104,91 @@
     }
     /* Signature styles */
     .signature {
-      margin-top: 40px;
+      margin-top: 50px;
       padding-top: 30px;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid #eaeaea;
       text-align: left;
     }
-    .sender-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #111111;
-      margin-bottom: 12px;
+    .sig-label {
+      font-size: 12px;
+      color: #777777;
+      margin: 0 0 12px 0;
     }
-    .sig-logo-wrap {
-      display: inline-block;
+    .sig-logo-cell {
+      padding-right: 14px;
+      border-right: 1px solid #eaeaea;
+    }
+    .sig-info-cell {
+      padding-left: 14px;
       vertical-align: middle;
-      margin-right: 8px;
     }
-    .sig-link {
+    .sig-brand-name {
+      font-family: 'Georgia', serif;
       font-size: 13px;
-      color: #888888;
-      text-decoration: none;
-      vertical-align: middle;
-    }
-    .sig-link:hover {
-      text-decoration: underline;
+      font-weight: bold;
       color: #111111;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+    .sig-desc {
+      font-size: 10px;
+      color: #888888;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
     /* Footer styles */
     .footer {
       background-color: #fafafa;
       border-top: 1px solid #eaeaea;
-      padding: 30px 40px;
-      text-align: left;
+      padding: 40px;
+      text-align: center;
+    }
+    .footer-nav {
+      margin-bottom: 20px;
+    }
+    .footer-nav-link {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #111111;
+      text-decoration: none;
+      margin: 0 10px;
+      display: inline-block;
+    }
+    .footer-nav-separator {
+      color: #cccccc;
+      font-size: 11px;
+      display: inline-block;
     }
     .footer-text {
       font-size: 11px;
-      line-height: 1.6;
+      line-height: 1.8;
       color: #888888;
       margin: 0;
     }
-    .footer-links {
-      margin-top: 12px;
-    }
-    .footer-link {
-      font-size: 11px;
-      color: #666666;
-      text-decoration: none;
-      margin-right: 15px;
-    }
-    .footer-link:hover {
-      color: #111111;
-      text-decoration: underline;
-    }
     @media screen and (max-width: 600px) {
+      .container {
+        border-left: none;
+        border-right: none;
+      }
       .content-padding {
-        padding: 0 20px 30px 20px;
+        padding: 30px 20px;
       }
       .footer {
-        padding: 20px 20px;
+        padding: 30px 20px;
       }
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <table class="container" align="center">
+    <table class="container" align="center" border="0" cellpadding="0" cellspacing="0">
       <tr>
         <td class="header">
-          <img src="https://artic.live/images/logo-black.png" alt="artic." width="90">
+          <img src="https://artic.live/images/logo-black.png" alt="artic." width="72" height="52" style="border: none;">
         </td>
       </tr>
       <tr>
@@ -172,25 +201,36 @@
             {{DATA_TABLE}}
             
             <div class="signature">
-              <div class="sender-name">artic.</div>
-              <div>
-                <span class="sig-logo-wrap">
-                  <img src="https://artic.live/images/logo-icon-black.png" alt="" width="14" height="14" style="display: block; border: none;">
-                </span>
-                <a href="https://artic.live" class="sig-link" target="_blank">artic.live</a>
-              </div>
+              <div class="sig-label">Sent by</div>
+              <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td class="sig-logo-cell">
+                    <img src="https://artic.live/images/logo-black.png" alt="artic." width="54" style="display: block; border: none;">
+                  </td>
+                  <td class="sig-info-cell">
+                    <a href="https://artic.live" class="sig-brand-name" target="_blank">artic.live</a>
+                    <div class="sig-desc">Art, Culture, and Archive.</div>
+                  </td>
+                </tr>
+              </table>
             </div>
           </div>
         </td>
       </tr>
       <tr>
         <td class="footer">
-          <p class="footer-text">본 메일은 artic. 서비스 이용 고객님을 대상으로 발송된 발신전용 메일입니다.<br>문의사항이 있으시면 고객지원 이메일로 연락주시기 바랍니다.</p>
-          <div class="footer-links">
-            <a href="mailto:admin@artic.live" class="footer-link">admin@artic.live</a>
-            <a href="https://artic.live" class="footer-link">Website</a>
+          <div class="footer-nav">
+            <a href="https://artic.live" class="footer-nav-link" target="_blank">Website</a>
+            <span class="footer-nav-separator">&bull;</span>
+            <a href="mailto:admin@artic.live" class="footer-nav-link">Contact Support</a>
+            <span class="footer-nav-separator">&bull;</span>
+            <a href="https://www.instagram.com/artic.live" class="footer-nav-link" target="_blank">Instagram</a>
           </div>
-          <p class="footer-text" style="margin-top: 15px;">&copy; 2026 artic. All Rights Reserved.</p>
+          <p class="footer-text">
+            본 메일은 artic. 서비스 이용 고객님을 대상으로 발송된 발신전용 메일입니다.<br>
+            문의 사항이 있으신 경우 <a href="mailto:admin@artic.live" style="color: #666666; text-decoration: underline;">admin@artic.live</a>로 문의해 주시기 바랍니다.
+          </p>
+          <p class="footer-text" style="margin-top: 15px; color: #999999;">&copy; 2026 artic. All Rights Reserved.</p>
         </td>
       </tr>
     </table>

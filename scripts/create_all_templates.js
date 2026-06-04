@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const baseDir = 'c:/Users/LA723SL/.gemini/antigravity/Homepage';
+const baseDir = path.resolve(__dirname, '..');
 const templatesDir = path.join(baseDir, 'templates');
 
 // Utility to create directory recursively if not exists
@@ -189,9 +189,9 @@ const projectLayoutContent = `<!DOCTYPE html>
   <meta name="description" content="artic. — {{PROJECT_TITLE}} ({{PROJECT_SUBTITLE}})">
   <meta name="author" content="artic.">
   <title>{{PROJECT_TITLE}} — {{PROJECT_SUBTITLE}} | artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="icon" type="image/png" href="{{PATH_DEPTH}}images/favicon.png">
   <link rel="preload" href="{{COVER_IMAGE}}" as="image">
-  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="{{PATH_DEPTH}}css/design-system.css">
   <script>
     (function(){
       var s = localStorage.getItem('artic-theme');
@@ -231,11 +231,11 @@ const projectLayoutContent = `<!DOCTYPE html>
       </div>
     </div>
 
-    {{FOOTER}}
-
   </div>
 
-  <script src="../js/shared.js"></script>
+  {{FOOTER}}
+
+  <script src="{{PATH_DEPTH}}js/shared.js"></script>
   {{ADDITIONAL_SCRIPTS}}
 </body>
 </html>

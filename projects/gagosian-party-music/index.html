@@ -6,9 +6,9 @@
   <meta name="description" content="artic. — Gagosian Party Curation ({{PROJECT_SUBTITLE}})">
   <meta name="author" content="artic.">
   <title>Gagosian Party Curation — {{PROJECT_SUBTITLE}} | artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="icon" type="image/png" href="../../images/favicon.png">
   <link rel="preload" href="album-art.png" as="image">
-  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="../../css/design-system.css">
   <script>
     (function(){
       var s = localStorage.getItem('artic-theme');
@@ -34,7 +34,7 @@
       align-items: center;
       justify-content: flex-start;
       overflow-x: hidden;
-      padding: var(--space-md) var(--space-sm);
+      padding: 0;
       padding-top: 100px;
       position: relative;
       transition: var(--transition-theme);
@@ -50,6 +50,7 @@
       flex-direction: column;
       align-items: center;
       flex-grow: 1;
+      padding: 0 var(--space-sm);
     }
 
     @media (min-width: 768px) {
@@ -660,21 +661,7 @@
       color: var(--bg-primary);
     }
 
-    /* Footer */
-    footer {
-      width: 100%;
-      border-top: 1px solid var(--border-color);
-      padding: var(--space-lg) 0;
-      text-align: center;
-      font-size: 0.55rem;
-      color: var(--text-muted);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-top: auto;
-      transition: border-color 0.5s ease;
-      opacity: 0;
-      animation: sectionReveal 0.5s ease 3.4s forwards;
-    }
+
 
     /* Mobile overrides */
     @media (max-width: 767px) {
@@ -922,13 +909,13 @@
       </div>
     </div>
 
-    <footer class="about-footer">
+  </div>
+
+  <footer class="about-footer">
   © 2026 artic. All Rights Reserved
 </footer>
 
-  </div>
-
-  <script src="../js/shared.js"></script>
+  <script src="../../js/shared.js"></script>
   <script>
 // == Instagram Reel Embed Toggle with UI Cropping ==
     (function() {

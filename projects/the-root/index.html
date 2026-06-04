@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — 중립적인인터뷰 ({{PROJECT_SUBTITLE}})">
+  <meta name="description" content="artic. — Project : The Root ({{PROJECT_SUBTITLE}})">
   <meta name="author" content="artic.">
-  <title>중립적인인터뷰 — {{PROJECT_SUBTITLE}} | artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <title>Project : The Root — {{PROJECT_SUBTITLE}} | artic.</title>
+  <link rel="icon" type="image/png" href="../../images/favicon.png">
   <link rel="preload" href="album-art.png" as="image">
-  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="../../css/design-system.css">
   <script>
     (function(){
       var s = localStorage.getItem('artic-theme');
@@ -34,7 +34,7 @@
       align-items: center;
       justify-content: flex-start;
       overflow-x: hidden;
-      padding: var(--space-md) var(--space-sm);
+      padding: 0;
       padding-top: 100px;
       position: relative;
       transition: var(--transition-theme);
@@ -50,6 +50,7 @@
       flex-direction: column;
       align-items: center;
       flex-grow: 1;
+      padding: 0 var(--space-sm);
     }
 
     /* Desktop: widen for row layout in header */
@@ -254,7 +255,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Episodes items stagger delay curves (14 items) */
+    /* Episodes items stagger delay curves (8 items) */
     .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.1s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.15s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.2s; }
@@ -263,12 +264,6 @@
     .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 3.35s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(7) { animation-delay: 3.4s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(8) { animation-delay: 3.45s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(9) { animation-delay: 3.5s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(10) { animation-delay: 3.55s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(11) { animation-delay: 3.6s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(12) { animation-delay: 3.65s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(13) { animation-delay: 3.7s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(14) { animation-delay: 3.75s; }
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
@@ -534,7 +529,7 @@
       filter: brightness(1.0);
     }
 
-    /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Pill Play Button */
+    /* Glassmorphic Play Button */
     .poster-play-btn {
       position: absolute;
       bottom: 16px;
@@ -595,19 +590,7 @@
       fill: var(--text-primary);
     }
 
-    /* ── Footer ── */
-    footer {
-      width: 100%;
-      border-top: 1px solid var(--border-color);
-      padding: var(--space-lg) 0;
-      text-align: center;
-      font-size: 0.55rem;
-      color: var(--text-muted);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-top: auto;
-      transition: border-color 0.5s ease;
-    }
+
 
     /* ── Mobile Accordion Styles & Overrides ── */
     .toggle-icon {
@@ -702,7 +685,7 @@
       }
 
       .expanded .toggle-content {
-        max-height: 2500px; /* Generous height for 14 items list */
+        max-height: 2500px; /* Generous height for list */
         opacity: 1;
         margin-top: 16px;
       }
@@ -798,12 +781,12 @@
     <!-- Album Showcase -->
     <section class="album-showcase">
       <div class="album-art-wrapper">
-        <img class="album-art" src="album-art.png" alt="중립적인인터뷰 Cover Art">
+        <img class="album-art" src="album-art.png" alt="Project : The Root Cover Art">
       </div>
       <div class="album-info">
-        <span class="artist-name">Bokos</span>
-        <h1 class="album-title">중립적인인터뷰</h1>
-        <p class="album-meta">PRODUCTION • 2025</p>
+        <span class="artist-name">Bokos x artic.</span>
+        <h1 class="album-title">Project : The Root</h1>
+        <p class="album-meta">ORIGINAL SERIES • 2026</p>
       </div>
     </section>
 
@@ -818,20 +801,20 @@
         </div>
         <div class="toggle-content">
           <div class="static-content">
-            <div class="archive-entry active" data-vid="X8r2fg3240I">
+            <div class="archive-entry active" data-vid="gRSwOt_GwBk">
               <a class="archive-item latest-featured-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <div class="archive-item-text">
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">CODA | 중립적인인터뷰</span>
-                      <span class="archive-item-date">2025.12.02</span>
+                      <span class="archive-item-title">차승우라는 한 남자의 인생과 앨범들 | EP.7</span>
+                      <span class="archive-item-date">2026.05.20</span>
                     </div>
                   </div>
                 </div>
               </a>
               <div class="archive-embed open">
-                <div class="custom-video-poster" data-vid="X8r2fg3240I" style="opacity: 0; transition: opacity 0.8s ease;">
-                  <img class="poster-thumbnail" src="https://img.youtube.com/vi/X8r2fg3240I/maxresdefault.jpg" alt="Video Cover">
+                <div class="custom-video-poster" data-vid="gRSwOt_GwBk" style="opacity: 0; transition: opacity 0.8s ease;">
+                  <img class="poster-thumbnail" src="https://img.youtube.com/vi/gRSwOt_GwBk/maxresdefault.jpg" alt="Video Cover">
                   <div class="poster-play-btn">
                     <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
                   </div>
@@ -843,13 +826,12 @@
           <!-- Project Description & Info -->
           <div class="project-brief" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; transition: border-color 0.5s ease;">
             <p class="brief-desc-ko" style="font-family: var(--font-sans); font-size: 0.78rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 20px;">
-              <b>Bokos(보코스)의 아티스트 앨범 큐레이션 인터뷰 시리즈.</b><br>
-              격주 수요일, 다양한 창작자들과 함께 인생 앨범 3장을 이야기하며 그들의 정체성과 취향을 알아본다.
+              최근 작업물부터 10대 시절 인생앨범까지, 취향의 뿌리를 따라가는 인터뷰 시리즈
             </p>
             <div class="brief-meta" style="font-family: var(--font-sans); font-size: 0.65rem; color: var(--text-muted); line-height: 1.8;">
               <div style="display: flex; gap: 24px; margin-bottom: 6px;">
                 <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Creator</span>
-                <span style="color: var(--text-secondary);">Bokos</span>
+                <span style="color: var(--text-secondary);">Bokos x artic.</span>
               </div>
               <div style="display: flex; gap: 24px; margin-bottom: 20px;">
                 <span style="width: 80px; font-weight: 700; color: var(--text-primary);">Production</span>
@@ -862,8 +844,8 @@
           <div class="project-starring" style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 12px; transition: border-color 0.5s ease;">
             <span style="font-family: var(--font-sans); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 12px;">STARRING</span>
             <p style="font-family: var(--font-sans); font-size: 0.72rem; line-height: 1.8; color: var(--text-secondary); letter-spacing: 0.02em;">
-              이승준 &nbsp;•&nbsp; Hukky Shibaseki &nbsp;•&nbsp; HYPNOSIS THERAPY &nbsp;•&nbsp; Slom &nbsp;•&nbsp; 천재노창 &nbsp;•&nbsp; pH-1 &nbsp;•&nbsp; Crush &nbsp;•&nbsp; Chaeyoung of TWICE &nbsp;•&nbsp; 조원선 &nbsp;•&nbsp; 윤단비 &nbsp;•&nbsp; JINBO the SuperFreak &nbsp;•&nbsp; 김춘추(놀이도감)
-            </p>
+            자이언티 &nbsp;•&nbsp; 권기백 &nbsp;•&nbsp; 최수미 &nbsp;•&nbsp; 주영 &nbsp;•&nbsp; 제이클레프 &nbsp;•&nbsp; 까데호 & Original Love &nbsp;•&nbsp; 차승우
+          </p>
           </div>
       </main>
       </div>
@@ -875,18 +857,35 @@
             <span class="archive-group-label film-label">episodes</span>
             <span class="toggle-icon"></span>
           </div>
-                    <div class="archive-list toggle-content">
+          <div class="archive-list toggle-content">
 
-            <!-- EP.1 -->
-            <div class="archive-entry" data-vid="yyXvMtWSN9I">
+            <!-- EP.0 -->
+            <div class="archive-entry" data-vid="usefAQ2yMYs">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">이승준</span>
+                    <span class="archive-item-type">Teaser</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.1 | 이승준의 인생앨범 3선</span>
-                      <span class="archive-item-date">2025.06.11</span>
+                      <span class="archive-item-title">Project: The Root EP.0</span>
+                      <span class="archive-item-date">2026.01.11</span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+              <div class="archive-embed"></div>
+            </div>
+
+            <!-- EP.1 -->
+            <div class="archive-entry" data-vid="nvjVqcu8pa0">
+              <a class="archive-item" href="javascript:void(0)">
+                <div class="archive-item-left">
+                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <div class="archive-item-text">
+                    <span class="archive-item-type">자이언티</span>
+                    <div class="archive-item-title-row">
+                      <span class="archive-item-title">휘성을 듣던 김해솔이 [POSER]를 만든 자이언티가 되기까지 | EP.1</span>
+                      <span class="archive-item-date">2026.01.14</span>
                     </div>
                   </div>
                 </div>
@@ -895,15 +894,15 @@
             </div>
 
             <!-- EP.2 -->
-            <div class="archive-entry" data-vid="jR6iLjU2wi0">
+            <div class="archive-entry" data-vid="zyNDbezftEQ">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">Hukky Shibaseki</span>
+                    <span class="archive-item-type">권기백</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.2 | 허키 시바세키의 인생앨범 3선</span>
-                      <span class="archive-item-date">2025.06.25</span>
+                      <span class="archive-item-title">권기백이 인생앨범 얘기하러 왔다고 임마 | EP.2 in 안양</span>
+                      <span class="archive-item-date">2026.02.04</span>
                     </div>
                   </div>
                 </div>
@@ -912,15 +911,15 @@
             </div>
 
             <!-- EP.3 -->
-            <div class="archive-entry" data-vid="XveXyq4gEz8">
+            <div class="archive-entry" data-vid="6c5Vi2O3dXk">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">HYPNOSIS THERAPY</span>
+                    <span class="archive-item-type">최수미</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.3 | 힙노시스테라피의 인생앨범 3선</span>
-                      <span class="archive-item-date">2025.07.09</span>
+                      <span class="archive-item-title">세이수미 최수미가 말하는 ‘있는 그대로의 삶’ (feat. 한대음) | EP.3</span>
+                      <span class="archive-item-date">2026.02.25</span>
                     </div>
                   </div>
                 </div>
@@ -929,15 +928,15 @@
             </div>
 
             <!-- EP.4 -->
-            <div class="archive-entry" data-vid="A2p4Hw0X-1o">
+            <div class="archive-entry" data-vid="wsTZXHi7RXU">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">Slom</span>
+                    <span class="archive-item-type">주영</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.4 | 슬롬의 인생앨범 3선</span>
-                      <span class="archive-item-date">2025.07.23</span>
+                      <span class="archive-item-title">주영의 뿌리를 찾다가 맞이한 충격적 결말 | EP.4</span>
+                      <span class="archive-item-date">2026.03.18</span>
                     </div>
                   </div>
                 </div>
@@ -946,15 +945,15 @@
             </div>
 
             <!-- EP.5 -->
-            <div class="archive-entry" data-vid="GcpbOMRWAE8">
+            <div class="archive-entry" data-vid="GmW8B9QMfew">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">천재노창</span>
+                    <span class="archive-item-type">제이클레프</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.5 | 그냥노창의 그냥앨범 3선</span>
-                      <span class="archive-item-date">2025.08.06</span>
+                      <span class="archive-item-title">제이클레프의 모든 버전이 궁금해 | EP.5</span>
+                      <span class="archive-item-date">2026.04.15</span>
                     </div>
                   </div>
                 </div>
@@ -963,15 +962,15 @@
             </div>
 
             <!-- EP.6 -->
-            <div class="archive-entry" data-vid="reZm4AutbbA">
+            <div class="archive-entry" data-vid="6TglPJfO7K4">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">pH-1</span>
+                    <span class="archive-item-type">까데호 & Original Love</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.6 | pH-1의 인생앨범 3선</span>
-                      <span class="archive-item-date">2025.08.20</span>
+                      <span class="archive-item-title">일본 전설이 사랑에 빠진 한국 밴드 | EP.6 오리지널 러브 × 까데호 in 춘천</span>
+                      <span class="archive-item-date">2026.05.01</span>
                     </div>
                   </div>
                 </div>
@@ -979,16 +978,16 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.7-1 -->
-            <div class="archive-entry" data-vid="9ctpxn-gZX0">
+            <!-- EP.7 -->
+            <div class="archive-entry" data-vid="gRSwOt_GwBk">
               <a class="archive-item" href="javascript:void(0)">
                 <div class="archive-item-left">
                   <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <div class="archive-item-text">
-                    <span class="archive-item-type">Crush</span>
+                    <span class="archive-item-type">차승우</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.7-1 | 크러쉬의 인생앨범 5선 (Part 1)</span>
-                      <span class="archive-item-date">2025.09.03</span>
+                      <span class="archive-item-title">차승우라는 한 남자의 인생과 앨범들 | EP.7</span>
+                      <span class="archive-item-date">2026.05.20</span>
                     </div>
                   </div>
                 </div>
@@ -996,138 +995,22 @@
               <div class="archive-embed"></div>
             </div>
 
-            <!-- EP.7-2 -->
-            <div class="archive-entry" data-vid="IQuNZtS3Nig">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">Crush</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.7-2 | 크러쉬의 최애 바이닐 Mix Playlist (Part 2)</span>
-                      <span class="archive-item-date">2025.09.10</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
+          
 
-            <!-- EP.8 -->
-            <div class="archive-entry" data-vid="6Rj8X_gNz_M">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">Chaeyoung of TWICE</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.8 | 채영의 인생앨범 4선</span>
-                      <span class="archive-item-date">2025.09.17</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
 
-            <!-- EP.9 -->
-            <div class="archive-entry" data-vid="O0MMYBcam-Q">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">조원선</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.9 | 조원선의 인생앨범 3선</span>
-                      <span class="archive-item-date">2025.10.01</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <!-- EP.10 -->
-            <div class="archive-entry" data-vid="wOLgFdlg0qE">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">윤단비</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.10 | 윤단비의 인생앨범 3선</span>
-                      <span class="archive-item-date">2025.10.22</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <!-- EP.11-1 -->
-            <div class="archive-entry" data-vid="3_8sWvUJ0zI">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">JINBO the SuperFreak</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.11-1 | 진보 더 수퍼프릭의 인생앨범 3선 (Part 1)</span>
-                      <span class="archive-item-date">2025.11.05</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <!-- EP.11-2 -->
-            <div class="archive-entry" data-vid="siOVsCwY-vY">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">JINBO the SuperFreak</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">EP.11-2 | 진보 더 수퍼프릭의 또다른 인생앨범들 (Part 2)</span>
-                      <span class="archive-item-date">2025.11.05</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <!-- CODA -->
-            <div class="archive-entry" data-vid="X8r2fg3240I">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">Bokos</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">CODA | 중립적인인터뷰</span>
-                      <span class="archive-item-date">2025.12.02</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-          </div>
+</div>
         </div>
       </section>
       </div>
     </div>
 
-    <footer class="about-footer">
+  </div>
+
+  <footer class="about-footer">
   © 2026 artic. All Rights Reserved
 </footer>
 
-  </div>
-
-  <script src="../js/shared.js"></script>
+  <script src="../../js/shared.js"></script>
   <script>
 // -- Inline video embed toggle (close-first-then-open) --
     (function() {

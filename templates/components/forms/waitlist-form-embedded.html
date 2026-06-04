@@ -1,0 +1,131 @@
+<!--
+  [Embedded Form Component] Join the Waitlist
+  
+  API INTEGRATION SPECIFICATION:
+    - Endpoint (Production): POST https://us-central1-artic-official-home.cloudfunctions.net/waitlist
+    - Endpoint (Staging/Local): POST http://127.0.0.1:5001/artic-official-home/us-central1/waitlist
+    - Method: POST
+    - Content-Type: application/json
+    - Payload: { "email": "user@example.com" }
+    
+  DATABASE SCHEMA MAPPING (Firebase Firestore):
+    - Collection: `quarterly_subscribers`
+    - Document Fields:
+      - `email`: string
+      - `created_at`: timestamp (ServerValue.TIMESTAMP / serverTimestamp())
+      
+  DATABASE SCHEMA MAPPING (Local SQLite):
+    - Table: `quarterly_subscribers`
+    - Columns:
+      - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+      - `email`: TEXT NOT NULL
+      - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-->
+<div class="waitlist-container">
+  <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
+  <form id="waitlist-form" class="waitlist-form">
+    <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required>
+    <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
+      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+  </form>
+  <div id="waitlist-message" class="waitlist-message"></div>
+</div>
+
+<style>
+  /* ── Waitlist Form Style ── */
+  .waitlist-container {
+    position: relative;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .waitlist-form {
+    display: none;
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 12px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .waitlist-form.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .waitlist-form input {
+    flex: 1;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 10px 0;
+    padding-right: 40px;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    outline: none;
+    border-radius: 0;
+    transition: border-color 0.4s ease;
+  }
+
+  .waitlist-form input:focus {
+    border-bottom-color: var(--text-primary);
+  }
+
+  .waitlist-form button {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0;
+  }
+
+  .waitlist-form button svg {
+    width: 10px;
+    height: 10px;
+    fill: var(--text-muted);
+    transition: fill 0.3s ease, transform 0.3s ease;
+  }
+
+  .waitlist-form button:hover svg {
+    fill: var(--text-primary);
+    transform: scale(1.15);
+  }
+
+  .waitlist-form button:disabled svg {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .waitlist-message {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    line-height: 1.5;
+    margin-top: 10px;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .waitlist-message.active {
+    display: block;
+    opacity: 1;
+  }
+
+  .waitlist-message.success {
+    color: var(--accent-success, #10B981);
+  }
+
+  .waitlist-message.error {
+    color: var(--accent-danger, #EF4444);
+  }
+</style>

@@ -1,0 +1,30 @@
+<!-- Reusable Player Component -->
+<div class="play-widget" id="play-widget">
+  <div class="play-track-info">
+    <span class="play-track-num" id="play-track-num">01</span>
+    <div class="play-track-text">
+      <span class="play-track-title" id="play-track-title">Track Title</span>
+      <span class="play-track-status" id="play-track-status">Ready</span>
+    </div>
+  </div>
+  <div class="play-progress-wrap">
+    <span class="play-time" id="play-current">0:00</span>
+    <div class="play-bar-track" id="play-bar-track">
+      <div class="play-bar-fill" id="play-bar-fill"></div>
+    </div>
+    <span class="play-time dur" id="play-duration">0:00</span>
+  </div>
+  <div class="play-controls">
+    <button class="play-ctrl-btn" id="play-prev-btn" aria-label="Previous track">
+      <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+      Prev
+    </button>
+    <button class="play-main-btn" id="play-main-btn" aria-label="Play">
+      <svg viewBox="0 0 24 24" id="play-main-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+    <button class="play-ctrl-btn" id="play-next-btn" aria-label="Next track">
+      Next
+      <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+    </button>
+  </div>
+</div>

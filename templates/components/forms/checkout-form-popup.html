@@ -1,0 +1,142 @@
+<!--
+  [Popup Form Component] Purchase/Order Checkout
+  
+  API INTEGRATION SPECIFICATION:
+    - Endpoint (Production): POST https://us-central1-artic-official-home.cloudfunctions.net/checkout
+    - Endpoint (Staging/Local): POST http://localhost:8000/api/checkout (Node server proxy)
+    - Method: POST
+    - Content-Type: application/json
+    - Payload: 
+      {
+        "name": string,
+        "email": string,
+        "phone": string,
+        "address": string,
+        "quantity": number,
+        "depositor": string,
+        "notes": string
+      }
+    
+  DATABASE SCHEMA MAPPING (Firebase Firestore):
+    - Collection: `orders`
+    - Document Fields:
+      - `name`: string
+      - `email`: string
+      - `phone`: string
+      - `address`: string
+      - `quantity`: number
+      - `depositor`: string
+      - `notes`: string
+      - `created_at`: timestamp (ServerValue.TIMESTAMP / serverTimestamp())
+      
+  DATABASE SCHEMA MAPPING (Local SQLite):
+    - Table: `orders`
+    - Columns:
+      - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
+      - `name`: TEXT NOT NULL
+      - `email`: TEXT NOT NULL
+      - `phone`: TEXT NOT NULL
+      - `address`: TEXT NOT NULL
+      - `quantity`: INTEGER NOT NULL
+      - `depositor`: TEXT NOT NULL
+      - `notes`: TEXT
+      - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-->
+<div class="checkout-scroll-container">
+  <div class="checkout-form-group">
+    <label class="checkout-label">이름 *</label>
+    <input type="text" id="chk-name" class="checkout-input" required placeholder="성함을 입력하세요">
+  </div>
+  <div class="checkout-form-group">
+    <label class="checkout-label">이메일 *</label>
+    <input type="email" id="chk-email" class="checkout-input" required placeholder="example@email.com">
+  </div>
+  <div class="checkout-form-group">
+    <label class="checkout-label">연락처 *</label>
+    <input type="tel" id="chk-phone" class="checkout-input" required placeholder="010-0000-0000">
+  </div>
+  <div class="checkout-form-group">
+    <label class="checkout-label">배송지 주소 *</label>
+    <input type="text" id="chk-address" class="checkout-input" required placeholder="배송 주소를 입력하세요">
+  </div>
+  <div class="checkout-form-group">
+    <label class="checkout-label">수량 *</label>
+    <select id="chk-quantity" class="checkout-select">
+      <option value="1">1개 (15,000원 + 배송비 3,000원)</option>
+      <option value="2">2개 (30,000원 + 배송비 3,000원)</option>
+      <option value="3">3개 (45,000원 + 배송비 3,000원)</option>
+      <option value="4">4개 (60,000원 + 배송비 3,000원)</option>
+      <option value="5">5개 (75,000원 + 배송비 3,000원)</option>
+    </select>
+  </div>
+  <div class="checkout-form-group">
+    <label class="checkout-label">입금자명 <span style="font-size:0.6rem; color:var(--text-muted); font-weight:normal;">(입금자가 주문자명과 다를 경우에만 작성)</span></label>
+    <input type="text" id="chk-depositor" class="checkout-input" placeholder="입금자명을 입력하세요">
+  </div>
+  <div class="checkout-form-group">
+    <label class="checkout-label">요청사항</label>
+    <textarea id="chk-notes" class="checkout-textarea" placeholder="기타 배송 시 요청사항을 작성하세요"></textarea>
+  </div>
+</div>
+
+<style>
+  /* ── Checkout Form Styling ── */
+  .checkout-scroll-container {
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 8px;
+    padding-bottom: 24px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+  }
+
+  .checkout-scroll-container::-webkit-scrollbar {
+    width: 2px;
+  }
+
+  .checkout-scroll-container::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+  }
+
+  .checkout-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .checkout-label {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+  }
+
+  .checkout-input, .checkout-select, .checkout-textarea {
+    width: 100%;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 12px 14px;
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+
+  .checkout-input:focus, .checkout-select:focus, .checkout-textarea:focus {
+    border-color: var(--text-primary);
+    background-color: var(--bg-card);
+  }
+
+  .checkout-textarea {
+    resize: vertical;
+    min-height: 70px;
+    height: 70px;
+  }
+</style>

@@ -316,7 +316,7 @@ projectDirs.forEach(slugName => {
     .replace(/\{\{PROJECT_TITLE\}\}/g, meta.title || '')
     .replace(/\{\{PROJECT_ARTIST\}\}/g, meta.artist || '')
     .replace(/\{\{PROJECT_META\}\}/g, meta.meta || '')
-    .replace(/\{\{PROJECT_SUBTITLE\}\}/g, meta.subtitle || meta.title || '')
+
     .replace(/\{\{COVER_IMAGE\}\}/g, coverImage)
     .replace(/\{\{PATH_DEPTH\}\}/g, depth)
     .replace(/\{\{ADDITIONAL_HEAD\}\}/g, additionalHead)

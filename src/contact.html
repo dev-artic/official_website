@@ -203,7 +203,7 @@ body {
 
   
 
-  <script src="../js/shared.js"></script>
+  
   <script>
     function copyText(text, btnElement) {
       navigator.clipboard.writeText(text).then(() => {
@@ -214,14 +214,3 @@ body {
       });
     }
   </script>
-
-<script>
-function copyText(text, btnElement) {
-      navigator.clipboard.writeText(text).then(() => {
-        btnElement.innerText = 'COPIED!';
-        setTimeout(() => {
-          btnElement.innerText = 'COPY ADDRESS';
-        }, 2000);
-      });
-    }
-</script>

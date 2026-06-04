@@ -363,7 +363,7 @@ body {
   <!-- Theme Toggle -->
   
 
-  <script src="../js/shared.js"></script>
+  
   <script>
     // Scroll Reveal Intersection Observer
     document.addEventListener('DOMContentLoaded', () => {
@@ -389,29 +389,3 @@ body {
       });
     });
   </script>
-
-<script>
-// Scroll Reveal Intersection Observer
-    document.addEventListener('DOMContentLoaded', () => {
-      const rows = document.querySelectorAll('.reveal-row');
-      
-      const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.15
-      };
-
-      const observer = new IntersectionObserver((entries, self) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            self.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-
-      rows.forEach(row => {
-        observer.observe(row);
-      });
-    });
-</script>

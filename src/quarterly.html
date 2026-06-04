@@ -355,7 +355,7 @@ body {
   <!-- Theme Toggle -->
   
 
-  <script src="../js/shared.js"></script>
+  
   <script>
     // Waitlist Form Interactivity
     document.addEventListener('DOMContentLoaded', () => {
@@ -426,74 +426,3 @@ body {
       }
     });
   </script>
-
-<script>
-// Waitlist Form Interactivity
-    document.addEventListener('DOMContentLoaded', () => {
-      const toggleBtn = document.getElementById('waitlist-toggle-btn');
-      const form = document.getElementById('waitlist-form');
-      const emailInput = document.getElementById('waitlist-email');
-      const submitBtn = document.getElementById('waitlist-submit-btn');
-      const messageDiv = document.getElementById('waitlist-message');
-
-      if (toggleBtn && form) {
-        toggleBtn.addEventListener('click', () => {
-          // Hide button and reveal form
-          toggleBtn.style.opacity = '0';
-          toggleBtn.style.pointerEvents = 'none';
-          setTimeout(() => {
-            toggleBtn.style.display = 'none';
-            form.classList.add('active');
-            emailInput.focus();
-          }, 300);
-        });
-      }
-
-      if (form) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const email = emailInput.value.trim();
-          if (!email) return;
-
-          // Submitting state
-          submitBtn.disabled = true;
-          emailInput.disabled = true;
-          messageDiv.className = 'waitlist-message';
-          messageDiv.textContent = '';
-
-          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-          const apiUrl = isLocal 
-            ? 'http://127.0.0.1:5001/artic-official-home/us-central1/waitlist' 
-            : 'https://us-central1-artic-official-home.cloudfunctions.net/waitlist';
-
-          fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email: email })
-          })
-          .then(res => {
-            if (!res.ok) {
-              return res.json().then(err => { throw new Error(err.error || 'Submission failed') });
-            }
-            return res.json();
-          })
-          .then(data => {
-            // Success state
-            messageDiv.className = 'waitlist-message success active';
-            messageDiv.textContent = 'You have successfully joined the waitlist.';
-            form.style.opacity = '0.3';
-            form.style.pointerEvents = 'none';
-          })
-          .catch(err => {
-            // Error state
-            submitBtn.disabled = false;
-            emailInput.disabled = false;
-            messageDiv.className = 'waitlist-message error active';
-            messageDiv.textContent = err.message || 'An error occurred. Please try again.';
-          });
-        });
-      }
-    });
-</script>

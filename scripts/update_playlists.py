@@ -94,7 +94,7 @@ def fetch_playlist_items(playlist_id: str) -> list[dict]:
 # 2. 기존 HTML에서 videoId 파싱 (중복 방지)
 # ─────────────────────────────────────────────────────────────
 def parse_existing_video_ids(html: str) -> list[str]:
-    return re.findall(r'class="archive-entry[^"]*"\s+data-vid="([^"]+)"', html)
+    return re.findall(r'class="archive-entry[^"]*"s+data-vid="([^"]+)"', html)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -198,13 +198,8 @@ def update_latest_release(html: str, newest: dict) -> str:
 # ─────────────────────────────────────────────────────────────
 # 4.5 Starring 섹션을 에피소드 출연자로 자동 업데이트
 # ─────────────────────────────────────────────────────────────
-def update_starring_section(html: str) -> str:
-    section_match = re.search(r'<section class="archive-section">(.*?)</section>', html, re.DOTALL)
-    if not section_match:
-        return html
-
-    archive_section_html = section_match.group(1)
-    raw_guests = re.findall(r'<span class="archive-item-type">([^<]+)</span>', archive_section_html)
+def update_starring_section(left_html: str, right_html: str) -> str:
+    raw_guests = re.findall(r'<span class="archive-item-type">([^<]+)</span>', right_html)
 
     unique_guests = []
     seen = set()
@@ -215,18 +210,18 @@ def update_starring_section(html: str) -> str:
             continue
         if g_lower in {"teaser", "pilot", "episode", "bokos", "artic.", "deleted video"}:
             continue
-        if re.match(r'^ep\.\d+', g_lower):
+        if re.match(r'^ep.\d+', g_lower):
             continue
         if g_clean not in seen:
             seen.add(g_clean)
             unique_guests.append(g_clean)
 
     if not unique_guests:
-        return html
+        return left_html
 
     starring_str = " &nbsp;•&nbsp; ".join(unique_guests)
     starring_pattern = r'(<div class="project-starring"[^>]*>\s*<span[^>]*>STARRING</span>\s*<p[^>]*>).*?(</p>\s*</div>)'
-    updated = re.sub(starring_pattern, r'\1\n            ' + starring_str + r'\n          \2', html, count=1, flags=re.DOTALL)
+    updated = re.sub(starring_pattern, r'\1\n            ' + starring_str + r'\n          \2', left_html, count=1, flags=re.DOTALL)
     return updated
 
 
@@ -234,7 +229,7 @@ def update_starring_section(html: str) -> str:
 # 5. 단일 프로젝트 처리
 # ─────────────────────────────────────────────────────────────
 def process_project(proj: dict) -> bool:
-    """Returns True if HTML was modified."""
+    """Returns True if HTML files were modified."""
     pid = proj["id"]
 
     # enabled 키가 명시적으로 False이면 스킵
@@ -248,9 +243,12 @@ def process_project(proj: dict) -> bool:
         print(f"[{pid}] SKIPPED (playlist_id 없음 — {proj.get('playlist_id_env')} Secret을 설정하세요)")
         return False
 
-    html_path = proj["html_path"]
-    if not os.path.exists(html_path):
-        print(f"[{pid}] SKIPPED ({html_path} 파일 없음)")
+    # Determine left and right column paths
+    left_path = proj.get("left_path", proj.get("html_path", ""))
+    right_path = proj.get("right_path", proj.get("html_path", ""))
+
+    if not os.path.exists(left_path) or not os.path.exists(right_path):
+        print(f"[{pid}] SKIPPED (파일이 존재하지 않음: {left_path} 또는 {right_path})")
         return False
 
     print(f"\n[{pid}] ▶ 플레이리스트 {playlist_id} 동기화 시작")
@@ -261,16 +259,17 @@ def process_project(proj: dict) -> bool:
         return False
     print(f"[{pid}]   API에서 {len(items)}개 항목 조회")
 
-    with open(html_path, "r", encoding="utf-8") as f:
-        html = f.read()
+    # Read right content (Episode list)
+    with open(right_path, "r", encoding="utf-8") as f:
+        right_html = f.read()
 
-    existing_ids = parse_existing_video_ids(html)
-    print(f"[{pid}]   HTML의 기존 videoId {len(existing_ids)}개: {existing_ids[:5]}{'...' if len(existing_ids) > 5 else ''}")
+    existing_ids = parse_existing_video_ids(right_html)
+    print(f"[{pid}]   기존 videoId {len(existing_ids)}개: {existing_ids[:5]}{'...' if len(existing_ids) > 5 else ''}")
 
     new_items = [it for it in items if it["videoId"] not in existing_ids]
     print(f"[{pid}]   새 에피소드 {len(new_items)}개")
 
-    modified = False
+    right_modified = False
 
     if new_items:
         new_html_blocks = ""
@@ -292,42 +291,58 @@ def process_project(proj: dict) -> bool:
 
         # archive-list 닫힘 태그 직전에 삽입
         # 패턴: 마지막 archive-entry 블록 닫힘 이후, archive-list 닫힘 직전
+        # 만약 archive-list 닫힘 직전 패턴이 매칭되지 않으면 닫는 태그 직전 fallback
         insert_pattern = r'(</div>\s*\n\s*)([ \t]*</div>\s*\n\s*</div>\s*\n\s*</section>)'
         def inserter(m):
             return m.group(1) + new_html_blocks + "\n\n" + m.group(2)
 
-        new_html = re.sub(insert_pattern, inserter, html, count=1, flags=re.DOTALL)
-        if new_html != html:
-            html = new_html
-            modified = True
+        new_right_html = re.sub(insert_pattern, inserter, right_html, count=1, flags=re.DOTALL)
+        if new_right_html == right_html:
+            # Fallback if the outer wrapping element is slightly different in right.html
+            insert_pattern_fallback = r'(</div>\s*\n\s*)([ \t]*</div>\s*\n\s*</section>)'
+            new_right_html = re.sub(insert_pattern_fallback, inserter, right_html, count=1, flags=re.DOTALL)
+
+        if new_right_html != right_html:
+            right_html = new_right_html
+            right_modified = True
             print(f"[{pid}]   {len(new_items)}개 에피소드 추가 완료")
         else:
             print(f"[{pid}]   WARNING: archive-list 삽입 위치를 찾지 못함 — HTML 구조 확인 필요")
 
+    # Read left content (Latest Release & Starring)
+    with open(left_path, "r", encoding="utf-8") as f:
+        left_html = f.read()
+
+    left_modified = False
+
     # Latest Release 업데이트 (업로드일 데이터가 가장 최근인 항목)
     if proj.get("has_latest_release") and items:
         newest = max(items, key=lambda x: x.get("publishedAtRaw", ""))
-        new_html = update_latest_release(html, newest)
-        if new_html != html:
-            html     = new_html
-            modified = True
+        new_left_html = update_latest_release(left_html, newest)
+        if new_left_html != left_html:
+            left_html = new_left_html
+            left_modified = True
             print(f"[{pid}]   Latest Release → {newest['title'][:40]}")
 
-    # Starring 리스트 최신화
-    new_html = update_starring_section(html)
-    if new_html != html:
-        html     = new_html
-        modified = True
+    # Starring 리스트 최신화 (right_html을 바탕으로 left_html 업데이트)
+    new_left_html = update_starring_section(left_html, right_html)
+    if new_left_html != left_html:
+        left_html = new_left_html
+        left_modified = True
         print(f"[{pid}]   Starring List Updated")
 
-    if modified:
-        with open(html_path, "w", encoding="utf-8") as f:
-            f.write(html)
-        print(f"[{pid}]   ✅ {html_path} 저장 완료")
-    else:
-        print(f"[{pid}]   변경 없음 (이미 최신)")
+    # Write changes
+    if right_modified:
+        with open(right_path, "w", encoding="utf-8") as f:
+            f.write(right_html)
+        print(f"[{pid}]   ✅ {right_path} 저장 완료")
 
-    return modified
+    if left_modified:
+        with open(left_path, "w", encoding="utf-8") as f:
+            f.write(left_html)
+        print(f"[{pid}]   ✅ {left_path} 저장 완료")
+
+    return right_modified or left_modified
 
 
 # ─────────────────────────────────────────────────────────────
@@ -335,27 +350,33 @@ def process_project(proj: dict) -> bool:
 # ─────────────────────────────────────────────────────────────
 def main():
     print("=" * 60)
-    print("artic. YouTube Playlist Auto-Sync")
+    print("artic. YouTube Playlist Auto-Sync (Split Files)")
     print(f"대상 프로젝트: {len(PROJECTS)}개")
     print("=" * 60)
 
-    changed_projects = []
+    changed_files = []
 
     for proj in PROJECTS:
+        left_path = proj.get("left_path", proj.get("html_path", ""))
+        right_path = proj.get("right_path", proj.get("html_path", ""))
+        
+        # Determine files changed
         if process_project(proj):
-            changed_projects.append(proj["html_path"])
+            changed_files.append(left_path)
+            changed_files.append(right_path)
 
     print("\n" + "=" * 60)
-    if changed_projects:
-        print(f"✅ 업데이트된 파일 ({len(changed_projects)}개):")
-        for p in changed_projects:
+    if changed_files:
+        unique_changed = sorted(list(set(changed_files)))
+        print(f"✅ 업데이트된 파일 ({len(unique_changed)}개):")
+        for p in unique_changed:
             print(f"   - {p}")
         # GitHub Actions에서 참조할 output
         output_file = os.environ.get("GITHUB_OUTPUT", "")
         if output_file:
             with open(output_file, "a") as f:
                 f.write("changed=true\n")
-                f.write(f"changed_files={' '.join(changed_projects)}\n")
+                f.write(f"changed_files={' '.join(unique_changed)}\n")
     else:
         print("변경 없음 — 모든 프로젝트가 최신 상태입니다.")
         output_file = os.environ.get("GITHUB_OUTPUT", "")

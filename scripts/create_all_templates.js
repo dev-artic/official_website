@@ -411,30 +411,45 @@ const waitlistFormContent = `<!--
       - \\\`created_at\\\`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 -->
 <div class="waitlist-container">
-  <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
-  
-  <form id="waitlist-form" class="waitlist-form" novalidate>
-    <div class="waitlist-fields-wrapper">
-      <div class="waitlist-field-group">
-        <input type="text" id="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
-      </div>
-      <div class="waitlist-field-group">
-        <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required autocomplete="email">
-        <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </button>
-      </div>
+  <!-- Button Wrapper -->
+  <div id="waitlist-btn-wrapper" class="grid-collapse-wrapper active">
+    <div class="grid-collapse-content">
+      <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
     </div>
-  </form>
+  </div>
+  
+  <!-- Form Wrapper -->
+  <div id="waitlist-form-wrapper" class="grid-collapse-wrapper">
+    <div class="grid-collapse-content" style="padding-bottom: 2px;">
+      <form id="waitlist-form" class="waitlist-form" novalidate>
+        <div class="waitlist-fields-wrapper">
+          <div class="waitlist-field-group">
+            <input type="text" id="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
+          </div>
+          <div class="waitlist-field-group">
+            <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required autocomplete="email">
+            <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div class="waitlist-loading-bar">
     <div class="waitlist-loading-progress"></div>
   </div>
 
-  <div id="waitlist-message" class="waitlist-message"></div>
+  <!-- Message Wrapper -->
+  <div id="waitlist-message-wrapper" class="grid-collapse-wrapper">
+    <div class="grid-collapse-content">
+      <div id="waitlist-message" class="waitlist-message"></div>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -443,7 +458,17 @@ const waitlistFormContent = `<!--
     position: relative;
     width: 100%;
     margin-top: 16px;
-    min-height: 80px;
+  }
+
+  #waitlist-toggle-btn {
+    opacity: 1;
+    display: inline-flex;
+    transition: opacity 0.4s ease;
+  }
+
+  .grid-collapse-wrapper:not(.active) #waitlist-toggle-btn {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .about-action svg {
@@ -461,20 +486,16 @@ const waitlistFormContent = `<!--
     width: 100%;
     max-width: 320px;
     opacity: 0;
-    max-height: 0;
-    overflow: hidden;
     transform: translateY(8px);
-    transition: max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
-    margin-top: 0;
+    padding-top: 12px;
   }
 
-  .waitlist-form.active {
+  .grid-collapse-wrapper.active .waitlist-form {
     opacity: 1;
-    max-height: 120px;
     transform: translateY(0);
     pointer-events: auto;
-    margin-top: 12px;
   }
 
   /* Fields stacked layout */
@@ -576,7 +597,7 @@ const waitlistFormContent = `<!--
     margin-top: 12px;
   }
 
-  .waitlist-form.submitting ~ .waitlist-loading-bar {
+  .waitlist-container.submitting .waitlist-loading-bar {
     display: block;
   }
 
@@ -597,17 +618,15 @@ const waitlistFormContent = `<!--
   /* Success & error messages styling */
   .waitlist-message {
     font-family: var(--font-sans);
-    margin-top: 16px;
     opacity: 0;
     transform: translateY(4px);
-    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    display: none;
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     text-align: left;
     max-width: 320px;
+    padding-top: 16px;
   }
 
-  .waitlist-message.active {
-    display: block;
+  .grid-collapse-wrapper.active .waitlist-message {
     opacity: 1;
     transform: translateY(0);
   }

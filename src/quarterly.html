@@ -260,16 +260,18 @@ body {
       const submitBtn = document.getElementById('waitlist-submit-btn');
       const messageDiv = document.getElementById('waitlist-message');
       const fieldsWrapper = form ? form.querySelector('.waitlist-fields-wrapper') : null;
+      const btnWrapper = document.getElementById('waitlist-btn-wrapper');
+      const formWrapper = document.getElementById('waitlist-form-wrapper');
+      const messageWrapper = document.getElementById('waitlist-message-wrapper');
+      const container = document.querySelector('.waitlist-container');
 
       if (toggleBtn && form) {
         toggleBtn.addEventListener('click', () => {
-          toggleBtn.style.opacity = '0';
-          toggleBtn.style.pointerEvents = 'none';
-          setTimeout(() => {
-            toggleBtn.style.display = 'none';
-            form.classList.add('active');
-            if (nameInput) nameInput.focus();
-          }, 300);
+          if (btnWrapper) btnWrapper.classList.remove('active');
+          if (formWrapper) formWrapper.classList.add('active');
+          if (nameInput) {
+            setTimeout(() => nameInput.focus(), 250);
+          }
         });
       }
 
@@ -332,9 +334,11 @@ body {
           if (nameInput) nameInput.disabled = true;
           if (emailInput) emailInput.disabled = true;
           if (submitBtn) submitBtn.disabled = true;
-          form.classList.add('submitting');
           
-          messageDiv.className = 'waitlist-message';
+          if (container) container.classList.add('submitting');
+          form.classList.add('submitting');
+          if (messageWrapper) messageWrapper.classList.remove('active');
+          
           messageDiv.innerHTML = '';
 
           const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -361,29 +365,26 @@ body {
 
           Promise.all([fetchPromise, animPromise])
           .then(([data]) => {
-            // Smoothly collapse form and fade in premium success messaging
-            form.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
-            form.style.maxHeight = '0px';
-            form.style.opacity = '0';
-            form.style.marginTop = '0px';
+            if (container) container.classList.remove('submitting');
+            if (formWrapper) formWrapper.classList.remove('active');
 
-            setTimeout(() => {
-              messageDiv.className = 'waitlist-message active';
-              messageDiv.innerHTML = `
-                <div class="success-title">STAY TUNED.</div>
-                <div class="success-desc">We will share our official release with you first.</div>
-              `;
-            }, 500);
+            messageDiv.innerHTML = `
+              <div class="success-title">STAY TUNED.</div>
+              <div class="success-desc">We will share our official release with you first.</div>
+            `;
+            if (messageWrapper) messageWrapper.classList.add('active');
           })
           .catch(err => {
             // Restore form fields in case of API errors (e.g. duplicate email)
             if (nameInput) nameInput.disabled = false;
             if (emailInput) emailInput.disabled = false;
             if (submitBtn) submitBtn.disabled = false;
+            if (container) container.classList.remove('submitting');
             form.classList.remove('submitting');
             
-            messageDiv.className = 'waitlist-message error active';
+            messageDiv.className = 'waitlist-message error';
             messageDiv.textContent = err.message || 'An error occurred. Please try again.';
+            if (messageWrapper) messageWrapper.classList.add('active');
           });
         });
       }

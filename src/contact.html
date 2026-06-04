@@ -1,22 +1,10 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — Contact">
-  <meta name="author" content="artic.">
-  <title>Contact — artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
-  <link rel="stylesheet" href="../css/design-system.css">
-  <link rel="stylesheet" href="../css/animations.css">
-  <script>
-    (function(){
-      var s = localStorage.getItem('artic-theme');
-      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
-      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
-    })();
-  </script>
-  <style>
+---
+layout: base
+title: "Contact"
+description: "artic. — Contact"
+path_depth: "../"
+---
+<style>
 body {
       overflow-x: hidden;
       min-height: 100vh;
@@ -184,28 +172,8 @@ body {
       }
     }
 </style>
-</head>
-<body>
 
-  <nav class="nav-bar delayed-reveal">
-  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
-  <a href="/about/" class="nav-link">About</a>
-  <a href="/projects/" class="nav-link">Projects</a>
-  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-  <a href="/quarterly/" class="nav-link">Quarterly</a>
-  <a href="/contact/" class="nav-link">Contact</a>
-</nav>
-
-<!-- Theme Toggle (Integrated inside Header) -->
-<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-</button>
-  
-  <div class="page-main-content">
-    
-
-
+{{HEADER}}
 
   <div class="delayed-reveal contact-wrap">
     
@@ -238,19 +206,7 @@ body {
   
 
   <script src="../js/shared.js"></script>
-  
-
-
-
-  </div>
-
-  <footer class="about-footer">
-  © 2026 artic. All Rights Reserved
-</footer>
-
-  <script src="../js/shared.js"></script>
   <script>
-
     function copyText(text, btnElement) {
       navigator.clipboard.writeText(text).then(() => {
         btnElement.innerText = 'COPIED!';
@@ -259,7 +215,15 @@ body {
         }, 2000);
       });
     }
-  
+  </script>
+
+<script>
+function copyText(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        btnElement.innerText = 'COPIED!';
+        setTimeout(() => {
+          btnElement.innerText = 'COPY ADDRESS';
+        }, 2000);
+      });
+    }
 </script>
-</body>
-</html>

@@ -1,130 +1,10 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — Quarterly. Notion database-driven webzine.">
-  <meta name="author" content="artic.">
-  <title>Quarterly — artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
-  <link rel="stylesheet" href="../css/design-system.css">
-  <link rel="stylesheet" href="../css/animations.css">
-  <script>
-    (function(){
-      var s = localStorage.getItem('artic-theme');
-      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
-      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
-    })();
-  </script>
-  <style>
-/* ── Waitlist Form Style ── */
-  .waitlist-container {
-    position: relative;
-    width: 100%;
-    margin-top: 10px;
-  }
-
-  /* Inherited .about-action svg zoom animation */
-  .about-action svg {
-    width: 10px;
-    height: 10px;
-    fill: var(--text-primary);
-    transition: fill 0.4s ease, transform 0.4s ease;
-  }
-  .about-action:hover svg {
-    fill: var(--bg-primary);
-    transform: scale(1.1);
-  }
-
-  .waitlist-form {
-    display: none;
-    position: relative;
-    width: 100%;
-    max-width: 320px;
-    margin-top: 12px;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-
-  .waitlist-form.active {
-    display: flex;
-    opacity: 1;
-  }
-
-  .waitlist-form input {
-    flex: 1;
-    background: none;
-    border: none;
-    border-bottom: 1px solid var(--border-color);
-    padding: 10px 0;
-    padding-right: 40px;
-    font-family: var(--font-sans);
-    font-size: 0.72rem;
-    color: var(--text-primary);
-    outline: none;
-    border-radius: 0;
-    transition: border-color 0.4s ease;
-  }
-
-  .waitlist-form input:focus {
-    border-bottom-color: var(--text-primary);
-  }
-
-  .waitlist-form button {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    background: none;
-    border: none;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0;
-  }
-
-  .waitlist-form button svg {
-    width: 10px;
-    height: 10px;
-    fill: var(--text-muted);
-    transition: fill 0.3s ease, transform 0.3s ease;
-  }
-
-  .waitlist-form button:hover svg {
-    fill: var(--text-primary);
-    transform: scale(1.15);
-  }
-
-  .waitlist-form button:disabled svg {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  .waitlist-message {
-    font-family: var(--font-sans);
-    font-size: 0.65rem;
-    line-height: 1.5;
-    margin-top: 10px;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  .waitlist-message.active {
-    display: block;
-    opacity: 1;
-  }
-
-  .waitlist-message.success {
-    color: var(--accent-success, #10B981);
-  }
-
-  .waitlist-message.error {
-    color: var(--accent-danger, #EF4444);
-  }
-
+---
+layout: base
+title: "Quarterly"
+description: "artic. — Quarterly. Notion database-driven webzine."
+path_depth: "../"
+---
+<style>
 body {
       overflow-x: hidden;
     }
@@ -444,29 +324,9 @@ body {
       }
     }
 </style>
-</head>
-<body>
-
-  <nav class="nav-bar delayed-reveal">
-  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
-  <a href="/about/" class="nav-link">About</a>
-  <a href="/projects/" class="nav-link">Projects</a>
-  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-  <a href="/quarterly/" class="nav-link">Quarterly</a>
-  <a href="/contact/" class="nav-link">Contact</a>
-</nav>
-
-<!-- Theme Toggle (Integrated inside Header) -->
-<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-</button>
-  
-  <div class="page-main-content">
-    
 
 <!-- Floating Navigation -->
-  
+  {{HEADER}}
 
   <div class="delayed-reveal about-content animate-fade-in">
 
@@ -483,39 +343,7 @@ body {
           매 분기 발매된 앨범, 작품,<br>그리고 다양한 예술 소식을 전합니다.
         </p>
         
-        <!--
-  [Embedded Form Component] Join the Waitlist
-  
-  API INTEGRATION SPECIFICATION:
-    - Endpoint (Production): POST https://us-central1-artic-official-home.cloudfunctions.net/waitlist
-    - Endpoint (Staging/Local): POST http://127.0.0.1:5001/artic-official-home/us-central1/waitlist
-    - Method: POST
-    - Content-Type: application/json
-    - Payload: { "email": "user@example.com" }
-    
-  DATABASE SCHEMA MAPPING (Firebase Firestore):
-    - Collection: `quarterly_subscribers`
-    - Document Fields:
-      - `email`: string
-      - `created_at`: timestamp (ServerValue.TIMESTAMP / serverTimestamp())
-      
-  DATABASE SCHEMA MAPPING (Local SQLite):
-    - Table: `quarterly_subscribers`
-    - Columns:
-      - `id`: INTEGER PRIMARY KEY AUTOINCREMENT
-      - `email`: TEXT NOT NULL
-      - `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--->
-<div class="waitlist-container">
-  <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
-  <form id="waitlist-form" class="waitlist-form">
-    <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required>
-    <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
-      <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-    </button>
-  </form>
-  <div id="waitlist-message" class="waitlist-message"></div>
-</div>
+        {{WAITLIST_FORM}}
 </div>
       </div>
     </div>
@@ -523,25 +351,13 @@ body {
   </div>
 
   <!-- Footer -->
-  
+  {{FOOTER}}
 
   <!-- Theme Toggle -->
   
 
   <script src="../js/shared.js"></script>
-  
-
-
-
-  </div>
-
-  <footer class="about-footer">
-  © 2026 artic. All Rights Reserved
-</footer>
-
-  <script src="../js/shared.js"></script>
   <script>
-
     // Waitlist Form Interactivity
     document.addEventListener('DOMContentLoaded', () => {
       const toggleBtn = document.getElementById('waitlist-toggle-btn');
@@ -610,7 +426,75 @@ body {
         });
       }
     });
-  
+  </script>
+
+<script>
+// Waitlist Form Interactivity
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('waitlist-toggle-btn');
+      const form = document.getElementById('waitlist-form');
+      const emailInput = document.getElementById('waitlist-email');
+      const submitBtn = document.getElementById('waitlist-submit-btn');
+      const messageDiv = document.getElementById('waitlist-message');
+
+      if (toggleBtn && form) {
+        toggleBtn.addEventListener('click', () => {
+          // Hide button and reveal form
+          toggleBtn.style.opacity = '0';
+          toggleBtn.style.pointerEvents = 'none';
+          setTimeout(() => {
+            toggleBtn.style.display = 'none';
+            form.classList.add('active');
+            emailInput.focus();
+          }, 300);
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = emailInput.value.trim();
+          if (!email) return;
+
+          // Submitting state
+          submitBtn.disabled = true;
+          emailInput.disabled = true;
+          messageDiv.className = 'waitlist-message';
+          messageDiv.textContent = '';
+
+          const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const apiUrl = isLocal 
+            ? 'http://127.0.0.1:5001/artic-official-home/us-central1/waitlist' 
+            : 'https://us-central1-artic-official-home.cloudfunctions.net/waitlist';
+
+          fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: email })
+          })
+          .then(res => {
+            if (!res.ok) {
+              return res.json().then(err => { throw new Error(err.error || 'Submission failed') });
+            }
+            return res.json();
+          })
+          .then(data => {
+            // Success state
+            messageDiv.className = 'waitlist-message success active';
+            messageDiv.textContent = 'You have successfully joined the waitlist.';
+            form.style.opacity = '0.3';
+            form.style.pointerEvents = 'none';
+          })
+          .catch(err => {
+            // Error state
+            submitBtn.disabled = false;
+            emailInput.disabled = false;
+            messageDiv.className = 'waitlist-message error active';
+            messageDiv.textContent = err.message || 'An error occurred. Please try again.';
+          });
+        });
+      }
+    });
 </script>
-</body>
-</html>

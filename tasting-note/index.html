@@ -3,28 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — TASTING NOTE (ORIGINAL SERIES)">
+  <meta name="description" content="artic. — TASTING NOTE — ORIGINAL SERIES ()">
   <meta name="author" content="artic.">
-  <title>TASTING NOTE — ORIGINAL SERIES</title>
-
+  <title>TASTING NOTE — ORIGINAL SERIES —  | artic.</title>
   <link rel="icon" type="image/png" href="../images/favicon.png">
   <link rel="preload" href="album-art.png" as="image">
   <link rel="stylesheet" href="../css/design-system.css">
-
-  <!-- Prevent flash: apply theme before render -->
   <script>
     (function(){
       var s = localStorage.getItem('artic-theme');
       if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
       else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
-      // Force scroll to top on every load (prevents refresh keeping scroll position)
-      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-      window.scrollTo(0, 0);
     })();
   </script>
-
   <style>
-    /* Reset & Base overrides for the Premium Monochrome Bright Theme */
+/* Reset & Base overrides for the Premium Monochrome Bright Theme */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -811,236 +804,61 @@
         transform: rotate(0deg) scale(1);
       }
     }
-  </style>
+</style>
 </head>
 <body>
 
-  <!-- Floating Navigation -->
   <nav class="nav-bar delayed-reveal">
-    <a href="/" class="nav-home visible" id="nav-home">artic.</a>
-    <a href="/about/" class="nav-link">About</a>
-    <a href="/projects/" class="nav-link">Projects</a>
-    <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-    <a href="/quarterly/" class="nav-link">Quarterly</a>
-    <a href="/contact/" class="nav-link">Contact</a>
-  </nav>
+  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
+  <a href="/about/" class="nav-link">About</a>
+  <a href="/projects/" class="nav-link">Projects</a>
+  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
+  <a href="/quarterly/" class="nav-link">Quarterly</a>
+  <a href="/contact/" class="nav-link">Contact</a>
+</nav>
 
-  <div class="delayed-reveal page-container animate-fade-in">
+<!-- Theme Toggle (Integrated inside Header) -->
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
 
-    <!-- Album Showcase (Perfectly models deus ex machina desktop & mobile reveal animations) -->
-    <section class="album-showcase">
+  <div class="container">
+    
+    <!-- Header Showcase Section -->
+    <header class="album-showcase">
       <div class="album-art-wrapper">
-        <img class="album-art" src="album-art.png" alt="TASTING NOTE Cover Art">
+        <img class="album-art" src="album-art.png" alt="TASTING NOTE — ORIGINAL SERIES Cover Art">
       </div>
       <div class="album-info">
-        <span class="artist-name">artic.</span>
-        <h1 class="album-title">TASTING NOTE</h1>
-        <p class="album-meta">ORIGINAL SERIES • 2026</p>
+        <h1 class="album-title">TASTING NOTE — ORIGINAL SERIES</h1>
+        <p class="album-subtitle"></p>
+        <p class="album-description">artic. — TASTING NOTE (ORIGINAL SERIES)</p>
       </div>
-    </section>
+    </header>
 
-    <!-- 2-Column: Latest Release (left) + Episodes (right) -->
+    <!-- Two-Column Page Detail Grid Layout -->
     <div class="content-columns">
-
-      <!-- Left Column: Latest Release -->
-      <main class="links-container expanded">
-        <div class="mobile-toggle-header">
-          <span class="archive-group-label stream-label">Latest Release</span>
-          <span class="toggle-icon"></span>
-        </div>
-        <div class="toggle-content">
-          <div class="static-content">
-            <div class="archive-entry active" data-vid="3OyKOqX1tgU">
-              <a class="archive-item latest-featured-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <div class="archive-item-text">
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">영원히 남을 하나의 멜로디를 향해</span>
-                      <span class="archive-item-date">2026.05.28</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed open">
-                <div class="custom-video-poster" data-vid="3OyKOqX1tgU" style="opacity: 0; transition: opacity 0.8s ease;">
-                  <img class="poster-thumbnail" src="https://img.youtube.com/vi/3OyKOqX1tgU/maxresdefault.jpg" alt="Video Cover">
-                  <div class="poster-play-btn">
-                    <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Project Description & Info -->
-          <div class="project-brief" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px; transition: border-color 0.5s ease;">
-            <p class="brief-desc-ko" style="font-family: var(--font-sans); font-size: 0.78rem; line-height: 1.75; color: var(--text-secondary); margin-bottom: 20px;">
-              모든 답변을 취향 따라 고른 음악으로 대신하는 플레이리스트형 인터뷰
-            </p>
-            <div class="brief-meta" style="font-family: var(--font-sans); font-size: 0.65rem; color: var(--text-muted); line-height: 1.8;">
-              <div style="display: flex; gap: 24px; margin-bottom: 20px;">
-                <span style="width: 140px; font-weight: 700; color: var(--text-primary);">Directed & Produced by</span>
-                <span style="color: var(--text-secondary);">artic.</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Starring List -->
-          <div class="project-starring" style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 12px; transition: border-color 0.5s ease;">
-            <span style="font-family: var(--font-sans); font-size: 0.55rem; font-weight: 700; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 12px;">STARRING</span>
-            <p style="font-family: var(--font-sans); font-size: 0.72rem; line-height: 1.8; color: var(--text-secondary); letter-spacing: 0.02em;">
-              Crush &nbsp;•&nbsp; 주혜린 &nbsp;•&nbsp; 오존(O3ohn) &nbsp;•&nbsp; 수민(SUMIN) &nbsp;•&nbsp; 박문치 &nbsp;•&nbsp; MEMI &nbsp;•&nbsp; 강지원
-            </p>
-          </div>
-
-      </main>
-
-      <!-- Right Column: Archive / Episodes Section -->
-      <section class="archive-section">
-
-        <!-- Episodes Accordion Group -->
-        <div class="archive-group expanded">
-          <div class="mobile-toggle-header">
-            <span class="archive-group-label film-label">episodes</span>
-            <span class="toggle-icon"></span>
-          </div>
-          <div class="archive-list toggle-content">
-            
-            <div class="archive-entry" data-vid="ZfD84TkNXGw">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">Crush</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">Pilot</span>
-                      <span class="archive-item-date">2025.12.31</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <div class="archive-entry" data-vid="CyLnWaJIEhw">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">주혜린</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">Kindness is Timeless</span>
-                      <span class="archive-item-date">2026.02.11</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <div class="archive-entry" data-vid="qBF9UpEug_c">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">오존(O3ohn)</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">불편함을 고집하는 낭만</span>
-                      <span class="archive-item-date">2026.02.27</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <div class="archive-entry" data-vid="7_0BYN3TUus">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">수민(SUMIN)</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">행복은 시차를 두고 다가온다</span>
-                      <span class="archive-item-date">2026.03.31</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <div class="archive-entry" data-vid="vhjjEAU6wRA">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">박문치</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">내가 나로서 솔직해지기</span>
-                      <span class="archive-item-date">2026.05.04</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <div class="archive-entry" data-vid="OawNyCoAHpc">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">MEMI</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">Rock은 절대 죽지 않아</span>
-                      <span class="archive-item-date">2026.05.11</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-            <div class="archive-entry" data-vid="3OyKOqX1tgU">
-              <a class="archive-item" href="javascript:void(0)">
-                <div class="archive-item-left">
-                  <svg class="archive-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <div class="archive-item-text">
-                    <span class="archive-item-type">강지원</span>
-                    <div class="archive-item-title-row">
-                      <span class="archive-item-title">영원히 남을 하나의 멜로디를 향해</span>
-                      <span class="archive-item-date">2026.05.28</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-              <div class="archive-embed"></div>
-            </div>
-
-          </div>
-        </div>
-
-      </section>
-
+      <!-- Left (Streaming platforms, players, forms) -->
+      <div class="left-column">
+        
+      </div>
+      <!-- Right (Episodes, video lists, curation list) -->
+      <div class="right-column">
+        
+      </div>
     </div>
+
+    <footer class="about-footer">
+  © 2026 artic. All Rights Reserved
+</footer>
 
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <span>© 2026 artic. All Rights Reserved</span>
-  </footer>
-
-  <!-- Theme Toggle -->
-  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
-
   <script src="../js/shared.js"></script>
   <script>
-        // -- Inline video embed toggle (close-first-then-open) --
+
+// -- Inline video embed toggle (close-first-then-open) --
     (function() {
       // Stagger right column episodes animation delays dynamically
       document.querySelectorAll('.archive-list .archive-entry').forEach((entry, idx) => {
@@ -1199,7 +1017,7 @@
         }
       });
     });
-  </script>
 
+</script>
 </body>
 </html>

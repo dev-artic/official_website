@@ -1,22 +1,11 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — Project : The Root — ORIGINAL SERIES ()">
-  <meta name="author" content="artic.">
-  <title>Project : The Root — ORIGINAL SERIES —  | artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
-  <link rel="preload" href="album-art.png" as="image">
-  <link rel="stylesheet" href="../css/design-system.css">
-  <script>
-    (function(){
-      var s = localStorage.getItem('artic-theme');
-      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
-      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
-    })();
-  </script>
-  <style>
+---
+layout: project-detail
+title: "TASTING NOTE — ORIGINAL SERIES"
+description: "artic. — TASTING NOTE (ORIGINAL SERIES)"
+path_depth: "../"
+cover_image: "album-art.png"
+---
+<style>
 /* Reset & Base overrides for the Premium Monochrome Bright Theme */
     * {
       box-sizing: border-box;
@@ -59,17 +48,25 @@
       }
     }
 
-    /* ── Entry Animation — 3-Phase Sequence ── */
+    /* ══════════════════════════════════════
+       Entry Animation — 3-Phase Sequence
+       Phase 1 (0–1.2s):  Album cover fades in at its centered (or left-aligned) reference
+       Phase 2 (1.3–2.3s): Album info is wiped open with a premium bezier curve
+       Phase 3 (2.7–3.8s): Everything slides up vertically, album cover shrinks, content appears
+       ══════════════════════════════════════ */
+
     .album-showcase {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       width: 100%;
-      gap: 32px;
-      margin-bottom: 80px;
+      gap: 32px; /* Premium gap between cover and text on mobile */
+      margin-bottom: 80px; /* Generous gap below the showcase */
+      /* Stacked group centered vertically in the viewport initially */
       transform: translateY(calc(50dvh - 310px));
       will-change: transform;
+      /* Phase 3: slides up vertically */
       animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
@@ -84,20 +81,21 @@
         justify-content: flex-start;
         text-align: left;
         align-items: center;
-        gap: 48px;
-        transform: translateY(calc(50dvh - 210px));
+        gap: 48px; /* Doubled gap between cover and text */
+        transform: translateY(calc(50dvh - 210px)); /* Desktop row centered vertically */
       }
     }
 
     /* ── Album Art ── */
     .album-art-wrapper {
       position: relative;
-      z-index: 2;
+      z-index: 2; /* Layered above the text to physically cover it during Phase 1 & 2 */
       width: 280px;
       height: 280px;
       margin-bottom: 0;
       flex-shrink: 0;
-      will-change: width, height;
+      will-change: width, height; /* Hardware acceleration for layout resize */
+      /* Phase 3: album cover shrinks when sliding up */
       animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
 
@@ -111,7 +109,7 @@
     /* Desktop: Slide left from horizontal center */
     @media (min-width: 768px) {
       .album-art-wrapper {
-        left: calc(50% - 140px);
+        left: calc(50% - 140px); /* Perfectly centered horizontally relative to the showcase container */
         animation: albumSlideLeft 1.0s cubic-bezier(0.16, 1, 0.3, 1) 1.3s forwards,
                    albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
       }
@@ -129,8 +127,9 @@
       border: 1px solid var(--border-color);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0); /* Cache decoded image on GPU */
       will-change: transform;
+      /* Phase 1: fade in */
       opacity: 0;
       animation: albumFadeIn 1s ease 0.3s forwards;
       transition: transform 0.6s var(--ease-out-expo);
@@ -148,10 +147,11 @@
     /* ── Album Info ── */
     .album-info {
       position: relative;
-      z-index: 1;
+      z-index: 1; /* Layered below the cover to ensure it emerges from behind the cover's edge */
       opacity: 0;
       clip-path: inset(0 100% 0 0);
       transform: translateY(10px);
+      /* Phase 2: wipe open with organic bezier curve */
       animation: infoWipeRevealMobile 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
     }
 
@@ -185,7 +185,7 @@
       }
     }
 
-    /* ── Artist Name ── */
+    /* ── Artist/Category Name (original series) ── */
     .artist-name {
       font-family: var(--font-sans);
       font-size: 0.75rem;
@@ -198,7 +198,7 @@
 
     .album-title {
       font-family: var(--font-serif);
-      font-size: 2.05rem;
+      font-size: 2.25rem;
       font-weight: 700;
       letter-spacing: 0;
       color: var(--text-primary);
@@ -208,7 +208,7 @@
 
     @media (max-width: 767px) {
       .album-title {
-        font-size: 1.65rem;
+        font-size: 1.75rem;
       }
     }
 
@@ -254,15 +254,13 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Episodes items stagger delay curves (8 items) */
+    /* Film / Episodes items stagger (starts at 3.1s) */
     .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.1s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.15s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.2s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(4) { animation-delay: 3.25s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(5) { animation-delay: 3.3s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 3.35s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(7) { animation-delay: 3.4s; }
-    .archive-group:nth-of-type(1) .archive-entry:nth-child(8) { animation-delay: 3.45s; }
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
@@ -284,7 +282,7 @@
       }
     }
 
-    /* Left Column: Latest Release & Metadata */
+    /* Left Column: Latest Release */
     .links-container {
       display: block;
     }
@@ -318,19 +316,52 @@
       animation-delay: 2.7s;
     }
 
+    /* Flat Monochrome Link Card */
+    .link-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 0px;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+
+    .link-item:hover {
+      background-color: var(--bg-secondary);
+      border-color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .archive-item-date {
+      font-family: var(--font-sans);
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      transition: color 0.3s ease;
+      line-height: 1.2;
+    }
+
+    .archive-item:hover .archive-item-date,
+    .link-item:hover .archive-item-date {
+      color: var(--text-primary);
+    }
+
     .latest-release-header {
       display: block;
       font-family: var(--font-sans);
       transition: border-color 0.5s ease;
     }
-    .latest-release-header .archive-group-label {
-      margin-bottom: 4px;
-    }
 
     /* Latest Featured Video Custom Styling */
     .latest-featured-item {
       padding-top: 14px;
-      padding-bottom: 12px;
+      padding-bottom: 10px;
     }
 
     .latest-featured-item .archive-item-type {
@@ -463,20 +494,6 @@
       color: var(--text-secondary);
     }
 
-    .archive-item-date {
-      font-family: var(--font-sans);
-      font-size: 0.65rem;
-      font-weight: 500;
-      color: var(--text-muted);
-      letter-spacing: 0.02em;
-      transition: color 0.3s ease;
-      line-height: 1.2;
-    }
-
-    .archive-item:hover .archive-item-date {
-      color: var(--text-primary);
-    }
-
     /* Inline video embed */
     .archive-embed {
       width: 100%;
@@ -528,7 +545,7 @@
       filter: brightness(1.0);
     }
 
-    /* Glassmorphic Play Button */
+    /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Pill Play Button */
     .poster-play-btn {
       position: absolute;
       bottom: 16px;
@@ -541,7 +558,7 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border-color);
-      border-radius: 0px;
+      border-radius: 0px; /* Sharp editorial corners matching artic. */
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
     }
@@ -650,7 +667,7 @@
         will-change: transform;
       }
 
-      /* Episodes Header Border Staggered Wipe */
+      /* Film/Episodes Header Border Staggered Wipe */
       .archive-group:nth-of-type(1) .mobile-toggle-header::after {
         animation: borderWipe 1.0s cubic-bezier(0.16, 1, 0.3, 1) 2.9s forwards;
       }
@@ -696,7 +713,7 @@
       }
 
       .expanded .toggle-content {
-        max-height: 2500px; /* Generous height for list */
+        max-height: 1000px;
         opacity: 1;
         margin-top: 16px;
       }
@@ -752,6 +769,14 @@
       }
     }
 
+    /* Removed duplicate keyframes to prevent overriding the clip-path info reveal on mobile */
+
+    @keyframes infoShiftUpMobile {
+      to {
+        transform: translateY(0);
+      }
+    }
+
     @keyframes borderWipe {
       to {
         transform: scaleX(1);
@@ -769,59 +794,16 @@
       }
     }
 </style>
-</head>
-<body>
 
-  <nav class="nav-bar delayed-reveal">
-  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
-  <a href="/about/" class="nav-link">About</a>
-  <a href="/projects/" class="nav-link">Projects</a>
-  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-  <a href="/quarterly/" class="nav-link">Quarterly</a>
-  <a href="/contact/" class="nav-link">Contact</a>
-</nav>
+<div slot="left">
 
-<!-- Theme Toggle (Integrated inside Header) -->
-<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-</button>
+</div>
 
-  <div class="container">
-    
-    <!-- Header Showcase Section -->
-    <header class="album-showcase">
-      <div class="album-art-wrapper">
-        <img class="album-art" src="album-art.png" alt="Project : The Root — ORIGINAL SERIES Cover Art">
-      </div>
-      <div class="album-info">
-        <h1 class="album-title">Project : The Root — ORIGINAL SERIES</h1>
-        <p class="album-subtitle"></p>
-        <p class="album-description">artic. — Project : The Root (Bokos x artic.)</p>
-      </div>
-    </header>
+<div slot="right">
 
-    <!-- Two-Column Page Detail Grid Layout -->
-    <div class="content-columns">
-      <!-- Left (Streaming platforms, players, forms) -->
-      <div class="left-column">
-        
-      </div>
-      <!-- Right (Episodes, video lists, curation list) -->
-      <div class="right-column">
-        
-      </div>
-    </div>
+</div>
 
-    <footer class="about-footer">
-  © 2026 artic. All Rights Reserved
-</footer>
-
-  </div>
-
-  <script src="../js/shared.js"></script>
-  <script>
-
+<script>
 // -- Inline video embed toggle (close-first-then-open) --
     (function() {
       // Stagger right column episodes animation delays dynamically
@@ -981,7 +963,4 @@
         }
       });
     });
-
 </script>
-</body>
-</html>

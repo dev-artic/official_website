@@ -1,63 +1,10 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — Art, Culture, and Archive. About us.">
-  <meta name="author" content="artic.">
-  <title>About — artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
-  <link rel="stylesheet" href="../css/design-system.css">
-  <link rel="stylesheet" href="../css/animations.css">
-  <script>
-    (function(){
-      var s = localStorage.getItem('artic-theme');
-      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
-      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
-    })();
-  </script>
-  <style>
-/* ── Reusable Button Styles ── */
-  .about-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    background-color: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-color);
-    border-radius: 0px; /* Sharp corners matching artic. */
-    font-family: var(--font-sans);
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    cursor: pointer;
-  }
-
-  .about-action:hover {
-    background-color: var(--text-primary);
-    border-color: var(--text-primary);
-    color: var(--bg-primary);
-    transform: translateY(-1px);
-  }
-
-  .about-action svg {
-    width: 10px;
-    height: 10px;
-    fill: var(--text-primary);
-    transition: fill 0.4s ease, transform 0.4s ease;
-  }
-
-  .about-action:hover svg {
-    fill: var(--bg-primary);
-    transform: scale(1.1);
-  }
-
+---
+layout: base
+title: "About"
+description: "artic. — Art, Culture, and Archive. About us."
+path_depth: "../"
+---
+<style>
 body {
       overflow-x: hidden;
     }
@@ -351,29 +298,9 @@ body {
       }
     }
 </style>
-</head>
-<body>
-
-  <nav class="nav-bar delayed-reveal">
-  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
-  <a href="/about/" class="nav-link">About</a>
-  <a href="/projects/" class="nav-link">Projects</a>
-  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-  <a href="/quarterly/" class="nav-link">Quarterly</a>
-  <a href="/contact/" class="nav-link">Contact</a>
-</nav>
-
-<!-- Theme Toggle (Integrated inside Header) -->
-<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-</button>
-  
-  <div class="page-main-content">
-    
 
 <!-- Floating Navigation -->
-  
+  {{HEADER}}
 
   <div class="about-content">
 
@@ -416,16 +343,14 @@ body {
             그들의 온전한 목소리를 조명하는 콘텐츠 크리에이티브를 제공합니다.
           </p>
           <div class="about-actions reveal-item reveal-stagger-3">
-            <!-- Reusable Standard Button Component -->
-<a href="https://instagram.com/artic.live" class="about-action" target="_blank" rel="noopener noreferrer">
-  <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.948-.2-4.358-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
-  Follow
-</a>
-            <!-- Reusable Standard Button Component -->
-<a href="https://youtube.com/@artic_live" class="about-action" target="_blank" rel="noopener noreferrer">
-  <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
-  YouTube
-</a>
+            <a href="https://instagram.com/artic.live" class="about-action" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.948-.2-4.358-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+              Follow
+            </a>
+            <a href="https://youtube.com/@artic_live" class="about-action" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
+              YouTube
+            </a>
           </div>
         </div>
       </div>
@@ -434,25 +359,13 @@ body {
   </div>
 
   <!-- Footer -->
-  
+  {{FOOTER}}
 
   <!-- Theme Toggle -->
   
 
   <script src="../js/shared.js"></script>
-  
-
-
-
-  </div>
-
-  <footer class="about-footer">
-  © 2026 artic. All Rights Reserved
-</footer>
-
-  <script src="../js/shared.js"></script>
   <script>
-
     // Scroll Reveal Intersection Observer
     document.addEventListener('DOMContentLoaded', () => {
       const rows = document.querySelectorAll('.reveal-row');
@@ -476,7 +389,30 @@ body {
         observer.observe(row);
       });
     });
-  
+  </script>
+
+<script>
+// Scroll Reveal Intersection Observer
+    document.addEventListener('DOMContentLoaded', () => {
+      const rows = document.querySelectorAll('.reveal-row');
+      
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, self) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            self.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      rows.forEach(row => {
+        observer.observe(row);
+      });
+    });
 </script>
-</body>
-</html>

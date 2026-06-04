@@ -1,22 +1,11 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="artic. — Project : The Root — ORIGINAL SERIES ()">
-  <meta name="author" content="artic.">
-  <title>Project : The Root — ORIGINAL SERIES —  | artic.</title>
-  <link rel="icon" type="image/png" href="../images/favicon.png">
-  <link rel="preload" href="album-art.png" as="image">
-  <link rel="stylesheet" href="../css/design-system.css">
-  <script>
-    (function(){
-      var s = localStorage.getItem('artic-theme');
-      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
-      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
-    })();
-  </script>
-  <style>
+---
+layout: project-detail
+title: "중립적인인터뷰 — PRODUCTION"
+description: "artic. — 중립적인인터뷰 (Bokos)"
+path_depth: "../"
+cover_image: "album-art.png"
+---
+<style>
 /* Reset & Base overrides for the Premium Monochrome Bright Theme */
     * {
       box-sizing: border-box;
@@ -254,7 +243,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Episodes items stagger delay curves (8 items) */
+    /* Episodes items stagger delay curves (14 items) */
     .archive-group:nth-of-type(1) .archive-entry:nth-child(1) { animation-delay: 3.1s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(2) { animation-delay: 3.15s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(3) { animation-delay: 3.2s; }
@@ -263,6 +252,12 @@
     .archive-group:nth-of-type(1) .archive-entry:nth-child(6) { animation-delay: 3.35s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(7) { animation-delay: 3.4s; }
     .archive-group:nth-of-type(1) .archive-entry:nth-child(8) { animation-delay: 3.45s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(9) { animation-delay: 3.5s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(10) { animation-delay: 3.55s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(11) { animation-delay: 3.6s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(12) { animation-delay: 3.65s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(13) { animation-delay: 3.7s; }
+    .archive-group:nth-of-type(1) .archive-entry:nth-child(14) { animation-delay: 3.75s; }
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
@@ -528,7 +523,7 @@
       filter: brightness(1.0);
     }
 
-    /* Glassmorphic Play Button */
+    /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Pill Play Button */
     .poster-play-btn {
       position: absolute;
       bottom: 16px;
@@ -696,7 +691,7 @@
       }
 
       .expanded .toggle-content {
-        max-height: 2500px; /* Generous height for list */
+        max-height: 2500px; /* Generous height for 14 items list */
         opacity: 1;
         margin-top: 16px;
       }
@@ -769,59 +764,16 @@
       }
     }
 </style>
-</head>
-<body>
 
-  <nav class="nav-bar delayed-reveal">
-  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
-  <a href="/about/" class="nav-link">About</a>
-  <a href="/projects/" class="nav-link">Projects</a>
-  <a href="javascript:void(0)" class="nav-link nav-artic-le">artic.le</a>
-  <a href="/quarterly/" class="nav-link">Quarterly</a>
-  <a href="/contact/" class="nav-link">Contact</a>
-</nav>
+<div slot="left">
 
-<!-- Theme Toggle (Integrated inside Header) -->
-<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-</button>
+</div>
 
-  <div class="container">
-    
-    <!-- Header Showcase Section -->
-    <header class="album-showcase">
-      <div class="album-art-wrapper">
-        <img class="album-art" src="album-art.png" alt="Project : The Root — ORIGINAL SERIES Cover Art">
-      </div>
-      <div class="album-info">
-        <h1 class="album-title">Project : The Root — ORIGINAL SERIES</h1>
-        <p class="album-subtitle"></p>
-        <p class="album-description">artic. — Project : The Root (Bokos x artic.)</p>
-      </div>
-    </header>
+<div slot="right">
 
-    <!-- Two-Column Page Detail Grid Layout -->
-    <div class="content-columns">
-      <!-- Left (Streaming platforms, players, forms) -->
-      <div class="left-column">
-        
-      </div>
-      <!-- Right (Episodes, video lists, curation list) -->
-      <div class="right-column">
-        
-      </div>
-    </div>
+</div>
 
-    <footer class="about-footer">
-  © 2026 artic. All Rights Reserved
-</footer>
-
-  </div>
-
-  <script src="../js/shared.js"></script>
-  <script>
-
+<script>
 // -- Inline video embed toggle (close-first-then-open) --
     (function() {
       // Stagger right column episodes animation delays dynamically
@@ -981,7 +933,4 @@
         }
       });
     });
-
 </script>
-</body>
-</html>

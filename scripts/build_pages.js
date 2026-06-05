@@ -207,9 +207,17 @@ staticPages.forEach(p => {
     additionalHead += `\n<style>\n${Array.from(pageStyles).join('\n\n')}\n</style>`;
   }
 
+  let pageTitle = data.title || 'artic.';
+  if (p.dest === 'index.html') {
+    pageTitle = 'artic.';
+  } else {
+    const capitalized = pageTitle.charAt(0).toUpperCase() + pageTitle.slice(1);
+    pageTitle = `${capitalized} | artic.`;
+  }
+
   // Assemble base page layout (inject headers at layout-level = true)
   let finalHtml = baseLayout
-    .replace(/\{\{PAGE_TITLE\}\}/g, (data.title || 'artic.').toLowerCase())
+    .replace(/\{\{PAGE_TITLE\}\}/g, pageTitle)
     .replace(/\{\{META_DESCRIPTION\}\}/g, data.description || '')
     .replace(/\{\{PATH_DEPTH\}\}/g, depth)
     .replace(/\{\{ADDITIONAL_HEAD\}\}/g, additionalHead)
@@ -313,8 +321,8 @@ projectDirs.forEach(slugName => {
   }
 
   let finalHtml = compiledLayout
-    .replace(/\{\{PROJECT_TITLE\}\}/g, (meta.title || '').toLowerCase())
-    .replace(/\{\{PROJECT_ARTIST\}\}/g, (meta.artist || '').toLowerCase())
+    .replace(/\{\{PROJECT_TITLE\}\}/g, meta.title || '')
+    .replace(/\{\{PROJECT_ARTIST\}\}/g, meta.artist || '')
     .replace(/\{\{PROJECT_META\}\}/g, meta.meta || '')
 
     .replace(/\{\{COVER_IMAGE\}\}/g, coverImage)

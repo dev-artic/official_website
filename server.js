@@ -249,7 +249,7 @@ function handleCheckout(req, res, bodyText) {
     const total_price = product.price * Number(quantity) + 3000;
     console.log('\n=== [EMAIL MOCK - Customer] ===');
     console.log(`To: ${email}`);
-    console.log(`Subject: [artic.] ${product.name} 결제 요청 완료`);
+    console.log(`Subject: ${product.name} 결제 요청 완료`);
     console.log(`Body:
 안녕하세요, ${name}님. artic. 입니다.
 
@@ -281,9 +281,14 @@ function handleCheckout(req, res, bodyText) {
       if (templates) {
         const { customerTemplate, adminTemplate } = templates;
         
-        const customerBody = `<p>안녕하세요, <strong>${name}</strong>님. artic. 입니다.</p>
-<p><strong>'${product.name}'</strong> 결제 요청이 접수되었습니다.<br>
-아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.</p>`;
+        const customerBody = `<p style="text-align: center; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
+  Payment request has been received.
+</p>
+<p style="text-align: center; margin-top: 18px; margin-bottom: 24px; font-size: 13px; line-height: 1.6; color: #777777;">
+  안녕하세요, ${name} 님.<br>
+  '${product.name}' 결제 요청이 접수되었습니다.<br>
+  아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.
+</p>`;
 
         const customerTable = `<table class="data-table">
   <tr>
@@ -296,7 +301,15 @@ function handleCheckout(req, res, bodyText) {
   </tr>
   <tr>
     <td class="label">총 결제 금액</td>
-    <td class="value"><span class="bold">${total_price.toLocaleString()}원</span> (상품가 ${product.price.toLocaleString()}원 * 수량 + 배송비 3,000원)</td>
+    <td class="value"><span class="bold">${total_price.toLocaleString()}원</span></td>
+  </tr>
+  <tr>
+    <td class="label" style="padding-left: 16px; font-size: 9px; color: #999999; text-transform: none; letter-spacing: 0.05em;">└ 상품 가격 (${product.price.toLocaleString()}원 × ${quantity})</td>
+    <td class="value" style="font-size: 11px; color: #666666;">${(product.price * quantity).toLocaleString()}원</td>
+  </tr>
+  <tr>
+    <td class="label" style="padding-left: 16px; font-size: 9px; color: #999999; text-transform: none; letter-spacing: 0.05em;">└ 배송비</td>
+    <td class="value" style="font-size: 11px; color: #666666;">3,000원</td>
   </tr>
   <tr>
     <td class="label">입금자명</td>
@@ -317,7 +330,7 @@ function handleCheckout(req, res, bodyText) {
 </table>`;
 
         const customerHtml = customerTemplate
-          .replace(/{{TITLE}}/g, `[artic.] ${product.name} 결제 요청 완료`)
+          .replace(/{{TITLE}}/g, `${product.name} 결제 요청 완료`)
           .replace("{{BODY_CONTENT}}", customerBody)
           .replace("{{DATA_TABLE}}", customerTable);
 

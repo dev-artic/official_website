@@ -132,10 +132,10 @@ function generatePreviews() {
   fs.writeFileSync(path.join(scratchDir, "admin-checkout-preview.html"), adminCheckoutHtml, "utf8");
 
   // 3. Customer Waitlist HTML
-  const customerWaitlistBody = `<p style="text-align: left; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
+  const customerWaitlistBody = `<p style="text-align: center; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
   You are now on the waitlist.
 </p>
-<p style="text-align: left; margin-top: 18px; margin-bottom: 24px; font-size: 13px; line-height: 1.6; color: #777777;">
+<p style="text-align: center; margin-top: 18px; margin-bottom: 24px; font-size: 13px; line-height: 1.6; color: #777777;">
   안녕하세요, ${name} 님.<br>
   Quarterly. 대기명단 등록이 완료되었습니다.
 </p>`;

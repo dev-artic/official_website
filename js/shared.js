@@ -581,8 +581,8 @@ function initWaitlistForm() {
 
       if (messageDiv) {
         messageDiv.innerHTML = `
-          <div class="success-title">STAY TUNED.</div>
-          <div class="success-desc">We will share our official release with you first.</div>
+          <div class="success-title">artic.</div>
+          <div class="success-desc">You have been successfully registered on the quarterly artic. waitlist.</div>
         `;
       }
       if (messageWrapper) messageWrapper.classList.add('active');

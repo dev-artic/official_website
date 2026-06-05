@@ -132,8 +132,16 @@ function generatePreviews() {
   fs.writeFileSync(path.join(scratchDir, "admin-checkout-preview.html"), adminCheckoutHtml, "utf8");
 
   // 3. Customer Waitlist HTML
-  const customerWaitlistBody = `<p style="text-align: center; margin-bottom: 24px;">안녕하세요, <strong>${name}</strong>님. <strong>artic.</strong> 입니다.<br>새로운 소식을 가장 먼저 받아보실 수 있는 대기 명단(Waitlist) 등록이 완료되었습니다.</p>
-<p style="text-align: center; margin-top: 24px; color: #777777; font-size: 12px; line-height: 1.5;">준비가 완료되는 대로 등록해 주신 이메일로 가장 먼저 공개 소식을 전해드리겠습니다.</p>`;
+  const customerWaitlistBody = `<p style="text-align: center; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
+  안녕하세요, <strong>${name}</strong>님.<br>
+  quarterly artic. 대기명단 등록이 완료되었습니다.<br>
+  새로운 소식이 준비되는 대로 가장 먼저 메일로 전해드리겠습니다.
+</p>
+<p style="text-align: center; margin-top: 18px; font-size: 13px; line-height: 1.6; color: #777777;">
+  Hello, <strong>${name}</strong>.<br>
+  You have been successfully registered on the quarterly artic. waitlist.<br>
+  We will share our official release with you first.
+</p>`;
 
   const customerWaitlistTable = `<table class="data-table">
   <tr>
@@ -146,12 +154,12 @@ function generatePreviews() {
   </tr>
   <tr>
     <td class="label">상태</td>
-    <td class="value"><span class="bold">Waitlist 등록 완료</span></td>
+    <td class="value"><span class="bold">대기명단 등록 완료</span></td>
   </tr>
 </table>`;
 
   const customerWaitlistHtml = customerTemplate
-    .replace(/{{TITLE}}/g, "Quarterly artic.의 Waitlist 등록 완료")
+    .replace(/{{TITLE}}/g, "waitlist")
     .replace("{{BODY_CONTENT}}", customerWaitlistBody)
     .replace("{{DATA_TABLE}}", customerWaitlistTable);
 

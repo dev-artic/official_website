@@ -343,13 +343,10 @@ exports.waitlist = onRequest((req, res) => {
       const countSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").get();
       const totalCount = countSnapshot.size;
 
-      const customerSubject = "[artic.] Join Waitlist 등록 완료";
+      const customerSubject = "[artic.] Quarterly artic.의 Waitlist 등록 완료";
       const customerBody = `안녕하세요, ${name}님. artic. 입니다.
 
 새로운 소식을 가장 먼저 받아보실 수 있는 대기 명단(Waitlist) 등록이 완료되었습니다.
-
-"Stay tuned.
-We will share our official release with you first."
 
 준비가 완료되는 대로 가장 먼저 공개 소식을 전해드리겠습니다.
 감사합니다.
@@ -374,9 +371,6 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
 
       if (customerTemplate) {
         const bodyHtml = `<p style="text-align: center; margin-bottom: 24px;">안녕하세요, <strong>${name}</strong>님. <strong>artic.</strong> 입니다.<br>새로운 소식을 가장 먼저 받아보실 수 있는 대기 명단(Waitlist) 등록이 완료되었습니다.</p>
-<p style="font-family: Georgia, serif; font-size: 15px; font-style: italic; color: #111111; margin: 36px 0; text-align: center; font-weight: 300; letter-spacing: 0.02em; line-height: 1.6;">
-  "Stay tuned.<br>We will share our official release with you first."
-</p>
 <p style="text-align: center; margin-top: 24px; color: #777777; font-size: 12px; line-height: 1.5;">준비가 완료되는 대로 등록해 주신 이메일로 가장 먼저 공개 소식을 전해드리겠습니다.</p>`;
 
         const dataTableHtml = `<table class="data-table">
@@ -395,7 +389,7 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
 </table>`;
 
         customerHtml = customerTemplate
-          .replace(/{{TITLE}}/g, "Join Waitlist 등록 완료")
+          .replace(/{{TITLE}}/g, "Quarterly artic.의 Waitlist 등록 완료")
           .replace("{{BODY_CONTENT}}", bodyHtml)
           .replace("{{DATA_TABLE}}", dataTableHtml);
       }

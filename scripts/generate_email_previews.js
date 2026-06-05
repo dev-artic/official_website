@@ -133,13 +133,11 @@ function generatePreviews() {
 
   // 3. Customer Waitlist HTML
   const customerWaitlistBody = `<p style="text-align: left; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
-  Hello, ${name}.<br>
-  You have been successfully registered on the quarterly artic. waitlist.
+  You are now on the waitlist.
 </p>
-<p style="text-align: left; margin-top: 18px; font-size: 13px; line-height: 1.6; color: #777777;">
-  안녕하세요, ${name}님.<br>
-  quarterly artic. 대기명단 등록이 완료되었습니다.<br>
-  새로운 소식이 준비되는 대로 전해드리겠습니다.
+<p style="text-align: left; margin-top: 18px; margin-bottom: 24px; font-size: 13px; line-height: 1.6; color: #777777;">
+  안녕하세요, ${name} 님.<br>
+  Quarterly. 대기명단 등록이 완료되었습니다.
 </p>`;
 
   const regDateFormatted = new Date().toLocaleDateString("ko-KR", {
@@ -161,10 +159,17 @@ function generatePreviews() {
     <td class="label">등록일</td>
     <td class="value">${regDateFormatted}</td>
   </tr>
-</table>`;
+</table>
+<p style="text-align: left; margin-top: 36px; margin-bottom: 12px; font-size: 12px; line-height: 1.7; color: #111111;">
+  Quarterly. is a quarterly publication by artic. that delivers curated albums, artworks, and diverse artistic insights.
+</p>
+<p style="text-align: left; margin-top: 12px; font-size: 11px; line-height: 1.7; color: #777777;">
+  Quarterly.는 artic.의 매 분기 발매된 앨범, 작품, 그리고 다양한 예술 소식을 전하는 분기별 정기간행물입니다.<br>
+  Quarterly.에 대한 새로운 소식을 제일 먼저 받아보세요.
+</p>`;
 
   const customerWaitlistHtml = customerTemplate
-    .replace(/{{TITLE}}/g, "thank you.")
+    .replace(/{{TITLE}}/g, "THANK YOU.")
     .replace("{{BODY_CONTENT}}", customerWaitlistBody)
     .replace("{{DATA_TABLE}}", customerWaitlistTable);
 

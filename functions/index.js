@@ -344,12 +344,20 @@ exports.waitlist = onRequest((req, res) => {
       const totalCount = countSnapshot.size;
 
       const customerSubject = "[artic.] quarterly artic. 대기명단 등록 완료";
-      const customerBody = `Hello, ${name}.
-You have been successfully registered on the quarterly artic. waitlist.
+      const customerBody = `You are now on the waitlist.
 
-안녕하세요, ${name}님.
-quarterly artic. 대기명단 등록이 완료되었습니다.
-새로운 소식이 준비되는 대로 전해드리겠습니다.
+안녕하세요, ${name} 님.
+Quarterly. 대기명단 등록이 완료되었습니다.
+
+[등록 정보]
+- 이름: ${name}
+- 이메일: ${email}
+- 등록일: ${regDateFormatted}
+
+Quarterly. is a quarterly publication by artic. that delivers curated albums, artworks, and diverse artistic insights.
+
+Quarterly.는 artic.의 매 분기 발매된 앨범, 작품, 그리고 다양한 예술 소식을 전하는 분기별 정기간행물입니다.
+Quarterly.에 대한 새로운 소식을 제일 먼저 받아보세요.
 
 감사합니다.
 ⓒ 2026 artic. All Rights Reserved.`;
@@ -372,13 +380,11 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
 
       if (customerTemplate) {
         const bodyHtml = `<p style="text-align: left; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
-  Hello, ${name}.<br>
-  You have been successfully registered on the quarterly artic. waitlist.
+  You are now on the waitlist.
 </p>
-<p style="text-align: left; margin-top: 18px; font-size: 13px; line-height: 1.6; color: #777777;">
-  안녕하세요, ${name}님.<br>
-  quarterly artic. 대기명단 등록이 완료되었습니다.<br>
-  새로운 소식이 준비되는 대로 전해드리겠습니다.
+<p style="text-align: left; margin-top: 18px; margin-bottom: 24px; font-size: 13px; line-height: 1.6; color: #777777;">
+  안녕하세요, ${name} 님.<br>
+  Quarterly. 대기명단 등록이 완료되었습니다.
 </p>`;
 
         const regDateFormatted = new Date().toLocaleDateString("ko-KR", {
@@ -400,10 +406,17 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
     <td class="label">등록일</td>
     <td class="value">${regDateFormatted}</td>
   </tr>
-</table>`;
+</table>
+<p style="text-align: left; margin-top: 36px; margin-bottom: 12px; font-size: 12px; line-height: 1.7; color: #111111;">
+  Quarterly. is a quarterly publication by artic. that delivers curated albums, artworks, and diverse artistic insights.
+</p>
+<p style="text-align: left; margin-top: 12px; font-size: 11px; line-height: 1.7; color: #777777;">
+  Quarterly.는 artic.의 매 분기 발매된 앨범, 작품, 그리고 다양한 예술 소식을 전하는 분기별 정기간행물입니다.<br>
+  Quarterly.에 대한 새로운 소식을 제일 먼저 받아보세요.
+</p>`;
 
         customerHtml = customerTemplate
-          .replace(/{{TITLE}}/g, "thank you.")
+          .replace(/{{TITLE}}/g, "THANK YOU.")
           .replace("{{BODY_CONTENT}}", bodyHtml)
           .replace("{{DATA_TABLE}}", dataTableHtml);
       }

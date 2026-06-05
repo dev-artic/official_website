@@ -189,6 +189,18 @@ function handleSaveLyrics(req, res, bodyText) {
   }
 }
 
+function getTemplates() {
+  const customerPath = path.join(__dirname, 'functions', 'templates', 'customer-email-template.html');
+  const adminPath = path.join(__dirname, 'functions', 'templates', 'admin-email-template.html');
+  if (fs.existsSync(customerPath) && fs.existsSync(adminPath)) {
+    return {
+      customerTemplate: fs.readFileSync(customerPath, 'utf8'),
+      adminTemplate: fs.readFileSync(adminPath, 'utf8')
+    };
+  }
+  return null;
+}
+
 function handleCheckout(req, res, bodyText) {
   try {
     const data = JSON.parse(bodyText);
@@ -263,7 +275,111 @@ function handleCheckout(req, res, bodyText) {
 ⓒ 2026 artic. All Rights Reserved.`);
     console.log('================================\n');
 
+    // Generate HTML previews
+    try {
+      const templates = getTemplates();
+      if (templates) {
+        const { customerTemplate, adminTemplate } = templates;
+        
+        const customerBody = `<p>안녕하세요, <strong>${name}</strong>님. artic. 입니다.</p>
+<p><strong>'${product.name}'</strong> 결제 요청이 접수되었습니다.<br>
+아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.</p>`;
+
+        const customerTable = `<table class="data-table">
+  <tr>
+    <td class="label">상품명</td>
+    <td class="value">${product.name}</td>
+  </tr>
+  <tr>
+    <td class="label">수량</td>
+    <td class="value">${quantity}개</td>
+  </tr>
+  <tr>
+    <td class="label">총 결제 금액</td>
+    <td class="value"><span class="bold">${total_price.toLocaleString()}원</span> (상품가 ${product.price.toLocaleString()}원 * 수량 + 배송비 3,000원)</td>
+  </tr>
+  <tr>
+    <td class="label">입금자명</td>
+    <td class="value">${depositor}</td>
+  </tr>
+  <tr>
+    <td class="label">배송지 주소</td>
+    <td class="value">${address}</td>
+  </tr>
+  <tr>
+    <td class="label">연락처</td>
+    <td class="value">${phone}</td>
+  </tr>
+  <tr>
+    <td class="label">입금 계좌 정보</td>
+    <td class="value"><span class="bold">토스뱅크 1002-1532-0842 (예금주: 김민제)</span></td>
+  </tr>
+</table>`;
+
+        const customerHtml = customerTemplate
+          .replace(/{{TITLE}}/g, `[artic.] ${product.name} 결제 요청 완료`)
+          .replace("{{BODY_CONTENT}}", customerBody)
+          .replace("{{DATA_TABLE}}", customerTable);
+
+        const scratchDir = path.join(__dirname, 'scratch');
+        if (!fs.existsSync(scratchDir)) {
+          fs.mkdirSync(scratchDir, { recursive: true });
+        }
+        fs.writeFileSync(path.join(scratchDir, 'last-customer-checkout.html'), customerHtml, 'utf8');
+
+        // Admin HTML
+        const adminBody = `<p>새로운 <strong>'${product.name}'</strong> 결제 요청이 접수되었습니다.</p>`;
+        const adminTable = `<table class="data-table">
+  <tr>
+    <td class="label">신청자명</td>
+    <td class="value">${name}</td>
+  </tr>
+  <tr>
+    <td class="label">이메일</td>
+    <td class="value">${email}</td>
+  </tr>
+  <tr>
+    <td class="label">연락처</td>
+    <td class="value">${phone}</td>
+  </tr>
+  <tr>
+    <td class="label">배송지 주소</td>
+    <td class="value">${address}</td>
+  </tr>
+  <tr>
+    <td class="label">수량</td>
+    <td class="value">${quantity}개</td>
+  </tr>
+  <tr>
+    <td class="label">입금자명</td>
+    <td class="value">${depositor}</td>
+  </tr>
+  <tr>
+    <td class="label">요청사항</td>
+    <td class="value">${notes || '(없음)'}</td>
+  </tr>
+</table>`;
+
+        const adminHtml = adminTemplate
+          .replace(/{{TITLE}}/g, "새로운 결제 요청 접수")
+          .replace("{{BODY_CONTENT}}", adminBody)
+          .replace("{{DATA_TABLE}}", adminTable)
+          .replace("{{DB_COLLECTION}}", "orders")
+          .replace("{{DB_DOC_ID}}", "local_sqlite_id");
+
+        fs.writeFileSync(path.join(scratchDir, 'last-admin-checkout.html'), adminHtml, 'utf8');
+
+        console.log('\n=== [EMAIL PREVIEW - Checkout HTML] ===');
+        console.log(`- Customer: http://localhost:${PORT}/scratch/last-customer-checkout.html`);
+        console.log(`- Admin:    http://localhost:${PORT}/scratch/last-admin-checkout.html`);
+        console.log('========================================\n');
+      }
+    } catch (previewErr) {
+      console.error('Failed to generate local checkout email previews:', previewErr);
+    }
+
     sendJSON(res, 200, { success: true, saved_to_cloud: false });
+
   } catch (e) {
     console.error('Error handling checkout:', e);
     sendJSON(res, 500, { error: e.message });
@@ -336,7 +452,85 @@ We will share our official release with you first."
 SQLite 로컬 데이터베이스 subscribers에 적재되었습니다.`);
     console.log('=====================================\n');
 
+    // Generate HTML previews
+    try {
+      const templates = getTemplates();
+      if (templates) {
+        const { customerTemplate, adminTemplate } = templates;
+
+        const customerBody = `<p style="text-align: center; margin-bottom: 24px;">안녕하세요, <strong>${name}</strong>님. <strong>artic.</strong> 입니다.<br>새로운 소식을 가장 먼저 받아보실 수 있는 대기 명단(Waitlist) 등록이 완료되었습니다.</p>
+<p style="font-family: Georgia, serif; font-size: 15px; font-style: italic; color: #111111; margin: 36px 0; text-align: center; font-weight: 300; letter-spacing: 0.02em; line-height: 1.6;">
+  "Stay tuned.<br>We will share our official release with you first."
+</p>
+<p style="text-align: center; margin-top: 24px; color: #777777; font-size: 12px; line-height: 1.5;">준비가 완료되는 대로 등록해 주신 이메일로 가장 먼저 공개 소식을 전해드리겠습니다.</p>`;
+
+        const customerTable = `<table class="data-table">
+  <tr>
+    <td class="label">이름</td>
+    <td class="value">${name}</td>
+  </tr>
+  <tr>
+    <td class="label">이메일</td>
+    <td class="value">${email}</td>
+  </tr>
+  <tr>
+    <td class="label">상태</td>
+    <td class="value"><span class="bold">Waitlist 등록 완료</span></td>
+  </tr>
+</table>`;
+
+        const customerHtml = customerTemplate
+          .replace(/{{TITLE}}/g, "Join Waitlist 등록 완료")
+          .replace("{{BODY_CONTENT}}", customerBody)
+          .replace("{{DATA_TABLE}}", customerTable);
+
+        const scratchDir = path.join(__dirname, 'scratch');
+        if (!fs.existsSync(scratchDir)) {
+          fs.mkdirSync(scratchDir, { recursive: true });
+        }
+        fs.writeFileSync(path.join(scratchDir, 'last-customer-waitlist.html'), customerHtml, 'utf8');
+
+        // Admin HTML
+        const adminBody = `<p>새로운 고객이 <strong>Quarterly Join Waitlist</strong>에 가입하여 Firestore DB에 등록되었습니다.</p>`;
+        const adminTable = `<table class="data-table">
+  <tr>
+    <td class="label">이름</td>
+    <td class="value">${name}</td>
+  </tr>
+  <tr>
+    <td class="label">가입 이메일</td>
+    <td class="value">${email}</td>
+  </tr>
+  <tr>
+    <td class="label">가입 일시</td>
+    <td class="value">${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (KST)</td>
+  </tr>
+  <tr>
+    <td class="label">현재 총 등록 인원</td>
+    <td class="value"><span class="bold">${totalCount}명</span></td>
+  </tr>
+</table>`;
+
+        const adminHtml = adminTemplate
+          .replace(/{{TITLE}}/g, "새로운 Waitlist 가입 알림")
+          .replace("{{BODY_CONTENT}}", adminBody)
+          .replace("{{DATA_TABLE}}", adminTable)
+          .replace("{{DB_COLLECTION}}", "subscribers")
+          .replace("{{DB_DOC_ID}}", "local_sqlite_id");
+
+        fs.writeFileSync(path.join(scratchDir, 'last-admin-waitlist.html'), adminHtml, 'utf8');
+
+        console.log('\n=== [EMAIL PREVIEW - Waitlist HTML] ===');
+        console.log(`- Customer: http://localhost:${PORT}/scratch/last-customer-waitlist.html`);
+        console.log(`- Admin:    http://localhost:${PORT}/scratch/last-admin-waitlist.html`);
+        console.log('========================================\n');
+      }
+    } catch (previewErr) {
+      console.error('Failed to generate local waitlist email previews:', previewErr);
+    }
+
     sendJSON(res, 200, { success: true, saved_to_cloud: false, total_subscribers: totalCount });
+
   } catch (e) {
     console.error('Error handling waitlist:', e);
     sendJSON(res, 500, { error: e.message });

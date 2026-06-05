@@ -232,7 +232,7 @@ exports.checkout = onRequest((req, res) => {
 </table>`;
 
         customerHtml = customerTemplate
-          .replace("{{TITLE}}", customerSubject)
+          .replace(/{{TITLE}}/g, customerSubject)
           .replace("{{BODY_CONTENT}}", bodyHtml)
           .replace("{{DATA_TABLE}}", dataTableHtml);
       }
@@ -272,7 +272,7 @@ exports.checkout = onRequest((req, res) => {
 </table>`;
 
         adminHtml = adminTemplate
-          .replace("{{TITLE}}", "새로운 결제 요청 접수")
+          .replace(/{{TITLE}}/g, "새로운 결제 요청 접수")
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
           .replace("{{DATA_TABLE}}", adminDataTableHtml)
           .replace("{{DB_COLLECTION}}", "orders")
@@ -395,7 +395,7 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
 </table>`;
 
         customerHtml = customerTemplate
-          .replace("{{TITLE}}", "Join Waitlist 등록 완료")
+          .replace(/{{TITLE}}/g, "Join Waitlist 등록 완료")
           .replace("{{BODY_CONTENT}}", bodyHtml)
           .replace("{{DATA_TABLE}}", dataTableHtml);
       }
@@ -423,7 +423,7 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
 </table>`;
 
         adminHtml = adminTemplate
-          .replace("{{TITLE}}", "새로운 Waitlist 가입 알림")
+          .replace(/{{TITLE}}/g, "새로운 Waitlist 가입 알림")
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
           .replace("{{DATA_TABLE}}", adminDataTableHtml)
           .replace("{{DB_COLLECTION}}", "subscribers")

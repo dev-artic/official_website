@@ -209,7 +209,7 @@ staticPages.forEach(p => {
 
   // Assemble base page layout (inject headers at layout-level = true)
   let finalHtml = baseLayout
-    .replace(/\{\{PAGE_TITLE\}\}/g, data.title || 'artic.')
+    .replace(/\{\{PAGE_TITLE\}\}/g, (data.title || 'artic.').toLowerCase())
     .replace(/\{\{META_DESCRIPTION\}\}/g, data.description || '')
     .replace(/\{\{PATH_DEPTH\}\}/g, depth)
     .replace(/\{\{ADDITIONAL_HEAD\}\}/g, additionalHead)
@@ -313,8 +313,8 @@ projectDirs.forEach(slugName => {
   }
 
   let finalHtml = compiledLayout
-    .replace(/\{\{PROJECT_TITLE\}\}/g, meta.title || '')
-    .replace(/\{\{PROJECT_ARTIST\}\}/g, meta.artist || '')
+    .replace(/\{\{PROJECT_TITLE\}\}/g, (meta.title || '').toLowerCase())
+    .replace(/\{\{PROJECT_ARTIST\}\}/g, (meta.artist || '').toLowerCase())
     .replace(/\{\{PROJECT_META\}\}/g, meta.meta || '')
 
     .replace(/\{\{COVER_IMAGE\}\}/g, coverImage)

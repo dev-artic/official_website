@@ -133,15 +133,21 @@ function generatePreviews() {
 
   // 3. Customer Waitlist HTML
   const customerWaitlistBody = `<p style="text-align: left; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
-  안녕하세요, <strong>${name}</strong>님.<br>
+  안녕하세요, ${name}님.<br>
   quarterly artic. 대기명단 등록이 완료되었습니다.<br>
-  새로운 소식이 준비되는 대로 가장 먼저 메일로 전해드리겠습니다.
+  새로운 소식이 준비되는 대로 메일로 전해드리겠습니다.
 </p>
 <p style="text-align: left; margin-top: 18px; font-size: 13px; line-height: 1.6; color: #777777;">
-  Hello, <strong>${name}</strong>.<br>
+  Hello, ${name}.<br>
   You have been successfully registered on the quarterly artic. waitlist.
 </p>`;
 
+  const regDateFormatted = new Date().toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Seoul"
+  });
   const customerWaitlistTable = `<table class="data-table">
   <tr>
     <td class="label">이름</td>
@@ -152,13 +158,13 @@ function generatePreviews() {
     <td class="value">${email}</td>
   </tr>
   <tr>
-    <td class="label">상태</td>
-    <td class="value"><span class="bold">대기명단 등록 완료</span></td>
+    <td class="label">등록일</td>
+    <td class="value">${regDateFormatted}</td>
   </tr>
 </table>`;
 
   const customerWaitlistHtml = customerTemplate
-    .replace(/{{TITLE}}/g, "waitlist")
+    .replace(/{{TITLE}}/g, "thank you.")
     .replace("{{BODY_CONTENT}}", customerWaitlistBody)
     .replace("{{DATA_TABLE}}", customerWaitlistTable);
 

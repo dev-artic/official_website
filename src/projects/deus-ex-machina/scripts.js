@@ -143,7 +143,7 @@
       };
 
       // Fetch dynamic statuses from database to populate PRINT_DATA
-      fetch('/api/products')
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname); const apiUrl = isLocal ? '/api/products' : 'https://products-4n2xy6gsxa-uc.a.run.app'; fetch(apiUrl)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch products');
           return res.json();

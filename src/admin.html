@@ -532,7 +532,7 @@ path_depth: "../"
 
     // Load Data
     function loadDashboardData() {
-      fetch('/api/admin/data', {
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname); const apiUrl = isLocal ? '/api/admin/data' : 'https://admin-4n2xy6gsxa-uc.a.run.app'; fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${adminToken}`
         }
@@ -600,7 +600,7 @@ path_depth: "../"
       const inventory = Number(document.getElementById('prod-inventory').value);
       const status = document.getElementById('prod-status').value;
 
-      fetch('/api/admin/products', {
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname); const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app'; fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

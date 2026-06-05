@@ -344,12 +344,12 @@ exports.waitlist = onRequest((req, res) => {
       const totalCount = countSnapshot.size;
 
       const customerSubject = "[artic.] quarterly artic. 대기명단 등록 완료";
-      const customerBody = `안녕하세요, ${name}님.
-quarterly artic. 대기명단 등록이 완료되었습니다.
-새로운 소식이 준비되는 대로 메일로 전해드리겠습니다.
-
-Hello, ${name}.
+      const customerBody = `Hello, ${name}.
 You have been successfully registered on the quarterly artic. waitlist.
+
+안녕하세요, ${name}님.
+quarterly artic. 대기명단 등록이 완료되었습니다.
+새로운 소식이 준비되는 대로 전해드리겠습니다.
 
 감사합니다.
 ⓒ 2026 artic. All Rights Reserved.`;
@@ -372,13 +372,13 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
 
       if (customerTemplate) {
         const bodyHtml = `<p style="text-align: left; margin-bottom: 18px; font-size: 14px; line-height: 1.6; color: #111111;">
-  안녕하세요, ${name}님.<br>
-  quarterly artic. 대기명단 등록이 완료되었습니다.<br>
-  새로운 소식이 준비되는 대로 메일로 전해드리겠습니다.
-</p>
-<p style="text-align: left; margin-top: 18px; font-size: 13px; line-height: 1.6; color: #777777;">
   Hello, ${name}.<br>
   You have been successfully registered on the quarterly artic. waitlist.
+</p>
+<p style="text-align: left; margin-top: 18px; font-size: 13px; line-height: 1.6; color: #777777;">
+  안녕하세요, ${name}님.<br>
+  quarterly artic. 대기명단 등록이 완료되었습니다.<br>
+  새로운 소식이 준비되는 대로 전해드리겠습니다.
 </p>`;
 
         const regDateFormatted = new Date().toLocaleDateString("ko-KR", {

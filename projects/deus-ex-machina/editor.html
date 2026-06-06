@@ -754,11 +754,6 @@
       }
     }
 
-    // Expose helpers globally for inline onclick handlers
-    window.nudgeTime = nudgeTime;
-    window.handleSplitClick = handleSplitClick;
-    window.deleteLine = deleteLine;
-
     // Sync trigger function
     function recordCurrentTimestamp() {
       if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
@@ -845,14 +840,22 @@
         return;
       }
 
-      // Up/Down Arrows: Nudge active focused line timing (works even inside inputs!)
+      // Up/Down Arrows: Nudge active focused line timing (Allowed even inside input focus)
       if (e.code === 'ArrowUp') {
         e.preventDefault();
+        const focusedInput = document.activeElement;
+        if (focusedInput && focusedInput.classList.contains('lyrics-line-input')) {
+          activeFocusIdx = parseInt(focusedInput.getAttribute('data-idx'), 10);
+        }
         nudgeTime(activeFocusIdx, 0.1);
         return;
       }
       if (e.code === 'ArrowDown') {
         e.preventDefault();
+        const focusedInput = document.activeElement;
+        if (focusedInput && focusedInput.classList.contains('lyrics-line-input')) {
+          activeFocusIdx = parseInt(focusedInput.getAttribute('data-idx'), 10);
+        }
         nudgeTime(activeFocusIdx, -0.1);
         return;
       }
@@ -885,6 +888,11 @@
         saveToServer();
       }
     });
+
+    // Expose functions globally for inline onclick attributes
+    window.nudgeTime = nudgeTime;
+    window.handleSplitClick = handleSplitClick;
+    window.deleteLine = deleteLine;
 
     // YouTube Player Initialization
     window.onYouTubeIframeAPIReady = function() {

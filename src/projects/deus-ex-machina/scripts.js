@@ -168,7 +168,7 @@
               } else {
                 item.statusClass = 'not-for-sale';
                 item.statusText = 'Not For Sale';
-                item.status = 'Not For Sale';
+                item.status = p.status;
               }
             }
           });
@@ -181,9 +181,58 @@
       const modalImg = document.getElementById('print-modal-image');
       const modalInfo = document.getElementById('print-modal-info');
 
+      function resetMobileCollapsingHeader() {
+        const imageWrap = modal.querySelector('.print-modal-image-wrap');
+        if (!imageWrap) return;
+        
+        imageWrap.classList.add('resetting');
+        if (modalImg) {
+          modalImg.classList.add('resetting');
+        }
+        
+        imageWrap.style.height = '';
+        imageWrap.style.padding = '';
+        if (modalImg) {
+          modalImg.style.maxHeight = '';
+        }
+        
+        setTimeout(() => {
+          imageWrap.classList.remove('resetting');
+          if (modalImg) {
+            modalImg.classList.remove('resetting');
+          }
+        }, 300);
+      }
+
+      function handleModalScroll() {
+        if (window.innerWidth < 768) {
+          const container = modal.querySelector('.print-modal-container');
+          const imageWrap = modal.querySelector('.print-modal-image-wrap');
+          if (!container || !imageWrap) return;
+          const scrollTop = container.scrollTop;
+          const ratio = Math.min(scrollTop / 100, 1);
+          
+          const wrapHeight = 220 - 135 * ratio;
+          const imgMaxHeight = 140 - 80 * ratio;
+          const padding = 40 - 28 * ratio;
+          
+          imageWrap.style.height = `${wrapHeight}px`;
+          imageWrap.style.padding = `${padding}px 40px`;
+          modalImg.style.maxHeight = `${imgMaxHeight}px`;
+        } else {
+          resetMobileCollapsingHeader();
+        }
+      }
+
       function openModal(key) {
         const data = PRINT_DATA[key];
         if (!data) return;
+
+        const container = modal.querySelector('.print-modal-container');
+        if (container) {
+          container.scrollTop = 0;
+        }
+        resetMobileCollapsingHeader();
 
         // Hide image until it is fully loaded to prevent cached flash
         modalImg.style.opacity = '0';
@@ -330,10 +379,20 @@
 
           actionBtn.addEventListener('click', function() {
             modal.classList.add('is-checkout');
+            const container = modal.querySelector('.print-modal-container');
+            if (container) {
+              container.scrollTop = 0;
+            }
+            resetMobileCollapsingHeader();
           });
 
           backBtn.addEventListener('click', function() {
             modal.classList.remove('is-checkout');
+            const container = modal.querySelector('.print-modal-container');
+            if (container) {
+              container.scrollTop = 0;
+            }
+            resetMobileCollapsingHeader();
           });
 
           let loadingInterval = null;
@@ -384,6 +443,11 @@
             .then(resData => {
               document.getElementById('success-email-display').textContent = email;
               modal.classList.add('is-success');
+              const container = modal.querySelector('.print-modal-container');
+              if (container) {
+                container.scrollTop = 0;
+              }
+              resetMobileCollapsingHeader();
               
               document.getElementById('chk-success-close-btn').addEventListener('click', closeModal);
             })
@@ -416,6 +480,11 @@
             modalImg.src = '';
             modalImg.alt = '';
             modalInfo.innerHTML = '';
+            const container = modal.querySelector('.print-modal-container');
+            if (container) {
+              container.scrollTop = 0;
+            }
+            resetMobileCollapsingHeader();
           }
         }, 500);
       }
@@ -438,6 +507,21 @@
       window.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.classList.contains('is-active')) {
           closeModal();
+        }
+      });
+
+      // Scroll and resize event listeners for collapsing header on mobile
+      const modalContainer = modal.querySelector('.print-modal-container');
+      if (modalContainer) {
+        modalContainer.addEventListener('scroll', handleModalScroll);
+      }
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+          resetMobileCollapsingHeader();
+        } else {
+          if (modal.classList.contains('is-active')) {
+            handleModalScroll();
+          }
         }
       });
     })();

@@ -1746,38 +1746,63 @@
       }
 
       @media (max-width: 767px) {
-        /* Shrink image wrap on checkout and success */
-        .print-modal.is-checkout .print-modal-image-wrap,
-        .print-modal.is-success .print-modal-image-wrap {
-          padding: 20px !important;
+        .print-modal-container {
+          width: 340px;
+          max-width: 90%;
+          height: 560px; /* Stable card height */
+          max-height: 80vh;
+          border-radius: 16px;
+          overflow-y: auto !important;
         }
-        .print-modal.is-checkout .print-modal-image-wrap img,
-        .print-modal.is-success .print-modal-image-wrap img {
-          max-height: 12vh !important;
+
+        /* Sticky collapsing image header */
+        .print-modal-image-wrap {
+          position: sticky;
+          top: 0;
+          z-index: 5;
+          height: 220px; /* Initial height */
+          width: 100%;
+          flex: 0 0 auto;
+          padding: 40px;
+          border-bottom: 1px solid var(--border-color);
+          box-sizing: border-box;
         }
-        
-        /* Shrink info panel layout space to prevent overflow, but add bottom padding for buttons */
+
+        .print-modal-image-wrap.resetting {
+          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .print-modal-image-wrap img {
+          max-height: 140px;
+        }
+
+        .print-modal-image-wrap img.resetting {
+          transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Keep layout paddings comfortable and uniform on mobile */
+        .print-modal-info {
+          padding: 24px 20px 40px 20px !important;
+          gap: 24px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          flex: 0 0 auto !important;
+          box-sizing: border-box;
+        }
+
         .print-modal.is-checkout .print-modal-info,
         .print-modal.is-success .print-modal-info {
-          padding: 24px 20px 40px 20px !important; /* Added 40px bottom padding */
-          gap: 16px !important;
+          padding: 24px 20px 40px 20px !important;
+          gap: 24px !important;
         }
 
         /* Disable inner scroll container limits to allow natural full form display */
+        .checkout-scroll-container,
         .print-modal.is-checkout .checkout-scroll-container {
           max-height: none !important;
           overflow-y: visible !important;
-          padding-bottom: 8px;
-        }
-
-        /* Allow outer container to scroll naturally to prevent any cutoff */
-        .print-modal-container {
-          overflow-y: auto !important;
-          max-height: 92vh !important;
-        }
-        .print-modal.is-checkout .print-modal-container,
-        .print-modal.is-success .print-modal-container {
-          overflow-y: auto !important;
+          padding-bottom: 0 !important;
+          margin-top: 12px;
         }
       }
 

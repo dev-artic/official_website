@@ -593,7 +593,7 @@ exports.products = onRequest((req, res) => {
       if (snapshot.empty) {
         // Seed default products in firestore
         const p1 = { id: "1", name: "1MC1PD: The Interview", price: 15000, inventory: 10, status: "for-sale" };
-        const p2 = { id: "2", name: "Lyric Booklet", price: 0, inventory: 0, status: "not-for-sale" };
+        const p2 = { id: "2", name: "Lyric Booklet", price: 0, inventory: 0, status: "Distributed in Listening Party" };
         await db.collection("products").doc(p1.id).set(p1);
         await db.collection("products").doc(p2.id).set(p2);
         res.status(200).json([p1, p2]);

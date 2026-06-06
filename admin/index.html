@@ -427,12 +427,7 @@ body {
           <div class="grid-form-cols" style="margin-top: 16px;">
             <div class="form-col-group">
               <label>Status *</label>
-              <select id="prod-status">
-                <option value="for-sale">For Sale (판매중)</option>
-                <option value="not-for-sale">Not For Sale (비매품)</option>
-                <option value="out-of-stock">Out of Stock (품절)</option>
-                <option value="sold-out">Sold Out (완판)</option>
-              </select>
+              <input type="text" id="prod-status" placeholder="e.g. for-sale, Distributed in Listening Party" required style="width: 100%; background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 4px; font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-primary); outline: none; transition: border-color 0.3s ease, background-color 0.3s ease;">
             </div>
             <div class="form-col-group" style="justify-content: flex-end; flex-direction: row; gap: 8px; align-items: flex-end;">
               <button type="button" class="auth-btn" id="delete-prod-btn" style="padding: 10px; background-color: #e74c3c; display: none;">Delete Product</button>

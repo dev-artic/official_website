@@ -1905,38 +1905,63 @@
       }
 
       @media (max-width: 767px) {
-        /* Shrink image wrap on checkout and success */
-        .print-modal.is-checkout .print-modal-image-wrap,
-        .print-modal.is-success .print-modal-image-wrap {
-          padding: 20px !important;
+        .print-modal-container {
+          width: 340px;
+          max-width: 90%;
+          height: 560px; /* Stable card height */
+          max-height: 80vh;
+          border-radius: 16px;
+          overflow-y: auto !important;
         }
-        .print-modal.is-checkout .print-modal-image-wrap img,
-        .print-modal.is-success .print-modal-image-wrap img {
-          max-height: 12vh !important;
+
+        /* Sticky collapsing image header */
+        .print-modal-image-wrap {
+          position: sticky;
+          top: 0;
+          z-index: 5;
+          height: 220px; /* Initial height */
+          width: 100%;
+          flex: 0 0 auto;
+          padding: 40px;
+          border-bottom: 1px solid var(--border-color);
+          box-sizing: border-box;
         }
-        
-        /* Shrink info panel layout space to prevent overflow, but add bottom padding for buttons */
+
+        .print-modal-image-wrap.resetting {
+          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .print-modal-image-wrap img {
+          max-height: 140px;
+        }
+
+        .print-modal-image-wrap img.resetting {
+          transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Keep layout paddings comfortable and uniform on mobile */
+        .print-modal-info {
+          padding: 24px 20px 40px 20px !important;
+          gap: 24px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          flex: 0 0 auto !important;
+          box-sizing: border-box;
+        }
+
         .print-modal.is-checkout .print-modal-info,
         .print-modal.is-success .print-modal-info {
-          padding: 24px 20px 40px 20px !important; /* Added 40px bottom padding */
-          gap: 16px !important;
+          padding: 24px 20px 40px 20px !important;
+          gap: 24px !important;
         }
 
         /* Disable inner scroll container limits to allow natural full form display */
+        .checkout-scroll-container,
         .print-modal.is-checkout .checkout-scroll-container {
           max-height: none !important;
           overflow-y: visible !important;
-          padding-bottom: 8px;
-        }
-
-        /* Allow outer container to scroll naturally to prevent any cutoff */
-        .print-modal-container {
-          overflow-y: auto !important;
-          max-height: 92vh !important;
-        }
-        .print-modal.is-checkout .print-modal-container,
-        .print-modal.is-success .print-modal-container {
-          overflow-y: auto !important;
+          padding-bottom: 0 !important;
+          margin-top: 12px;
         }
       }
 
@@ -2677,7 +2702,7 @@
               } else {
                 item.statusClass = 'not-for-sale';
                 item.statusText = 'Not For Sale';
-                item.status = 'Not For Sale';
+                item.status = p.status;
               }
             }
           });
@@ -2690,9 +2715,58 @@
       const modalImg = document.getElementById('print-modal-image');
       const modalInfo = document.getElementById('print-modal-info');
 
+      function resetMobileCollapsingHeader() {
+        const imageWrap = modal.querySelector('.print-modal-image-wrap');
+        if (!imageWrap) return;
+        
+        imageWrap.classList.add('resetting');
+        if (modalImg) {
+          modalImg.classList.add('resetting');
+        }
+        
+        imageWrap.style.height = '';
+        imageWrap.style.padding = '';
+        if (modalImg) {
+          modalImg.style.maxHeight = '';
+        }
+        
+        setTimeout(() => {
+          imageWrap.classList.remove('resetting');
+          if (modalImg) {
+            modalImg.classList.remove('resetting');
+          }
+        }, 300);
+      }
+
+      function handleModalScroll() {
+        if (window.innerWidth < 768) {
+          const container = modal.querySelector('.print-modal-container');
+          const imageWrap = modal.querySelector('.print-modal-image-wrap');
+          if (!container || !imageWrap) return;
+          const scrollTop = container.scrollTop;
+          const ratio = Math.min(scrollTop / 100, 1);
+          
+          const wrapHeight = 220 - 135 * ratio;
+          const imgMaxHeight = 140 - 80 * ratio;
+          const padding = 40 - 28 * ratio;
+          
+          imageWrap.style.height = `${wrapHeight}px`;
+          imageWrap.style.padding = `${padding}px 40px`;
+          modalImg.style.maxHeight = `${imgMaxHeight}px`;
+        } else {
+          resetMobileCollapsingHeader();
+        }
+      }
+
       function openModal(key) {
         const data = PRINT_DATA[key];
         if (!data) return;
+
+        const container = modal.querySelector('.print-modal-container');
+        if (container) {
+          container.scrollTop = 0;
+        }
+        resetMobileCollapsingHeader();
 
         // Hide image until it is fully loaded to prevent cached flash
         modalImg.style.opacity = '0';
@@ -2874,10 +2948,20 @@
 
           actionBtn.addEventListener('click', function() {
             modal.classList.add('is-checkout');
+            const container = modal.querySelector('.print-modal-container');
+            if (container) {
+              container.scrollTop = 0;
+            }
+            resetMobileCollapsingHeader();
           });
 
           backBtn.addEventListener('click', function() {
             modal.classList.remove('is-checkout');
+            const container = modal.querySelector('.print-modal-container');
+            if (container) {
+              container.scrollTop = 0;
+            }
+            resetMobileCollapsingHeader();
           });
 
           let loadingInterval = null;
@@ -2928,6 +3012,11 @@
             .then(resData => {
               document.getElementById('success-email-display').textContent = email;
               modal.classList.add('is-success');
+              const container = modal.querySelector('.print-modal-container');
+              if (container) {
+                container.scrollTop = 0;
+              }
+              resetMobileCollapsingHeader();
               
               document.getElementById('chk-success-close-btn').addEventListener('click', closeModal);
             })
@@ -2960,6 +3049,11 @@
             modalImg.src = '';
             modalImg.alt = '';
             modalInfo.innerHTML = '';
+            const container = modal.querySelector('.print-modal-container');
+            if (container) {
+              container.scrollTop = 0;
+            }
+            resetMobileCollapsingHeader();
           }
         }, 500);
       }
@@ -2982,6 +3076,21 @@
       window.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.classList.contains('is-active')) {
           closeModal();
+        }
+      });
+
+      // Scroll and resize event listeners for collapsing header on mobile
+      const modalContainer = modal.querySelector('.print-modal-container');
+      if (modalContainer) {
+        modalContainer.addEventListener('scroll', handleModalScroll);
+      }
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768) {
+          resetMobileCollapsingHeader();
+        } else {
+          if (modal.classList.contains('is-active')) {
+            handleModalScroll();
+          }
         }
       });
     })();

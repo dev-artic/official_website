@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <script>
+    // Only allow access from localhost or 127.0.0.1 to protect local server APIs
+    if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+      window.location.href = './';
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>deus ex machina // Lyrics Sync Editor</title>

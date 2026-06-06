@@ -56,9 +56,6 @@ async function sendEmail({ to, subject, body, html }) {
         user: smtpUser,
         pass: smtpPassword,
       },
-      connectionTimeout: 10000, // 10 seconds
-      greetingTimeout: 10000,   // 10 seconds
-      socketTimeout: 10000,     // 10 seconds
     });
 
     const mailOptions = {
@@ -244,42 +241,49 @@ exports.onOrderCreated = functions.firestore
   아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.
 </p>`;
 
-        const dataTableHtml = `<table class="data-table">
+        const customerTableStyle = "width: 100%; margin: 36px 0; border-collapse: collapse;";
+        const customerLabelStyle = "width: 35%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888888; text-align: left; padding: 12px 0; border-bottom: 1px solid #f3f3f3; vertical-align: middle;";
+        const customerLabelLastStyle = "width: 35%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888888; text-align: left; padding: 12px 0; border-bottom: none; vertical-align: middle;";
+        const customerValueStyle = "width: 65%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 12px; font-weight: 400; color: #111111; text-align: right; padding: 12px 0; border-bottom: 1px solid #f3f3f3; vertical-align: middle;";
+        const customerValueLastStyle = "width: 65%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 12px; font-weight: 400; color: #111111; text-align: right; padding: 12px 0; border-bottom: none; vertical-align: middle;";
+        const boldStyle = "font-weight: 600; color: #111111;";
+
+        const dataTableHtml = `<table style="${customerTableStyle}">
   <tr>
-    <td class="label">상품명</td>
-    <td class="value">${product_name}</td>
+    <td style="${customerLabelStyle}">상품명</td>
+    <td style="${customerValueStyle}">${product_name}</td>
   </tr>
   <tr>
-    <td class="label">수량</td>
-    <td class="value">${qty}개</td>
+    <td style="${customerLabelStyle}">수량</td>
+    <td style="${customerValueStyle}">${qty}개</td>
   </tr>
   <tr>
-    <td class="label">총 결제 금액</td>
-    <td class="value"><span class="bold">${totalPrice.toLocaleString()}원</span></td>
+    <td style="${customerLabelStyle}">총 결제 금액</td>
+    <td style="${customerValueStyle}"><span style="${boldStyle}">${totalPrice.toLocaleString()}원</span></td>
   </tr>
   <tr>
-    <td class="label" style="padding-left: 16px; font-size: 9px; color: #999999; text-transform: none; letter-spacing: 0.05em;">└ 상품 가격 (${price.toLocaleString()}원 × ${qty})</td>
-    <td class="value" style="font-size: 11px; color: #666666;">${(price * qty).toLocaleString()}원</td>
+    <td style="width: 35%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 9px; font-weight: 600; text-transform: none; letter-spacing: 0.05em; color: #999999; text-align: left; padding: 12px 0 12px 16px; border-bottom: 1px solid #f3f3f3; vertical-align: middle;">└ 상품 가격 (${price.toLocaleString()}원 × ${qty})</td>
+    <td style="width: 65%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 11px; font-weight: 400; color: #666666; text-align: right; padding: 12px 0; border-bottom: 1px solid #f3f3f3; vertical-align: middle;">${(price * qty).toLocaleString()}원</td>
   </tr>
   <tr>
-    <td class="label" style="padding-left: 16px; font-size: 9px; color: #999999; text-transform: none; letter-spacing: 0.05em;">└ 배송비</td>
-    <td class="value" style="font-size: 11px; color: #666666;">3,000원</td>
+    <td style="width: 35%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 9px; font-weight: 600; text-transform: none; letter-spacing: 0.05em; color: #999999; text-align: left; padding: 12px 0 12px 16px; border-bottom: 1px solid #f3f3f3; vertical-align: middle;">└ 배송비</td>
+    <td style="width: 65%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 11px; font-weight: 400; color: #666666; text-align: right; padding: 12px 0; border-bottom: 1px solid #f3f3f3; vertical-align: middle;">3,000원</td>
   </tr>
   <tr>
-    <td class="label">입금자명</td>
-    <td class="value">${depName}</td>
+    <td style="${customerLabelStyle}">입금자명</td>
+    <td style="${customerValueStyle}">${depName}</td>
   </tr>
   <tr>
-    <td class="label">배송지 주소</td>
-    <td class="value">${address}</td>
+    <td style="${customerLabelStyle}">배송지 주소</td>
+    <td style="${customerValueStyle}">${address}</td>
   </tr>
   <tr>
-    <td class="label">연락처</td>
-    <td class="value">${phone}</td>
+    <td style="${customerLabelStyle}">연락처</td>
+    <td style="${customerValueStyle}">${phone}</td>
   </tr>
   <tr>
-    <td class="label">입금 계좌 정보</td>
-    <td class="value"><span class="bold">토스뱅크 1002-1532-0842 (예금주: 김민제)</span></td>
+    <td style="${customerLabelLastStyle}">입금 계좌 정보</td>
+    <td style="${customerValueLastStyle}"><span style="${boldStyle}">토스뱅크 1002-1532-0842 (예금주: 김민제)</span></td>
   </tr>
 </table>`;
 
@@ -290,47 +294,52 @@ exports.onOrderCreated = functions.firestore
       }
 
       if (adminTemplate) {
-        const adminBodyHtml = `<p>새로운 <strong>'${product_name}'</strong> 결제 요청이 접수되었습니다.</p>`;
+        const adminBodyStyle = "font-size: 13px; line-height: 1.7; margin: 0 0 20px 0; color: #444444; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminBodyHtml = `<p style="${adminBodyStyle}">새로운 <strong>'${product_name}'</strong> 결제 요청이 접수되었습니다.</p>`;
 
-        const adminDataTableHtml = `<table class="data-table">
+        const adminTableStyle = "width: 100%; margin: 24px 0; border-collapse: collapse; border: 1px solid #eaeaea;";
+        const adminLabelStyle = "width: 35%; color: #666666; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; background-color: #fafafa; text-align: left; padding: 10px 14px; border-bottom: 1px solid #eaeaea; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminLabelLastStyle = "width: 35%; color: #666666; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; background-color: #fafafa; text-align: left; padding: 10px 14px; border-bottom: none; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminValueStyle = "width: 65%; color: #111111; font-weight: 500; text-align: left; padding: 10px 14px; border-bottom: 1px solid #eaeaea; vertical-align: top; font-size: 12px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminValueLastStyle = "width: 65%; color: #111111; font-weight: 500; text-align: left; padding: 10px 14px; border-bottom: none; vertical-align: top; font-size: 12px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+
+        const adminDataTableHtml = `<table style="${adminTableStyle}">
   <tr>
-    <td class="label">신청자명</td>
-    <td class="value">${name}</td>
+    <td style="${adminLabelStyle}">신청자명</td>
+    <td style="${adminValueStyle}">${name}</td>
   </tr>
   <tr>
-    <td class="label">이메일</td>
-    <td class="value">${email}</td>
+    <td style="${adminLabelStyle}">이메일</td>
+    <td style="${adminValueStyle}">${email}</td>
   </tr>
   <tr>
-    <td class="label">연락처</td>
-    <td class="value">${phone}</td>
+    <td style="${adminLabelStyle}">연락처</td>
+    <td style="${adminValueStyle}">${phone}</td>
   </tr>
   <tr>
-    <td class="label">배송지 주소</td>
-    <td class="value">${address}</td>
+    <td style="${adminLabelStyle}">배송지 주소</td>
+    <td style="${adminValueStyle}">${address}</td>
   </tr>
   <tr>
-    <td class="label">수량</td>
-    <td class="value">${qty}개</td>
+    <td style="${adminLabelStyle}">수량</td>
+    <td style="${adminValueStyle}">${qty}개</td>
   </tr>
   <tr>
-    <td class="label">입금자명</td>
-    <td class="value">${depName}</td>
+    <td style="${adminLabelStyle}">입금자명</td>
+    <td style="${adminValueStyle}">${depName}</td>
   </tr>
   <tr>
-    <td class="label">요청사항</td>
-    <td class="value">${chkNotes || "(없음)"}</td>
-  </tr>
-  <tr>
-    <td class="label">주문 ID</td>
-    <td class="value" style="font-family: monospace; font-size: 11px;">${docId}</td>
+    <td style="${adminLabelLastStyle}">요청사항</td>
+    <td style="${adminValueLastStyle}">${chkNotes || "(없음)"}</td>
   </tr>
 </table>`;
 
         adminHtml = adminTemplate
           .replace(/{{TITLE}}/g, "새로운 결제 요청 접수")
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
-          .replace("{{DATA_TABLE}}", adminDataTableHtml);
+          .replace("{{DATA_TABLE}}", adminDataTableHtml)
+          .replace("{{DB_COLLECTION}}", "orders")
+          .replace("{{DB_DOC_ID}}", docId);
       }
 
       await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
@@ -438,8 +447,8 @@ exports.onSubscriberCreated = functions.firestore
         });
       }
 
-      const countSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").count().get();
-      const totalCount = countSnapshot.data().count;
+      const countSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").get();
+      const totalCount = countSnapshot.size;
 
       const customerSubject = "[artic.] quarterly artic. 대기명단 등록 완료";
       const customerBody = `You are now on the waitlist.
@@ -485,18 +494,24 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
   Quarterly. 대기명단 등록이 완료되었습니다.
 </p>`;
 
-        const dataTableHtml = `<table class="data-table">
+        const customerTableStyle = "width: 100%; margin: 36px 0; border-collapse: collapse;";
+        const customerLabelStyle = "width: 35%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888888; text-align: left; padding: 12px 0; border-bottom: 1px solid #f3f3f3; vertical-align: middle;";
+        const customerLabelLastStyle = "width: 35%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888888; text-align: left; padding: 12px 0; border-bottom: none; vertical-align: middle;";
+        const customerValueStyle = "width: 65%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 12px; font-weight: 400; color: #111111; text-align: right; padding: 12px 0; border-bottom: 1px solid #f3f3f3; vertical-align: middle;";
+        const customerValueLastStyle = "width: 65%; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 12px; font-weight: 400; color: #111111; text-align: right; padding: 12px 0; border-bottom: none; vertical-align: middle;";
+
+        const dataTableHtml = `<table style="${customerTableStyle}">
   <tr>
-    <td class="label">이름</td>
-    <td class="value">${name}</td>
+    <td style="${customerLabelStyle}">이름</td>
+    <td style="${customerValueStyle}">${name}</td>
   </tr>
   <tr>
-    <td class="label">이메일</td>
-    <td class="value">${email}</td>
+    <td style="${customerLabelStyle}">이메일</td>
+    <td style="${customerValueStyle}">${email}</td>
   </tr>
   <tr>
-    <td class="label">등록일</td>
-    <td class="value">${regDateFormatted}</td>
+    <td style="${customerLabelLastStyle}">등록일</td>
+    <td style="${customerValueLastStyle}">${regDateFormatted}</td>
   </tr>
 </table>
 <p style="text-align: left; margin-top: 36px; margin-bottom: 12px; font-size: 12px; line-height: 1.7; color: #111111;">
@@ -514,35 +529,41 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
       }
 
       if (adminTemplate) {
-        const adminBodyHtml = `<p>새로운 고객이 <strong>Quarterly Join Waitlist</strong>에 가입하여 Firestore DB에 등록되었습니다.</p>`;
+        const adminBodyStyle = "font-size: 13px; line-height: 1.7; margin: 0 0 20px 0; color: #444444; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminBodyHtml = `<p style="${adminBodyStyle}">새로운 고객이 <strong>Quarterly Join Waitlist</strong>에 가입하여 Firestore DB에 등록되었습니다.</p>`;
 
-        const adminDataTableHtml = `<table class="data-table">
+        const adminTableStyle = "width: 100%; margin: 24px 0; border-collapse: collapse; border: 1px solid #eaeaea;";
+        const adminLabelStyle = "width: 35%; color: #666666; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; background-color: #fafafa; text-align: left; padding: 10px 14px; border-bottom: 1px solid #eaeaea; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminLabelLastStyle = "width: 35%; color: #666666; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.05em; background-color: #fafafa; text-align: left; padding: 10px 14px; border-bottom: none; vertical-align: top; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminValueStyle = "width: 65%; color: #111111; font-weight: 500; text-align: left; padding: 10px 14px; border-bottom: 1px solid #eaeaea; vertical-align: top; font-size: 12px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const adminValueLastStyle = "width: 65%; color: #111111; font-weight: 500; text-align: left; padding: 10px 14px; border-bottom: none; vertical-align: top; font-size: 12px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, sans-serif;";
+        const boldStyle = "font-weight: 600; color: #111111;";
+
+        const adminDataTableHtml = `<table style="${adminTableStyle}">
   <tr>
-    <td class="label">이름</td>
-    <td class="value">${name}</td>
+    <td style="${adminLabelStyle}">이름</td>
+    <td style="${adminValueStyle}">${name}</td>
   </tr>
   <tr>
-    <td class="label">가입 이메일</td>
-    <td class="value">${email}</td>
+    <td style="${adminLabelStyle}">가입 이메일</td>
+    <td style="${adminValueStyle}">${email}</td>
   </tr>
   <tr>
-    <td class="label">가입 일시</td>
-    <td class="value">${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (KST)</td>
+    <td style="${adminLabelStyle}">가입 일시</td>
+    <td style="${adminValueStyle}">${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (KST)</td>
   </tr>
   <tr>
-    <td class="label">현재 총 등록 인원</td>
-    <td class="value"><span class="bold">${totalCount}명</span></td>
-  </tr>
-  <tr>
-    <td class="label">구독자 ID</td>
-    <td class="value" style="font-family: monospace; font-size: 11px;">${docId}</td>
+    <td style="${adminLabelLastStyle}">현재 총 등록 인원</td>
+    <td style="${adminValueLastStyle}"><span style="${boldStyle}">${totalCount}명</span></td>
   </tr>
 </table>`;
 
         adminHtml = adminTemplate
           .replace(/{{TITLE}}/g, "새로운 Waitlist 가입 알림")
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
-          .replace("{{DATA_TABLE}}", adminDataTableHtml);
+          .replace("{{DATA_TABLE}}", adminDataTableHtml)
+          .replace("{{DB_COLLECTION}}", "subscribers")
+          .replace("{{DB_DOC_ID}}", docId);
       }
 
       const emailSentCustomer = await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });

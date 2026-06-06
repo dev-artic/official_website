@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{TITLE}}</title>
   <style>
+    /* Retain styles in head as a fallback for clients that support it */
     body {
       margin: 0;
       padding: 0;
-      background-color: #ffffff;
-      color: #111111;
+      background-color: #f6f6f6;
+      color: #333333;
       font-family: 'KakaoSmall', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
@@ -20,25 +21,40 @@
     }
     .wrapper {
       width: 100%;
-      background-color: #ffffff;
+      background-color: #f6f6f6;
       padding: 40px 0;
     }
     .container {
       max-width: 600px;
       margin: 0 auto;
       background-color: #ffffff;
-      border: 1px solid #eaeaea;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
     .header {
       padding: 64px 32px;
       text-align: center;
-      background-color: #ffffff;
-      border-bottom: 1px solid #f5f5f5;
+      background-color: #111111;
     }
     .header img {
       display: inline-block;
       border: none;
       outline: none;
+    }
+    .badge-container {
+      text-align: center;
+      background-color: #222222;
+      padding: 8px 20px;
+      border-bottom: 1px solid #2d2d2d;
+    }
+    .internal-badge {
+      display: inline-block;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
     .content-table {
       width: 100%;
@@ -51,127 +67,169 @@
       font-family: 'KakaoBig', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       font-size: 15px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin: 0 0 32px 0;
+      letter-spacing: 0.02em;
+      margin: 0 0 24px 0;
       color: #111111;
       line-height: 1.4;
       text-align: center;
     }
     p {
       font-size: 13px;
-      line-height: 1.8;
+      line-height: 1.7;
       margin: 0 0 20px 0;
-      color: #333333;
-      letter-spacing: 0.01em;
+      color: #444444;
     }
-    /* Data table styles (Borderless, elegant rows with subtle divider lines) */
     .data-table {
       width: 100%;
-      margin: 36px 0;
+      margin: 24px 0;
       border-collapse: collapse;
+      border: 1px solid #eaeaea;
     }
     .data-table td {
-      padding: 12px 0;
-      border-bottom: 1px solid #f3f3f3;
-      font-size: 13px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #eaeaea;
+      font-size: 12px;
       line-height: 1.5;
-      vertical-align: middle;
+      vertical-align: top;
     }
     .data-table tr:last-child td {
       border-bottom: none;
     }
     .data-table td.label {
       width: 35%;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 10px;
+      color: #666666;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #888888;
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      background-color: #fafafa;
       text-align: left;
     }
     .data-table td.value {
       width: 65%;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 12px;
-      font-weight: 400;
       color: #111111;
-      text-align: right;
+      font-weight: 500;
+      text-align: left;
     }
     .bold {
       font-weight: 600;
       color: #111111;
     }
-    /* Signature styles (Right-aligned, minimal) */
-    .signature {
-      margin-top: 48px;
-      padding-top: 48px;
-      border-top: 1px solid #f5f5f5;
-      text-align: center;
-      font-size: 11px;
-      color: #999999;
+    .db-info {
+      margin-top: 36px;
+      padding: 18px;
+      background-color: #f7f8fa;
+      border: 1px dashed #d1d5db;
+      border-radius: 2px;
     }
-    /* Footer styles */
+    .db-info-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #4b5563;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+    .db-info-table {
+      width: 100%;
+    }
+    .db-info-table td {
+      padding: 4px 0;
+      font-size: 11px;
+      font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+      color: #4b5563;
+      border: none;
+      vertical-align: top;
+    }
+    .db-info-table td.lbl {
+      width: 30%;
+      font-weight: bold;
+      color: #6b7280;
+    }
+    .db-info-table td.val {
+      width: 70%;
+      color: #1f2937;
+    }
+    .db-link {
+      color: #111111;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+    .db-link:hover {
+      color: #444444;
+    }
     .footer {
-      background-color: #ffffff;
-      border-top: 1px solid #f5f5f5;
-      padding: 48px 40px;
+      background-color: #111111;
+      padding: 36px 40px;
       text-align: center;
+      border-top: 1px solid #222222;
     }
     .footer-text {
-      font-size: 11px;
-      line-height: 1.8;
-      color: #888888;
+      font-size: 10px;
+      line-height: 1.6;
+      color: #777777;
       margin: 0;
     }
     @media screen and (max-width: 600px) {
-      .container {
-        border-left: none;
-        border-right: none;
-      }
       .content-padding {
-        padding: 36px 24px;
-      }
-      .signature {
-        padding-top: 36px;
+        padding: 36px 24px !important;
       }
       .footer {
-        padding: 36px 24px;
+        padding: 24px 24px !important;
       }
     }
   </style>
 </head>
-<body>
-  <div class="wrapper">
-    <table class="container" align="center" border="0" cellpadding="0" cellspacing="0">
+<body style="margin: 0; padding: 0; background-color: #f6f6f6; color: #333333; font-family: 'KakaoSmall', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <div class="wrapper" style="width: 100%; background-color: #f6f6f6; padding: 40px 0;">
+    <table class="container" align="center" border="0" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border-collapse: collapse;">
       <tr>
-        <td class="header">
-          <img src="https://artic.live/images/logo-icon-black.png" alt="artic." width="72" style="border: none;">
+        <td class="header" style="padding: 64px 32px; text-align: center; background-color: #111111;">
+          <img src="https://artic.live/images/logo-white.png" alt="artic." width="72" style="border: none; display: inline-block; outline: none;">
         </td>
       </tr>
       <tr>
-        <td class="content-table">
-          <div class="content-padding">
-            <h1>{{TITLE}}</h1>
+        <td class="badge-container" style="text-align: center; background-color: #222222; padding: 8px 20px; border-bottom: 1px solid #2d2d2d;">
+          <div class="internal-badge" style="display: inline-block; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;">내부 확인용 발신 • INTERNAL NOTICE</div>
+        </td>
+      </tr>
+      <tr>
+        <td class="content-table" style="width: 100%; background-color: #ffffff; border-collapse: collapse;">
+          <div class="content-padding" style="padding: 48px 40px;">
+            <h1 style="font-family: 'KakaoBig', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.02em; margin: 0 0 24px 0; color: #111111; line-height: 1.4; text-align: center;">{{TITLE}}</h1>
             
             {{BODY_CONTENT}}
             
             {{DATA_TABLE}}
             
-            <div class="signature">
-              <a href="https://artic.live" target="_blank" style="display: inline-block; text-decoration: none; border: none; outline: none;">
-                <img src="https://artic.live/images/logo-type-black.png" alt="artic." width="80" style="border: none; display: block; margin: 0 auto 4px auto;">
-              </a>
-              <span style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 9px; color: #999999; letter-spacing: 0.03em; display: block;">artists' attic.</span>
+            <div class="db-info" style="margin-top: 36px; padding: 18px; background-color: #f7f8fa; border: 1px dashed #d1d5db; border-radius: 2px;">
+              <div class="db-info-title" style="font-size: 10px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Firestore DB Storage Info</div>
+              <table class="db-info-table" style="width: 100%; border-collapse: collapse; margin: 0; padding: 0;">
+                <tr>
+                  <td class="lbl" style="width: 30%; font-weight: bold; color: #6b7280; padding: 4px 0; font-size: 11px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: none; vertical-align: top;">Collection</td>
+                  <td class="val" style="width: 70%; color: #1f2937; padding: 4px 0; font-size: 11px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: none; vertical-align: top;"><code>{{DB_COLLECTION}}</code></td>
+                </tr>
+                <tr>
+                  <td class="lbl" style="width: 30%; font-weight: bold; color: #6b7280; padding: 4px 0; font-size: 11px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: none; vertical-align: top;">Doc ID</td>
+                  <td class="val" style="width: 70%; color: #1f2937; padding: 4px 0; font-size: 11px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: none; vertical-align: top;"><code>{{DB_DOC_ID}}</code></td>
+                </tr>
+                <tr>
+                  <td class="lbl" style="width: 30%; font-weight: bold; color: #6b7280; padding: 4px 0; font-size: 11px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: none; vertical-align: top;">Access URL</td>
+                  <td class="val" style="width: 70%; color: #1f2937; padding: 4px 0; font-size: 11px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; border: none; vertical-align: top;">
+                    <a href="https://console.firebase.google.com/project/artic-official-home/firestore/databases/-default-/data" target="_blank" class="db-link" style="color: #111111; text-decoration: underline; font-weight: bold;">
+                      Go to Firebase Console &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </div>
           </div>
         </td>
       </tr>
       <tr>
-        <td class="footer">
-          <p class="footer-text">본 메일은 시스템에 의해 자동 생성된 관리자 내부 확인용 메일입니다.<br>보안을 위해 본 메일의 정보를 외부로 유출하지 마십시오.</p>
-          <p class="footer-text" style="margin-top: 15px; color: #999999;">&copy; 2026 artic. All Rights Reserved.</p>
+        <td class="footer" style="background-color: #111111; padding: 36px 40px; text-align: center; border-top: 1px solid #222222;">
+          <p class="footer-text" style="font-size: 10px; line-height: 1.6; color: #777777; margin: 0;">본 메일은 시스템에 의해 자동 생성된 관리자 내부 확인용 메일입니다.<br>보안을 위해 본 메일의 정보를 외부로 유출하지 마십시오.</p>
+          <p class="footer-text" style="font-size: 10px; line-height: 1.6; color: #777777; margin: 0; margin-top: 10px; color: #555555;">&copy; 2026 artic. System Admin.</p>
         </td>
       </tr>
     </table>

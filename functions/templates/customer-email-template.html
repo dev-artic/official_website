@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{TITLE}}</title>
   <style>
+    /* Retain styles in head as fallback for clients that support it */
     body {
       margin: 0;
       padding: 0;
@@ -65,7 +66,6 @@
       color: #333333;
       letter-spacing: 0.01em;
     }
-    /* Data table styles (Borderless, elegant rows with subtle divider lines) */
     .data-table {
       width: 100%;
       margin: 36px 0;
@@ -103,7 +103,6 @@
       font-weight: 600;
       color: #111111;
     }
-    /* Signature styles (Right-aligned, minimal) */
     .signature {
       margin-top: 48px;
       padding-top: 48px;
@@ -112,15 +111,6 @@
       font-size: 11px;
       color: #999999;
     }
-    .sig-brand-name {
-      font-family: 'ITCGaramond', 'Georgia', serif;
-      font-size: 18px;
-      font-weight: normal;
-      color: #111111;
-      text-decoration: none;
-      letter-spacing: 0.05em;
-    }
-    /* Footer styles */
     .footer {
       background-color: #ffffff;
       border-top: 1px solid #f5f5f5;
@@ -141,11 +131,6 @@
       margin: 0 12px;
       display: inline-block;
     }
-    .footer-nav-separator {
-      color: #cccccc;
-      font-size: 10px;
-      display: inline-block;
-    }
     .footer-text {
       font-size: 11px;
       line-height: 1.8;
@@ -154,39 +139,39 @@
     }
     @media screen and (max-width: 600px) {
       .container {
-        border-left: none;
-        border-right: none;
+        border-left: none !important;
+        border-right: none !important;
       }
       .content-padding {
-        padding: 36px 24px;
+        padding: 36px 24px !important;
       }
       .signature {
-        padding-top: 36px;
+        padding-top: 36px !important;
       }
       .footer {
-        padding: 36px 24px;
+        padding: 36px 24px !important;
       }
     }
   </style>
 </head>
-<body>
-  <div class="wrapper">
-    <table class="container" align="center" border="0" cellpadding="0" cellspacing="0">
+<body style="margin: 0; padding: 0; background-color: #ffffff; color: #111111; font-family: 'KakaoSmall', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <div class="wrapper" style="width: 100%; background-color: #ffffff; padding: 40px 0;">
+    <table class="container" align="center" border="0" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; margin: 0 auto; background-color: #ffffff; border: 1px solid #eaeaea; border-collapse: collapse;">
       <tr>
-        <td class="header">
-          <img src="https://artic.live/images/logo-icon-black.png" alt="artic." width="72" style="border: none;">
+        <td class="header" style="padding: 64px 32px; text-align: center; background-color: #ffffff; border-bottom: 1px solid #f5f5f5;">
+          <img src="https://artic.live/images/logo-icon-black.png" alt="artic." width="72" style="border: none; display: inline-block; outline: none;">
         </td>
       </tr>
       <tr>
-        <td class="content-table">
-          <div class="content-padding">
-            <h1>{{TITLE}}</h1>
+        <td class="content-table" style="width: 100%; background-color: #ffffff; border-collapse: collapse;">
+          <div class="content-padding" style="padding: 48px 40px;">
+            <h1 style="font-family: 'KakaoBig', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 32px 0; color: #111111; line-height: 1.4; text-align: center;">{{TITLE}}</h1>
             
             {{BODY_CONTENT}}
             
             {{DATA_TABLE}}
             
-            <div class="signature">
+            <div class="signature" style="margin-top: 48px; padding-top: 48px; border-top: 1px solid #f5f5f5; text-align: center; font-size: 11px; color: #999999;">
               <a href="https://artic.live" target="_blank" style="display: inline-block; text-decoration: none; border: none; outline: none;">
                 <img src="https://artic.live/images/logo-type-black.png" alt="artic." width="80" style="border: none; display: block; margin: 0 auto 4px auto;">
               </a>
@@ -196,19 +181,19 @@
         </td>
       </tr>
       <tr>
-        <td class="footer">
-          <div class="footer-nav">
-            <a href="https://artic.live" class="footer-nav-link" target="_blank">Home</a>
+        <td class="footer" style="background-color: #ffffff; border-top: 1px solid #f5f5f5; padding: 48px 40px; text-align: center;">
+          <div class="footer-nav" style="margin-bottom: 24px;">
+            <a href="https://artic.live" class="footer-nav-link" target="_blank" style="font-family: 'KakaoBig', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: #111111; text-decoration: none; margin: 0 12px; display: inline-block;">Home</a>
             
-            <a href="mailto:admin@artic.live" class="footer-nav-link">Contact</a>
+            <a href="mailto:admin@artic.live" class="footer-nav-link" style="font-family: 'KakaoBig', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: #111111; text-decoration: none; margin: 0 12px; display: inline-block;">Contact</a>
             
-            <a href="https://www.instagram.com/artic.live" class="footer-nav-link" target="_blank">Instagram</a>
+            <a href="https://www.instagram.com/artic.live" class="footer-nav-link" target="_blank" style="font-family: 'KakaoBig', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: #111111; text-decoration: none; margin: 0 12px; display: inline-block;">Instagram</a>
           </div>
-          <p class="footer-text">
+          <p class="footer-text" style="font-size: 11px; line-height: 1.8; color: #888888; margin: 0;">
             본 메일은 artic. 서비스 이용 고객님을 대상으로 발송된 발신전용 메일입니다.<br>
             문의 사항이 있으신 경우 <a href="mailto:admin@artic.live" style="color: #666666; text-decoration: underline;">admin@artic.live</a>로 문의해 주시기 바랍니다.
           </p>
-          <p class="footer-text" style="margin-top: 15px; color: #999999;">&copy; 2026 artic. All Rights Reserved.</p>
+          <p class="footer-text" style="font-size: 11px; line-height: 1.8; color: #888888; margin: 0; margin-top: 15px; color: #999999;">&copy; 2026 artic. All Rights Reserved.</p>
         </td>
       </tr>
     </table>

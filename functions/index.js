@@ -1,4 +1,5 @@
 const { onRequest } = require("firebase-functions/v2/https");
+const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
 const nodemailer = require("nodemailer");
@@ -359,14 +360,6 @@ exports.waitlist = onRequest((req, res) => {
         return;
       }
 
-      // Format registration date
-      const regDateFormatted = new Date().toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        timeZone: "Asia/Seoul"
-      });
-
       const subscriberData = {
         name,
         email,
@@ -377,6 +370,51 @@ exports.waitlist = onRequest((req, res) => {
 
       const docRef = await db.collection("subscribers").add(subscriberData);
       console.log(`Waitlist subscriber successfully saved to Firestore (ID: ${docRef.id}).`);
+
+      res.status(200).json({ success: true, saved_to_cloud: true, id: docRef.id });
+    } catch (err) {
+      console.error("Internal server error during waitlist submission:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+exports.onSubscriberCreated = functions.firestore
+  .document("subscribers/{docId}")
+  .onCreate(async (snapshot, context) => {
+    const subscriber = snapshot.data();
+    if (!subscriber) {
+      console.log("No data associated with the event");
+      return;
+    }
+
+    // Only process quarterly subscribers that haven't sent a welcome email yet
+    if (subscriber.type !== "quarterly" || subscriber.welcome_email_sent === true) {
+      return;
+    }
+
+    const { name, email } = subscriber;
+    const docId = context.params.docId;
+
+    try {
+      // Format registration date
+      let regDateVal = subscriber.created_at;
+      let regDateFormatted = "";
+      if (regDateVal && typeof regDateVal.toDate === "function") {
+        regDateFormatted = regDateVal.toDate().toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          timeZone: "Asia/Seoul",
+        });
+      } else {
+        regDateFormatted = new Date().toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          timeZone: "Asia/Seoul",
+        });
+      }
 
       const countSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").get();
       const totalCount = countSnapshot.size;
@@ -480,7 +518,7 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
           .replace("{{DATA_TABLE}}", adminDataTableHtml)
           .replace("{{DB_COLLECTION}}", "subscribers")
-          .replace("{{DB_DOC_ID}}", docRef.id);
+          .replace("{{DB_DOC_ID}}", docId);
       }
 
       const emailSentCustomer = await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
@@ -490,16 +528,13 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
       if (adminHtml) savePreviewIfEmulator("last-admin-waitlist.html", adminHtml);
 
       if (emailSentCustomer) {
-        await docRef.update({ welcome_email_sent: true });
+        await db.collection("subscribers").doc(docId).update({ welcome_email_sent: true });
+        console.log(`Successfully sent waitlist email and updated status for subscriber: ${docId}`);
       }
-
-      res.status(200).json({ success: true, saved_to_cloud: true, id: docRef.id, total_subscribers: totalCount });
     } catch (err) {
-      console.error("Internal server error during waitlist submission:", err);
-      res.status(500).json({ error: err.message });
+      console.error(`Error in onSubscriberCreated trigger for subscriber ${docId}:`, err);
     }
   });
-});
 
 exports.products = onRequest((req, res) => {
   cors(req, res, async () => {

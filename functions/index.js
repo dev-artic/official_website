@@ -66,8 +66,7 @@ async function sendEmail({ to, subject, body, html }) {
 
     if (html) {
       mailOptions.html = html;
-    }
-    if (body) {
+    } else if (body) {
       mailOptions.text = body;
     }
 
@@ -164,19 +163,41 @@ exports.checkout = onRequest((req, res) => {
       });
 
       console.log(`Checkout successfully saved to Firestore (ID: ${orderId}).`);
+      res.status(200).json({ success: true, saved_to_cloud: true, order_id: orderId });
+    } catch (err) {
+      console.error("Internal server error during checkout:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
 
-      // Prepare receipt emails
-      const totalPrice = productPrice * qty + 3000;
-      const customerSubject = `${productName} 결제 요청 완료`;
+exports.onOrderCreated = functions.firestore
+  .document("orders/{docId}")
+  .onCreate(async (snapshot, context) => {
+    const orderData = snapshot.data();
+    if (!orderData) {
+      console.log("No data associated with the event");
+      return;
+    }
+
+    const docId = context.params.docId;
+    const { name, email, phone, address, quantity, depositor, notes, product_id, product_name, price } = orderData;
+    const qty = quantity || 1;
+    const depName = depositor || name;
+    const chkNotes = notes || "";
+
+    try {
+      const totalPrice = price * qty + 3000;
+      const customerSubject = `${product_name} 결제 요청 완료`;
       const customerBody = `안녕하세요, ${name}님. artic. 입니다.
 
-'${productName}' 결제 요청이 접수되었습니다.
+'${product_name}' 결제 요청이 접수되었습니다.
 아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.
 
 [주문 정보]
-- 상품명: ${productName}
+- 상품명: ${product_name}
 - 수량: ${qty}개
-- 총 결제 금액: ${totalPrice.toLocaleString()}원 (상품가 ${productPrice.toLocaleString()}원 * 수량 + 배송비 3,000원)
+- 총 결제 금액: ${totalPrice.toLocaleString()}원 (상품가 ${price.toLocaleString()}원 * 수량 + 배송비 3,000원)
 - 입금자명: ${depName}
 - 배송지 주소: ${address}
 - 연락처: ${phone}
@@ -193,7 +214,7 @@ exports.checkout = onRequest((req, res) => {
 
       const adminEmail = process.env.ADMIN_EMAIL || "admin@artic.live";
       const adminSubject = `[ADMIN] 새로운 결제 요청 접수 - ${name}님`;
-      const adminBody = `새로운 '${productName}' 결제 요청이 접수되었습니다.
+      const adminBody = `새로운 '${product_name}' 결제 요청이 접수되었습니다.
 
 [신청 정보]
 - 신청자명: ${name}
@@ -216,14 +237,14 @@ exports.checkout = onRequest((req, res) => {
 </p>
 <p style="text-align: center; margin-top: 18px; margin-bottom: 24px; font-size: 13px; line-height: 1.6; color: #777777;">
   안녕하세요, ${name} 님.<br>
-  '${productName}' 결제 요청이 접수되었습니다.<br>
+  '${product_name}' 결제 요청이 접수되었습니다.<br>
   아래 계좌로 주문 금액을 입금해 주시면 입금 확인 후 배송을 진행해 드리겠습니다.
 </p>`;
 
         const dataTableHtml = `<table class="data-table">
   <tr>
     <td class="label">상품명</td>
-    <td class="value">${productName}</td>
+    <td class="value">${product_name}</td>
   </tr>
   <tr>
     <td class="label">수량</td>
@@ -234,8 +255,8 @@ exports.checkout = onRequest((req, res) => {
     <td class="value"><span class="bold">${totalPrice.toLocaleString()}원</span></td>
   </tr>
   <tr>
-    <td class="label" style="padding-left: 16px; font-size: 9px; color: #999999; text-transform: none; letter-spacing: 0.05em;">└ 상품 가격 (${productPrice.toLocaleString()}원 × ${qty})</td>
-    <td class="value" style="font-size: 11px; color: #666666;">${(productPrice * qty).toLocaleString()}원</td>
+    <td class="label" style="padding-left: 16px; font-size: 9px; color: #999999; text-transform: none; letter-spacing: 0.05em;">└ 상품 가격 (${price.toLocaleString()}원 × ${qty})</td>
+    <td class="value" style="font-size: 11px; color: #666666;">${(price * qty).toLocaleString()}원</td>
   </tr>
   <tr>
     <td class="label" style="padding-left: 16px; font-size: 9px; color: #999999; text-transform: none; letter-spacing: 0.05em;">└ 배송비</td>
@@ -266,7 +287,7 @@ exports.checkout = onRequest((req, res) => {
       }
 
       if (adminTemplate) {
-        const adminBodyHtml = `<p>새로운 <strong>'${productName}'</strong> 결제 요청이 접수되었습니다.</p>`;
+        const adminBodyHtml = `<p>새로운 <strong>'${product_name}'</strong> 결제 요청이 접수되었습니다.</p>`;
 
         const adminDataTableHtml = `<table class="data-table">
   <tr>
@@ -304,7 +325,7 @@ exports.checkout = onRequest((req, res) => {
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
           .replace("{{DATA_TABLE}}", adminDataTableHtml)
           .replace("{{DB_COLLECTION}}", "orders")
-          .replace("{{DB_DOC_ID}}", orderId);
+          .replace("{{DB_DOC_ID}}", docId);
       }
 
       await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
@@ -312,14 +333,10 @@ exports.checkout = onRequest((req, res) => {
 
       if (customerHtml) savePreviewIfEmulator("last-customer-checkout.html", customerHtml);
       if (adminHtml) savePreviewIfEmulator("last-admin-checkout.html", adminHtml);
-
-      res.status(200).json({ success: true, saved_to_cloud: true, order_id: orderId });
     } catch (err) {
-      console.error("Internal server error during checkout:", err);
-      res.status(500).json({ error: err.message });
+      console.error(`Error in onOrderCreated trigger for order ${docId}:`, err);
     }
   });
-});
 
 exports.waitlist = onRequest((req, res) => {
   cors(req, res, async () => {

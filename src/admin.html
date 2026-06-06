@@ -373,11 +373,7 @@ path_depth: "../"
       <div class="admin-card">
         <h3 class="admin-card-title">Add / Update Product</h3>
         <form id="product-form">
-          <div class="grid-form-cols">
-            <div class="form-col-group">
-              <label>Product ID (자동 생성시 비워둠)</label>
-              <input type="text" id="prod-id" placeholder="e.g. 1mc1pd">
-            </div>
+          <div class="grid-form-cols" style="grid-template-columns: repeat(3, 1fr);">
             <div class="form-col-group">
               <label>Name *</label>
               <input type="text" id="prod-name" placeholder="e.g. 1MC1PD: The Interview" required>
@@ -581,8 +577,10 @@ path_depth: "../"
       });
     }
 
+    let editingProductId = '';
+
     window.editProduct = function(id, name, price, inventory, status) {
-      document.getElementById('prod-id').value = id;
+      editingProductId = id;
       document.getElementById('prod-name').value = name;
       document.getElementById('prod-price').value = price;
       document.getElementById('prod-inventory').value = inventory;
@@ -601,34 +599,18 @@ path_depth: "../"
         .replace(/-+/g, '-');        // Collapse dashes
     }
 
-    // Auto-populate slug as user types name (if ID is empty/not edited)
-    let idManuallyEdited = false;
     const prodNameInput = document.getElementById('prod-name');
-    const prodIdInput = document.getElementById('prod-id');
-
-    prodIdInput.addEventListener('input', () => {
-      idManuallyEdited = prodIdInput.value.trim().length > 0;
-    });
-
-    prodNameInput.addEventListener('input', () => {
-      if (!idManuallyEdited) {
-        prodIdInput.value = generateSlug(prodNameInput.value);
-      }
-    });
 
     // Product form submission
     const prodForm = document.getElementById('product-form');
     prodForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      let id = prodIdInput.value.trim();
       const name = prodNameInput.value.trim();
       const price = Number(document.getElementById('prod-price').value);
       const inventory = Number(document.getElementById('prod-inventory').value);
       const status = document.getElementById('prod-status').value;
 
-      if (!id) {
-        id = generateSlug(name);
-      }
+      const id = editingProductId || generateSlug(name);
       if (!id) {
         alert('Please enter a product name to generate an ID.');
         return;
@@ -648,7 +630,7 @@ path_depth: "../"
       })
       .then(() => {
         prodForm.reset();
-        idManuallyEdited = false; // Reset manual edit state
+        editingProductId = ''; // Reset editing ID state
         loadDashboardData();
       })
       .catch(err => {

@@ -181,37 +181,72 @@
       const modalImg = document.getElementById('print-modal-image');
       const modalInfo = document.getElementById('print-modal-info');
 
+      function animateScrollToTop(element, duration, callback) {
+        const start = element.scrollTop;
+        if (start === 0) {
+          if (callback) callback();
+          return;
+        }
+        const startTime = performance.now();
+
+        function easeOutExpo(t) {
+          return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+        }
+
+        function scroll(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const ease = easeOutExpo(progress);
+          element.scrollTop = start * (1 - ease);
+
+          if (progress < 1) {
+            requestAnimationFrame(scroll);
+          } else {
+            if (callback) callback();
+          }
+        }
+
+        requestAnimationFrame(scroll);
+      }
+
       function resetMobileCollapsingHeader() {
         const imageWrap = modal.querySelector('.print-modal-image-wrap');
         if (!imageWrap) return;
         
-        imageWrap.classList.add('resetting');
-        if (modalImg) {
-          modalImg.classList.add('resetting');
-        }
-        if (closeBtn) {
-          closeBtn.classList.add('resetting');
+        const inTransition = modal.classList.contains('is-transitioning');
+        if (!inTransition) {
+          imageWrap.classList.add('resetting');
+          if (modalImg) {
+            modalImg.classList.add('resetting');
+          }
+          if (closeBtn) {
+            closeBtn.classList.add('resetting');
+          }
         }
         
         if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
           imageWrap.style.height = '85px';
           imageWrap.style.padding = '12px 40px';
-          imageWrap.style.transform = 'translateY(0)';
-          if (closeBtn) {
-            closeBtn.style.transform = 'translateY(0)';
-          }
           if (modalImg) {
             modalImg.style.maxHeight = '60px';
+          }
+          if (!inTransition) {
+            imageWrap.style.transform = 'translateY(0)';
+            if (closeBtn) {
+              closeBtn.style.transform = 'translateY(0)';
+            }
           }
         } else {
           imageWrap.style.height = '';
           imageWrap.style.padding = '';
-          imageWrap.style.transform = '';
-          if (closeBtn) {
-            closeBtn.style.transform = '';
-          }
           if (modalImg) {
             modalImg.style.maxHeight = '';
+          }
+          if (!inTransition) {
+            imageWrap.style.transform = '';
+            if (closeBtn) {
+              closeBtn.style.transform = '';
+            }
           }
         }
         
@@ -235,15 +270,26 @@
               const imageWrap = modal.querySelector('.print-modal-image-wrap');
               if (container && imageWrap) {
                 const scrollTop = container.scrollTop;
+                
+                if (modal.classList.contains('is-transitioning')) {
+                  // Only update translateY to follow smooth scroll during transition
+                  imageWrap.style.transform = `translateY(${scrollTop}px)`;
+                  if (closeBtn) {
+                    closeBtn.style.transform = `translateY(${scrollTop}px)`;
+                  }
+                  ticking = false;
+                  return;
+                }
+                
                 const maxScrollLimit = container.scrollHeight - container.clientHeight;
                 const cleanScrollTop = Math.min(Math.max(0, scrollTop), maxScrollLimit);
                 
                 if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
                   imageWrap.style.height = '85px';
                   imageWrap.style.padding = '12px 40px';
-                  imageWrap.style.transform = `translateY(${cleanScrollTop}px)`;
+                  imageWrap.style.transform = `translateY(${scrollTop}px)`;
                   if (closeBtn) {
-                    closeBtn.style.transform = `translateY(${cleanScrollTop}px)`;
+                    closeBtn.style.transform = `translateY(${scrollTop}px)`;
                   }
                   if (modalImg) {
                     modalImg.style.maxHeight = '60px';
@@ -256,9 +302,9 @@
                   
                   imageWrap.style.height = `${wrapHeight}px`;
                   imageWrap.style.padding = `${padding}px 40px`;
-                  imageWrap.style.transform = `translateY(${cleanScrollTop}px)`;
+                  imageWrap.style.transform = `translateY(${scrollTop}px)`;
                   if (closeBtn) {
-                    closeBtn.style.transform = `translateY(${cleanScrollTop}px)`;
+                    closeBtn.style.transform = `translateY(${scrollTop}px)`;
                   }
                   if (modalImg) {
                     modalImg.style.maxHeight = `${imgMaxHeight}px`;
@@ -428,21 +474,29 @@
           });
 
           actionBtn.addEventListener('click', function() {
+            modal.classList.add('is-transitioning');
             modal.classList.add('is-checkout');
             const container = modal.querySelector('.print-modal-container');
             if (container) {
-              container.scrollTop = 0;
+              animateScrollToTop(container, 600);
             }
             resetMobileCollapsingHeader();
+            setTimeout(() => {
+              modal.classList.remove('is-transitioning');
+            }, 600);
           });
 
           backBtn.addEventListener('click', function() {
+            modal.classList.add('is-transitioning');
             modal.classList.remove('is-checkout');
             const container = modal.querySelector('.print-modal-container');
             if (container) {
-              container.scrollTop = 0;
+              animateScrollToTop(container, 600);
             }
             resetMobileCollapsingHeader();
+            setTimeout(() => {
+              modal.classList.remove('is-transitioning');
+            }, 600);
           });
 
           let loadingInterval = null;
@@ -492,12 +546,16 @@
             })
             .then(resData => {
               document.getElementById('success-email-display').textContent = email;
+              modal.classList.add('is-transitioning');
               modal.classList.add('is-success');
               const container = modal.querySelector('.print-modal-container');
               if (container) {
-                container.scrollTop = 0;
+                animateScrollToTop(container, 600);
               }
               resetMobileCollapsingHeader();
+              setTimeout(() => {
+                modal.classList.remove('is-transitioning');
+              }, 600);
               
               document.getElementById('chk-success-close-btn').addEventListener('click', closeModal);
             })

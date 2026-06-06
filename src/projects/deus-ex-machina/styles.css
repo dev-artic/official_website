@@ -1499,6 +1499,7 @@
         display: flex;
         flex-direction: column;
         overflow-y: auto;
+        overscroll-behavior: none;
         opacity: 0;
         transform: translateY(24px);
         transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1753,6 +1754,7 @@
           max-height: 80vh;
           border-radius: 16px;
           overflow-y: auto !important;
+          overscroll-behavior: none !important;
         }
 
         /* Absolute collapsing image header */
@@ -1770,8 +1772,8 @@
           transition: none !important; /* Disable all transitions during scroll tracking */
         }
 
-        .print-modal-image-wrap.resetting {
-          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important, padding 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+         .print-modal-image-wrap.resetting {
+          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important, padding 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         .print-modal-image-wrap img {
@@ -1786,10 +1788,6 @@
         .print-modal-close {
           transition: none !important;
           z-index: 10;
-        }
-
-        .print-modal-close.resetting {
-          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         /* Keep layout paddings comfortable and uniform on mobile */
@@ -1807,33 +1805,48 @@
           margin-top: 32px !important; /* Add gap below details grid */
         }
 
-        /* Hide inactive slides on mobile to prevent height stretching and scroll issues */
+        /* Slide Height Clamping to prevent mobile layout height stretching */
         .print-modal-slide {
-          display: none !important;
-        }
-        .print-modal:not(.is-checkout):not(.is-success) .print-modal-slide.slide-details {
+          height: 0 !important;
+          overflow: hidden !important;
+          width: 33.333% !important;
           display: flex !important;
+          flex-direction: column;
         }
-        .print-modal.is-checkout .print-modal-slide.slide-checkout {
-          display: flex !important;
-        }
+        .print-modal:not(.is-checkout):not(.is-success) .print-modal-slide.slide-details,
+        .print-modal.is-checkout .print-modal-slide.slide-checkout,
         .print-modal.is-success .print-modal-slide.slide-success {
-          display: flex !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
+        .print-modal.is-transitioning .print-modal-slide {
+          height: auto !important;
+          overflow: visible !important;
+        }
+        .print-modal.is-transitioning .print-modal-image-wrap {
+          transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important, padding 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .print-modal.is-transitioning .print-modal-info {
+          transition: margin-top 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .print-modal.is-transitioning .print-modal-image-wrap img {
+          transition: max-height 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
-        .print-modal.is-checkout .print-modal-slider-track,
-        .print-modal.is-success .print-modal-slider-track {
-          transform: none !important;
-        }
         .print-modal-slider-track {
+          width: 300% !important;
+          display: flex !important;
+          transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .print-modal-slider-viewport {
           width: 100% !important;
+          overflow: hidden !important;
         }
 
         .print-modal-slider-viewport,
-        .print-modal-slider-track,
-        .print-modal-slide {
+        .print-modal-slider-track {
           height: auto !important;
-          width: 100% !important;
         }
 
         .print-modal-slide.slide-details {

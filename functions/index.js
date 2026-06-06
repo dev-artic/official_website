@@ -139,11 +139,7 @@ exports.checkout = onRequest((req, res) => {
         productName = pData.name;
         productPrice = pData.price;
 
-        const newInventory = pData.inventory - qty;
-        const newStatus = newInventory === 0 ? "out-of-stock" : "for-sale";
-
-        transaction.update(productRef, { inventory: newInventory, status: newStatus });
-
+        // Note: Do NOT decrement inventory here. It will be decremented when admin sets status to 'shipped'.
         const orderData = {
           name,
           email,
@@ -155,6 +151,9 @@ exports.checkout = onRequest((req, res) => {
           product_id,
           product_name: productName,
           price: productPrice,
+          status: "pending",
+          tracking_number: "",
+          inventory_deducted: false,
           created_at: FieldValue.serverTimestamp(),
         };
 
@@ -583,6 +582,62 @@ exports.admin = onRequest((req, res) => {
       }
     } else if (req.method === "POST") {
       try {
+        const { action } = req.body;
+
+        if (action === "update_order") {
+          const { orderId, status, tracking_number } = req.body;
+          if (!orderId || !status) {
+            res.status(400).json({ error: "Missing required fields (orderId, status)" });
+            return;
+          }
+
+          const orderRef = db.collection("orders").doc(orderId);
+          await db.runTransaction(async (transaction) => {
+            const orderDoc = await transaction.get(orderRef);
+            if (!orderDoc.exists) {
+              throw new Error("Order not found");
+            }
+            const oData = orderDoc.data();
+            const isDeducted = oData.inventory_deducted || false;
+
+            let updateData = {
+              status: status,
+              tracking_number: tracking_number || ""
+            };
+
+            // Transition to shipped: deduct inventory if not already deducted
+            if (status === "shipped" && !isDeducted) {
+              const productRef = db.collection("products").doc(oData.product_id);
+              const productDoc = await transaction.get(productRef);
+              if (!productDoc.exists) {
+                throw new Error("Product not found");
+              }
+              const pData = productDoc.data();
+              const qty = oData.quantity || 1;
+
+              if (pData.inventory < qty) {
+                throw new Error(`Insufficient inventory for product: ${pData.name} (Available: ${pData.inventory}, Ordered: ${qty})`);
+              }
+
+              const newInventory = pData.inventory - qty;
+              const newStatus = newInventory === 0 ? "out-of-stock" : pData.status;
+
+              transaction.update(productRef, {
+                inventory: newInventory,
+                status: newStatus
+              });
+
+              updateData.inventory_deducted = true;
+            }
+
+            transaction.update(orderRef, updateData);
+          });
+
+          res.status(200).json({ success: true });
+          return;
+        }
+
+        // Default: save/update product
         const { id, name, price, inventory, status } = req.body;
         if (!id || !name || price === undefined || inventory === undefined || !status) {
           res.status(400).json({ error: "Missing required fields" });

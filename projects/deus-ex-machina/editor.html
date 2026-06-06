@@ -613,25 +613,20 @@
           <span class="lyrics-line-time" title="Click to seek">${line.time.toFixed(1)}s</span>
           <input type="text" class="lyrics-line-input" value="${escapeHtml(line.text)}" data-idx="${i}">
           <div class="lyrics-line-actions">
-            <button class="nudge-btn" onclick="nudgeTime(${i}, -0.1, event)">-</button>
-            <button class="nudge-btn" onclick="nudgeTime(${i}, 0.1, event)">+</button>
-            <button class="nudge-btn split-btn" title="Split line at cursor (Ctrl+Enter)" onclick="handleSplitClick(${i}, event)">✂</button>
-            <button class="nudge-btn del-btn" title="Delete line" onclick="deleteLine(${i}, event)">×</button>
+            <button class="nudge-btn btn-minus">-</button>
+            <button class="nudge-btn btn-plus">+</button>
+            <button class="nudge-btn split-btn" title="Split line at cursor (Ctrl+Enter)">✂</button>
+            <button class="nudge-btn del-btn" title="Delete line">×</button>
           </div>
         `;
 
         const input = row.querySelector('.lyrics-line-input');
-        
-        // Input text sync
-        input.addEventListener('input', (e) => {
-          localLyrics[i].text = e.target.value;
-          if (i === activeLineIdx) {
-            tapTrigger.textContent = `[ENTER / CLICK HERE] SYNC LINE ${activeLineIdx + 1}: "${e.target.value}"`;
-          }
-        });
+        const btnMinus = row.querySelector('.btn-minus');
+        const btnPlus = row.querySelector('.btn-plus');
+        const btnSplit = row.querySelector('.split-btn');
+        const btnDel = row.querySelector('.del-btn');
 
-        // Focus row when input focused
-        input.addEventListener('focus', () => {
+        const selectRow = () => {
           if (activeFocusIdx !== i) {
             const oldActive = lyricsContainer.querySelector('.lyrics-timeline-row.active');
             if (oldActive) oldActive.classList.remove('active');
@@ -648,7 +643,43 @@
               tapTrigger.textContent = `[ENTER / CLICK HERE] SYNC LINE ${activeLineIdx + 1}: "${localLyrics[activeLineIdx].text}"`;
             }
           }
+        };
+
+        // Attach direct event listeners
+        btnMinus.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectRow();
+          nudgeTime(i, -0.1);
         });
+
+        btnPlus.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectRow();
+          nudgeTime(i, 0.1);
+        });
+
+        btnSplit.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectRow();
+          splitLine(i, input.selectionStart || input.value.length);
+        });
+
+        btnDel.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectRow();
+          deleteLine(i);
+        });
+        
+        // Input text sync
+        input.addEventListener('input', (e) => {
+          localLyrics[i].text = e.target.value;
+          if (i === activeLineIdx) {
+            tapTrigger.textContent = `[ENTER / CLICK HERE] SYNC LINE ${activeLineIdx + 1}: "${e.target.value}"`;
+          }
+        });
+
+        // Focus row when input focused
+        input.addEventListener('focus', selectRow);
 
         // Click row (any empty space) to focus input
         row.addEventListener('click', (e) => {
@@ -695,14 +726,27 @@
     }
 
     function nudgeTime(idx, amount, e) {
+      console.log('nudgeTime called:', { idx, amount, localLyricsLength: localLyrics ? localLyrics.length : 'null' });
       if (e) e.stopPropagation();
       if (idx >= 0 && idx < localLyrics.length) {
-        localLyrics[idx].time = Math.max(0, parseFloat((localLyrics[idx].time + amount).toFixed(1)));
-        const rows = lyricsContainer.querySelectorAll('.lyrics-line-row');
+        console.log('Current time:', localLyrics[idx].time, typeof localLyrics[idx].time);
+        const curTime = parseFloat(localLyrics[idx].time) || 0;
+        localLyrics[idx].time = Math.max(0, parseFloat((curTime + amount).toFixed(1)));
+        console.log('New time:', localLyrics[idx].time);
+        const rows = lyricsContainer.querySelectorAll('.lyrics-timeline-row');
         if (rows[idx]) {
           const badge = rows[idx].querySelector('.lyrics-line-time');
-          if (badge) badge.textContent = localLyrics[idx].time.toFixed(1) + 's';
+          if (badge) {
+            badge.textContent = localLyrics[idx].time.toFixed(1) + 's';
+            console.log('Badge textContent set to:', badge.textContent);
+          } else {
+            console.log('Badge element not found inside row');
+          }
+        } else {
+          console.log('Row element not found at index:', idx);
         }
+      } else {
+        console.log('nudgeTime bounds check failed for idx:', idx);
       }
     }
 
@@ -834,10 +878,11 @@
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
+      console.log('keydown event caught:', e.key, e.code, 'target:', e.target.tagName);
       const inInput = e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA';
 
       // Ctrl+Enter from anywhere → split focused line at cursor
-      if ((e.ctrlKey || e.metaKey) && e.code === 'Enter') {
+      if ((e.ctrlKey || e.metaKey) && (e.code === 'Enter' || e.key === 'Enter')) {
         e.preventDefault();
         const inp = document.querySelector('.lyrics-line-input:focus');
         if (inp) {
@@ -848,21 +893,23 @@
       }
 
       // Up/Down Arrows: Nudge active focused line timing (Allowed even inside input focus)
-      if (e.code === 'ArrowUp') {
+      if (e.code === 'ArrowUp' || e.key === 'ArrowUp') {
         e.preventDefault();
         const focusedInput = document.activeElement;
         if (focusedInput && focusedInput.classList.contains('lyrics-line-input')) {
           activeFocusIdx = parseInt(focusedInput.getAttribute('data-idx'), 10);
         }
+        console.log('ArrowUp nudging index:', activeFocusIdx);
         nudgeTime(activeFocusIdx, 0.1);
         return;
       }
-      if (e.code === 'ArrowDown') {
+      if (e.code === 'ArrowDown' || e.key === 'ArrowDown') {
         e.preventDefault();
         const focusedInput = document.activeElement;
         if (focusedInput && focusedInput.classList.contains('lyrics-line-input')) {
           activeFocusIdx = parseInt(focusedInput.getAttribute('data-idx'), 10);
         }
+        console.log('ArrowDown nudging index:', activeFocusIdx);
         nudgeTime(activeFocusIdx, -0.1);
         return;
       }

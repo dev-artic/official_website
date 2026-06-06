@@ -80,6 +80,21 @@ async function sendEmail({ to, subject, body, html }) {
   }
 }
 
+function savePreviewIfEmulator(fileName, html) {
+  if (process.env.FUNCTIONS_EMULATOR === "true") {
+    try {
+      const scratchDir = path.join(__dirname, "..", "scratch");
+      if (!fs.existsSync(scratchDir)) {
+        fs.mkdirSync(scratchDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(scratchDir, fileName), html, "utf8");
+      console.log(`[EMULATOR] Saved email preview to scratch/${fileName}`);
+    } catch (err) {
+      console.error("[EMULATOR] Failed to save email preview:", err);
+    }
+  }
+}
+
 exports.checkout = onRequest((req, res) => {
   cors(req, res, async () => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
@@ -295,6 +310,9 @@ exports.checkout = onRequest((req, res) => {
       await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
       await sendEmail({ to: adminEmail, subject: adminSubject, body: adminBody, html: adminHtml });
 
+      if (customerHtml) savePreviewIfEmulator("last-customer-checkout.html", customerHtml);
+      if (adminHtml) savePreviewIfEmulator("last-admin-checkout.html", adminHtml);
+
       res.status(200).json({ success: true, saved_to_cloud: true, order_id: orderId });
     } catch (err) {
       console.error("Internal server error during checkout:", err);
@@ -341,6 +359,14 @@ exports.waitlist = onRequest((req, res) => {
         res.status(400).json({ error: "This email is already registered. Stay tuned!" });
         return;
       }
+
+      // Format registration date
+      const regDateFormatted = new Date().toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "Asia/Seoul"
+      });
 
       const subscriberData = {
         name,
@@ -400,12 +426,6 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
   Quarterly. 대기명단 등록이 완료되었습니다.
 </p>`;
 
-        const regDateFormatted = new Date().toLocaleDateString("ko-KR", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          timeZone: "Asia/Seoul"
-        });
         const dataTableHtml = `<table class="data-table">
   <tr>
     <td class="label">이름</td>
@@ -466,6 +486,9 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
 
       const emailSentCustomer = await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
       await sendEmail({ to: adminEmail, subject: adminSubject, body: adminBody, html: adminHtml });
+
+      if (customerHtml) savePreviewIfEmulator("last-customer-waitlist.html", customerHtml);
+      if (adminHtml) savePreviewIfEmulator("last-admin-waitlist.html", adminHtml);
 
       if (emailSentCustomer) {
         await docRef.update({ welcome_email_sent: true });
@@ -530,12 +553,28 @@ exports.admin = onRequest((req, res) => {
           orders.push({ id: d.id, ...o });
         });
 
-        const subscribersSnap = await db.collection("subscribers").orderBy("created_at", "desc").get();
+        const subscribersSnap = await db.collection("subscribers").get();
         const subscribers = [];
         subscribersSnap.forEach(d => {
           const s = d.data();
-          if (s.created_at) s.created_at = s.created_at.toDate().toISOString();
+          // Fallback to timestamp if created_at is missing (for older test records)
+          let dateVal = s.created_at;
+          if (!dateVal && s.timestamp) {
+            dateVal = s.timestamp;
+          }
+          if (dateVal && typeof dateVal.toDate === 'function') {
+            s.created_at = dateVal.toDate().toISOString();
+          } else {
+            s.created_at = null;
+          }
           subscribers.push({ id: d.id, ...s });
+        });
+
+        // Sort subscribers by created_at descending in-memory
+        subscribers.sort((a, b) => {
+          const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dbVal = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dbVal - da;
         });
 
         res.status(200).json({ products, orders, subscribers });

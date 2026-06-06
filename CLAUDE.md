@@ -76,7 +76,28 @@ npm run dev
 
 ---
 
-## 4. Brand Guidelines
+## 4. Environment Isolation & Databases (로컬 및 실서버 환경 격리)
+
+The project is divided into two completely isolated environments to prevent accidental data changes or configuration leaks:
+
+### A. Local Staging Environment (로컬 개발 및 테스트 환경)
+- **Local Web Site & Admin**: `http://localhost:8000` (User-facing) and `http://localhost:8000/admin` (Admin control panel).
+- **Firebase Emulator UI**: `http://localhost:4000` (Provides a local Firestore DB dashboard on port `8080` and Functions runner on `5001`).
+- **Database**: Uses the **Local Firestore Emulator memory**. Any modifications, waitlist additions, or test orders are written to this temporary 가상 데이터베이스, ensuring 100% safety from production data.
+- **Local email preview**: Node-generated email notifications automatically generate HTML mockups inside the `scratch/` directory for preview.
+
+### B. Production Environment (실서버 운영 환경)
+- **Production Web Site & Admin**: `https://artic.live` and `https://artic.live/admin` (Live site hosted on GitHub Pages).
+- **Firebase Database UI**: Accessed via the [Google Firebase Console](https://console.firebase.google.com/project/artic-official-home/firestore/databases/-default-/data).
+- **Database**: Uses the **Real Google Cloud Firestore database**. Changes here directly represent live user data.
+- **SMTP Config**: Uses the credentials defined in `functions/.env` (which is excluded from Git).
+
+### C. Environment Routing
+The client frontend code (via `js/shared.js` and component forms) automatically detects the host name (`window.location.hostname`). If it is `localhost` or `127.0.0.1`, it directs API calls to the local emulator, otherwise to production endpoints. Developers do not need to toggle base URLs manually.
+
+---
+
+## 5. Brand Guidelines
 
 - **Official Brand Name**: **artic.** (always lowercase with a trailing period)
 - **Korean Pronunciation/Notation**: **아틱** (Never use "아티크" under any circumstances).

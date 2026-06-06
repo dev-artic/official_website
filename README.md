@@ -165,6 +165,25 @@ graph TD
 
 ---
 
+### 🛡️ 로컬 및 실서버의 완전 격리 구조 (Environment Isolation)
+
+서비스의 안전한 유지보수 및 실서버 가동성(Availability) 보장을 위해 두 환경은 물리적으로 철저히 분리되어 있습니다:
+
+*   **로컬 개발 환경 (Local Staging)**:
+    *   **접속 도메인**: 웹사이트 `http://localhost:8000` | 어드민 `http://localhost:8000/admin` | 에뮬레이터 UI `http://localhost:4000`
+    *   **데이터베이스**: PC 로컬 메모리상에서만 상주하는 **가상 Firestore DB** (`localhost:8080`)
+    *   **안전성**: 로컬 어드민과 폼 테스트 과정에서 데이터를 등록, 변경, 삭제하더라도 실제 인터넷 실서버 DB에는 전혀 영향이 없습니다.
+    *   **메일**: 메일 서버를 실제로 거치지 않고, 루트의 `scratch/` 폴더 내에 HTML Preview 파일을 생성하여 검증합니다.
+*   **실서버 운영 환경 (Production)**:
+    *   **접속 도메인**: 웹사이트 `https://artic.live` | 어드민 `https://artic.live/admin`
+    *   **데이터베이스**: 구글 클라우드에 구성된 **실제 운영 Firestore DB** (Firebase Console을 통해 접근)
+    *   **특징**: 실제 사용자들의 가입 및 주문 정보가 적재되며, 결제 및 대기자 신청 완료 시 지정된 메일 발송 서버(SMTP)를 거쳐 메일 발신이 이루어집니다.
+*   **환경 변수 및 라우팅 자동화**:
+    *   클라이언트 단의 공통 스크립트(`js/shared.js` 등)가 브라우저의 현재 호스트명(`window.location.hostname`)을 감지합니다.
+    *   호스트가 `localhost` 또는 `127.0.0.1`일 때는 로컬 백엔드 주소(`http://localhost:8000/api`)로 통신하고, `artic.live` 도메인일 때는 실제 클라우드 백엔드 주소로 API 호출 경로가 자동 전환되므로 빌드 시 별도로 소스코드를 수정할 필요가 없습니다.
+
+---
+
 ### 3️⃣ 배포 단계 (Deployment Phase)
 * **A. 프론트엔드 배포 (GitHub Pages)**:
   * 로컬에서 컴파일러(`npm run build`) 실행 후, 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.

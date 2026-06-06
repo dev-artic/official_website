@@ -460,6 +460,7 @@ path_depth: "../"
               <th>Type</th>
               <th>Welcome Mail Status</th>
               <th>Created At</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="subscribers-table-body">
@@ -733,6 +734,7 @@ path_depth: "../"
           </td>
           <td>
             <button class="action-btn-sm" style="font-size:0.55rem; padding:4px 8px;" onclick="saveOrderStatus('${o.id}')">저장</button>
+            <button class="action-btn-sm" style="font-size:0.55rem; padding:4px 8px; background-color:#e74c3c; margin-left:4px;" onclick="deleteOrder('${o.id}')">삭제</button>
           </td>
         `;
         tr.innerHTML = trVal;
@@ -775,12 +777,76 @@ path_depth: "../"
       });
     };
 
+    window.deleteOrder = function(orderId) {
+      if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          action: 'delete_order',
+          id: orderId
+        })
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.error || 'Failed to delete order') });
+        }
+        return res.json();
+      })
+      .then(() => {
+        alert('Order deleted successfully.');
+        loadDashboardData();
+      })
+      .catch(err => {
+        alert(err.message);
+      });
+    };
+
+    window.deleteSubscriber = function(subId) {
+      if (!confirm('Are you sure you want to delete this subscriber? This action cannot be undone.')) return;
+
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          action: 'delete_subscriber',
+          id: subId
+        })
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.error || 'Failed to delete subscriber') });
+        }
+        return res.json();
+      })
+      .then(() => {
+        alert('Subscriber deleted successfully.');
+        loadDashboardData();
+      })
+      .catch(err => {
+        alert(err.message);
+      });
+    };
+
     function renderSubscribers(subscribers) {
       const tbody = document.getElementById('subscribers-table-body');
       tbody.innerHTML = '';
 
       if (!subscribers || subscribers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No subscribers yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No subscribers yet.</td></tr>`;
         return;
       }
 
@@ -795,6 +861,9 @@ path_depth: "../"
           <td style="text-transform:uppercase;">${s.type || 'quarterly'}</td>
           <td><span class="status-badge ${mailStatusClass}">${mailStatusText}</span></td>
           <td>${new Date(s.created_at).toLocaleString('ko-KR')}</td>
+          <td>
+            <button class="action-btn-sm" style="font-size:0.55rem; padding:4px 8px; background-color:#e74c3c;" onclick="deleteSubscriber('${s.id}')">삭제</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });

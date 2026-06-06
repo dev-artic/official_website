@@ -728,6 +728,28 @@ exports.admin = onRequest((req, res) => {
           return;
         }
 
+        if (action === "delete_order") {
+          const { id } = req.body;
+          if (!id) {
+            res.status(400).json({ error: "Missing required field (id)" });
+            return;
+          }
+          await db.collection("orders").doc(id).delete();
+          res.status(200).json({ success: true });
+          return;
+        }
+
+        if (action === "delete_subscriber") {
+          const { id } = req.body;
+          if (!id) {
+            res.status(400).json({ error: "Missing required field (id)" });
+            return;
+          }
+          await db.collection("subscribers").doc(id).delete();
+          res.status(200).json({ success: true });
+          return;
+        }
+
         // Default: save/update product
         let { id, name, price, inventory, status } = req.body;
         if (!name || price === undefined || inventory === undefined || !status) {

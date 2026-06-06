@@ -30,9 +30,6 @@ sys.path.insert(0, os.path.dirname(__file__))
 from playlist_config import PROJECTS
 
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", "")
-if not YOUTUBE_API_KEY:
-    print("ERROR: YOUTUBE_API_KEY 환경변수가 설정되지 않았습니다.")
-    sys.exit(1)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -94,7 +91,7 @@ def fetch_playlist_items(playlist_id: str) -> list[dict]:
 # 2. 기존 HTML에서 videoId 파싱 (중복 방지)
 # ─────────────────────────────────────────────────────────────
 def parse_existing_video_ids(html: str) -> list[str]:
-    return re.findall(r'class="archive-entry[^"]*"s+data-vid="([^"]+)"', html)
+    return re.findall(r'class="archive-entry[^"]*"\s+data-vid="([^"]+)"', html)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -349,6 +346,10 @@ def process_project(proj: dict) -> bool:
 # 6. 메인 — 모든 프로젝트 순회
 # ─────────────────────────────────────────────────────────────
 def main():
+    if not YOUTUBE_API_KEY:
+        print("ERROR: YOUTUBE_API_KEY 환경변수가 설정되지 않았습니다.")
+        sys.exit(1)
+
     print("=" * 60)
     print("artic. YouTube Playlist Auto-Sync (Split Files)")
     print(f"대상 프로젝트: {len(PROJECTS)}개")

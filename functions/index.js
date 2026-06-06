@@ -9,6 +9,15 @@ const path = require("path");
 
 admin.initializeApp();
 const db = admin.firestore();
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || (process.env.FUNCTIONS_EMULATOR === "true" ? "articadmin2026" : "");
+const VALID_ORDER_STATUSES = new Set(["pending", "paid", "shipped", "delivered"]);
+const FULFILLMENT_STATUSES = new Set(["shipped", "delivered"]);
+
+function parsePositiveInteger(value, fallback = 1) {
+  const normalized = value === undefined || value === null || value === "" ? fallback : value;
+  const num = Number(normalized);
+  return Number.isInteger(num) && num > 0 ? num : null;
+}
 
 // Load templates helper
 function getTemplates() {
@@ -108,12 +117,16 @@ exports.checkout = onRequest((req, res) => {
 
     try {
       const { product_id, name, email, phone, address, quantity, depositor, notes } = req.body;
-      const qty = parseInt(quantity || "1", 10);
+      const qty = parsePositiveInteger(quantity, 1);
       const depName = depositor || name;
       const chkNotes = notes || "";
 
       if (!product_id || !name || !email || !phone || !address) {
         res.status(400).json({ error: "Missing required fields" });
+        return;
+      }
+      if (!qty) {
+        res.status(400).json({ error: "Quantity must be a positive integer" });
         return;
       }
 
@@ -591,6 +604,10 @@ exports.products = onRequest((req, res) => {
     try {
       const snapshot = await db.collection("products").get();
       if (snapshot.empty) {
+        if (process.env.FUNCTIONS_EMULATOR !== "true") {
+          res.status(200).json([]);
+          return;
+        }
         // Seed default products in firestore
         const p1 = { id: "1", name: "1MC1PD: The Interview", price: 15000, inventory: 10, status: "for-sale" };
         const p2 = { id: "2", name: "Lyric Booklet", price: 0, inventory: 0, status: "Distributed in Listening Party" };
@@ -613,7 +630,11 @@ exports.admin = onRequest((req, res) => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 
     const authHeader = req.headers.authorization;
-    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== "articadmin2026") {
+    if (!ADMIN_TOKEN) {
+      res.status(500).json({ error: "Admin token is not configured" });
+      return;
+    }
+    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== ADMIN_TOKEN) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
@@ -670,6 +691,10 @@ exports.admin = onRequest((req, res) => {
             res.status(400).json({ error: "Missing required fields (orderId, status)" });
             return;
           }
+          if (!VALID_ORDER_STATUSES.has(status)) {
+            res.status(400).json({ error: "Invalid order status" });
+            return;
+          }
 
           const orderRef = db.collection("orders").doc(orderId);
           await db.runTransaction(async (transaction) => {
@@ -679,21 +704,26 @@ exports.admin = onRequest((req, res) => {
             }
             const oData = orderDoc.data();
             const isDeducted = oData.inventory_deducted || false;
+            const qty = parsePositiveInteger(oData.quantity, 1);
+            if (!qty) {
+              throw new Error("Invalid order quantity");
+            }
 
             let updateData = {
               status: status,
               tracking_number: tracking_number || ""
             };
 
-            // Transition to shipped: deduct inventory if not already deducted
-            if (status === "shipped" && !isDeducted) {
+            const shouldDeductInventory = FULFILLMENT_STATUSES.has(status);
+
+            // Transition into fulfillment: deduct inventory once.
+            if (shouldDeductInventory && !isDeducted) {
               const productRef = db.collection("products").doc(oData.product_id);
               const productDoc = await transaction.get(productRef);
               if (!productDoc.exists) {
                 throw new Error("Product not found");
               }
               const pData = productDoc.data();
-              const qty = oData.quantity || 1;
 
               if (pData.inventory < qty) {
                 throw new Error(`Insufficient inventory for product: ${pData.name} (Available: ${pData.inventory}, Ordered: ${qty})`);
@@ -708,6 +738,25 @@ exports.admin = onRequest((req, res) => {
               });
 
               updateData.inventory_deducted = true;
+            }
+
+            // Transition out of fulfillment: restore inventory if it had already been deducted.
+            if (!shouldDeductInventory && isDeducted) {
+              const productRef = db.collection("products").doc(oData.product_id);
+              const productDoc = await transaction.get(productRef);
+              if (!productDoc.exists) {
+                throw new Error("Product not found");
+              }
+              const pData = productDoc.data();
+              const restoredInventory = (Number(pData.inventory) || 0) + qty;
+              const restoredStatus = pData.status === "out-of-stock" && restoredInventory > 0 ? "for-sale" : pData.status;
+
+              transaction.update(productRef, {
+                inventory: restoredInventory,
+                status: restoredStatus
+              });
+
+              updateData.inventory_deducted = false;
             }
 
             transaction.update(orderRef, updateData);
@@ -734,7 +783,38 @@ exports.admin = onRequest((req, res) => {
             res.status(400).json({ error: "Missing required field (id)" });
             return;
           }
-          await db.collection("orders").doc(id).delete();
+
+          const orderRef = db.collection("orders").doc(id);
+          await db.runTransaction(async (transaction) => {
+            const orderDoc = await transaction.get(orderRef);
+            if (!orderDoc.exists) {
+              throw new Error("Order not found");
+            }
+            const oData = orderDoc.data();
+            const qty = parsePositiveInteger(oData.quantity, 1);
+            if (!qty) {
+              throw new Error("Invalid order quantity");
+            }
+
+            if (oData.inventory_deducted) {
+              const productRef = db.collection("products").doc(oData.product_id);
+              const productDoc = await transaction.get(productRef);
+              if (!productDoc.exists) {
+                throw new Error("Product not found");
+              }
+              const pData = productDoc.data();
+              const restoredInventory = (Number(pData.inventory) || 0) + qty;
+              const restoredStatus = pData.status === "out-of-stock" && restoredInventory > 0 ? "for-sale" : pData.status;
+
+              transaction.update(productRef, {
+                inventory: restoredInventory,
+                status: restoredStatus
+              });
+            }
+
+            transaction.delete(orderRef);
+          });
+
           res.status(200).json({ success: true });
           return;
         }

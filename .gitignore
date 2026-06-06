@@ -9,5 +9,3 @@ scratch
 *.log
 
 node_modules/
-package-lock.json
-package.json

@@ -476,7 +476,13 @@ body {
           매 분기 발매된 앨범, 작품,<br>그리고 다양한 예술 소식을 전합니다.
         </p>
         
-        <div class="waitlist-container">
+        <!--
+  DATABASE SCHEMA MAPPING
+  Firebase Firestore collection: subscribers
+  Fields: name, email, type=quarterly, welcome_email_sent, created_at
+  API: /api/waitlist locally, waitlist Cloud Function in production
+-->
+<div class="waitlist-container">
   <!-- Button Wrapper -->
   <div id="waitlist-btn-wrapper" class="grid-collapse-wrapper active">
     <div class="grid-collapse-content">

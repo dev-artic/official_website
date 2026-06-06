@@ -48,7 +48,7 @@ REQUIRED_TEMPLATES.forEach(tempPath => {
   
   // Specific assertions
   if (tempPath === 'components/forms/waitlist-form-embedded.html') {
-    if (!content.includes('DATABASE SCHEMA MAPPING') || !content.includes('quarterly_subscribers') || !content.includes('Firebase Firestore')) {
+    if (!content.includes('DATABASE SCHEMA MAPPING') || !content.includes('subscribers') || !content.includes('Firebase Firestore')) {
       console.warn(`[WARN] templates/${tempPath} might be missing backend mapping info comments.`);
     }
   }

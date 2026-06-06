@@ -110,7 +110,7 @@ function handleSaveLyrics(req, res, bodyText) {
         // Run build_pages.js compilation
         try {
           const { execSync } = require('child_process');
-          execSync('agy-node scripts/build_pages.js', { cwd: __dirname });
+          execSync('node scripts/build_pages.js', { cwd: __dirname });
           console.log(`Successfully compiled pages after saving lyrics.`);
           sendJSON(res, 200, { success: true, message: 'Lyrics saved and project compiled successfully.' });
         } catch (buildErr) {

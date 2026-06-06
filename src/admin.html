@@ -495,7 +495,7 @@ path_depth: "../"
     });
 
     function checkAuth() {
-      if (adminToken === 'articadmin2026') {
+      if (adminToken) {
         authBox.style.display = 'none';
         dashboardBox.style.display = 'flex';
         loadDashboardData();
@@ -507,14 +507,14 @@ path_depth: "../"
 
     loginBtn.addEventListener('click', () => {
       const pass = passwordInput.value.trim();
-      if (pass === 'articadmin2026') {
-        adminToken = 'articadmin2026';
-        localStorage.setItem('artic-admin-token', adminToken);
-        authError.style.display = 'none';
-        checkAuth();
-      } else {
+      if (!pass) {
         authError.style.display = 'block';
+        return;
       }
+      adminToken = pass;
+      localStorage.setItem('artic-admin-token', adminToken);
+      authError.style.display = 'none';
+      checkAuth();
     });
 
     passwordInput.addEventListener('keydown', (e) => {
@@ -525,7 +525,10 @@ path_depth: "../"
 
     // Load Data
     function loadDashboardData() {
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname); const apiUrl = isLocal ? '/api/admin/data' : 'https://admin-4n2xy6gsxa-uc.a.run.app'; fetch(apiUrl, {
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const apiUrl = isLocal ? '/api/admin/data' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+
+      fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${adminToken}`
         }

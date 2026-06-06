@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "puppeteer": "^25.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  },
+  "scripts": {
+    "emulators": "firebase emulators:start --only functions,firestore",
+    "server": "node server.js",
+    "dev": "concurrently \"npm run emulators\" \"npm run server\"",
+    "build": "node scripts/build_pages.js"
+  }
+}

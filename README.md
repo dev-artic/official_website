@@ -137,7 +137,8 @@ graph TD
 * **정적 컴파일러 실행**:
   * 소스 작성이 완료되면 아래 명령어로 페이지 빌드를 가동합니다.
     ```bash
-    node scripts/build_pages.js
+    npm run build
+    # 또는: node scripts/build_pages.js
     ```
   * 이 스크립트는 `templates/`에 구성된 디자인 요소들을 `src/` 본문과 결합하여 최종 HTML을 빌드하고, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 통합하는 렌더링 최적화를 수행합니다.
 * **백엔드 API 로직 개발**:
@@ -148,26 +149,25 @@ graph TD
 ### 2️⃣ 로컬 스테이징 검증 단계 (Local Staging & Testing Phase)
 실서버 배포 전, 로컬 환경에서 정적 라우팅 및 데이터 적재, 이메일 발송 기능을 완벽히 사전 검증합니다.
 
-1. **로컬 스테이징 서버 구동**:
-   * 프론트엔드 서비스 및 로컬 Mock DB 가동을 위해 루트 경로에서 다음 명령을 실행합니다.
+1. **통합 로컬 개발 서버 구동**:
+   * 백엔드 에뮬레이터와 프론트엔드 정적 프록시 서버를 동시에 실행합니다 (Java JRE 설치 필요).
      ```bash
-     node server.js
+     npm run dev
      ```
-2. **Firebase 에뮬레이터 UI 실행**:
-   * Cloud Functions 백엔드 및 Firestore를 로컬에서 구동하기 위해 다음 명령을 실행합니다 (JRE 설치 필요).
-     ```bash
-     npx firebase-tools emulators:start
-     ```
-   * 브라우저가 `localhost` 도메인에 있을 경우, 클라이언트 스크립트는 실서비스 백엔드가 아닌 로컬 가상 Functions 서버(`http://127.0.0.1:5001`)로 자동 라우트됩니다.
-3. **SMTP 모의 이메일 및 데이터 체크**:
-   * 결제 폼 제출 시 Suite UI(`http://127.0.0.1:4000`) 대시보드에서 가상 적재 데이터와 이메일 발송 로그를 체크합니다.
-   * Firebase 에뮬레이터를 켜지 않고 가볍게 UI/정적 빌드 검증을 진행할 때는, `server.js`가 로컬 SQLite 파일인 `orders.db`에 주문 데이터를 대체 보관(Fallback)하여 에러를 방지합니다.
+   * 이 명령어는 `concurrently`를 통해 아래의 두 프로세스를 한 번에 가동합니다:
+     * **Firebase Emulator**: `localhost:5001` (Functions), `localhost:8080` (Firestore), `localhost:4000` (Emulator UI)
+     * **Node Proxy Server**: `localhost:8000` (정적 파일 서빙 및 API 프록시)
+2. **에뮬레이터 연동 확인**:
+   * 브라우저에서 `http://localhost:8000`에 접속하여 프론트엔드 기능을 이용하면, 모든 API 요청이 로컬 에뮬레이터 백엔드로 자동 라우팅(Proxy)되어 100% 동일한 비즈니스 로직으로 실행됩니다.
+3. **가상 적재 데이터 및 이메일 확인**:
+   * 폼 입력 제출 시 에뮬레이터 UI(`http://localhost:4000/firestore`)에서 실시간으로 저장된 가상 데이터를 조회할 수 있습니다.
+   * 가입/결제 완료 시 발송되는 이메일 HTML 파일은 루트 디렉토리의 `scratch/` 폴더에 `last-customer-waitlist.html` 등의 미리보기 파일로 자동 생성되므로 브라우저에서 디자인을 검토할 수 있습니다.
 
 ---
 
 ### 3️⃣ 배포 단계 (Deployment Phase)
 * **A. 프론트엔드 배포 (GitHub Pages)**:
-  * 로컬에서 컴파일러(`node scripts/build_pages.js`) 실행 후, 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.
+  * 로컬에서 컴파일러(`npm run build`) 실행 후, 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.
     ```bash
     git add .
     git commit -m "feat: compile static changes and update about sections"
@@ -175,13 +175,17 @@ graph TD
     ```
   * GitHub Actions가 감지 후 `CNAME`에 등록된 커스텀 도메인 `artic.live`를 타겟으로 정적 사이트를 배포합니다.
 * **B. 백엔드 Functions 배포**:
-  * 수정된 비즈니스 로직은 Firebase CLI로 프로덕션 인프라에 배포합니다:
+  * 에뮬레이터에서 완벽히 검증된 백엔드 비즈니스 로직을 Firebase CLI로 프로덕션 인프라에 업데이트합니다.
     ```bash
+    # 전체 함수 배포
     npx firebase-tools deploy --only functions
+    
+    # 또는 특정 함수만 빠르게 배포 (예: waitlist)
+    npx firebase-tools deploy --only functions:waitlist
     ```
 * **C. 유튜브 플레이리스트 갱신 자동화 (GitHub Actions Workflow)**:
   * 매주 월요일 오전 9시(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
-  * 워크플로우가 자동으로 `scripts/update_playlists.py`를 실행해 유튜브 API로 최신 비디오들을 가져와 `src/projects/[slug]/left.html` 및 `right.html` 소스를 갱신하고, 즉시 `node scripts/build_pages.js`를 기동하여 최종 HTML들을 다시 빌드한 뒤 원격지에 자동 커밋 및 푸시를 적용합니다.
+  * 워크플로우가 자동으로 `scripts/update_playlists.py`를 실행해 유튜브 API로 최신 비디오들을 가져와 `src/projects/[slug]/left.html` 및 `right.html` 소스를 갱신하고, 즉시 `npm run build`를 기동하여 최종 HTML들을 다시 빌드한 뒤 원격지에 자동 커밋 및 푸시를 적용합니다.
 
 ---
 

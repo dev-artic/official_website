@@ -52,7 +52,8 @@ Always run the following commands to build and verify your changes:
 ### Build Command
 Compile all source pages and templates into the final output:
 ```bash
-node scripts/build_pages.js
+npm run build
+# Or: node scripts/build_pages.js
 ```
 
 ### Validation Command
@@ -61,11 +62,16 @@ Verify the structural integrity and validation rules of all template files:
 node scripts/validate_templates.js
 ```
 
-### Local Staging Server
-Start the local HTTP Node server (serves the site on `http://localhost:8000` and proxies APIs to SQLite fallback db `orders.db`):
+### Local Development & Staging Server
+Start the local Firebase Emulator Suite (Functions & Firestore) alongside the Node proxy server:
 ```bash
-node server.js
+npm run dev
 ```
+- Serves the frontend static files and proxy API server on `http://localhost:8000`.
+- Starts the Firebase Emulator Suite on `http://localhost:4000` (Emulator UI), `5001` (Functions), and `8080` (Firestore).
+- Automatically proxies backend API requests (`/api/checkout`, `/api/waitlist`, `/api/products`, `/api/admin/*`) to the local emulator, ensuring 100% logic parity with production.
+- Generates HTML email previews in the `scratch/` directory when running locally.
+
 *Note: Run browser checks with **Hard Refresh (Cmd+Shift+R or Ctrl+F5)** to bypass cache.*
 
 ---

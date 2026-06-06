@@ -512,8 +512,8 @@ exports.products = onRequest((req, res) => {
       const snapshot = await db.collection("products").get();
       if (snapshot.empty) {
         // Seed default products in firestore
-        const p1 = { id: "1mc1pd", name: "1MC1PD: The Interview", price: 15000, inventory: 10, status: "for-sale" };
-        const p2 = { id: "lyric-booklet", name: "Lyric Booklet", price: 0, inventory: 0, status: "not-for-sale" };
+        const p1 = { id: "1", name: "1MC1PD: The Interview", price: 15000, inventory: 10, status: "for-sale" };
+        const p2 = { id: "2", name: "Lyric Booklet", price: 0, inventory: 0, status: "not-for-sale" };
         await db.collection("products").doc(p1.id).set(p1);
         await db.collection("products").doc(p2.id).set(p2);
         res.status(200).json([p1, p2]);
@@ -638,10 +638,24 @@ exports.admin = onRequest((req, res) => {
         }
 
         // Default: save/update product
-        const { id, name, price, inventory, status } = req.body;
-        if (!id || !name || price === undefined || inventory === undefined || !status) {
+        let { id, name, price, inventory, status } = req.body;
+        if (!name || price === undefined || inventory === undefined || !status) {
           res.status(400).json({ error: "Missing required fields" });
           return;
+        }
+
+        if (!id) {
+          // Auto-generate numeric ID
+          const productsSnap = await db.collection("products").get();
+          let maxIdVal = 0;
+          productsSnap.forEach(doc => {
+            const numId = parseInt(doc.id, 10);
+            if (!isNaN(numId) && numId > maxIdVal) {
+              maxIdVal = numId;
+            }
+          });
+          id = String(maxIdVal + 1);
+          console.log(`[AUTO-ID] Generated new product ID: ${id} for product: ${name}`);
         }
 
         const productData = {

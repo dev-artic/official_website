@@ -116,7 +116,7 @@
     // ── Print Modal Control ──
     (function() {
       const PRINT_DATA = {
-        '1mc1pd': {
+        '1': {
           title: "1MC1PD: The Interview",
           image: "1mc1pd.png",
           artists: "@arkyteccc<br>@poltergeisy_",
@@ -128,7 +128,7 @@
           credits: "Designed by @63.46.kr @gyu.dev",
           copyright: "ⓒ 2025 artic. All Rights Reserved."
         },
-        'lyric-booklet': {
+        '2': {
           title: "Lyric Booklet",
           image: "lyric-booklet.png",
           artists: "@arkyteccc",

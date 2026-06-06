@@ -56,6 +56,9 @@ async function sendEmail({ to, subject, body, html }) {
         user: smtpUser,
         pass: smtpPassword,
       },
+      connectionTimeout: 10000, // 10 seconds
+      greetingTimeout: 10000,   // 10 seconds
+      socketTimeout: 10000,     // 10 seconds
     });
 
     const mailOptions = {
@@ -318,14 +321,16 @@ exports.onOrderCreated = functions.firestore
     <td class="label">요청사항</td>
     <td class="value">${chkNotes || "(없음)"}</td>
   </tr>
+  <tr>
+    <td class="label">주문 ID</td>
+    <td class="value" style="font-family: monospace; font-size: 11px;">${docId}</td>
+  </tr>
 </table>`;
 
         adminHtml = adminTemplate
           .replace(/{{TITLE}}/g, "새로운 결제 요청 접수")
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
-          .replace("{{DATA_TABLE}}", adminDataTableHtml)
-          .replace("{{DB_COLLECTION}}", "orders")
-          .replace("{{DB_DOC_ID}}", docId);
+          .replace("{{DATA_TABLE}}", adminDataTableHtml);
       }
 
       await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });
@@ -433,8 +438,8 @@ exports.onSubscriberCreated = functions.firestore
         });
       }
 
-      const countSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").get();
-      const totalCount = countSnapshot.size;
+      const countSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").count().get();
+      const totalCount = countSnapshot.data().count;
 
       const customerSubject = "[artic.] quarterly artic. 대기명단 등록 완료";
       const customerBody = `You are now on the waitlist.
@@ -528,14 +533,16 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
     <td class="label">현재 총 등록 인원</td>
     <td class="value"><span class="bold">${totalCount}명</span></td>
   </tr>
+  <tr>
+    <td class="label">구독자 ID</td>
+    <td class="value" style="font-family: monospace; font-size: 11px;">${docId}</td>
+  </tr>
 </table>`;
 
         adminHtml = adminTemplate
           .replace(/{{TITLE}}/g, "새로운 Waitlist 가입 알림")
           .replace("{{BODY_CONTENT}}", adminBodyHtml)
-          .replace("{{DATA_TABLE}}", adminDataTableHtml)
-          .replace("{{DB_COLLECTION}}", "subscribers")
-          .replace("{{DB_DOC_ID}}", docId);
+          .replace("{{DATA_TABLE}}", adminDataTableHtml);
       }
 
       const emailSentCustomer = await sendEmail({ to: email, subject: customerSubject, body: customerBody, html: customerHtml });

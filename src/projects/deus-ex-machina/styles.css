@@ -1760,24 +1760,26 @@
           position: sticky;
           top: 0;
           z-index: 5;
-          height: 220px; /* Initial height */
+          height: 360px; /* Large initial height */
           width: 100%;
           flex: 0 0 auto;
-          padding: 40px;
+          padding: 60px; /* Comfortable initial padding */
           border-bottom: 1px solid var(--border-color);
           box-sizing: border-box;
+          transition: none !important; /* Disable all transitions during scroll tracking */
         }
 
         .print-modal-image-wrap.resetting {
-          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important, padding 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         .print-modal-image-wrap img {
-          max-height: 140px;
+          max-height: 240px; /* Large initial image size */
+          transition: none !important; /* Disable all transitions during scroll tracking */
         }
 
         .print-modal-image-wrap img.resetting {
-          transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         /* Keep layout paddings comfortable and uniform on mobile */
@@ -1788,6 +1790,16 @@
           max-width: 100% !important;
           flex: 0 0 auto !important;
           box-sizing: border-box;
+        }
+
+        .print-modal-slider-viewport,
+        .print-modal-slider-track,
+        .print-modal-slide {
+          height: auto !important;
+        }
+
+        .print-modal-slide.slide-details {
+          justify-content: flex-start !important;
         }
 
         .print-modal.is-checkout .print-modal-info,

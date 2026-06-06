@@ -204,23 +204,31 @@
         }, 300);
       }
 
+      let ticking = false;
       function handleModalScroll() {
-        if (window.innerWidth < 768) {
-          const container = modal.querySelector('.print-modal-container');
-          const imageWrap = modal.querySelector('.print-modal-image-wrap');
-          if (!container || !imageWrap) return;
-          const scrollTop = container.scrollTop;
-          const ratio = Math.min(scrollTop / 100, 1);
-          
-          const wrapHeight = 220 - 135 * ratio;
-          const imgMaxHeight = 140 - 80 * ratio;
-          const padding = 40 - 28 * ratio;
-          
-          imageWrap.style.height = `${wrapHeight}px`;
-          imageWrap.style.padding = `${padding}px 40px`;
-          modalImg.style.maxHeight = `${imgMaxHeight}px`;
-        } else {
-          resetMobileCollapsingHeader();
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            if (window.innerWidth < 768) {
+              const container = modal.querySelector('.print-modal-container');
+              const imageWrap = modal.querySelector('.print-modal-image-wrap');
+              if (container && imageWrap) {
+                const scrollTop = container.scrollTop;
+                const ratio = Math.min(scrollTop / 300, 1);
+                
+                const wrapHeight = 360 - 275 * ratio;     // 360px -> 85px
+                const imgMaxHeight = 240 - 180 * ratio;   // 240px -> 60px
+                const padding = 60 - 48 * ratio;          // 60px -> 12px
+                
+                imageWrap.style.height = `${wrapHeight}px`;
+                imageWrap.style.padding = `${padding}px 40px`;
+                modalImg.style.maxHeight = `${imgMaxHeight}px`;
+              }
+            } else {
+              resetMobileCollapsingHeader();
+            }
+            ticking = false;
+          });
+          ticking = true;
         }
       }
 

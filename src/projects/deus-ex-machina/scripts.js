@@ -226,12 +226,13 @@
 
         let checkoutHtml = '';
         if (data.statusClass === 'request-purchase') {
+          const itemPrice = Number(data.price) || 15000;
           checkoutHtml = `
             {{CHECKOUT_FORM}}
             <div class="checkout-summary-box">
               <div class="checkout-summary-row">
                 <span>상품 금액 (${data.title})</span>
-                <span id="chk-summary-price">${(data.price || 15000).toLocaleString()}원</span>
+                <span id="chk-summary-price">${itemPrice.toLocaleString()}원</span>
               </div>
               <div class="checkout-summary-row">
                 <span>배송비</span>
@@ -239,7 +240,7 @@
               </div>
               <div class="checkout-summary-row total">
                 <span>총 합계</span>
-                <span id="chk-summary-total">${((data.price || 15000) + 3000).toLocaleString()}원</span>
+                <span id="chk-summary-total">${(itemPrice + 3000).toLocaleString()}원</span>
               </div>
               <div style="margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 8px; font-size: 0.55rem; color: var(--text-muted);">
                 * 계좌이체로만 결제 가능합니다.

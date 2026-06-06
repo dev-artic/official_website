@@ -1506,6 +1506,12 @@
         scrollbar-width: none;
       }
 
+      @media (min-width: 768px) {
+        .print-modal-container {
+          height: 620px; /* Fixed height for slide transition stability on desktop */
+        }
+      }
+
       .print-modal-container::-webkit-scrollbar {
         display: none;
       }
@@ -1750,22 +1756,28 @@
           max-height: 12vh !important;
         }
         
-        /* Shrink info panel layout space to prevent overflow */
+        /* Shrink info panel layout space to prevent overflow, but add bottom padding for buttons */
         .print-modal.is-checkout .print-modal-info,
         .print-modal.is-success .print-modal-info {
-          padding: 24px 20px !important;
+          padding: 24px 20px 40px 20px !important; /* Added 40px bottom padding */
           gap: 16px !important;
         }
 
-        /* Set scroll container height limits to fit small screens */
+        /* Disable inner scroll container limits to allow natural full form display */
         .print-modal.is-checkout .checkout-scroll-container {
-          max-height: 30vh !important;
+          max-height: none !important;
+          overflow-y: visible !important;
+          padding-bottom: 8px;
         }
 
-        /* Lock outer container from scrolling when form or success is active */
+        /* Allow outer container to scroll naturally to prevent any cutoff */
+        .print-modal-container {
+          overflow-y: auto !important;
+          max-height: 92vh !important;
+        }
         .print-modal.is-checkout .print-modal-container,
         .print-modal.is-success .print-modal-container {
-          overflow: hidden !important;
+          overflow-y: auto !important;
         }
       }
 

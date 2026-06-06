@@ -189,17 +189,39 @@
         if (modalImg) {
           modalImg.classList.add('resetting');
         }
+        if (closeBtn) {
+          closeBtn.classList.add('resetting');
+        }
         
-        imageWrap.style.height = '';
-        imageWrap.style.padding = '';
-        if (modalImg) {
-          modalImg.style.maxHeight = '';
+        if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
+          imageWrap.style.height = '85px';
+          imageWrap.style.padding = '12px 40px';
+          imageWrap.style.transform = 'translateY(0)';
+          if (closeBtn) {
+            closeBtn.style.transform = 'translateY(0)';
+          }
+          if (modalImg) {
+            modalImg.style.maxHeight = '60px';
+          }
+        } else {
+          imageWrap.style.height = '';
+          imageWrap.style.padding = '';
+          imageWrap.style.transform = '';
+          if (closeBtn) {
+            closeBtn.style.transform = '';
+          }
+          if (modalImg) {
+            modalImg.style.maxHeight = '';
+          }
         }
         
         setTimeout(() => {
           imageWrap.classList.remove('resetting');
           if (modalImg) {
             modalImg.classList.remove('resetting');
+          }
+          if (closeBtn) {
+            closeBtn.classList.remove('resetting');
           }
         }, 300);
       }
@@ -213,15 +235,35 @@
               const imageWrap = modal.querySelector('.print-modal-image-wrap');
               if (container && imageWrap) {
                 const scrollTop = container.scrollTop;
-                const ratio = Math.min(scrollTop / 300, 1);
+                const maxScrollLimit = container.scrollHeight - container.clientHeight;
+                const cleanScrollTop = Math.min(Math.max(0, scrollTop), maxScrollLimit);
                 
-                const wrapHeight = 360 - 275 * ratio;     // 360px -> 85px
-                const imgMaxHeight = 240 - 180 * ratio;   // 240px -> 60px
-                const padding = 60 - 48 * ratio;          // 60px -> 12px
-                
-                imageWrap.style.height = `${wrapHeight}px`;
-                imageWrap.style.padding = `${padding}px 40px`;
-                modalImg.style.maxHeight = `${imgMaxHeight}px`;
+                if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
+                  imageWrap.style.height = '85px';
+                  imageWrap.style.padding = '12px 40px';
+                  imageWrap.style.transform = `translateY(${cleanScrollTop}px)`;
+                  if (closeBtn) {
+                    closeBtn.style.transform = `translateY(${cleanScrollTop}px)`;
+                  }
+                  if (modalImg) {
+                    modalImg.style.maxHeight = '60px';
+                  }
+                } else {
+                  const ratio = Math.min(cleanScrollTop / 315, 1);
+                  const wrapHeight = 400 - 315 * ratio;     // 400px -> 85px
+                  const imgMaxHeight = 280 - 220 * ratio;   // 280px -> 60px
+                  const padding = 60 - 48 * ratio;          // 60px -> 12px
+                  
+                  imageWrap.style.height = `${wrapHeight}px`;
+                  imageWrap.style.padding = `${padding}px 40px`;
+                  imageWrap.style.transform = `translateY(${cleanScrollTop}px)`;
+                  if (closeBtn) {
+                    closeBtn.style.transform = `translateY(${cleanScrollTop}px)`;
+                  }
+                  if (modalImg) {
+                    modalImg.style.maxHeight = `${imgMaxHeight}px`;
+                  }
+                }
               }
             } else {
               resetMobileCollapsingHeader();
@@ -275,7 +317,7 @@
               ${badgeHtml}
             </div>
           </div>
-          <div class="print-modal-info-footer" style="border-top: 1px solid var(--border-color); padding-top: 24px; font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5;">
+          <div class="print-modal-info-footer" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px; font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5;">
             <div>${data.credits}</div>
             <div style="margin-top: 4px;">${data.copyright}</div>
           </div>

@@ -1914,12 +1914,13 @@
           overflow-y: auto !important;
         }
 
-        /* Sticky collapsing image header */
+        /* Absolute collapsing image header */
         .print-modal-image-wrap {
-          position: sticky;
+          position: absolute;
           top: 0;
+          left: 0;
           z-index: 5;
-          height: 360px; /* Large initial height */
+          height: 400px; /* Large initial height */
           width: 100%;
           flex: 0 0 auto;
           padding: 60px; /* Comfortable initial padding */
@@ -1929,11 +1930,11 @@
         }
 
         .print-modal-image-wrap.resetting {
-          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important, padding 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important, padding 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
         .print-modal-image-wrap img {
-          max-height: 240px; /* Large initial image size */
+          max-height: 280px; /* Large initial image size */
           transition: none !important; /* Disable all transitions during scroll tracking */
         }
 
@@ -1941,8 +1942,18 @@
           transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
         }
 
+        .print-modal-close {
+          transition: none !important;
+          z-index: 10;
+        }
+
+        .print-modal-close.resetting {
+          transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
         /* Keep layout paddings comfortable and uniform on mobile */
         .print-modal-info {
+          margin-top: 400px !important; /* Push below the absolute header */
           padding: 24px 20px 40px 20px !important;
           gap: 24px !important;
           width: 100% !important;
@@ -1951,10 +1962,37 @@
           box-sizing: border-box;
         }
 
+        .print-modal-info-footer {
+          margin-top: 32px !important; /* Add gap below details grid */
+        }
+
+        /* Hide inactive slides on mobile to prevent height stretching and scroll issues */
+        .print-modal-slide {
+          display: none !important;
+        }
+        .print-modal:not(.is-checkout):not(.is-success) .print-modal-slide.slide-details {
+          display: flex !important;
+        }
+        .print-modal.is-checkout .print-modal-slide.slide-checkout {
+          display: flex !important;
+        }
+        .print-modal.is-success .print-modal-slide.slide-success {
+          display: flex !important;
+        }
+
+        .print-modal.is-checkout .print-modal-slider-track,
+        .print-modal.is-success .print-modal-slider-track {
+          transform: none !important;
+        }
+        .print-modal-slider-track {
+          width: 100% !important;
+        }
+
         .print-modal-slider-viewport,
         .print-modal-slider-track,
         .print-modal-slide {
           height: auto !important;
+          width: 100% !important;
         }
 
         .print-modal-slide.slide-details {
@@ -1963,6 +2001,7 @@
 
         .print-modal.is-checkout .print-modal-info,
         .print-modal.is-success .print-modal-info {
+          margin-top: 85px !important; /* Push below collapsed header during checkout/success since they start collapsed */
           padding: 24px 20px 40px 20px !important;
           gap: 24px !important;
         }
@@ -2735,17 +2774,39 @@
         if (modalImg) {
           modalImg.classList.add('resetting');
         }
+        if (closeBtn) {
+          closeBtn.classList.add('resetting');
+        }
         
-        imageWrap.style.height = '';
-        imageWrap.style.padding = '';
-        if (modalImg) {
-          modalImg.style.maxHeight = '';
+        if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
+          imageWrap.style.height = '85px';
+          imageWrap.style.padding = '12px 40px';
+          imageWrap.style.transform = 'translateY(0)';
+          if (closeBtn) {
+            closeBtn.style.transform = 'translateY(0)';
+          }
+          if (modalImg) {
+            modalImg.style.maxHeight = '60px';
+          }
+        } else {
+          imageWrap.style.height = '';
+          imageWrap.style.padding = '';
+          imageWrap.style.transform = '';
+          if (closeBtn) {
+            closeBtn.style.transform = '';
+          }
+          if (modalImg) {
+            modalImg.style.maxHeight = '';
+          }
         }
         
         setTimeout(() => {
           imageWrap.classList.remove('resetting');
           if (modalImg) {
             modalImg.classList.remove('resetting');
+          }
+          if (closeBtn) {
+            closeBtn.classList.remove('resetting');
           }
         }, 300);
       }
@@ -2759,15 +2820,35 @@
               const imageWrap = modal.querySelector('.print-modal-image-wrap');
               if (container && imageWrap) {
                 const scrollTop = container.scrollTop;
-                const ratio = Math.min(scrollTop / 300, 1);
+                const maxScrollLimit = container.scrollHeight - container.clientHeight;
+                const cleanScrollTop = Math.min(Math.max(0, scrollTop), maxScrollLimit);
                 
-                const wrapHeight = 360 - 275 * ratio;     // 360px -> 85px
-                const imgMaxHeight = 240 - 180 * ratio;   // 240px -> 60px
-                const padding = 60 - 48 * ratio;          // 60px -> 12px
-                
-                imageWrap.style.height = `${wrapHeight}px`;
-                imageWrap.style.padding = `${padding}px 40px`;
-                modalImg.style.maxHeight = `${imgMaxHeight}px`;
+                if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
+                  imageWrap.style.height = '85px';
+                  imageWrap.style.padding = '12px 40px';
+                  imageWrap.style.transform = `translateY(${cleanScrollTop}px)`;
+                  if (closeBtn) {
+                    closeBtn.style.transform = `translateY(${cleanScrollTop}px)`;
+                  }
+                  if (modalImg) {
+                    modalImg.style.maxHeight = '60px';
+                  }
+                } else {
+                  const ratio = Math.min(cleanScrollTop / 315, 1);
+                  const wrapHeight = 400 - 315 * ratio;     // 400px -> 85px
+                  const imgMaxHeight = 280 - 220 * ratio;   // 280px -> 60px
+                  const padding = 60 - 48 * ratio;          // 60px -> 12px
+                  
+                  imageWrap.style.height = `${wrapHeight}px`;
+                  imageWrap.style.padding = `${padding}px 40px`;
+                  imageWrap.style.transform = `translateY(${cleanScrollTop}px)`;
+                  if (closeBtn) {
+                    closeBtn.style.transform = `translateY(${cleanScrollTop}px)`;
+                  }
+                  if (modalImg) {
+                    modalImg.style.maxHeight = `${imgMaxHeight}px`;
+                  }
+                }
               }
             } else {
               resetMobileCollapsingHeader();
@@ -2821,7 +2902,7 @@
               ${badgeHtml}
             </div>
           </div>
-          <div class="print-modal-info-footer" style="border-top: 1px solid var(--border-color); padding-top: 24px; font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5;">
+          <div class="print-modal-info-footer" style="margin-top: 32px; border-top: 1px solid var(--border-color); padding-top: 24px; font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5;">
             <div>${data.credits}</div>
             <div style="margin-top: 4px;">${data.copyright}</div>
           </div>

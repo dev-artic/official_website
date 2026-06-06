@@ -66,38 +66,57 @@ async function run() {
       
       // Find the first album link under album search section
       albumLinkHref = await page.evaluate((albumTitle, artistName) => {
-        // Look for Album section headers or lists
-        const albumRows = document.querySelectorAll('table.list.albumList tbody tr, .albumList li');
-        if (albumRows.length === 0) {
-          // Fallback: try finding any link containing album url pattern
-          const allAlbumLinks = Array.from(document.querySelectorAll('a[href*="/album/"]'));
-          for (let a of allAlbumLinks) {
-            const text = a.textContent.toLowerCase();
-            if (text.includes(albumTitle.toLowerCase())) {
-              return a.href;
-            }
+        // Normalize strings by removing all whitespace and non-alphanumeric chars
+        const norm = (s) => s.toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+        const normTitle = norm(albumTitle);
+        const normArtist = norm(artistName);
+
+        // Scan all links containing "/album/"
+        const links = Array.from(document.querySelectorAll('a[href*="/album/"]'));
+        
+        // Strategy A: Find link where text matches the album title
+        for (let a of links) {
+          const text = a.textContent.trim();
+          const img = a.querySelector('img');
+          const altText = img ? img.getAttribute('alt') || '' : '';
+          
+          const normText = norm(text);
+          const normAlt = norm(altText);
+
+          if ((normText && normText.includes(normTitle)) || (normAlt && normAlt.includes(normTitle))) {
+            // Ensure this is not a duplicated link, returning absolute href
+            if (a.href) return a.href;
           }
-          return null;
         }
 
-        // Check rows for match
+        // Strategy B: Locate album table/list rows
+        const albumRows = document.querySelectorAll('table.list.albumList tbody tr, ul.listAlbum li, .albumList li');
         for (let row of albumRows) {
           const titleEl = row.querySelector('.albumTitle, a.title, .title');
           const artistEl = row.querySelector('.artist, a.artist, .artistName');
+          
           if (titleEl) {
-            const tText = titleEl.textContent.trim().toLowerCase();
-            const aText = artistEl ? artistEl.textContent.trim().toLowerCase() : '';
+            const tText = norm(titleEl.textContent);
+            const aText = artistEl ? norm(artistEl.textContent) : '';
             
-            if (tText.includes(albumTitle.toLowerCase()) || albumTitle.toLowerCase().includes(tText)) {
+            if (tText.includes(normTitle) || normTitle.includes(tText)) {
               const link = titleEl.tagName === 'A' ? titleEl : titleEl.querySelector('a');
-              if (link) return link.href;
+              if (link && link.href) return link.href;
             }
           }
         }
-        
-        // Secondary fallback: return the first album link found
-        const firstRowLink = document.querySelector('table.list.albumList tbody tr .albumTitle a, .albumList li a');
-        return firstRowLink ? firstRowLink.href : null;
+
+        // Strategy C: If we specifically searched for both artist + album, 
+        // the very first album-related link inside the content/list area is almost certainly it.
+        const firstAlbumLink = document.querySelector('section[data-comments="앨범"] a[href*="/album/"], .albumList a[href*="/album/"], table.list.albumList a[href*="/album/"]');
+        if (firstAlbumLink && firstAlbumLink.href) {
+          return firstAlbumLink.href;
+        }
+
+        // Ultimate fallback: return any first album link from content area (excluding navigation if possible)
+        const contentArea = document.getElementById('container') || document.body;
+        const fallbackLink = contentArea.querySelector('a[href*="/album/"]');
+        return fallbackLink ? fallbackLink.href : null;
       }, album, artist);
     }
 
@@ -159,11 +178,19 @@ async function run() {
       });
 
       if (lyricsText) {
-        // Clean lyrics into individual lines and map to initial sync objects {time: 0, text: line}
         const lines = lyricsText
           .split(/\r?\n/)
           .map(line => line.trim())
-          .filter(line => line.length > 0 && !line.startsWith('[') && !line.endsWith(']')); // Skip headers like [Chorus] if desired
+          .filter(line => {
+            const l = line.trim();
+            return (
+              l.length > 0 &&
+              !l.startsWith('[') && !l.endsWith(']') &&
+              !l.includes("Bugs 님이") &&
+              !l.includes("가사 오류") &&
+              !l.includes("등록해 주신 가사")
+            );
+          });
         
         const lyricObjects = lines.map(line => ({
           time: 0.0,

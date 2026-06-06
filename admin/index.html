@@ -434,7 +434,8 @@ body {
                 <option value="sold-out">Sold Out (완판)</option>
               </select>
             </div>
-            <div class="form-col-group" style="justify-content: flex-end;">
+            <div class="form-col-group" style="justify-content: flex-end; flex-direction: row; gap: 8px; align-items: flex-end;">
+              <button type="button" class="auth-btn" id="delete-prod-btn" style="padding: 10px; background-color: #e74c3c; display: none;">Delete Product</button>
               <button type="submit" class="auth-btn" style="padding: 10px;">Save Product</button>
             </div>
           </div>
@@ -624,6 +625,8 @@ body {
     }
 
     let editingProductId = '';
+    const deleteProdBtn = document.getElementById('delete-prod-btn');
+    const prodForm = document.getElementById('product-form');
 
     window.editProduct = function(id, name, price, inventory, status) {
       editingProductId = id;
@@ -631,6 +634,7 @@ body {
       document.getElementById('prod-price').value = price;
       document.getElementById('prod-inventory').value = inventory;
       document.getElementById('prod-status').value = status;
+      deleteProdBtn.style.display = 'block'; // Show delete button when editing
       document.getElementById('prod-name').scrollIntoView({ behavior: 'smooth' });
     };
 
@@ -647,8 +651,13 @@ body {
 
     const prodNameInput = document.getElementById('prod-name');
 
+    function resetProductForm() {
+      prodForm.reset();
+      editingProductId = '';
+      deleteProdBtn.style.display = 'none'; // Hide delete button
+    }
+
     // Product form submission
-    const prodForm = document.getElementById('product-form');
     prodForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = prodNameInput.value.trim();
@@ -675,8 +684,42 @@ body {
         return res.json();
       })
       .then(() => {
-        prodForm.reset();
-        editingProductId = ''; // Reset editing ID state
+        resetProductForm();
+        loadDashboardData();
+      })
+      .catch(err => {
+        alert(err.message);
+      });
+    });
+
+    // Delete Product handler
+    deleteProdBtn.addEventListener('click', () => {
+      if (!editingProductId) return;
+      if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
+
+      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({
+          action: 'delete_product',
+          id: editingProductId
+        })
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.error || 'Failed to delete product') });
+        }
+        return res.json();
+      })
+      .then(() => {
+        alert('Product deleted successfully.');
+        resetProductForm();
         loadDashboardData();
       })
       .catch(err => {

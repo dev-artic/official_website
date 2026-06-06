@@ -637,6 +637,17 @@ exports.admin = onRequest((req, res) => {
           return;
         }
 
+        if (action === "delete_product") {
+          const { id } = req.body;
+          if (!id) {
+            res.status(400).json({ error: "Missing required field (id)" });
+            return;
+          }
+          await db.collection("products").doc(id).delete();
+          res.status(200).json({ success: true });
+          return;
+        }
+
         // Default: save/update product
         let { id, name, price, inventory, status } = req.body;
         if (!name || price === undefined || inventory === undefined || !status) {

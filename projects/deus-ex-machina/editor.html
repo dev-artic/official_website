@@ -650,6 +650,13 @@
           }
         });
 
+        // Click row (any empty space) to focus input
+        row.addEventListener('click', (e) => {
+          if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+            input.focus();
+          }
+        });
+
         // Double click seek on row (ignoring input/button)
         row.addEventListener('dblclick', (e) => {
           if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {

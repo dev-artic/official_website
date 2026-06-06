@@ -2487,7 +2487,7 @@
               highlightActiveLyric(cur);
             }
           } catch(e) {}
-        }, 250);
+        }, 100);
       }
 
       function stopProgress() {

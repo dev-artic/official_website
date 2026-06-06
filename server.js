@@ -34,9 +34,42 @@ function handleGetLyrics(req, res) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(data);
     } else {
-      sendJSON(res, 404, { error: 'Lyrics database not found' });
+      console.log('Lyrics database file not found. Attempting to restore from src/projects/deus-ex-machina/scripts.js...');
+      const srcScriptsPath = path.join(__dirname, 'src', 'projects', 'deus-ex-machina', 'scripts.js');
+      if (fs.existsSync(srcScriptsPath)) {
+        const scriptsContent = fs.readFileSync(srcScriptsPath, 'utf8').replace(/\r\n/g, '\n');
+        // Match the LYRICS_DATA block
+        const match = scriptsContent.match(/const\s+LYRICS_DATA\s*=\s*(\{[\s\S]*?\});\s*(?:var|let|const)\s+currentIdx/);
+        if (match) {
+          const lyricsDataStr = match[1];
+          const vm = require('vm');
+          const sandbox = {};
+          vm.runInNewContext('lyrics = ' + lyricsDataStr, sandbox);
+          const lyricsData = sandbox.lyrics;
+
+          // Ensure parent directory exists (scratch/)
+          const scratchDir = path.dirname(dbPath);
+          if (!fs.existsSync(scratchDir)) {
+            fs.mkdirSync(scratchDir, { recursive: true });
+          }
+
+          // Save to database file to persist
+          fs.writeFileSync(dbPath, JSON.stringify(lyricsData, null, 2), 'utf8');
+          console.log('Successfully restored lyrics database from scripts.js and saved to scratch/synced_lyrics_estimate.json');
+          
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(lyricsData));
+        } else {
+          console.error('Failed to parse LYRICS_DATA from scripts.js (regex mismatch)');
+          sendJSON(res, 404, { error: 'Lyrics database not found and fallback parser failed' });
+        }
+      } else {
+        console.error('scripts.js not found, cannot fallback');
+        sendJSON(res, 404, { error: 'Lyrics database and source scripts.js not found' });
+      }
     }
   } catch (e) {
+    console.error('Error in handleGetLyrics:', e);
     sendJSON(res, 500, { error: e.message });
   }
 }

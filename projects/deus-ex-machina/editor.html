@@ -754,6 +754,11 @@
       }
     }
 
+    // Expose helpers globally for inline onclick handlers
+    window.nudgeTime = nudgeTime;
+    window.handleSplitClick = handleSplitClick;
+    window.deleteLine = deleteLine;
+
     // Sync trigger function
     function recordCurrentTimestamp() {
       if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
@@ -840,6 +845,18 @@
         return;
       }
 
+      // Up/Down Arrows: Nudge active focused line timing (works even inside inputs!)
+      if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        nudgeTime(activeFocusIdx, 0.1);
+        return;
+      }
+      if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        nudgeTime(activeFocusIdx, -0.1);
+        return;
+      }
+
       // All other shortcuts require focus to NOT be inside a text input
       if (inInput) return;
 
@@ -860,16 +877,6 @@
       if (e.code === 'Enter') {
         e.preventDefault();
         recordCurrentTimestamp();
-      }
-
-      // Up/Down Arrows: Nudge active focused line timing
-      if (e.code === 'ArrowUp') {
-        e.preventDefault();
-        nudgeTime(activeFocusIdx, 0.1);
-      }
-      if (e.code === 'ArrowDown') {
-        e.preventDefault();
-        nudgeTime(activeFocusIdx, -0.1);
       }
 
       // Ctrl + S: Save

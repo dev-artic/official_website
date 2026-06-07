@@ -81,8 +81,10 @@ Homepage/
 ├── js/                   # [클라이언트 스크립트]
 │   └── shared.js         # 다크모드 상태 관리, 모바일 햄버거 토글, 아코디언/카러셀 모션 등 공통 로직
 ├── functions/            # [백엔드 API] Node.js 22 기반 Firebase Cloud Functions 코드베이스
-│   ├── index.js                # checkout/waitlist/products/admin API 및 Firestore trigger
+│   ├── index.js                # checkout/waitlist/products/admin/quarterlyContents/quarterlyAdmin API 및 Firestore trigger
 │   ├── order_inventory.js      # 주문 배송 상태별 재고 차감/복구 판단 로직
+│   ├── quarterly_notion.js     # Notion `분기별 결산` data source adapter
+│   ├── quarterly_admin.js      # Quarterly admin 진단/수정 API 및 Firestore media override 병합
 │   └── templates/              # 결제/구독 메일 HTML 템플릿
 ├── projects.json         # 메인 프리뷰 렌더링용 단일 데이터 소스
 └── server.js             # [로컬 스테이징] 정적 파일 서버 및 Firebase Emulator API 프록시
@@ -142,8 +144,9 @@ graph TD
     ```
   * 이 스크립트는 `templates/`에 구성된 디자인 요소들을 `src/` 본문과 결합하여 최종 HTML을 빌드하고, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 통합하는 렌더링 최적화를 수행합니다.
 * **백엔드 API 로직 개발**:
-  * 대기명단 가입 및 결제 주문 처리는 **`functions/index.js`** 파일에서 Node.js 22 기반 Firebase Functions로 설계 및 작성됩니다.
+  * 대기명단 가입, 결제 주문, 상품 조회, Quarterly Notion 아카이브 조회는 **`functions/index.js`** 파일에서 Node.js 22 기반 Firebase Functions로 설계 및 작성됩니다.
   * 주문 상태별 재고 변경 규칙은 **`functions/order_inventory.js`** 에 분리되어 있으며, `npm run test:inventory`로 회귀 테스트합니다.
+  * Quarterly 아카이브는 **`functions/quarterly_notion.js`** 에서 Notion `분기별 결산` data source를 read-only로 조회하고, 공개 가능한 row만 7-tier webzine JSON으로 정규화합니다. Notion database view를 직접 호출하지 않고 data source query를 사용하므로, 웹 노출 조건은 Notion view 필터가 아니라 adapter의 publish gate가 기준입니다.
 
 ---
 
@@ -193,6 +196,7 @@ graph TD
     *   **특징**: 실제 사용자들의 가입 및 주문 정보가 적재되며, 결제 및 대기자 신청 완료 시 지정된 메일 발송 서버(SMTP)를 거쳐 메일 발신이 이루어집니다.
     *   **런타임**: Firebase Cloud Functions는 Node.js 22 런타임으로 배포됩니다.
     *   **Admin Secret**: 운영 admin bearer token은 Firebase Secret Manager의 `ADMIN_TOKEN`으로 관리합니다. 로컬 보관용 token은 `functions/.env.local`에 둘 수 있으며, 이 파일은 Git에 커밋하지 않습니다.
+    *   **Notion Secret**: Quarterly 아카이브 조회용 Notion integration token은 Firebase Secret Manager의 `NOTION_API_KEY`로 관리합니다. `분기별 결산` database는 해당 integration에 공유되어 있어야 하며, data source ID는 `NOTION_QUARTERLY_DATA_SOURCE_ID`로 override할 수 있습니다.
 *   **환경 변수 및 라우팅 자동화**:
     *   클라이언트 단의 공통 스크립트(`js/shared.js` 등)가 브라우저의 현재 호스트명(`window.location.hostname`)을 감지합니다.
     *   호스트가 `localhost` 또는 `127.0.0.1`일 때는 로컬 백엔드 주소(`http://localhost:8000/api`)로 통신하고, `artic.live` 도메인일 때는 실제 클라우드 백엔드 주소로 API 호출 경로가 자동 전환되므로 빌드 시 별도로 소스코드를 수정할 필요가 없습니다.
@@ -228,10 +232,17 @@ graph TD
     printf "%s" "$ADMIN_TOKEN" | npx firebase-tools functions:secrets:set ADMIN_TOKEN --project artic-official-home
     npx firebase-tools deploy --only functions:admin --project artic-official-home
     ```
+  * quarterlyContents/quarterlyAdmin 함수는 Secret Manager의 `NOTION_API_KEY`에 의존합니다. Notion integration token을 회전하거나 처음 연결할 때는 아래 순서로 반영합니다.
+    ```bash
+    # 값은 출력하지 않고 stdin으로 입력
+    printf "%s" "$NOTION_API_KEY" | npx firebase-tools functions:secrets:set NOTION_API_KEY --project artic-official-home
+    npx firebase-tools deploy --only functions:quarterlyContents,functions:quarterlyAdmin --project artic-official-home
+    ```
   * 배포 후 다음 smoke를 확인합니다.
     ```bash
     npx firebase-tools functions:list --project artic-official-home
     curl -sS https://products-4n2xy6gsxa-uc.a.run.app
+    curl -sS https://quarterlycontents-4n2xy6gsxa-uc.a.run.app
     ```
 * **C. 유튜브 플레이리스트 갱신 자동화 (GitHub Actions Workflow)**:
   * 매주 월요일 오전 9시(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
@@ -266,7 +277,40 @@ graph TD
   * **데이터 매핑**: 로컬 Firebase Emulator 또는 실서버 Cloud Functions `/checkout` API를 경유하여 Firestore `orders` 컬렉션에 적재됩니다.
   * **재고 규칙**: 주문 생성과 `paid` 상태에서는 재고를 유지하고, `shipped` 진입 시 차감, `delivered`에서는 유지, `paid/pending`으로 되돌릴 때 복구합니다.
 
-### 4. 프로젝트 특화 컴포넌트 (`templates/components/projects/`)
+### 4. Quarterly Webzine 컴포넌트 (`templates/components/quarterly/`)
+  * **`content-archive.html` [Notion-driven archive feed]**:
+  * **사용처**: `quarterly/` waitlist hero 아래 archive 섹션.
+  * **데이터 매핑**: 로컬에서는 `/api/quarterly-contents`가 `server.js` 안에서 `functions/quarterly_notion.js` adapter를 직접 호출하고, 운영에서는 `https://quarterlycontents-4n2xy6gsxa-uc.a.run.app`을 호출합니다.
+  * **로컬 live Notion 필수**: `functions/.env.local` 또는 `functions/.env`에 `NOTION_API_KEY`/`NOTION_TOKEN`이 없으면 로컬 `/api/quarterly-contents`는 실패합니다. snapshot fallback은 사용하지 않습니다. Notion에서 아티스트명/앨범명 오타를 고친 뒤 로컬에 즉시 반영되는지 확인하려면 응답 헤더 `X-artic-Data-Source: local-notion-live`를 확인합니다.
+  * **Notion 기준**: `분기별 결산` data source에서 `업로드 확정 = true`, `Publication Status = 완료`, `Source Format != Template Draft`인 row만 공개 archive로 변환합니다.
+  * **Notion query 방식**: 현재 웹/API는 특정 Notion view URL을 읽지 않고 `collection://7ae145b9-b8bb-4a0c-94c0-b804ab1c9357` data source를 직접 query합니다. 반환 JSON에는 `sourceName`, `sourceId`, `queryMode: data_source_direct`, `view: null`, `publishFilter`가 포함됩니다.
+  * **반영 속도**: 로컬과 운영 모두 stale data를 줄이기 위해 live Notion을 직접 조회합니다. 운영 `quarterlyContents` 응답은 `Cache-Control: no-store`로 반환합니다. Notion API 자체/브라우저 hard refresh 지연을 제외하면 새 요청마다 live Notion을 다시 조회합니다.
+  * **ACHA 파싱 규칙**: issue 본문에서 `TIER n - 라벨`, `티어 n`, 숫자+라벨, 라벨 단독 heading을 tier heading으로 인식하고, heading 아래 Notion table을 앨범 목록으로 정규화합니다. 빈 tier heading도 JSON에 유지되므로 상세 페이지에서 0개 앨범 tier가 누락되지 않습니다.
+  * **Featured article 연결**: companion/featured article은 issue 본문의 child page와 table `Companion Essay` 셀의 Notion page mention을 모두 수집합니다. table mention에는 album/artist/tier 힌트를 함께 저장해 article 제목이 앨범명과 다르더라도 올바른 앨범 카드에 매칭되도록 합니다. child article 본문이 Notion table 편집본이면 `문체 수정 버전` 컬럼을 공개 본문으로 읽습니다.
+  * **Media enrichment**: Notion `분기별 결산` 원문은 album/artist image URL을 필수 필드로 갖지 않습니다. 웹 API는 `functions/data/quarterly_media_cache.json`의 verified media cache를 명시적으로 적용하고, 응답의 `mediaEnrichment`에 source, updatedAt, 적용 개수를 남깁니다. Album cover는 `verified: true`인 cache record만 렌더링하며, Bugs 이미지 URL은 album/artist 모두 `/images/1000/` 고화질 경로로 정규화합니다. 운영에서는 Firestore `quarterly_media_overrides` 컬렉션의 admin 수정값을 static cache보다 우선 적용합니다.
+  * **Quarterly admin**: `/admin`의 Quarterly 탭은 `quarterlyAdmin` function을 호출해 live Notion 파싱 결과, tier/album/article diagnostics, cover health, Now artic. 분기 매칭 상태를 확인합니다. 수정은 admin bearer token 인증 후에만 가능하며, featured article 본문은 Notion child page에 paragraph blocks로 저장하고, album cover override는 Firestore `quarterly_media_overrides`에 저장합니다. Bugs 후보 검색은 preview만 반환하며, 사용자가 `Save Override`를 눌러야 Firestore에 기록됩니다. Notion 쓰기는 dashboard가 읽은 `last_edited_time`과 저장 직전 Notion page 상태를 비교해 중간 변경이 있으면 `409`로 거부하고, 빈 article 본문 저장은 기본 차단합니다. Cover resolution 기준은 출처가 아니라 픽셀 크기이며, URL path에서 `1000x1000`, `1200x1200`, Bugs `/images/1000/` 같은 요청 해상도를 읽어 최단 변이 `1000px` 미만일 때만 low-res로 분류합니다. Apple Music 등 외부 고해상도 이미지는 low-res가 아니라 review 대상으로 표시하고, 운영자가 Firestore `quarterly_media_review_overrides`에 resolved 상태를 마킹할 수 있습니다.
+  * **분기 정렬 기준**: Archive 노출 순서는 `Year + Quarter`를 1차 기준으로 최신순 정렬하고, 같은 분기 안에서만 `Published At`을 보조 기준으로 사용합니다.
+  * **렌더링 모델**: 첫 화면은 기존 waitlist 영역을 유지하고, 스크롤 아래에서 분기별 issue shelf를 최신순으로 렌더링합니다. 각 분기 shelf 안에는 ACHA와 Now artic. 모듈이 함께 배치됩니다.
+  * **확장 정보구조**: Gagosian Quarterly의 섹션형 hub 구조를 참고해 `Issues`, `Essays`, `Interviews`, `Videos`, `Studio Visits` 같은 section taxonomy를 수용할 수 있게 두었습니다. 현재 artic. 고유 구조의 중심은 7-tier album framework입니다.
+  * **ACHA naming**: 분기별 앨범 결산 콘텐츠는 웹에서는 `ACHA`(Album Critic Highlight Archive)로 표기합니다. Archive row는 `/quarterly/acha/?issue=<slug>` detail shell로 연결되며, 이 상세 페이지는 전체 티어/앨범 리스트, 한줄평, 추천곡, 에디터 노트, companion essay, Bugs 커버 출처를 함께 렌더링합니다.
+  * **커버 identity resolver**: live Notion 응답을 `scratch/quarterly_live_contents.json`로 저장한 뒤, Bugs/Apple Music provider album identity를 검증해 누락 cover만 보강합니다. 자동 검색이 불확실한 항목은 임의 fallback을 넣지 않고 cache에 실패 사유를 남깁니다. provider ID가 확인된 예외 표기는 `scripts/resolve_quarterly_album_art.js`의 manual ID map에 명시합니다.
+    ```bash
+    node scripts/crawl_bugs_album_art.js --archive=scratch/quarterly_live_contents.json --cache=scratch/bugs_album_art_cache.json --artistCache=scratch/bugs_artist_image_cache.json --missingOnly=true --artists=true
+    node scripts/resolve_quarterly_album_art.js --archive=scratch/quarterly_live_contents.json --cache=functions/data/quarterly_media_cache.json --missingOnly=true
+    ```
+    수집 후 `scratch/bugs_album_art_cache.json`과 `scratch/bugs_artist_image_cache.json`을 `functions/data/quarterly_media_cache.json` 형태로 병합하고, 배포 전에는 아래 검증 gate를 통과해야 합니다.
+    ```bash
+    node scripts/verify_quarterly_media_cache.js --archive=scratch/quarterly_live_contents.json --cache=functions/data/quarterly_media_cache.json --write=true
+    ```
+  * **Now artic. 수집**: `instagram.com/artic.live` 공개 reels 목록은 캡션을 노출하지 않으므로, `node scripts/crawl_instagram_now_artic.js`는 각 reel 상세 페이지의 meta description을 열어 `실시간`, `오늘자`, `어제자` 캡션 후보를 읽습니다. Instagram이 headless/public session에 로그인 게이트를 걸면 링크 수집 결과가 0개일 수 있으므로, 안정 운영 전에는 Notion 수동 입력 또는 로그인된 승인 세션 기반 수집을 병행 검토합니다.
+    ```bash
+    NOW_ARTIC_REEL_URLS="https://www.instagram.com/artic.live/reel/..." node scripts/crawl_instagram_now_artic.js
+    ```
+    ```bash
+    node scripts/crawl_instagram_now_artic.js
+    ```
+
+### 5. 프로젝트 특화 컴포넌트 (`templates/components/projects/`)
 * **`player.html`**: 중앙 오디오 플레이 위젯 및 프로그레스바 트랙.
 * **`lyric-and-tracklist.html`**: 드래그 잠금식 트랙리스트 및 실시간 싱크 가사 카러셀 뷰포트.
 * **`featured-video.html`**: 커스텀 비주얼 포스터와 재생용 중앙 버튼이 포함된 단일 추천 비디오 위젯.

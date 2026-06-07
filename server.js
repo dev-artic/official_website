@@ -4,6 +4,16 @@ const path = require('path');
 
 const PORT = 8000;
 const LYRICS_DB_FILE = path.join(__dirname, 'scratch', 'synced_lyrics_estimate.json');
+const QUARTERLY_MEDIA_CACHE_FILE = path.join(__dirname, 'functions', 'data', 'quarterly_media_cache.json');
+const QUARTERLY_EXTERNAL_LINKS_FILE = path.join(__dirname, 'functions', 'data', 'quarterly_external_links.json');
+const QUARTERLY_NOW_ARTIC_FILES = [
+  path.join(__dirname, 'functions', 'data', 'quarterly_now_artic.json'),
+  path.join(__dirname, 'scratch', 'now_artic_snapshot.json'),
+];
+const QUARTERLY_ENV_FILES = [
+  path.join(__dirname, 'functions', '.env.local'),
+  path.join(__dirname, 'functions', '.env'),
+];
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -71,6 +81,90 @@ function handleGetLyrics(req, res) {
   } catch (e) {
     console.error('Error in handleGetLyrics:', e);
     sendJSON(res, 500, { error: e.message });
+  }
+}
+
+function readLocalEnvValue(name) {
+  for (const envPath of QUARTERLY_ENV_FILES) {
+    try {
+      if (!fs.existsSync(envPath)) continue;
+      const content = fs.readFileSync(envPath, 'utf8');
+      const match = content.match(new RegExp(`^${name}=(.+)$`, 'm'));
+      if (match && match[1] && !match[1].includes('your_')) {
+        return match[1].trim().replace(/^["']|["']$/g, '');
+      }
+    } catch (err) {
+      console.warn(`Unable to read ${envPath}:`, err.message);
+    }
+  }
+  return '';
+}
+
+function readQuarterlyMediaCache() {
+  try {
+    if (!fs.existsSync(QUARTERLY_MEDIA_CACHE_FILE)) return null;
+    return JSON.parse(fs.readFileSync(QUARTERLY_MEDIA_CACHE_FILE, 'utf8'));
+  } catch (err) {
+    console.warn('Unable to read quarterly media cache:', err.message);
+    return null;
+  }
+}
+
+function readQuarterlyNowArtic() {
+  for (const filePath of QUARTERLY_NOW_ARTIC_FILES) {
+    try {
+      if (!fs.existsSync(filePath)) continue;
+      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch (err) {
+      console.warn(`Unable to read quarterly Now artic cache at ${filePath}:`, err.message);
+    }
+  }
+  return null;
+}
+
+function readQuarterlyExternalLinks() {
+  try {
+    if (!fs.existsSync(QUARTERLY_EXTERNAL_LINKS_FILE)) return null;
+    return JSON.parse(fs.readFileSync(QUARTERLY_EXTERNAL_LINKS_FILE, 'utf8'));
+  } catch (err) {
+    console.warn(`Unable to read quarterly external links at ${QUARTERLY_EXTERNAL_LINKS_FILE}:`, err.message);
+    return null;
+  }
+}
+
+async function handleGetQuarterlyContents(req, res) {
+  const token = readLocalEnvValue('NOTION_API_KEY') || readLocalEnvValue('NOTION_TOKEN');
+  const dataSourceId = readLocalEnvValue('NOTION_QUARTERLY_DATA_SOURCE_ID') || undefined;
+
+  if (!token) {
+    sendJSON(res, 500, {
+      error: 'NOTION_API_KEY is not configured for local live Notion fetch',
+      required: 'Add NOTION_API_KEY or NOTION_TOKEN to functions/.env.local. The local quarterly API does not use snapshot fallback.',
+    });
+    return;
+  }
+
+  try {
+    const { fetchQuarterlyContents } = require('./functions/quarterly_notion');
+    const data = await fetchQuarterlyContents({
+      token,
+      dataSourceId,
+      mediaCache: readQuarterlyMediaCache(),
+      nowArtic: readQuarterlyNowArtic(),
+      externalLinks: readQuarterlyExternalLinks(),
+    });
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'X-artic-Data-Source': 'local-notion-live',
+      'X-artic-Notion-Query-Mode': data.queryMode || 'data_source_direct',
+    });
+    res.end(JSON.stringify(data));
+  } catch (err) {
+    console.error('Failed to fetch live Notion quarterly contents:', err);
+    sendJSON(res, err.status || 500, {
+      error: 'Failed to fetch live Notion quarterly contents',
+      message: err.message,
+    });
   }
 }
 
@@ -171,6 +265,8 @@ async function proxyToEmulator(req, res, bodyText, emulatorPath) {
 
 const server = http.createServer((req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`);
+  const requestPath = requestUrl.pathname;
 
   // Handle API requests
   if (req.method === 'POST') {
@@ -179,14 +275,16 @@ const server = http.createServer((req, res) => {
       body += chunk.toString();
     });
     req.on('end', () => {
-      if (req.url === '/api/checkout') {
+      if (requestPath === '/api/checkout') {
         proxyToEmulator(req, res, body, 'checkout');
-      } else if (req.url === '/api/waitlist') {
+      } else if (requestPath === '/api/waitlist') {
         proxyToEmulator(req, res, body, 'waitlist');
-      } else if (req.url === '/api/save-lyrics') {
+      } else if (requestPath === '/api/save-lyrics') {
         handleSaveLyrics(req, res, body);
-      } else if (req.url.startsWith('/api/admin/products')) {
+      } else if (requestPath.startsWith('/api/admin/products')) {
         proxyToEmulator(req, res, body, 'admin');
+      } else if (requestPath.startsWith('/api/admin/quarterly')) {
+        proxyToEmulator(req, res, body, 'quarterlyAdmin');
       } else {
         res.writeHead(404);
         res.end();
@@ -202,20 +300,25 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.method === 'GET') {
-    if (req.url === '/api/get-lyrics') {
+    if (requestPath === '/api/get-lyrics') {
       handleGetLyrics(req, res);
       return;
-    } else if (req.url === '/api/products') {
+    } else if (requestPath === '/api/quarterly-contents') {
+      handleGetQuarterlyContents(req, res);
+      return;
+    } else if (requestPath === '/api/products') {
       proxyToEmulator(req, res, null, 'products');
       return;
-    } else if (req.url.startsWith('/api/admin/data')) {
+    } else if (requestPath.startsWith('/api/admin/data')) {
       proxyToEmulator(req, res, null, 'admin');
+      return;
+    } else if (requestPath.startsWith('/api/admin/quarterly')) {
+      proxyToEmulator(req, res, null, 'quarterlyAdmin');
       return;
     }
   }
 
   // Serve static files
-  const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`);
   let safeUrl = requestUrl.pathname;
   const directoryPath = path.join(__dirname, safeUrl);
 

@@ -19,14 +19,18 @@ window.addEventListener('pageshow', function(e) {
     waitlist: 'https://waitlist-4n2xy6gsxa-uc.a.run.app',
     checkout: 'https://checkout-4n2xy6gsxa-uc.a.run.app',
     products: 'https://products-4n2xy6gsxa-uc.a.run.app',
-    admin: 'https://admin-4n2xy6gsxa-uc.a.run.app'
+    quarterlyContents: 'https://quarterlycontents-4n2xy6gsxa-uc.a.run.app',
+    admin: 'https://admin-4n2xy6gsxa-uc.a.run.app',
+    quarterlyAdmin: 'https://quarterlyadmin-4n2xy6gsxa-uc.a.run.app'
   };
   const LOCAL_API = {
     waitlist: '/api/waitlist',
     checkout: '/api/checkout',
     products: '/api/products',
+    quarterlyContents: '/api/quarterly-contents',
     admin: '/api/admin/products',
-    adminData: '/api/admin/data'
+    adminData: '/api/admin/data',
+    quarterlyAdmin: '/api/admin/quarterly'
   };
 
   const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
@@ -72,6 +76,74 @@ window.addEventListener('pageshow', function(e) {
     console.warn('[artic. UAT] Production API mode is enabled on localhost. Real server data and emails may be affected.');
   }
 })();
+
+// ── Shared Bezier Scroll Motion ──
+function cubicBezierAt(t, p1, p2) {
+  const inv = 1 - t;
+  return 3 * inv * inv * t * p1 + 3 * inv * t * t * p2 + t * t * t;
+}
+
+function solveBezierProgress(progress, x1, y1, x2, y2) {
+  let lower = 0;
+  let upper = 1;
+  let t = progress;
+
+  for (let i = 0; i < 12; i++) {
+    const x = cubicBezierAt(t, x1, x2);
+    if (Math.abs(x - progress) < 0.001) break;
+    if (x < progress) lower = t;
+    else upper = t;
+    t = (lower + upper) / 2;
+  }
+
+  return cubicBezierAt(t, y1, y2);
+}
+
+function articSmoothScrollTo(targetY, options = {}) {
+  const startY = window.scrollY || window.pageYOffset || 0;
+  const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const endY = Math.max(0, Math.min(targetY, maxY));
+  const distance = endY - startY;
+  const duration = options.duration || Math.min(1100, Math.max(520, Math.abs(distance) * 0.72));
+  const start = performance.now();
+
+  if (Math.abs(distance) < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.scrollTo(0, endY);
+    return Promise.resolve();
+  }
+
+  return new Promise(resolve => {
+    function step(now) {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = solveBezierProgress(progress, 0.16, 1, 0.3, 1);
+      window.scrollTo(0, startY + distance * eased);
+      if (progress < 1) requestAnimationFrame(step);
+      else resolve();
+    }
+
+    requestAnimationFrame(step);
+  });
+}
+
+window.articSmoothScrollTo = articSmoothScrollTo;
+
+function initBezierAnchorScroll() {
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link || link.target || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    const url = new URL(link.href, window.location.href);
+    if (url.origin !== window.location.origin || url.pathname !== window.location.pathname || !url.hash) return;
+
+    const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+    if (!target) return;
+
+    event.preventDefault();
+    history.pushState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    const top = target.getBoundingClientRect().top + window.scrollY;
+    articSmoothScrollTo(top - 72);
+  });
+}
 
 // ── 0. Dynamic Navigation Bar ──
 function buildNavigationBar() {
@@ -256,7 +328,7 @@ function initMobileNav() {
 
 // ── 5. Sub-page Landing Transition Overlay ──
 function initSubpageTransition() {
-  const mainContent = document.querySelector('.about-content, .container, .contact-wrap, .page-container');
+  const mainContent = document.querySelector('.about-content, .container, .contact-wrap, .page-container, .acha-page');
   if (!mainContent) return;
 
   // Do NOT run on homepage
@@ -681,6 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initArticleMenu();
   initDynamicHeightTransitions();
   initWaitlistForm();
+  initBezierAnchorScroll();
 });
 
 // Apply theme before DOM ready

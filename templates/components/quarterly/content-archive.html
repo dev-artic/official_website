@@ -1,0 +1,1466 @@
+<!--
+  Notion database: 분기별 결산
+  Runtime target: /api/quarterly-contents via Firebase Functions or local live Notion fetch
+-->
+<section class="quarterly-archive is-loading" aria-labelledby="quarterly-archive-title" aria-busy="true">
+  <header class="quarterly-archive-head">
+    <p class="quarterly-kicker">Quarterly archive</p>
+    <h2 id="quarterly-archive-title">Issues by quarter.</h2>
+    <p class="quarterly-archive-note" id="quarterly-archive-note">Seasonal issues, articles, and live notes</p>
+  </header>
+
+  <div class="quarterly-current" id="quarterly-current" aria-label="Current quarterly issue">
+    <div class="quarterly-loading-panel" aria-hidden="true">
+      <p class="quarterly-kicker">Loading</p>
+      <div>
+        <h3>Quarterly archive.</h3>
+        <p>Preparing seasonal issues, articles, and live notes.</p>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+  <div class="quarterly-feed" id="quarterly-feed" aria-label="Past quarterly issues"></div>
+  <div class="quarterly-feed-sentinel" id="quarterly-feed-sentinel" aria-live="polite">Loading Quarterly archive.</div>
+</section>
+
+<div class="quarterly-now-modal" id="quarterly-now-modal" aria-hidden="true" role="dialog" aria-label="Now artic. detail">
+  <div class="quarterly-now-modal-backdrop" data-now-modal-close></div>
+  <div class="quarterly-now-modal-panel">
+    <button class="quarterly-now-modal-close" type="button" data-now-modal-close aria-label="Close Now artic. detail">&times;</button>
+    <div class="quarterly-now-modal-content" id="quarterly-now-modal-content"></div>
+  </div>
+</div>
+
+<script>
+(function initQuarterlyArchiveFeed() {
+  const currentEl = document.getElementById('quarterly-current');
+  const feedEl = document.getElementById('quarterly-feed');
+  const sentinelEl = document.getElementById('quarterly-feed-sentinel');
+  const noteEl = document.getElementById('quarterly-archive-note');
+  const nowModalEl = document.getElementById('quarterly-now-modal');
+  const nowModalContentEl = document.getElementById('quarterly-now-modal-content');
+  if (!currentEl || !feedEl || !sentinelEl) return;
+  const archiveEl = sentinelEl.closest('.quarterly-archive');
+
+  let quarterGroups = [];
+  let renderedGroupCount = 0;
+  let nowModalItems = [];
+  const batchSize = 3;
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function formatDate(value) {
+    if (!value) return 'Unscheduled';
+    const date = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
+  }
+
+  function getQuarterPeriod(issue) {
+    const parsed = parseQuarter(issue);
+    if (!parsed.year || !parsed.quarter) return '';
+    const ranges = {
+      1: ['JAN 1', 'MAR 31'],
+      2: ['APR 1', 'JUN 30'],
+      3: ['JUL 1', 'SEP 30'],
+      4: ['OCT 1', 'DEC 31']
+    };
+    const range = ranges[parsed.quarter];
+    return range ? `Albums Released in ${range[0]} - ${range[1]}` : '';
+  }
+
+  function getAchaCopy() {
+    return [
+      "ACHA: A's Choice & Home Archive",
+      '4곡 이상 수록된 국내 EP 및 정규 앨범을 기준에 따라 일곱 단계로 분류하고 그중 상위를 소개합니다.',
+      '동일 tier 내 앨범 순서는 발매일 기준입니다.'
+    ].join('\n');
+  }
+
+  function getDisplayImageUrl(url) {
+    return String(url || '').replace(/\/album\/images\/\d+\//, '/album/images/1000/');
+  }
+
+  function getEssayHref(issue, essay) {
+    return `./acha/?issue=${encodeURIComponent(issue.slug || issue.id)}&essay=${encodeURIComponent(essay.id || essay.title || '')}#essay-${encodeURIComponent(essay.id || essay.title || '')}`;
+  }
+
+  function excerptFromText(value, limit) {
+    const text = String(value || '').replace(/\s+/g, ' ').trim();
+    if (!text) return '';
+    return text.length > limit ? `${text.slice(0, limit).trim()}...` : text;
+  }
+
+  function parseQuarter(issue) {
+    const issueText = String(issue.issue || issue.title || '').trim();
+    const fromIssue = issueText.match(/(20\d{2})\s*(?:Q([1-4])|([1-4])Q)/i);
+    if (fromIssue) {
+      return { year: Number(fromIssue[1]), quarter: Number(fromIssue[2] || fromIssue[3]) };
+    }
+
+    const date = new Date(`${issue.date || ''}T00:00:00`);
+    if (!Number.isNaN(date.getTime())) {
+      return {
+        year: date.getFullYear(),
+        quarter: Math.floor(date.getMonth() / 3) + 1
+      };
+    }
+
+    return { year: 0, quarter: 0 };
+  }
+
+  function quarterKeyFromIssue(issue) {
+    const parsed = parseQuarter(issue);
+    return `${parsed.year} Q${parsed.quarter}`;
+  }
+
+  function quarterSortValue(group) {
+    return (group.year * 10) + group.quarter;
+  }
+
+  function sortIssues(a, b) {
+    const qa = parseQuarter(a);
+    const qb = parseQuarter(b);
+    const byQuarter = ((qb.year * 10) + qb.quarter) - ((qa.year * 10) + qa.quarter);
+    if (byQuarter !== 0) return byQuarter;
+    return new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
+  }
+
+  function parseQuarterFromNowItem(item) {
+    const explicitYear = Number(item.year || 0);
+    const explicitQuarter = String(item.quarter || '').match(/[1-4]/);
+    if (explicitYear && explicitQuarter) {
+      return { year: explicitYear, quarter: Number(explicitQuarter[0]) };
+    }
+
+    const date = new Date(`${item.date || ''}T00:00:00`);
+    if (!Number.isNaN(date.getTime())) {
+      return {
+        year: date.getFullYear(),
+        quarter: Math.floor(date.getMonth() / 3) + 1
+      };
+    }
+
+    const text = `${item.issue || ''} ${item.issueSlug || ''}`.trim();
+    const match = text.match(/(20\d{2})\s*(?:Q([1-4])|([1-4])Q)/i);
+    if (match) {
+      return { year: Number(match[1]), quarter: Number(match[2] || match[3]) };
+    }
+
+    return { year: 0, quarter: 0 };
+  }
+
+  function nowBelongsToQuarter(item, group) {
+    const date = new Date(`${item.date || ''}T00:00:00`);
+    if (!Number.isNaN(date.getTime())) {
+      return date.getFullYear() === group.year && Math.floor(date.getMonth() / 3) + 1 === group.quarter;
+    }
+
+    const text = `${item.issue || ''} ${item.quarter || ''} ${item.issueSlug || ''} ${item.date || ''}`.toLowerCase();
+    if (!text.trim()) return false;
+    return text.includes(`${group.year}`) && (text.includes(`q${group.quarter}`) || text.includes(`${group.quarter}q`));
+  }
+
+  function groupByQuarter(issues, nowItems) {
+    const groups = new Map();
+
+    function ensureGroup(parsed) {
+      const label = `${parsed.year} Q${parsed.quarter}`;
+      if (!groups.has(label)) {
+        groups.set(label, {
+          id: label.toLowerCase().replace(/\s+/g, '-'),
+          label,
+          year: parsed.year,
+          quarter: parsed.quarter,
+          acha: null,
+          nowArtic: []
+        });
+      }
+      return groups.get(label);
+    }
+
+    issues.slice().sort(sortIssues).forEach((issue) => {
+      const parsed = parseQuarter(issue);
+      const group = ensureGroup(parsed);
+      if (!group.acha) group.acha = issue;
+    });
+
+    (nowItems || []).forEach((item) => {
+      const parsed = parseQuarterFromNowItem(item);
+      if (parsed.year && parsed.quarter) ensureGroup(parsed);
+    });
+
+    const output = Array.from(groups.values()).sort((a, b) => quarterSortValue(b) - quarterSortValue(a));
+    (nowItems || []).forEach((item) => {
+      const target = output.find((group) => nowBelongsToQuarter(item, group));
+      if (target) target.nowArtic.push(item);
+    });
+    return output;
+  }
+
+  function flattenTopAlbums(issue) {
+    return (issue?.tiers || [])
+      .filter((tier) => Number(tier.rank) <= 3)
+      .flatMap((tier) => (tier.items || []).map((item) => ({
+        ...item,
+        tierRank: tier.rank,
+        tierLabel: tier.label
+      })))
+      .filter((item) => item.album)
+      .slice(0, 6);
+  }
+
+  function getCoverAlbums(issue, count) {
+    const topAlbums = flattenTopAlbums(issue);
+    const withImages = topAlbums.filter((item) => item.imageUrl);
+    return (withImages.length ? withImages : topAlbums).slice(0, count);
+  }
+
+  function renderCoverStack(issue, count) {
+    const covers = getCoverAlbums(issue, count);
+    if (!covers.length) {
+      return `<div class="quarterly-cover-stack is-empty"><span>${escapeHtml(issue?.issue || 'ACHA')}</span></div>`;
+    }
+
+    return `
+      <div class="quarterly-cover-stack">
+        ${covers.map((item) => item.imageUrl ? `
+          <img src="${escapeHtml(getDisplayImageUrl(item.imageUrl))}" alt="${escapeHtml(`${item.album} album cover`)}" loading="lazy">
+        ` : `
+          <div class="quarterly-cover-fallback"><span>${escapeHtml(item.album)}</span></div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderAlbumPreview(issue, limit) {
+    const albums = flattenTopAlbums(issue).slice(0, limit);
+    if (!albums.length) return '';
+
+    return `
+      <ol class="quarterly-album-preview">
+        ${albums.map((item) => `
+          <li>
+            <span>${escapeHtml(item.tierLabel || '')}</span>
+            <div>
+              <strong>${escapeHtml(item.album)}</strong>
+              <em>${[item.artist, item.genre, item.releaseDate].filter(Boolean).map(escapeHtml).join(' · ')}</em>
+              ${item.comment ? `<p>${escapeHtml(item.comment)}</p>` : ''}
+            </div>
+          </li>
+        `).join('')}
+      </ol>
+    `;
+  }
+
+  function flattenAlbums(issue) {
+    return (issue?.tiers || []).flatMap((tier) => (tier.items || []).map((item) => ({
+      ...item,
+      tierRank: tier.rank,
+      tierLabel: tier.label
+    }))).filter((item) => item.album);
+  }
+
+  function normalizeMatchText(value) {
+    return String(value || '').replace(/[\s\-_()[\]]+/g, '').toLowerCase();
+  }
+
+  function findEssayAlbum(issue, essay) {
+    const albums = flattenAlbums(issue);
+    const essayAlbum = normalizeMatchText(essay.album);
+    const essayArtist = normalizeMatchText(essay.artist);
+    if (essayAlbum || essayArtist) {
+      const directMatch = albums.find((item) => {
+        const albumMatches = !essayAlbum || normalizeMatchText(item.album) === essayAlbum;
+        const artistMatches = !essayArtist || normalizeMatchText(item.artist) === essayArtist;
+        return albumMatches && artistMatches;
+      });
+      if (directMatch) return directMatch;
+    }
+
+    const title = normalizeMatchText(essay.title);
+    return albums.find((item) => {
+      const hasEssay = hasValue(item.companionEssay);
+      const tierMatches = !essay.tierRank || Number(item.tierRank) === Number(essay.tierRank);
+      const titleMatches = title.includes(normalizeMatchText(item.album)) || title.includes(normalizeMatchText(item.artist));
+      return hasEssay && tierMatches && titleMatches;
+    }) || albums.find((item) => hasValue(item.companionEssay) && (!essay.tierRank || Number(item.tierRank) === Number(essay.tierRank)));
+  }
+
+  function getEssayDisplayTitle(issue, essay) {
+    const album = findEssayAlbum(issue, essay);
+    if (album?.artist && album?.album) return `${album.artist} — ${album.album}`;
+    const match = String(essay.title || '').match(/\(([^)]+)\)\s*\[([^\]]+)\]/);
+    if (match) return `${match[1]} — ${match[2]}`;
+    return essay.title || 'Featured article';
+  }
+
+  function getEssayVisual(issue, essay) {
+    const album = findEssayAlbum(issue, essay);
+    return {
+      url: essay.artistImageUrl || album?.artistImageUrl || album?.imageUrl || '',
+      alt: album?.artist ? `${album.artist} artist image` : getEssayDisplayTitle(issue, essay),
+      caption: album?.artist || 'Featured article'
+    };
+  }
+
+  function renderFeaturedArticles(issue) {
+    if (!issue || !(issue.essays || []).length) return '';
+    return `
+      <div class="quarterly-featured-articles">
+        <p class="quarterly-module-label">Featured article</p>
+        <div class="quarterly-featured-list">
+          ${issue.essays.slice(0, 2).map((essay) => {
+            const visual = getEssayVisual(issue, essay);
+            return `
+              <article>
+                ${visual.url ? `
+                  <figure class="quarterly-featured-visual">
+                    <img src="${escapeHtml(getDisplayImageUrl(visual.url))}" alt="${escapeHtml(visual.alt)}" loading="lazy">
+                    <figcaption>${escapeHtml(visual.caption)}</figcaption>
+                  </figure>
+                ` : ''}
+                <div class="quarterly-featured-copy">
+                  <span>${escapeHtml(essay.tierLabel || 'Essay')}</span>
+                  <h5>${escapeHtml(getEssayDisplayTitle(issue, essay))}</h5>
+                  ${excerptFromText(essay.excerpt || essay.content, 260) ? `<p>${escapeHtml(excerptFromText(essay.excerpt || essay.content, 260))}</p>` : ''}
+                  <a class="quarterly-text-link" href="${escapeHtml(getEssayHref(issue, essay))}">
+                    <span>Continue reading</span>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                  </a>
+                </div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAchaModule(issue, variant) {
+    if (!issue) return '';
+
+    const href = `./acha/?issue=${encodeURIComponent(issue.slug || issue.id)}`;
+    const coverCount = 4;
+    const previewLimit = 5;
+
+    return `
+      <article class="quarterly-module quarterly-module-acha ${variant === 'current' ? 'is-current' : ''}">
+        <div class="quarterly-module-visual" aria-hidden="true">
+          ${renderCoverStack(issue, coverCount)}
+        </div>
+        <div class="quarterly-module-body">
+          <p class="quarterly-module-label">ACHA</p>
+          <h4><a href="${escapeHtml(href)}">${escapeHtml(issue.title)}</a></h4>
+          <p class="quarterly-module-meta">${escapeHtml([issue.issue, getQuarterPeriod(issue)].filter(Boolean).join(' · '))}</p>
+          <p class="quarterly-module-copy">${escapeHtml(getAchaCopy())}</p>
+          ${renderAlbumPreview(issue, previewLimit)}
+        </div>
+      </article>
+    `;
+  }
+
+  function getNowCaption(item) {
+    const label = String(item.label || '').trim();
+    const caption = String(item.caption || '').trim();
+    if (!label) return caption;
+    return caption.replace(new RegExp(`^${label}\\s*`), '').trim() || caption;
+  }
+
+  function getNowDisplayCaption(item) {
+    return getNowCaption(item).split(/\bVenue\b/i)[0].trim();
+  }
+
+  function hasValue(value) {
+    const normalized = String(value || '').trim();
+    return normalized && !['없음', 'none', 'n/a', '-'].includes(normalized.toLowerCase());
+  }
+
+  function getNowCreditParts(item) {
+    const caption = getNowCaption(item);
+    const venueMatch = caption.match(/\bVenue\s+(.+?)(?=\s+Thanks|\s*$)/i);
+    return [
+      ['Date', item.date ? formatDate(item.date) : ''],
+      ['Event', item.eventTitle || item.event || item.label],
+      ['Venue', item.venue || (venueMatch ? venueMatch[1] : '')]
+    ].filter(([, value]) => hasValue(value));
+  }
+
+  function renderNowMedia(item) {
+    if (item.videoUrl) {
+      return `<video src="${escapeHtml(item.videoUrl)}" poster="${escapeHtml(item.imageUrl || '')}" controls playsinline></video>`;
+    }
+    if (item.embedUrl) {
+      return `<iframe src="${escapeHtml(item.embedUrl)}" title="${escapeHtml(getNowCaption(item) || 'Now artic. media')}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+    }
+    if (item.imageUrl) {
+      return `<img src="${escapeHtml(item.imageUrl)}" alt="" loading="lazy"><span class="quarterly-now-play" aria-hidden="true"></span>`;
+    }
+    return '<i class="quarterly-now-thumb" aria-hidden="true"></i>';
+  }
+
+  function openNowModal(index) {
+    if (!nowModalEl || !nowModalContentEl) return;
+    const item = nowModalItems[index];
+    if (!item) return;
+    const caption = getNowDisplayCaption(item);
+    const eventTitle = item.title || item.eventTitle || item.event || 'This quarter in motion.';
+    nowModalContentEl.innerHTML = `
+      <div class="quarterly-now-modal-media">
+        ${renderNowMedia(item)}
+      </div>
+      <aside class="quarterly-now-modal-copy">
+        <p class="quarterly-module-label">Now artic.</p>
+        <h3>${escapeHtml(eventTitle)}</h3>
+        ${caption ? `<p>${escapeHtml(caption)}</p>` : ''}
+        <dl>
+          ${getNowCreditParts(item).map(([label, value]) => `
+            <div>
+              <dt>${escapeHtml(label)}</dt>
+              <dd>${escapeHtml(value)}</dd>
+            </div>
+          `).join('')}
+        </dl>
+      </aside>
+    `;
+    nowModalEl.classList.add('is-open');
+    nowModalEl.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('quarterly-now-modal-open');
+  }
+
+  function closeNowModal() {
+    if (!nowModalEl || !nowModalContentEl) return;
+    nowModalEl.classList.remove('is-open');
+    nowModalEl.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('quarterly-now-modal-open');
+  }
+
+  function renderNowModule(group, variant) {
+    const items = group.nowArtic || [];
+    if (!items.length) return '';
+    return `
+      <article class="quarterly-module quarterly-module-now ${variant === 'current' ? 'is-current' : ''}">
+        <div class="quarterly-module-body">
+          <p class="quarterly-module-label">Now artic.</p>
+          <h4>This quarter in motion.</h4>
+          <div class="quarterly-now-list">
+            ${items.slice(0, 4).map((item) => {
+              const modalIndex = nowModalItems.push(item) - 1;
+              return `
+              <button class="quarterly-now-trigger" type="button" data-now-index="${modalIndex}">
+                ${item.imageUrl ? `<img src="${escapeHtml(item.imageUrl)}" alt="" loading="lazy">` : '<i class="quarterly-now-thumb" aria-hidden="true"></i>'}
+                <span>
+                  <strong>${escapeHtml(getNowDisplayCaption(item))}</strong>
+                  <em>View note</em>
+                </span>
+              </button>
+            `}).join('')}
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderQuarterGroup(group, variant) {
+    const headline = variant === 'current' ? 'Current quarter' : 'Archive quarter';
+    const hasAcha = Boolean(group.acha);
+    const hasNow = (group.nowArtic || []).length > 0;
+    const description = hasAcha
+      ? getQuarterPeriod(group.acha)
+      : 'New scenes and moments from this quarter.';
+    return `
+      <section class="quarterly-quarter ${variant === 'current' ? 'is-current' : ''} ${!hasAcha && hasNow ? 'is-now-only' : ''}" aria-labelledby="${escapeHtml(group.id)}-title">
+        <header class="quarterly-quarter-head">
+          <p class="quarterly-kicker">${headline}</p>
+          <h3 id="${escapeHtml(group.id)}-title">${escapeHtml(group.label)}</h3>
+          <p>${description}</p>
+        </header>
+        <div class="quarterly-quarter-modules">
+          ${renderAchaModule(group.acha, variant)}
+          ${renderNowModule(group, variant)}
+        </div>
+        ${renderFeaturedArticles(group.acha)}
+      </section>
+    `;
+  }
+
+  function renderArchiveCta() {
+    return `
+      <section class="quarterly-archive-cta" aria-label="Join the Quarterly waitlist">
+        <div>
+          <p class="quarterly-kicker">Quarterly dispatch</p>
+        </div>
+        <div class="quarterly-archive-cta-copy">
+          <p class="quarterly-archive-cta-en">
+            Curated albums, artworks, and diverse artistic insights,<br>delivered every quarter.
+          </p>
+          <p class="quarterly-archive-cta-ko">
+            매 분기 발매된 앨범, 작품,<br>그리고 다양한 예술 소식을 전합니다.
+          </p>
+          <a class="about-action quarterly-archive-cta-action" href="#quarterly-waitlist">Join the Waitlist</a>
+        </div>
+      </section>
+    `;
+  }
+
+  function completeArchiveFeed() {
+    sentinelEl.innerHTML = renderArchiveCta();
+    sentinelEl.classList.add('is-complete');
+  }
+
+  function renderNextBatch() {
+    const archiveGroups = quarterGroups.slice(1);
+    if (renderedGroupCount >= archiveGroups.length) {
+      completeArchiveFeed();
+      return;
+    }
+
+    const nextGroups = archiveGroups.slice(renderedGroupCount, renderedGroupCount + batchSize);
+    feedEl.insertAdjacentHTML('beforeend', nextGroups.map((group) => renderQuarterGroup(group, 'archive')).join(''));
+    renderedGroupCount += nextGroups.length;
+    initQuarterlyScrollReveal(feedEl);
+
+    if (renderedGroupCount >= archiveGroups.length) {
+      completeArchiveFeed();
+    }
+  }
+
+  function startInfiniteScroll() {
+    nowModalItems = [];
+    if (quarterGroups[0]) {
+      currentEl.innerHTML = renderQuarterGroup(quarterGroups[0], 'current');
+    }
+
+    renderNextBatch();
+    initQuarterlyScrollReveal(document);
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          renderNextBatch();
+        }
+      }, { rootMargin: '640px 0px' });
+      observer.observe(sentinelEl);
+    } else {
+      while (renderedGroupCount < quarterGroups.slice(1).length) renderNextBatch();
+    }
+  }
+
+  function settleArchiveLoading() {
+    if (!archiveEl) return;
+    archiveEl.classList.remove('is-loading');
+    archiveEl.removeAttribute('aria-busy');
+  }
+
+  function initQuarterlyScrollReveal(root) {
+    const targets = Array.from((root || document).querySelectorAll('.quarterly-archive-head, .quarterly-quarter'));
+    if (!targets.length) return;
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach((target) => target.classList.add('is-visible'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries, self) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        self.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+    targets.forEach((target) => {
+      if (target.classList.contains('is-visible')) return;
+      observer.observe(target);
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('.quarterly-now-trigger');
+    if (trigger) {
+      openNowModal(Number(trigger.dataset.nowIndex));
+      return;
+    }
+    if (event.target.closest('[data-now-modal-close]')) {
+      closeNowModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeNowModal();
+  });
+
+  async function loadArchive() {
+    try {
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('quarterlyContents') : '/api/quarterly-contents';
+      const response = await fetch(apiUrl, { cache: 'no-cache' });
+      if (!response.ok) throw new Error(`Archive API returned ${response.status}`);
+      const data = await response.json();
+      const issues = Array.isArray(data.issues) ? data.issues : [];
+      quarterGroups = groupByQuarter(issues, data.nowArtic || []);
+
+      if (noteEl && data.updatedAt) {
+        noteEl.textContent = 'Seasonal issues, articles, and live notes';
+      }
+
+      if (!quarterGroups.length) {
+        sentinelEl.textContent = '';
+        sentinelEl.classList.add('is-complete');
+        settleArchiveLoading();
+        return;
+      }
+
+      sentinelEl.textContent = '';
+      startInfiniteScroll();
+      settleArchiveLoading();
+    } catch (err) {
+      console.error('Failed to load Quarterly archive.', err);
+      sentinelEl.innerHTML = '<span>Quarterly archive will return shortly.</span>';
+      sentinelEl.classList.add('is-error');
+      settleArchiveLoading();
+    }
+  }
+
+  loadArchive();
+})();
+</script>
+
+<style>
+  .quarterly-archive {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-xl) var(--gutter) var(--space-xxl);
+    min-height: calc(100dvh + clamp(220px, 30vh, 420px));
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-archive.is-loading .quarterly-feed-sentinel {
+    min-height: clamp(420px, 62vh, 760px);
+  }
+
+  .quarterly-archive-head,
+  .quarterly-quarter {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.85s var(--ease-out-expo), transform 0.85s var(--ease-out-expo);
+    will-change: opacity, transform;
+  }
+
+  .quarterly-archive-head.is-visible,
+  .quarterly-quarter.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .quarterly-archive * {
+    min-width: 0;
+  }
+
+  .quarterly-archive-head {
+    display: grid;
+    grid-template-columns: minmax(160px, 0.22fr) minmax(0, 0.5fr) minmax(220px, 0.28fr);
+    gap: clamp(20px, 4vw, 56px);
+    align-items: end;
+    margin-bottom: clamp(52px, 8vw, 108px);
+  }
+
+  .quarterly-kicker,
+  .quarterly-archive-note,
+  .quarterly-feed-sentinel,
+  .quarterly-module-label,
+  .quarterly-album-preview span,
+  .quarterly-featured-articles span {
+    font-family: var(--font-sans);
+    font-size: 0.58rem;
+    line-height: 1.45;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .quarterly-archive-head h2 {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 5vw, 4.8rem);
+    line-height: 0.96;
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .quarterly-current,
+  .quarterly-feed {
+    display: grid;
+    gap: 0;
+  }
+
+  .quarterly-loading-panel {
+    display: grid;
+    grid-template-columns: minmax(180px, 22%) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 80px);
+    min-height: clamp(360px, 48vh, 620px);
+    padding: clamp(40px, 7vw, 96px) 0;
+    border-top: 1px solid var(--border-color);
+    align-items: start;
+  }
+
+  .quarterly-loading-panel > div {
+    display: grid;
+    gap: 18px;
+    max-width: 58ch;
+  }
+
+  .quarterly-loading-panel h3 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.65rem, 3.6vw, 3.25rem);
+    line-height: 0.98;
+    color: var(--text-primary);
+  }
+
+  .quarterly-loading-panel p:last-of-type {
+    max-width: 42ch;
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+  }
+
+  .quarterly-loading-panel span {
+    display: block;
+    width: min(100%, 520px);
+    height: 1px;
+    background: var(--border-color);
+    transform: scaleX(0.18);
+    transform-origin: left center;
+    animation: quarterlyLoadingLine 1.8s var(--ease-out-expo) infinite;
+  }
+
+  .quarterly-loading-panel span:nth-of-type(2) {
+    width: min(76%, 400px);
+    animation-delay: 0.12s;
+  }
+
+  .quarterly-loading-panel span:nth-of-type(3) {
+    width: min(52%, 300px);
+    animation-delay: 0.24s;
+  }
+
+  @keyframes quarterlyLoadingLine {
+    0% {
+      opacity: 0.22;
+      transform: scaleX(0.18);
+    }
+    45% {
+      opacity: 0.72;
+      transform: scaleX(1);
+    }
+    100% {
+      opacity: 0.22;
+      transform: scaleX(0.18);
+    }
+  }
+
+  .quarterly-quarter {
+    display: grid;
+    grid-template-columns: minmax(180px, 22%) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 80px);
+    padding: clamp(40px, 7vw, 96px) 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-current .quarterly-quarter {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .quarterly-quarter-head {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+
+  .quarterly-quarter-head h3 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.65rem, 3.6vw, 3.25rem);
+    line-height: 0.98;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .quarterly-quarter-head p:last-child {
+    max-width: 28ch;
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+  }
+
+  .quarterly-quarter-modules {
+    display: grid;
+    gap: clamp(36px, 5vw, 72px);
+    align-items: start;
+  }
+
+  .quarterly-module {
+    display: grid;
+    gap: clamp(22px, 3vw, 42px);
+    align-items: start;
+  }
+
+  .quarterly-module-acha {
+    grid-template-columns: minmax(260px, 0.46fr) minmax(0, 0.54fr);
+    gap: clamp(28px, 5vw, 72px);
+  }
+
+  .quarterly-module-now {
+    padding-top: clamp(24px, 4vw, 48px);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-module-body {
+    display: grid;
+    gap: var(--space-md);
+    align-content: start;
+  }
+
+  .quarterly-module h4 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.35rem, 2.6vw, 2.35rem);
+    line-height: 1.08;
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .quarterly-module-copy {
+    max-width: 62ch;
+    font-family: var(--font-sans);
+    font-size: 0.84rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    white-space: pre-line;
+  }
+
+  .quarterly-module-meta {
+    font-family: var(--font-sans);
+    font-size: 0.66rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+
+  .quarterly-module-visual {
+    display: block;
+  }
+
+  .quarterly-cover-stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(8px, 1.7vw, 18px);
+  }
+
+  .quarterly-module-acha .quarterly-cover-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quarterly-cover-stack img,
+  .quarterly-cover-fallback {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--bg-secondary);
+  }
+
+  .quarterly-cover-stack img {
+    transition: transform 220ms ease, box-shadow 220ms ease;
+    transform-origin: center;
+  }
+
+  .quarterly-cover-stack img:hover {
+    position: relative;
+    z-index: 2;
+    transform: scale(1.045);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+  }
+
+  .quarterly-cover-fallback,
+  .quarterly-cover-stack.is-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    padding: 16px;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .quarterly-album-preview {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .quarterly-album-preview li {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-album-preview strong {
+    font-family: var(--font-sans);
+    font-size: 0.76rem;
+    line-height: 1.6;
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .quarterly-album-preview em {
+    display: block;
+    margin-top: 2px;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    line-height: 1.55;
+    font-style: normal;
+    color: var(--text-secondary);
+  }
+
+  .quarterly-album-preview p {
+    margin-top: 7px;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    line-height: 1.72;
+    color: var(--text-secondary);
+  }
+
+  .quarterly-now-list {
+    display: grid;
+    gap: 14px;
+    margin-top: var(--space-sm);
+  }
+
+  .quarterly-featured-articles {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(180px, 0.22fr) minmax(0, 0.78fr);
+    gap: clamp(28px, 5vw, 80px);
+    margin-top: clamp(14px, 2.6vw, 38px);
+    padding-top: clamp(30px, 5vw, 64px);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-featured-list {
+    display: grid;
+    gap: clamp(26px, 4vw, 52px);
+  }
+
+  .quarterly-featured-list article {
+    display: grid;
+    grid-template-columns: minmax(180px, 28%) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 68px);
+    align-items: center;
+    min-height: clamp(260px, 28vw, 420px);
+  }
+
+  .quarterly-featured-visual {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .quarterly-featured-visual img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    background: var(--bg-secondary);
+  }
+
+  .quarterly-featured-visual figcaption {
+    font-family: var(--font-sans);
+    font-size: 0.58rem;
+    line-height: 1.45;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .quarterly-featured-copy {
+    display: grid;
+    gap: clamp(12px, 1.8vw, 20px);
+    max-width: 76ch;
+    padding-left: clamp(20px, 3vw, 44px);
+    border-left: 1px solid var(--border-color);
+  }
+
+  .quarterly-featured-copy h5 {
+    max-width: 18ch;
+  }
+
+  .quarterly-featured-copy p {
+    max-width: 68ch;
+  }
+
+  .quarterly-now-trigger {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.18fr) minmax(0, 0.82fr);
+    gap: 10px;
+    align-items: start;
+    padding-top: 14px;
+    background: transparent;
+    border-top: 1px solid var(--border-color);
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-sans);
+  }
+
+  .quarterly-featured-articles h5 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.15rem, 2vw, 1.8rem);
+    line-height: 1.12;
+    color: var(--text-primary);
+  }
+
+  .quarterly-featured-articles p {
+    max-width: 64ch;
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+  }
+
+  .quarterly-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    position: relative;
+    padding-bottom: 2px;
+    transition: color 0.3s ease;
+  }
+
+  .quarterly-text-link span {
+    transition: color 0.3s ease;
+  }
+
+  .quarterly-text-link::after {
+    content: '';
+    position: absolute;
+    width: calc(100% - 20px);
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--text-primary);
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .quarterly-text-link:hover {
+    color: var(--text-primary);
+  }
+
+  .quarterly-featured-articles .quarterly-text-link:hover span {
+    color: var(--text-primary);
+  }
+
+  .quarterly-text-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+  }
+
+  .quarterly-text-link svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .quarterly-text-link:hover svg {
+    transform: translateX(4px);
+  }
+
+  .quarterly-now-list img,
+  .quarterly-now-thumb {
+    width: 100%;
+    max-width: 220px;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--bg-secondary);
+  }
+
+  .quarterly-now-trigger > span {
+    display: grid;
+    gap: 9px;
+  }
+
+  .quarterly-now-list strong {
+    display: -webkit-box;
+    max-width: 62ch;
+    overflow: hidden;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    font-size: 0.76rem;
+    line-height: 1.7;
+    font-weight: 400;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  .quarterly-now-trigger em {
+    width: fit-content;
+    font-style: normal;
+    font-size: 0.58rem;
+    line-height: 1.4;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 3px;
+    transition: color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .quarterly-now-trigger:hover em {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+  }
+
+  .quarterly-now-modal-open {
+    overflow: hidden;
+  }
+
+  .quarterly-now-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.42s var(--ease-out-expo), visibility 0s linear 0.42s;
+  }
+
+  .quarterly-now-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+
+  .quarterly-now-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    opacity: 0;
+    transition: opacity 0.42s var(--ease-out-expo);
+  }
+
+  .quarterly-now-modal.is-open .quarterly-now-modal-backdrop {
+    opacity: 1;
+  }
+
+  .quarterly-now-modal-panel {
+    position: relative;
+    z-index: 2;
+    width: min(1120px, calc(100vw - 48px));
+    max-height: calc(100dvh - 48px);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+    transition: opacity 0.52s var(--ease-out-expo), transform 0.52s var(--ease-out-expo);
+  }
+
+  .quarterly-now-modal.is-open .quarterly-now-modal-panel {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .quarterly-now-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 3;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  .quarterly-now-modal-content {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.56fr) minmax(280px, 0.44fr);
+    min-height: min(720px, calc(100dvh - 48px));
+  }
+
+  .quarterly-now-modal-media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    min-height: 520px;
+  }
+
+  .quarterly-now-modal-media img,
+  .quarterly-now-modal-media video,
+  .quarterly-now-modal-media iframe {
+    width: 100%;
+    height: 100%;
+    max-height: calc(100dvh - 48px);
+    object-fit: contain;
+    border: 0;
+  }
+
+  .quarterly-now-play {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    background: rgba(0, 0, 0, 0.28);
+  }
+
+  .quarterly-now-play::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 52%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-left: 14px solid #fff;
+  }
+
+  .quarterly-now-modal-copy {
+    display: grid;
+    align-content: start;
+    gap: var(--space-md);
+    padding: clamp(36px, 5vw, 72px);
+    overflow-y: auto;
+  }
+
+  .quarterly-now-modal-copy h3 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.35rem, 2.5vw, 2.2rem);
+    line-height: 1.08;
+    color: var(--text-primary);
+  }
+
+  .quarterly-now-modal-copy p {
+    font-family: var(--font-sans);
+    font-size: 0.84rem;
+    line-height: 1.85;
+    color: var(--text-secondary);
+  }
+
+  .quarterly-now-modal-copy dl {
+    display: grid;
+    gap: 12px;
+    margin-top: var(--space-sm);
+  }
+
+  .quarterly-now-modal-copy dl div {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 16px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-now-modal-copy dt,
+  .quarterly-now-modal-copy dd {
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    line-height: 1.65;
+  }
+
+  .quarterly-now-modal-copy dt {
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .quarterly-now-modal-copy dd {
+    color: var(--text-secondary);
+  }
+
+  .quarterly-feed-sentinel {
+    display: flex;
+    min-height: 96px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .quarterly-feed-sentinel.is-complete {
+    display: block;
+    min-height: 0;
+    text-align: left;
+  }
+
+  .quarterly-archive-cta {
+    display: grid;
+    grid-template-columns: minmax(180px, 22%) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 80px);
+    padding: clamp(44px, 7vw, 96px) 0 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-archive-cta-copy {
+    display: grid;
+    gap: var(--space-md);
+    max-width: 64ch;
+  }
+
+  .quarterly-archive-cta-en {
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+  }
+
+  .quarterly-archive-cta-ko {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+  }
+
+  .quarterly-archive-cta-action {
+    width: fit-content;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 1100px) {
+    .quarterly-archive-head,
+    .quarterly-quarter,
+    .quarterly-loading-panel,
+    .quarterly-module-acha,
+    .quarterly-archive-cta {
+      grid-template-columns: 1fr;
+    }
+
+  }
+
+  @media (max-width: 767px) {
+    .quarterly-archive {
+      padding-top: var(--space-lg);
+      padding-bottom: var(--space-xl);
+    }
+
+    .quarterly-archive-head {
+      gap: var(--space-sm);
+      margin-bottom: var(--space-xl);
+    }
+
+    .quarterly-quarter {
+      padding: var(--space-xl) 0;
+    }
+
+    .quarterly-now-trigger {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .quarterly-featured-articles article {
+      grid-template-columns: 1fr;
+    }
+
+    .quarterly-featured-articles {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+
+    .quarterly-featured-list article {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    .quarterly-featured-visual {
+      max-width: 180px;
+    }
+
+    .quarterly-featured-copy {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .quarterly-now-list img,
+    .quarterly-now-thumb {
+      width: 100%;
+      max-width: 160px;
+    }
+
+    .quarterly-now-modal {
+      padding: 16px;
+    }
+
+    .quarterly-now-modal-panel {
+      width: calc(100vw - 32px);
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
+    }
+
+    .quarterly-now-modal-content {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    .quarterly-now-modal-media {
+      min-height: 0;
+      aspect-ratio: 1;
+    }
+
+    .quarterly-now-modal-media img,
+    .quarterly-now-modal-media video,
+    .quarterly-now-modal-media iframe {
+      max-height: none;
+    }
+
+    .quarterly-now-modal-copy {
+      padding: 28px 22px 34px;
+      overflow: visible;
+    }
+
+    .quarterly-now-modal-copy dl div {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>

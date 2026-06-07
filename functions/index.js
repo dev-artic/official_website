@@ -11,10 +11,55 @@ const {
   VALID_ORDER_STATUSES,
   getInventoryTransition,
 } = require("./order_inventory");
+const {
+  fetchQuarterlyContents,
+  getDataSourceId,
+  getNotionToken,
+} = require("./quarterly_notion");
+const {
+  buildMediaCacheWithOverrides,
+  getQuarterlyAdminPayload,
+  handleQuarterlyAdminAction,
+  readQuarterlyMediaOverrides,
+} = require("./quarterly_admin");
 
 admin.initializeApp();
 const db = admin.firestore();
 const ADMIN_TOKEN_SECRET = defineSecret("ADMIN_TOKEN");
+const NOTION_API_KEY_SECRET = defineSecret("NOTION_API_KEY");
+const QUARTERLY_MEDIA_CACHE_FILE = path.join(__dirname, "data", "quarterly_media_cache.json");
+const QUARTERLY_NOW_ARTIC_FILE = path.join(__dirname, "data", "quarterly_now_artic.json");
+const QUARTERLY_EXTERNAL_LINKS_FILE = path.join(__dirname, "data", "quarterly_external_links.json");
+
+function readQuarterlyMediaCache() {
+  try {
+    if (!fs.existsSync(QUARTERLY_MEDIA_CACHE_FILE)) return null;
+    return JSON.parse(fs.readFileSync(QUARTERLY_MEDIA_CACHE_FILE, "utf8"));
+  } catch (err) {
+    console.warn("Unable to read quarterly media cache:", err.message);
+    return null;
+  }
+}
+
+function readQuarterlyNowArtic() {
+  try {
+    if (!fs.existsSync(QUARTERLY_NOW_ARTIC_FILE)) return null;
+    return JSON.parse(fs.readFileSync(QUARTERLY_NOW_ARTIC_FILE, "utf8"));
+  } catch (err) {
+    console.warn("Unable to read quarterly Now artic cache:", err.message);
+    return null;
+  }
+}
+
+function readQuarterlyExternalLinks() {
+  try {
+    if (!fs.existsSync(QUARTERLY_EXTERNAL_LINKS_FILE)) return null;
+    return JSON.parse(fs.readFileSync(QUARTERLY_EXTERNAL_LINKS_FILE, "utf8"));
+  } catch (err) {
+    console.warn("Unable to read quarterly external links:", err.message);
+    return null;
+  }
+}
 
 function getAdminToken() {
   let secretValue = "";
@@ -670,6 +715,110 @@ Firestore 컬렉션 subscribers에 적재되었습니다.`;
       console.error(`Error in onSubscriberCreated trigger for subscriber ${docId}:`, err);
     }
   });
+
+exports.quarterlyContents = onRequest({ secrets: [NOTION_API_KEY_SECRET] }, (req, res) => {
+  cors(req, res, async () => {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
+    if (req.method !== "GET") {
+      res.status(405).json({ error: "Method not allowed" });
+      return;
+    }
+
+    try {
+      let notionSecret = "";
+      try {
+        notionSecret = NOTION_API_KEY_SECRET.value();
+      } catch (err) {
+        notionSecret = "";
+      }
+
+      const mediaOverrides = await readQuarterlyMediaOverrides(db);
+      const data = await fetchQuarterlyContents({
+        token: getNotionToken(notionSecret),
+        dataSourceId: getDataSourceId(),
+        mediaCache: buildMediaCacheWithOverrides(readQuarterlyMediaCache(), mediaOverrides),
+        nowArtic: readQuarterlyNowArtic(),
+        externalLinks: readQuarterlyExternalLinks(),
+      });
+      res.set("X-artic-Data-Source", "notion-live");
+      res.set("X-artic-Notion-Query-Mode", data.queryMode || "data_source_direct");
+      res.status(200).json(data);
+    } catch (err) {
+      console.error("Failed to fetch quarterly contents from Notion:", err);
+      res.status(err.status || 500).json({
+        error: "Failed to fetch quarterly contents",
+        message: process.env.FUNCTIONS_EMULATOR === "true" ? err.message : undefined,
+      });
+    }
+  });
+});
+
+exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KEY_SECRET] }, (req, res) => {
+  cors(req, res, async () => {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+
+    const authHeader = req.headers.authorization;
+    const adminToken = getAdminToken();
+    if (!adminToken) {
+      res.status(500).json({ error: "Admin token is not configured" });
+      return;
+    }
+    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== adminToken) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    let notionSecret = "";
+    try {
+      notionSecret = NOTION_API_KEY_SECRET.value();
+    } catch (err) {
+      notionSecret = "";
+    }
+    const token = getNotionToken(notionSecret);
+    if (!token) {
+      res.status(500).json({ error: "NOTION_API_KEY is not configured" });
+      return;
+    }
+
+    try {
+      if (req.method === "GET") {
+        const payload = await getQuarterlyAdminPayload({
+          token,
+          dataSourceId: getDataSourceId(),
+          db,
+          mediaCache: readQuarterlyMediaCache(),
+          nowArtic: readQuarterlyNowArtic(),
+          externalLinks: readQuarterlyExternalLinks(),
+        });
+        res.status(200).json(payload);
+        return;
+      }
+
+      if (req.method === "POST") {
+        const result = await handleQuarterlyAdminAction({
+          body: req.body || {},
+          token,
+          db,
+          fieldValue: FieldValue,
+        });
+        res.status(200).json(result);
+        return;
+      }
+
+      res.status(405).json({ error: "Method not allowed" });
+    } catch (err) {
+      console.error("Quarterly admin request failed:", err);
+      res.status(err.status || 500).json({
+        error: err.message || "Quarterly admin request failed",
+      });
+    }
+  });
+});
 
 exports.products = onRequest((req, res) => {
   cors(req, res, async () => {

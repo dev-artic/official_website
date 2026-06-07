@@ -17,6 +17,11 @@ This document contains behavioral guidelines, coding standards, build workflows,
 - **Source of Truth**: Always edit the source fragments under `src/` and templates under `templates/`, then run the static compiler (`node scripts/build_pages.js`) to generate the output.
 - **Global Style Separation**: Keep raw HTML fragments clean. Write CSS inside project-specific `styles.css` files (or global stylesheets) and JavaScript inside project-specific `scripts.js` (or `js/shared.js`). The compiler automatically collects and optimizes these styles into the final `<head>` at compile time.
 
+### C. Motion & Navigation Continuity
+- **Bezier Navigation Motion**: In-page anchor movement and button-triggered section navigation must use the shared bezier scroll behavior in `js/shared.js` instead of instant jumps or browser-default smooth scrolling.
+- **Shared Motion First**: When adding a new scroll, reveal, modal, or page-transition behavior, extend the shared motion helpers or existing component patterns before adding page-local timing logic.
+- **Reduced Motion Respect**: Any new animation or scroll behavior must respect `prefers-reduced-motion` and fall back to immediate state changes when reduced motion is requested.
+
 ---
 
 ## 2. Project Directory Structure

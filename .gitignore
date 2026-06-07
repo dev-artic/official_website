@@ -4,6 +4,7 @@ serviceAccountKey.json
 .env
 functions/.env
 functions/.env.local
+functions/.secret.local
 
 scratch/
 scratch

@@ -19,6 +19,8 @@ const buttonLinkRaw = fs.readFileSync(path.join(templatesDir, 'components/base/b
 const buttonRaw = fs.readFileSync(path.join(templatesDir, 'components/base/button.html'), 'utf8');
 const waitlistFormRaw = fs.readFileSync(path.join(templatesDir, 'components/forms/waitlist-form-embedded.html'), 'utf8');
 const checkoutFormRaw = fs.readFileSync(path.join(templatesDir, 'components/forms/checkout-form-popup.html'), 'utf8');
+const quarterlyContentArchiveRaw = fs.readFileSync(path.join(templatesDir, 'components/quarterly/content-archive.html'), 'utf8');
+const quarterlyAchaDetailRaw = fs.readFileSync(path.join(templatesDir, 'components/quarterly/acha-detail.html'), 'utf8');
 const playerRaw = fs.readFileSync(path.join(templatesDir, 'components/projects/player.html'), 'utf8');
 const lyricRaw = fs.readFileSync(path.join(templatesDir, 'components/projects/lyric-and-tracklist.html'), 'utf8');
 const productShowcasePopupRaw = fs.readFileSync(path.join(templatesDir, 'components/projects/product-showcase-popup.html'), 'utf8');
@@ -41,6 +43,8 @@ const buttonLinkTpl = parseTemplate(buttonLinkRaw);
 const buttonTpl = parseTemplate(buttonRaw);
 const waitlistFormTpl = parseTemplate(waitlistFormRaw);
 const checkoutFormTpl = parseTemplate(checkoutFormRaw);
+const quarterlyContentArchiveTpl = parseTemplate(quarterlyContentArchiveRaw);
+const quarterlyAchaDetailTpl = parseTemplate(quarterlyAchaDetailRaw);
 const playerTpl = parseTemplate(playerRaw);
 const lyricTpl = parseTemplate(lyricRaw);
 const productShowcasePopupTpl = parseTemplate(productShowcasePopupRaw);
@@ -107,6 +111,18 @@ function replaceComponents(html, depth, isLayoutLevel = false, slug = '') {
     if (checkoutFormTpl.styles) pageStyles.add(checkoutFormTpl.styles);
   }
 
+  // Quarterly content archive substitute
+  if (result.includes('{{QUARTERLY_CONTENT_ARCHIVE}}')) {
+    result = result.replace(/\{\{QUARTERLY_CONTENT_ARCHIVE\}\}/g, quarterlyContentArchiveTpl.markup);
+    if (quarterlyContentArchiveTpl.styles) pageStyles.add(quarterlyContentArchiveTpl.styles);
+  }
+
+  // Quarterly ACHA detail substitute
+  if (result.includes('{{QUARTERLY_ACHA_DETAIL}}')) {
+    result = result.replace(/\{\{QUARTERLY_ACHA_DETAIL\}\}/g, quarterlyAchaDetailTpl.markup);
+    if (quarterlyAchaDetailTpl.styles) pageStyles.add(quarterlyAchaDetailTpl.styles);
+  }
+
   // Audio widgets substitute
   if (result.includes('{{PLAYER}}')) {
     result = result.replace(/\{\{PLAYER\}\}/g, playerTpl.markup);
@@ -161,6 +177,7 @@ const staticPages = [
   { src: 'about.html', dest: 'about/index.html' },
   { src: 'contact.html', dest: 'contact/index.html' },
   { src: 'quarterly.html', dest: 'quarterly/index.html' },
+  { src: 'quarterly-acha.html', dest: 'quarterly/acha/index.html' },
   { src: 'projects.html', dest: 'projects/index.html' },
   { src: 'admin.html', dest: 'admin/index.html' }
 ];

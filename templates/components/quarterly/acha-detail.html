@@ -1,0 +1,1781 @@
+<style>
+  body {
+    overflow-x: hidden;
+  }
+
+  .acha-page {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 120px var(--gutter) var(--space-xxl);
+    box-sizing: border-box;
+  }
+
+  .acha-page * {
+    min-width: 0;
+  }
+
+  .acha-hero {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.24fr) minmax(0, 0.76fr);
+    gap: clamp(28px, 6vw, 88px);
+    align-items: end;
+    min-height: 64vh;
+    padding-bottom: clamp(44px, 7vw, 92px);
+  }
+
+  .acha-kicker,
+  .acha-date,
+  .acha-back,
+  .acha-stat span,
+  .acha-tier small,
+  .acha-tier-summary,
+  .acha-album-meta,
+  .acha-field span,
+  .acha-source,
+  .acha-essay-list span,
+  .acha-status {
+    font-family: var(--font-sans);
+    font-size: 0.58rem;
+    line-height: 1.45;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .acha-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    margin-top: var(--space-md);
+    padding-bottom: 4px;
+    position: relative;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+  }
+
+  .acha-back::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--text-primary);
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.46s var(--ease-out-expo);
+  }
+
+  .acha-back:hover {
+    color: var(--text-primary);
+  }
+
+  .acha-back:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  .acha-back svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+    transform: rotate(180deg);
+    transition: transform 0.4s var(--ease-out-expo);
+  }
+
+  .acha-back:hover svg {
+    transform: rotate(180deg) translateX(4px);
+  }
+
+  .acha-hero h1 {
+    position: relative;
+    display: inline-block;
+    margin-top: 10px;
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 7vw, 6.7rem);
+    line-height: 0.94;
+    font-weight: 700;
+    color: var(--text-primary);
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  .acha-page.is-loading .acha-hero h1 {
+    color: transparent;
+    background: linear-gradient(90deg, var(--text-muted) 0%, var(--text-primary) 42%, var(--text-muted) 72%);
+    background-size: 240% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: acha-title-load 2.4s var(--ease-out-expo) infinite;
+  }
+
+  .acha-page.is-loading .acha-hero h1::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--bg-primary) 72%, transparent) 46%, transparent 78%);
+    transform: translateX(-120%);
+    animation: acha-title-wipe 2.4s var(--ease-out-expo) infinite;
+    pointer-events: none;
+  }
+
+  @keyframes acha-title-load {
+    0%,
+    100% {
+      opacity: 0.38;
+      background-position: 130% 50%;
+    }
+    46% {
+      opacity: 1;
+    }
+    70% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes acha-title-wipe {
+    0% {
+      opacity: 0;
+      transform: translateX(-120%);
+    }
+    22% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 0.72;
+      transform: translateX(120%);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(120%);
+    }
+  }
+
+  .acha-loading-note {
+    max-width: 68ch;
+    margin-top: var(--space-md);
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    line-height: 1.6;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+  }
+
+  .acha-page.is-loading .acha-loading-note {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .acha-page:not(.is-loading) .acha-loading-note {
+    display: none;
+  }
+
+  .acha-page.is-loading #acha-summary,
+  .acha-page.is-loading #acha-stats {
+    visibility: hidden;
+  }
+
+  .acha-summary,
+  .acha-stats,
+  .acha-cover-strip,
+  .acha-body,
+  .acha-essays,
+  .acha-status {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo);
+  }
+
+  .acha-page.is-loaded .acha-summary,
+  .acha-page.is-loaded .acha-stats,
+  .acha-page.is-loaded .acha-cover-strip,
+  .acha-page.is-loaded .acha-body,
+  .acha-page.is-loaded .acha-essays,
+  .acha-page.is-loaded .acha-status,
+  .acha-page:not(.is-loading) .acha-summary,
+  .acha-page:not(.is-loading) .acha-stats,
+  .acha-page:not(.is-loading) .acha-cover-strip,
+  .acha-page:not(.is-loading) .acha-body,
+  .acha-page:not(.is-loading) .acha-essays,
+  .acha-page:not(.is-loading) .acha-status {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .acha-page.is-loaded .acha-stats,
+  .acha-page:not(.is-loading) .acha-stats {
+    transition-delay: 0.08s;
+  }
+
+  .acha-page.is-loaded .acha-cover-strip,
+  .acha-page:not(.is-loading) .acha-cover-strip {
+    transition-delay: 0.16s;
+  }
+
+  .acha-page.is-loaded .acha-body,
+  .acha-page:not(.is-loading) .acha-body {
+    transition-delay: 0.24s;
+  }
+
+  .acha-tier {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+  }
+
+  .acha-tier.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: var(--acha-tier-delay, 0ms);
+  }
+
+  @keyframes acha-tier-view-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    .acha-tier {
+      opacity: 1;
+      transform: none;
+      animation: acha-tier-view-reveal 0.9s var(--ease-out-expo) both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 18%;
+    }
+
+    .acha-album {
+      opacity: 1;
+      transform: none;
+      animation: acha-tier-view-reveal 0.82s var(--ease-out-expo) both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 14%;
+    }
+  }
+
+  .acha-summary {
+    max-width: 68ch;
+    margin-top: var(--space-md);
+    font-family: var(--font-sans);
+    font-size: 0.86rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    white-space: pre-line;
+  }
+
+  body.acha-instagram-modal-open {
+    overflow: hidden;
+  }
+
+  .acha-stats {
+    --acha-stat-gap: clamp(10px, 1.3vw, 18px);
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--acha-stat-gap);
+    margin-top: var(--space-lg);
+    padding-bottom: 2px;
+    overflow-x: auto;
+    border-top: 1px solid var(--border-color);
+    scrollbar-width: none;
+  }
+
+  .acha-stat {
+    display: grid;
+    flex: 1 0 max(104px, calc((100% - (var(--acha-stat-gap) * 6)) / 7));
+    gap: 8px;
+    min-width: 0;
+    padding-top: 14px;
+  }
+
+  .acha-stats::-webkit-scrollbar {
+    display: none;
+  }
+
+  .acha-stat span {
+    white-space: nowrap;
+  }
+
+  .acha-stat strong {
+    font-family: var(--font-serif);
+    font-size: clamp(1.4rem, 3vw, 2.5rem);
+    line-height: 1;
+    color: var(--text-primary);
+  }
+
+  .acha-cover-strip {
+    margin: 0 calc(50% - 50vw) clamp(40px, 6vw, 84px);
+    overflow: hidden;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .acha-cover-strip img,
+  .acha-cover-fallback {
+    width: clamp(108px, 12vw, 176px);
+    flex: 0 0 clamp(108px, 12vw, 176px);
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: var(--bg-secondary);
+  }
+
+  .acha-cover-track {
+    display: flex;
+    width: max-content;
+    gap: clamp(8px, 1.2vw, 14px);
+    padding: clamp(8px, 1.2vw, 14px) 0;
+    transform: translate3d(var(--acha-cover-offset, 0px), 0, 0);
+    will-change: transform;
+  }
+
+  .acha-cover-set {
+    display: flex;
+    gap: clamp(8px, 1.2vw, 14px);
+  }
+
+  .acha-cover-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+  }
+
+  .acha-body {
+    border-top: 1px solid var(--border-color);
+  }
+
+  .acha-essay-reader {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.2fr) minmax(0, 0.8fr);
+    gap: clamp(28px, 5vw, 80px);
+    padding: clamp(42px, 6vw, 82px) 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .acha-essay-reader:empty {
+    display: none;
+  }
+
+  .acha-essay-reader h2 {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 5vw, 4.8rem);
+    line-height: 0.96;
+    color: var(--text-primary);
+  }
+
+  .acha-essay-content {
+    display: grid;
+    gap: 18px;
+    max-width: 78ch;
+  }
+
+  .acha-essay-content p,
+  .acha-essay-content li {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  .acha-essay-content h3 {
+    margin-top: var(--space-sm);
+    font-family: var(--font-serif);
+    font-size: clamp(1rem, 1.5vw, 1.28rem);
+    line-height: 1.24;
+    color: var(--text-primary);
+  }
+
+  .acha-essay-content h4,
+  .acha-essay-content h5 {
+    margin-top: var(--space-sm);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    line-height: 1.65;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+
+  .acha-essay-content h5 {
+    color: var(--text-secondary);
+  }
+
+  .acha-essay-content img {
+    width: 100%;
+    max-width: 720px;
+    height: auto;
+  }
+
+  .acha-tier {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.2fr) minmax(0, 0.8fr);
+    gap: clamp(28px, 5vw, 80px);
+    padding: clamp(42px, 6vw, 82px) 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .acha-tier-heading {
+    display: grid;
+    gap: 12px;
+    align-content: start;
+  }
+
+  .acha-tier h2 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.8rem, 4vw, 3.7rem);
+    line-height: 0.96;
+    color: var(--text-primary);
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  .acha-tier-summary {
+    max-width: 28ch;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.74rem;
+    line-height: 1.75;
+    color: var(--text-secondary);
+  }
+
+  .acha-tier-criteria {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+  }
+
+  .acha-album-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: clamp(24px, 4vw, 64px);
+    row-gap: clamp(26px, 4vw, 48px);
+  }
+
+  .acha-tier.is-featured .acha-album-list {
+    grid-template-columns: 1fr;
+  }
+
+  .acha-album {
+    display: grid;
+    grid-template-columns: minmax(96px, 0.24fr) minmax(0, 0.76fr);
+    gap: clamp(16px, 3vw, 28px);
+    align-items: start;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.78s var(--ease-out-expo), transform 0.78s var(--ease-out-expo), border-color 0.3s ease;
+  }
+
+  .acha-album.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: var(--acha-album-delay, 0ms);
+  }
+
+  .acha-tier.is-featured .acha-album {
+    grid-template-columns: minmax(150px, 0.26fr) minmax(0, 0.74fr);
+  }
+
+  .acha-album img,
+  .acha-album .acha-cover-fallback {
+    width: 100%;
+    min-height: 96px;
+  }
+
+  .acha-cover-strip img,
+  .acha-album img {
+    transition: transform 220ms ease, box-shadow 220ms ease;
+    transform-origin: center;
+  }
+
+  .acha-cover-strip img:hover,
+  .acha-album img:hover {
+    position: relative;
+    z-index: 2;
+    transform: scale(1.045);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+  }
+
+  @supports (animation-timeline: view()) {
+    .acha-album {
+      opacity: 1;
+      transform: none;
+      animation: acha-tier-view-reveal 0.82s var(--ease-out-expo) both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 14%;
+    }
+  }
+
+  .acha-album h3,
+  .acha-essay-list a {
+    font-family: var(--font-serif);
+    font-size: clamp(1.15rem, 2.1vw, 1.9rem);
+    line-height: 1.08;
+    font-weight: 700;
+    color: var(--text-primary);
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  .acha-album-meta {
+    display: block;
+    margin-top: 8px;
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+  }
+
+  .acha-critic-line {
+    margin-top: 14px;
+    font-family: var(--font-sans);
+    font-size: 0.84rem;
+    line-height: 1.78;
+    color: var(--text-primary);
+  }
+
+  .acha-field {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  .acha-field span {
+    letter-spacing: 0.12em;
+  }
+
+  .acha-empty-tier {
+    margin: 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color);
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  .acha-source {
+    display: inline-block;
+    margin-top: 12px;
+  }
+
+  .acha-album.has-inline-essay {
+    position: relative;
+    border-top-color: color-mix(in srgb, var(--text-primary) 34%, var(--border-color));
+  }
+
+  .acha-inline-essay {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: clamp(14px, 2.4vw, 26px);
+    position: relative;
+    margin-top: clamp(12px, 2.2vw, 26px);
+    padding: clamp(16px, 2.8vw, 32px) 0 0;
+    border-top: 0;
+    scroll-margin-top: 96px;
+    transition: margin-top 0.56s var(--ease-out-expo), padding-top 0.56s var(--ease-out-expo), gap 0.56s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay:not(.is-toggle-open) {
+    gap: 0;
+    margin-top: clamp(8px, 1.4vw, 18px);
+    padding-top: clamp(10px, 1.6vw, 20px);
+  }
+
+  .acha-inline-essay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: clamp(28px, 5vw, 72px);
+    width: clamp(54px, 8vw, 112px);
+    height: 1px;
+    background: var(--text-primary);
+    opacity: 0.34;
+  }
+
+  .acha-inline-essay summary {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: end;
+    position: relative;
+    min-height: clamp(240px, 30vw, 440px);
+    cursor: pointer;
+    list-style: none;
+    overflow: hidden;
+  }
+
+  .acha-inline-essay summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .acha-essay-visual {
+    grid-area: 1 / 1;
+    display: grid;
+    width: min(100%, 980px);
+    justify-self: end;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-secondary);
+    isolation: isolate;
+    contain: paint;
+    pointer-events: none;
+  }
+
+  .acha-essay-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.54) 0%, rgba(0, 0, 0, 0.24) 42%, rgba(0, 0, 0, 0.04) 100%);
+    pointer-events: none;
+    margin: 0;
+  }
+
+  .acha-essay-visual img,
+  .acha-essay-visual .acha-cover-fallback {
+    width: 100%;
+    aspect-ratio: 16 / 6;
+    object-fit: cover;
+    object-position: center;
+    background: var(--bg-secondary);
+    transform: translateZ(0) scale(1.02);
+    backface-visibility: hidden;
+    will-change: transform;
+    transition: transform 0.9s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay summary:hover .acha-essay-visual img,
+  .acha-inline-essay summary:focus-within .acha-essay-visual img {
+    transform: translateZ(0) scale(1.05);
+  }
+
+  .acha-essay-visual figcaption,
+  .acha-essay-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    font-family: var(--font-sans);
+    font-size: 0.58rem;
+    line-height: 1.45;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .acha-essay-visual figcaption {
+    position: absolute;
+    left: clamp(16px, 2vw, 26px);
+    bottom: clamp(14px, 2vw, 22px);
+    z-index: 2;
+    color: rgba(255, 255, 255, 0.76);
+  }
+
+  .acha-essay-toggle::after {
+    content: '+';
+    display: inline-grid;
+    place-items: center;
+    width: 0.8rem;
+    height: 0.8rem;
+    font-size: 0.72rem;
+    color: var(--text-primary);
+    transform: rotate(0deg);
+    transition: transform 0.48s var(--ease-out-expo), color 0.3s ease;
+  }
+
+  .acha-inline-essay.is-toggle-open .acha-essay-toggle::after {
+    content: '-';
+    transform: rotate(180deg);
+  }
+
+  .acha-essay-heading {
+    grid-area: 1 / 1;
+    z-index: 2;
+    display: grid;
+    gap: 12px;
+    align-self: center;
+    max-width: min(760px, 82%);
+    padding: clamp(22px, 5vw, 70px) 0 clamp(42px, 7vw, 90px) clamp(18px, 5vw, 76px);
+  }
+
+  .acha-essay-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .acha-instagram-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.54);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-size: 0.58rem;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.42s var(--ease-out-expo);
+  }
+
+  .acha-instagram-button:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.82);
+    transform: translateY(-1px);
+  }
+
+  .acha-inline-essay summary .acha-kicker,
+  .acha-inline-essay summary .acha-essay-toggle {
+    color: rgba(255, 255, 255, 0.74);
+  }
+
+  .acha-instagram-modal[hidden] {
+    display: none;
+  }
+
+  .acha-instagram-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    padding: var(--gutter);
+  }
+
+  .acha-instagram-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    opacity: 0;
+    transition: opacity 0.42s var(--ease-out-expo);
+  }
+
+  .acha-instagram-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(560px, calc(100vw - var(--gutter) * 2));
+    max-height: min(760px, calc(100vh - var(--gutter) * 2));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.34);
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+    transition: opacity 0.48s var(--ease-out-expo), transform 0.48s var(--ease-out-expo);
+  }
+
+  .acha-instagram-modal.is-open .acha-instagram-backdrop {
+    opacity: 1;
+  }
+
+  .acha-instagram-modal.is-open .acha-instagram-dialog {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .acha-instagram-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .acha-instagram-title {
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .acha-instagram-close {
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1;
+    transition: background 0.3s ease, transform 0.36s var(--ease-out-expo);
+  }
+
+  .acha-instagram-close:hover {
+    background: var(--bg-secondary);
+    transform: rotate(90deg);
+  }
+
+  .acha-instagram-frame {
+    width: 100%;
+    height: min(650px, calc(100vh - 152px));
+    border: 0;
+    background: var(--bg-secondary);
+  }
+
+  .acha-inline-essay h4 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.7rem, 4.2vw, 4.2rem);
+    line-height: 0.98;
+    color: #fff;
+    word-break: keep-all;
+    text-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+  }
+
+  .acha-inline-essay .acha-essay-content {
+    max-width: none;
+    padding-top: clamp(22px, 4vw, 48px);
+    column-count: 2;
+    column-gap: clamp(30px, 5vw, 76px);
+  }
+
+  .acha-inline-essay[data-enhanced="true"] .acha-essay-content {
+    overflow: hidden;
+    transition: height 0.86s var(--ease-out-expo), opacity 0.58s ease, transform 0.86s var(--ease-out-expo), padding-top 0.86s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay.is-collapsing .acha-essay-content {
+    opacity: 0;
+    transform: translateY(-10px);
+    padding-top: 0;
+  }
+
+  .acha-inline-essay[data-enhanced="true"]:not(.is-toggle-open) .acha-essay-content {
+    height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    padding-top: 0;
+    pointer-events: none;
+  }
+
+  .acha-inline-essay.is-expanding .acha-essay-content,
+  .acha-inline-essay.is-toggle-open .acha-essay-content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .acha-inline-essay .acha-essay-content h3 {
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  .acha-inline-essay:not([open]) .acha-essay-content {
+    display: none;
+  }
+
+  .acha-essays {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.2fr) minmax(0, 0.8fr);
+    gap: clamp(28px, 5vw, 80px);
+    padding: var(--space-xl) 0 0;
+  }
+
+  .acha-essay-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .acha-essay-list a {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 18px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .acha-page.is-loading .acha-hero h1 {
+      color: var(--text-primary);
+      background: none;
+      animation: none;
+    }
+
+    .acha-page.is-loading .acha-hero h1::after {
+      display: none;
+    }
+
+    .acha-tier,
+    .acha-album,
+    .acha-inline-essay[data-enhanced="true"] .acha-essay-content,
+    .acha-essay-visual img,
+    .acha-essay-toggle::after {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .acha-cover-strip img,
+    .acha-cover-fallback {
+      width: clamp(96px, 16vw, 140px);
+      flex-basis: clamp(96px, 16vw, 140px);
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .acha-album-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .acha-hero,
+    .acha-essay-reader,
+    .acha-tier,
+    .acha-essays {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .acha-page {
+      padding-top: 96px;
+    }
+
+    .acha-stats {
+      overflow-x: auto;
+    }
+
+    .acha-cover-strip img,
+    .acha-cover-fallback {
+      width: 92px;
+      flex-basis: 92px;
+    }
+
+    .acha-album,
+    .acha-tier.is-featured .acha-album,
+    .acha-inline-essay,
+    .acha-field,
+    .acha-essay-list a {
+      grid-template-columns: 1fr;
+    }
+
+    .acha-inline-essay summary {
+      grid-template-columns: 1fr;
+      min-height: clamp(220px, 68vw, 320px);
+    }
+
+    .acha-essay-visual {
+      width: 100%;
+      max-width: none;
+    }
+
+    .acha-essay-visual img,
+    .acha-essay-visual .acha-cover-fallback {
+      aspect-ratio: 16 / 8;
+    }
+
+    .acha-essay-heading {
+      max-width: 92%;
+      align-self: end;
+      padding: clamp(20px, 8vw, 34px);
+    }
+
+    .acha-inline-essay h4 {
+      font-size: clamp(1.8rem, 11vw, 3rem);
+    }
+
+    .acha-inline-essay .acha-essay-content {
+      column-count: 1;
+    }
+
+    .acha-album img,
+    .acha-album .acha-cover-fallback {
+      max-width: 220px;
+      min-height: 0;
+    }
+  }
+</style>
+<main class="acha-page delayed-reveal animate-fade-in is-loading">
+  <section class="acha-hero" id="acha-hero">
+    <div>
+      <p class="acha-kicker">ACHA.</p>
+      <p class="acha-date" id="acha-date">Quarterly issue</p>
+      <a class="acha-back" href="../">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        <span>Back to Quarterly</span>
+      </a>
+    </div>
+    <div>
+      <h1 id="acha-title">ACHA</h1>
+      <p class="acha-loading-note" id="acha-loading-note">Loading issue</p>
+      <p class="acha-summary" id="acha-summary"></p>
+      <div class="acha-stats" id="acha-stats" aria-label="Issue summary"></div>
+    </div>
+  </section>
+
+  <div class="acha-cover-strip" id="acha-cover-strip"></div>
+  <section class="acha-essay-reader" id="acha-essay-reader" aria-label="Featured article"></section>
+  <section class="acha-body" id="acha-body" aria-label="ACHA tier detail"></section>
+  <section class="acha-essays" id="acha-essays" aria-label="Featured essays"></section>
+  <p class="acha-status" id="acha-status"></p>
+</main>
+
+<div class="acha-instagram-modal" id="acha-instagram-modal" hidden aria-hidden="true">
+  <div class="acha-instagram-backdrop" data-acha-instagram-close></div>
+  <div class="acha-instagram-dialog" role="dialog" aria-modal="true" aria-labelledby="acha-instagram-title">
+    <div class="acha-instagram-header">
+      <span class="acha-instagram-title" id="acha-instagram-title">Instagram post</span>
+      <button class="acha-instagram-close" type="button" data-acha-instagram-close aria-label="Close Instagram post">×</button>
+    </div>
+    <iframe class="acha-instagram-frame" id="acha-instagram-frame" title="artic. Instagram post" loading="lazy" allowtransparency="true" frameborder="0" scrolling="no" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+  </div>
+</div>
+
+<script>
+(function initAchaDetail() {
+  const params = new URLSearchParams(window.location.search);
+  const issueKey = params.get('issue') || '';
+  const essayKey = params.get('essay') || '';
+  const pageEl = document.querySelector('.acha-page');
+  const titleEl = document.getElementById('acha-title');
+  const dateEl = document.getElementById('acha-date');
+  const summaryEl = document.getElementById('acha-summary');
+  const statsEl = document.getElementById('acha-stats');
+  const coversEl = document.getElementById('acha-cover-strip');
+  const essayReaderEl = document.getElementById('acha-essay-reader');
+  const bodyEl = document.getElementById('acha-body');
+  const essaysEl = document.getElementById('acha-essays');
+  const statusEl = document.getElementById('acha-status');
+  const instagramModalEl = document.getElementById('acha-instagram-modal');
+  const instagramFrameEl = document.getElementById('acha-instagram-frame');
+  let coverMarqueeFrame = 0;
+  let coverMarqueeOffset = 0;
+  let coverMarqueeVelocity = 0;
+  let coverMarqueeTransition = null;
+  let coverMarqueeTargetVelocity = 0;
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function formatDate(value) {
+    if (!value) return 'Unscheduled';
+    const date = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
+  }
+
+  function hasValue(value) {
+    const normalized = String(value || '').trim();
+    return normalized && !['없음', 'none', 'n/a', '-'].includes(normalized.toLowerCase());
+  }
+
+  function normalizeUrl(value) {
+    return String(value || '').trim();
+  }
+
+  function getInstagramEmbedUrl(url) {
+    const value = normalizeUrl(url);
+    if (!value) return '';
+    const match = value.match(/instagram\.com\/(p|reel|tv)\/([^/?#]+)/i);
+    if (!match) return '';
+    return `https://www.instagram.com/${match[1].toLowerCase()}/${match[2]}/embed`;
+  }
+
+  function getEssayInstagramPost(issue, essay, album) {
+    const directUrl = [
+      essay.instagramUrl,
+      essay.instagramPostUrl,
+      essay.instagramPost,
+      essay.socialUrl,
+      essay.postUrl,
+      album?.instagramUrl,
+      album?.instagramPostUrl,
+      album?.socialUrl
+    ].find(hasValue);
+
+    if (directUrl) return normalizeUrl(directUrl);
+    return '';
+  }
+
+  function openInstagramModal(url) {
+    const embedUrl = getInstagramEmbedUrl(url);
+    if (!embedUrl || !instagramModalEl || !instagramFrameEl) return;
+    instagramFrameEl.src = embedUrl;
+    instagramModalEl.hidden = false;
+    instagramModalEl.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('acha-instagram-modal-open');
+    requestAnimationFrame(() => instagramModalEl.classList.add('is-open'));
+  }
+
+  function closeInstagramModal() {
+    if (!instagramModalEl || !instagramFrameEl || instagramModalEl.hidden) return;
+    instagramModalEl.classList.remove('is-open');
+    instagramModalEl.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('acha-instagram-modal-open');
+    window.setTimeout(() => {
+      instagramModalEl.hidden = true;
+      instagramFrameEl.src = '';
+    }, 360);
+  }
+
+  function getDisplayImageUrl(url) {
+    return String(url || '')
+      .replace(/\/album\/images\/\d+\//, '/album/images/1000/')
+      .replace(/\/artist\/images\/\d+\//, '/artist/images/1000/');
+  }
+
+  function coverBezierAt(t, p1, p2) {
+    const inv = 1 - t;
+    return 3 * inv * inv * t * p1 + 3 * inv * t * t * p2 + t * t * t;
+  }
+
+  function coverBezierProgress(progress) {
+    let lower = 0;
+    let upper = 1;
+    let t = progress;
+    for (let i = 0; i < 10; i++) {
+      const x = coverBezierAt(t, 0.16, 0.3);
+      if (Math.abs(x - progress) < 0.001) break;
+      if (x < progress) lower = t;
+      else upper = t;
+      t = (lower + upper) / 2;
+    }
+    return coverBezierAt(t, 1, 1);
+  }
+
+  function setCoverMarqueeTarget(targetVelocity) {
+    coverMarqueeTransition = {
+      from: coverMarqueeVelocity,
+      to: targetVelocity,
+      start: performance.now(),
+      duration: 900
+    };
+    coverMarqueeTargetVelocity = targetVelocity;
+  }
+
+  function stopCoverMarquee() {
+    if (coverMarqueeFrame) cancelAnimationFrame(coverMarqueeFrame);
+    coverMarqueeFrame = 0;
+    coverMarqueeTransition = null;
+  }
+
+  function initCoverMarquee() {
+    stopCoverMarquee();
+    const strip = coversEl;
+    const track = coversEl.querySelector('.acha-cover-track');
+    const firstSet = coversEl.querySelector('.acha-cover-set');
+    if (!track || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    coverMarqueeOffset = 0;
+    coverMarqueeVelocity = 0;
+    let lastTime = performance.now();
+    const baseVelocity = 0.034;
+    setCoverMarqueeTarget(baseVelocity);
+
+    const handleEnter = () => setCoverMarqueeTarget(0);
+    const handleLeave = () => setCoverMarqueeTarget(baseVelocity);
+    strip.addEventListener('mouseenter', handleEnter);
+    strip.addEventListener('mouseleave', handleLeave);
+
+    function tick(now) {
+      const delta = Math.min(40, now - lastTime);
+      lastTime = now;
+      if (coverMarqueeTransition) {
+        const progress = Math.min(1, (now - coverMarqueeTransition.start) / coverMarqueeTransition.duration);
+        const eased = coverBezierProgress(progress);
+        coverMarqueeVelocity = coverMarqueeTransition.from + (coverMarqueeTransition.to - coverMarqueeTransition.from) * eased;
+        if (progress >= 1) {
+          coverMarqueeVelocity = coverMarqueeTargetVelocity;
+          coverMarqueeTransition = null;
+        }
+      }
+
+      const trackStyle = getComputedStyle(track);
+      const trackGap = Number.parseFloat(trackStyle.columnGap || trackStyle.gap || '0') || 0;
+      const loopWidth = firstSet ? firstSet.getBoundingClientRect().width + trackGap : track.scrollWidth / 2;
+      if (loopWidth > 0) {
+        coverMarqueeOffset -= coverMarqueeVelocity * delta;
+        if (coverMarqueeOffset <= -loopWidth) coverMarqueeOffset += loopWidth;
+        track.style.setProperty('--acha-cover-offset', `${coverMarqueeOffset}px`);
+      }
+      coverMarqueeFrame = requestAnimationFrame(tick);
+    }
+
+    coverMarqueeFrame = requestAnimationFrame(tick);
+  }
+
+  function setupScrollReveal(selector, visibleClass, delayProperty) {
+    const items = [...document.querySelectorAll(selector)];
+    if (!items.length) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+      items.forEach((item) => item.classList.add(visibleClass));
+      return;
+    }
+
+    const revealPassedItems = () => {
+      const trigger = window.innerHeight * 0.86;
+      items.forEach((item) => {
+        if (item.classList.contains(visibleClass)) return;
+        if (item.getBoundingClientRect().top < trigger) item.classList.add(visibleClass);
+      });
+      if (items.every((item) => item.classList.contains(visibleClass))) {
+        window.removeEventListener('scroll', revealPassedItems);
+        document.removeEventListener('scroll', revealPassedItems, true);
+        window.removeEventListener('resize', revealPassedItems);
+      }
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add(visibleClass);
+        observer.unobserve(entry.target);
+      });
+    }, {
+      rootMargin: '0px 0px -12% 0px',
+      threshold: 0.12
+    });
+
+    items.forEach((item, index) => {
+      item.style.setProperty(delayProperty, `${Math.min(index % 4, 3) * 55}ms`);
+      observer.observe(item);
+    });
+
+    window.addEventListener('scroll', revealPassedItems, { passive: true });
+    document.addEventListener('scroll', revealPassedItems, { passive: true, capture: true });
+    window.addEventListener('resize', revealPassedItems);
+    revealPassedItems();
+  }
+
+  function setupTierReveal() {
+    setupScrollReveal('.acha-tier', 'is-visible', '--acha-tier-delay');
+  }
+
+  function setupAlbumReveal() {
+    setupScrollReveal('.acha-album', 'is-visible', '--acha-album-delay');
+  }
+
+  function toggleInlineEssayFromSummary(summary) {
+    const details = summary.closest('.acha-inline-essay');
+    if (!details || details.dataset.animating === 'true') return;
+    animateInlineEssay(details, !details.classList.contains('is-toggle-open'));
+  }
+
+  function handleInlineEssayClick(event) {
+    const instagramButton = event.target.closest?.('[data-instagram-post-url]');
+    if (instagramButton && bodyEl.contains(instagramButton)) {
+      event.preventDefault();
+      event.stopPropagation();
+      openInstagramModal(instagramButton.dataset.instagramPostUrl);
+      return;
+    }
+
+    const summary = event.target.closest?.('.acha-inline-essay summary');
+    if (!summary || !bodyEl.contains(summary)) return;
+    event.preventDefault();
+    toggleInlineEssayFromSummary(summary);
+  }
+
+  function handleInlineEssayKeydown(event) {
+    if (!['Enter', ' '].includes(event.key)) return;
+    const instagramButton = event.target.closest?.('[data-instagram-post-url]');
+    if (instagramButton && bodyEl.contains(instagramButton)) {
+      event.preventDefault();
+      event.stopPropagation();
+      openInstagramModal(instagramButton.dataset.instagramPostUrl);
+      return;
+    }
+
+    const summary = event.target.closest?.('.acha-inline-essay summary');
+    if (!summary || !bodyEl.contains(summary)) return;
+    event.preventDefault();
+    toggleInlineEssayFromSummary(summary);
+  }
+
+  function handleInstagramModalClick(event) {
+    if (event.target.closest('[data-acha-instagram-close]')) closeInstagramModal();
+  }
+
+  function handleInstagramModalKeydown(event) {
+    if (event.key === 'Escape') closeInstagramModal();
+  }
+
+  function animateInlineEssay(details, shouldOpen) {
+    const content = details.querySelector('.acha-essay-content');
+    if (!content) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      details.open = true;
+      details.classList.toggle('is-toggle-open', shouldOpen);
+      details.querySelector('summary')?.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+      return;
+    }
+
+    details.dataset.animating = 'true';
+    content.style.overflow = 'hidden';
+
+    if (shouldOpen) {
+      details.open = true;
+      details.classList.add('is-toggle-open');
+      details.querySelector('summary')?.setAttribute('aria-expanded', 'true');
+      details.classList.remove('is-collapsing');
+      details.classList.add('is-expanding');
+      content.style.height = '0px';
+      content.style.opacity = '0';
+      content.style.transform = 'translateY(-8px)';
+      content.style.paddingTop = '';
+      content.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        content.style.height = `${content.scrollHeight}px`;
+        content.style.opacity = '1';
+        content.style.transform = 'translateY(0)';
+      });
+    } else {
+      details.classList.remove('is-toggle-open');
+      details.querySelector('summary')?.setAttribute('aria-expanded', 'false');
+      details.classList.remove('is-expanding');
+      details.classList.add('is-collapsing');
+      content.style.height = `${content.scrollHeight}px`;
+      content.style.opacity = '1';
+      content.style.transform = 'translateY(0)';
+      content.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        content.style.height = '0px';
+        content.style.opacity = '0';
+        content.style.transform = 'translateY(-8px)';
+      });
+    }
+
+      const finish = (event) => {
+      if (event.target !== content || event.propertyName !== 'height') return;
+      content.removeEventListener('transitionend', finish);
+      details.open = true;
+      content.style.height = shouldOpen ? 'auto' : '';
+      content.style.opacity = '';
+      content.style.transform = '';
+      content.style.paddingTop = '';
+      content.style.overflow = '';
+      details.classList.remove('is-expanding', 'is-collapsing');
+      delete details.dataset.animating;
+    };
+
+    content.addEventListener('transitionend', finish);
+  }
+
+  function setupInlineEssayInteractions() {
+    document.querySelectorAll('.acha-inline-essay').forEach((details) => {
+      const summary = details.querySelector('summary');
+      const content = details.querySelector('.acha-essay-content');
+      if (!summary || !content) return;
+      const shouldStartOpen = details.open;
+      details.dataset.enhanced = 'true';
+      details.open = true;
+      details.classList.toggle('is-toggle-open', shouldStartOpen);
+      summary.setAttribute('aria-expanded', shouldStartOpen ? 'true' : 'false');
+      summary.setAttribute('role', 'button');
+      summary.setAttribute('tabindex', '0');
+      content.style.height = shouldStartOpen ? 'auto' : '';
+    });
+  }
+
+  function getEssayHref(issue, essay) {
+    return `?issue=${encodeURIComponent(issue.slug || issue.id)}&essay=${encodeURIComponent(essay.id || essay.title || '')}#essay-${encodeURIComponent(essay.id || essay.title || '')}`;
+  }
+
+  function flattenAlbums(issue) {
+    return (issue.tiers || []).flatMap((tier) => (tier.items || []).map((item) => ({
+      ...item,
+      tierRank: tier.rank,
+      tierLabel: tier.label
+    }))).filter((item) => item.album);
+  }
+
+  function getTierCanon(tierCanon, tier) {
+    return (tierCanon || []).find((item) => Number(item.rank) === Number(tier.rank)) || {};
+  }
+
+  function renderCover(item) {
+    if (item.imageUrl) {
+      return `<img src="${escapeHtml(getDisplayImageUrl(item.imageUrl))}" alt="${escapeHtml(`${item.album} album cover`)}" loading="lazy">`;
+    }
+    return `<div class="acha-cover-fallback">${escapeHtml(item.album || 'ACHA')}</div>`;
+  }
+
+  function renderEssayVisualImage(visual, fallbackItem) {
+    if (visual.url) {
+      return `<img src="${escapeHtml(getDisplayImageUrl(visual.url))}" alt="${escapeHtml(visual.alt || visual.caption || 'Featured article image')}" loading="lazy" decoding="async">`;
+    }
+    return renderCover(fallbackItem);
+  }
+
+  function renderEssayBlock(block) {
+    if (block.type === 'image' && block.url) {
+      return `<img src="${escapeHtml(block.url)}" alt="${escapeHtml(block.text || '')}" loading="lazy">`;
+    }
+    const text = block.text || '';
+    if (!text) return '';
+    if (/heading_1|heading_2/i.test(block.type)) return `<h4>${escapeHtml(text)}</h4>`;
+    if (/heading/i.test(block.type)) return `<h5>${escapeHtml(text)}</h5>`;
+    if (/bulleted|numbered/i.test(block.type)) return `<p>${escapeHtml(text)}</p>`;
+    return `<p>${escapeHtml(text)}</p>`;
+  }
+
+  function normalizeEssayText(text) {
+    return String(text || '')
+      .replace(/\s*\n+\s*/g, ' ')
+      .replace(/[ \t]{2,}/g, ' ')
+      .trim();
+  }
+
+  function shouldMergeEssayParagraph(previous, next) {
+    if (!previous || !next) return false;
+    if (previous.type !== 'paragraph' || next.type !== 'paragraph') return false;
+    const text = String(previous.text || '').trim();
+    if (!text) return false;
+    return !/[.!?。！？…)"'’”\]]$/.test(text);
+  }
+
+  function splitKnownEssayBlock(block) {
+    const rawText = String(block.text || '').trim();
+    const text = normalizeEssayText(rawText);
+    if (!text) return [];
+    if (/heading/i.test(block.type)) return [{ ...block, text }];
+    if (/numbered|bulleted/i.test(block.type)) return [{ type: 'heading_3', text }];
+
+    const multilineNumberedHeading = rawText.match(/^([1-9]\.\s*[^\n]+)\n+\s*([\s\S]+)$/);
+    if (multilineNumberedHeading && multilineNumberedHeading[1].length <= 36) {
+      return [
+        { type: 'heading_3', text: normalizeEssayText(multilineNumberedHeading[1]) },
+        { type: 'paragraph', text: normalizeEssayText(multilineNumberedHeading[2]) }
+      ];
+    }
+
+    const knownInlineHeading = text.match(/^([1-9]\.\s*(?:아이디어|프로덕션|표현력))\s+(.+)$/);
+    if (knownInlineHeading) {
+      return [
+        { type: 'heading_3', text: knownInlineHeading[1] },
+        { type: 'paragraph', text: knownInlineHeading[2] }
+      ];
+    }
+
+    const numberedHeading = text.match(/^([1-9]\.\s*[^\n]+)\s+(.+)$/);
+    if (numberedHeading && numberedHeading[1].length <= 28) {
+      return [
+        { type: 'heading_3', text: numberedHeading[1] },
+        { type: 'paragraph', text: numberedHeading[2] }
+      ];
+    }
+
+    const conclusionHeading = text.match(/^(결론)\s*[-–—]\s*(.+)$/);
+    if (conclusionHeading) {
+      return [
+        { type: 'heading_3', text: conclusionHeading[1] },
+        { type: 'paragraph', text: conclusionHeading[2] }
+      ];
+    }
+
+    return [{ type: 'paragraph', text }];
+  }
+
+  function mergeKnownEssayParagraphs(blocks) {
+    return blocks.reduce((acc, block) => {
+      const previous = acc[acc.length - 1];
+      if (shouldMergeEssayParagraph(previous, block)) {
+        previous.text = `${previous.text} ${block.text}`.replace(/[ \t]{2,}/g, ' ');
+      } else {
+        acc.push({ ...block });
+      }
+      return acc;
+    }, []);
+  }
+
+  function getKnownEssayBlocks(essay) {
+    const key = normalizeMatchText(`${essay.title || ''} ${essay.artist || ''} ${essay.album || ''}`);
+    const isKnown = key.includes('atrain') || key.includes('에이트레인')
+      || key.includes('히피쿤다') || key.includes('hippiekunda')
+      || key.includes('ogipattern') || key.includes('반타01') || key.includes('cwar');
+    if (!isKnown) return null;
+
+    let rawBlocks = Array.isArray(essay.blocks) && essay.blocks.length
+      ? essay.blocks
+      : String(essay.content || '').split(/\n{2,}/).filter(Boolean).map((text) => ({ type: 'paragraph', text }));
+
+    if (key.includes('히피쿤다')) {
+      const sketchIndex = rawBlocks.findIndex((block) => block.type === 'toggle' && normalizeMatchText(block.text) === 'sketch');
+      if (sketchIndex >= 0) rawBlocks = rawBlocks.slice(sketchIndex + 1);
+    }
+
+    return mergeKnownEssayParagraphs(rawBlocks.flatMap(splitKnownEssayBlock));
+  }
+
+  function renderEssayContent(essay) {
+    const knownBlocks = getKnownEssayBlocks(essay);
+    const blocks = knownBlocks || (Array.isArray(essay.blocks) && essay.blocks.length
+      ? essay.blocks
+      : String(essay.content || '').split(/\n{2,}/).filter(Boolean).map((text) => ({ type: 'paragraph', text })));
+    return blocks.map(renderEssayBlock).join('');
+  }
+
+  function normalizeMatchText(value) {
+    return String(value || '').replace(/[\s\-_()[\]]+/g, '').toLowerCase();
+  }
+
+  function findEssayAlbum(issue, essay) {
+    const albums = flattenAlbums(issue);
+    const essayAlbum = normalizeMatchText(essay.album);
+    const essayArtist = normalizeMatchText(essay.artist);
+    if (essayAlbum || essayArtist) {
+      const directMatch = albums.find((item) => {
+        const albumMatches = !essayAlbum || normalizeMatchText(item.album) === essayAlbum;
+        const artistMatches = !essayArtist || normalizeMatchText(item.artist) === essayArtist;
+        return albumMatches && artistMatches;
+      });
+      if (directMatch) return directMatch;
+    }
+
+    const title = normalizeMatchText(essay.title);
+    return albums.find((item) => {
+      const hasEssay = hasValue(item.companionEssay);
+      const tierMatches = !essay.tierRank || Number(item.tierRank) === Number(essay.tierRank);
+      const titleMatches = title.includes(normalizeMatchText(item.album)) || title.includes(normalizeMatchText(item.artist));
+      return hasEssay && tierMatches && titleMatches;
+    }) || albums.find((item) => hasValue(item.companionEssay) && (!essay.tierRank || Number(item.tierRank) === Number(essay.tierRank)));
+  }
+
+  function getEssayDisplayTitle(issue, essay) {
+    const album = findEssayAlbum(issue, essay);
+    if (album?.artist && album?.album) return `${album.artist} — ${album.album}`;
+    const match = String(essay.title || '').match(/\(([^)]+)\)\s*\[([^\]]+)\]/);
+    if (match) return `${match[1]} — ${match[2]}`;
+    return essay.title || 'Featured article';
+  }
+
+  function getAchaSummary() {
+    return [
+      "ACHA: A's Choice & Home Archive",
+      '4곡 이상 수록된 국내 EP 및 정규 앨범을 기준에 따라 일곱 단계로 분류하고 그중 상위를 소개합니다.',
+      '동일 tier 내 앨범 순서는 발매일 기준입니다.'
+    ].join('\n');
+  }
+
+  function getEssayVisual(issue, essay) {
+    const album = findEssayAlbum(issue, essay);
+    return {
+      url: essay.artistImageUrl || album?.artistImageUrl || album?.imageUrl || '',
+      alt: album?.artist ? `${album.artist} artist image` : getEssayDisplayTitle(issue, essay),
+      caption: album?.artist || 'Featured article'
+    };
+  }
+
+  function getAlbumEssay(issue, item) {
+    return (issue.essays || []).find((essay) => {
+      const matchedAlbum = findEssayAlbum(issue, essay);
+      return matchedAlbum
+        && normalizeMatchText(matchedAlbum.album) === normalizeMatchText(item.album)
+        && normalizeMatchText(matchedAlbum.artist) === normalizeMatchText(item.artist);
+    });
+  }
+
+  function renderInlineEssay(issue, item) {
+    const essay = getAlbumEssay(issue, item);
+    if (!essay) return '';
+    const visual = getEssayVisual(issue, essay);
+    const instagramUrl = getEssayInstagramPost(issue, essay, item);
+    return `
+      <details class="acha-inline-essay" id="essay-${escapeHtml(essay.id || essay.title || '')}" open>
+        <summary>
+          <figure class="acha-essay-visual">
+            ${renderEssayVisualImage(visual, item)}
+            <figcaption>${escapeHtml(visual.caption)}</figcaption>
+          </figure>
+          <div class="acha-essay-heading">
+            <p class="acha-kicker">Featured article</p>
+            <h4>${escapeHtml(getEssayDisplayTitle(issue, essay))}</h4>
+            <div class="acha-essay-actions">
+              <span class="acha-essay-toggle">Full article</span>
+              ${instagramUrl ? `<span class="acha-instagram-button" role="button" tabindex="0" data-instagram-post-url="${escapeHtml(instagramUrl)}">Instagram post</span>` : ''}
+            </div>
+          </div>
+        </summary>
+        <div class="acha-essay-content">
+          ${renderEssayContent(essay)}
+        </div>
+      </details>
+    `;
+  }
+
+  function renderField(label, value) {
+    if (!hasValue(value)) return '';
+    return `
+      <div class="acha-field">
+        <span>${escapeHtml(label)}</span>
+        <p>${escapeHtml(value)}</p>
+      </div>
+    `;
+  }
+
+  function renderAlbum(issue, item) {
+    const inlineEssay = renderInlineEssay(issue, item);
+    return `
+      <article class="acha-album ${inlineEssay ? 'has-inline-essay' : ''}">
+        ${renderCover(item)}
+        <div>
+          <h3>${escapeHtml(item.album)}</h3>
+          <span class="acha-album-meta">${[item.artist, item.genre, item.releaseDate].filter(Boolean).map(escapeHtml).join(' · ')}</span>
+          ${hasValue(item.comment) ? `<p class="acha-critic-line">${escapeHtml(item.comment)}</p>` : ''}
+          ${renderField('Tracks', item.tracks)}
+        </div>
+        ${inlineEssay}
+      </article>
+    `;
+  }
+
+  function renderIssue(data, issue) {
+    document.title = `${issue.issue || 'ACHA'} | artic.`;
+    titleEl.textContent = issue.title || 'ACHA';
+    dateEl.textContent = `${issue.issue || 'Quarterly'} · ${formatDate(issue.date)}`;
+    summaryEl.textContent = getAchaSummary();
+
+    const albums = flattenAlbums(issue);
+    const tiers = issue.tiers || [];
+    const essays = issue.essays || [];
+
+    statsEl.innerHTML = tiers.map((tier) => [
+      `Tier ${tier.rank || ''}${tier.label ? ` · ${tier.label}` : ''}`,
+      `${(tier.items || []).filter((item) => item.album).length}`
+    ]).map(([label, value]) => `
+      <div class="acha-stat">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+      </div>
+    `).join('');
+
+    const coverItems = albums.length ? albums : [];
+    const coverMarkup = coverItems.map(renderCover).join('');
+    coversEl.innerHTML = coverMarkup
+      ? `<div class="acha-cover-track"><div class="acha-cover-set">${coverMarkup}</div><div class="acha-cover-set" aria-hidden="true">${coverMarkup}</div></div>`
+      : '';
+    initCoverMarquee();
+
+    essayReaderEl.innerHTML = '';
+
+    bodyEl.innerHTML = tiers.map((tier) => {
+      const canon = getTierCanon(data.tierCanon, tier);
+      const albumItems = (tier.items || []).filter((item) => item.album);
+      return `
+        <section class="acha-tier ${Number(tier.rank) <= 3 ? 'is-featured' : ''}">
+          <div class="acha-tier-heading">
+            <p class="acha-kicker">Tier ${escapeHtml(tier.rank || '')}</p>
+            <h2>${escapeHtml(tier.label || canon.label || '')}</h2>
+            ${canon.summary ? `<p class="acha-tier-summary">${escapeHtml(canon.summary)}</p>` : ''}
+            ${(canon.criteria || []).length ? `
+              <ul class="acha-tier-criteria">
+                ${canon.criteria.map((criterion) => `<li>${escapeHtml(criterion)}</li>`).join('')}
+              </ul>
+            ` : ''}
+            <small>${escapeHtml(albumItems.length)} albums</small>
+          </div>
+          <div class="acha-album-list">
+            ${albumItems.length ? albumItems.map((item) => renderAlbum(issue, {
+              ...item,
+              tierRank: tier.rank,
+              tierLabel: tier.label
+            })).join('') : '<p class="acha-empty-tier">No albums in this tier.</p>'}
+          </div>
+        </section>
+      `;
+    }).join('');
+
+    setupTierReveal();
+    setupAlbumReveal();
+    setupInlineEssayInteractions();
+
+    essaysEl.innerHTML = '';
+    pageEl?.classList.remove('is-loading');
+    pageEl?.classList.add('is-loaded');
+
+    if (essayKey) {
+      const scrollToSelectedEssay = () => {
+        const selectedEssay = essays.find((essay) => essay.id === essayKey || essay.title === essayKey);
+        const target = selectedEssay ? document.getElementById(`essay-${selectedEssay.id || selectedEssay.title || ''}`) : null;
+        if (target) {
+          const top = target.getBoundingClientRect().top + window.scrollY - 72;
+          if (window.articSmoothScrollTo) window.articSmoothScrollTo(top, { duration: 900 });
+          else window.scrollTo(0, top);
+        }
+      };
+      requestAnimationFrame(() => requestAnimationFrame(scrollToSelectedEssay));
+      window.addEventListener('load', scrollToSelectedEssay, { once: true });
+    }
+  }
+
+  async function loadIssue() {
+    try {
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('quarterlyContents') : '/api/quarterly-contents';
+      const response = await fetch(apiUrl, { cache: 'no-cache' });
+      if (!response.ok) throw new Error(`Archive API returned ${response.status}`);
+      const data = await response.json();
+      const issues = Array.isArray(data.issues) ? data.issues : [];
+      const issue = issues.find((item) => item.slug === issueKey || item.id === issueKey) || issues[0];
+      if (!issue) {
+        statusEl.textContent = 'The selected ACHA issue is not available.';
+        pageEl?.classList.remove('is-loading');
+        pageEl?.classList.add('is-loaded');
+        return;
+      }
+      renderIssue(data, issue);
+    } catch (err) {
+      console.error('Failed to load ACHA issue.', err);
+      statusEl.textContent = 'The selected ACHA issue is not available.';
+      pageEl?.classList.remove('is-loading');
+      pageEl?.classList.add('is-loaded');
+    }
+  }
+
+  bodyEl?.addEventListener('click', handleInlineEssayClick, true);
+  bodyEl?.addEventListener('keydown', handleInlineEssayKeydown, true);
+  instagramModalEl?.addEventListener('click', handleInstagramModalClick);
+  document.addEventListener('keydown', handleInstagramModalKeydown);
+  loadIssue();
+})();
+</script>

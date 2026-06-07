@@ -15,6 +15,8 @@ const REQUIRED_TEMPLATES = [
   'components/base/button-link.html',
   'components/forms/waitlist-form-embedded.html',
   'components/forms/checkout-form-popup.html',
+  'components/quarterly/content-archive.html',
+  'components/quarterly/acha-detail.html',
   'components/projects/player.html',
   'components/projects/lyric-and-tracklist.html',
   'components/projects/streaming-platforms.html',

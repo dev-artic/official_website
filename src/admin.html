@@ -108,6 +108,7 @@ path_depth: "../"
     font-size: 0.65rem;
     margin-top: 12px;
     display: none;
+    line-height: 1.5;
   }
 
   /* Dashboard Content */
@@ -342,6 +343,275 @@ path_depth: "../"
     color: var(--text-primary);
     outline: none;
   }
+
+  .quarterly-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .quarterly-metric {
+    border: 1px solid var(--border-color);
+    padding: 16px;
+    background: var(--bg-card);
+    min-width: 0;
+  }
+
+  .quarterly-metric-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .quarterly-metric-value {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+
+  .quarterly-admin-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.4fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .quarterly-issue-list,
+  .quarterly-detail {
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    min-width: 0;
+  }
+
+  .quarterly-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-card);
+  }
+
+  .quarterly-panel-title {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .quarterly-issue-button {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-primary);
+    text-align: left;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: grid;
+    gap: 6px;
+  }
+
+  .quarterly-issue-button.active {
+    background: var(--bg-card);
+  }
+
+  .quarterly-issue-title {
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .quarterly-issue-meta,
+  .quarterly-small-muted {
+    color: var(--text-muted);
+    font-size: 0.62rem;
+    line-height: 1.45;
+  }
+
+  .quarterly-health-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .quarterly-pill {
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 4px 7px;
+    font-size: 0.54rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .quarterly-pill.warn {
+    border-color: rgba(230, 126, 34, 0.5);
+    color: #e67e22;
+  }
+
+  .quarterly-pill.ok {
+    border-color: rgba(46, 204, 113, 0.45);
+    color: #2ecc71;
+  }
+
+  .quarterly-detail-body {
+    padding: 18px;
+    display: grid;
+    gap: 18px;
+  }
+
+  .quarterly-detail-section {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .quarterly-detail-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    line-height: 1.25;
+    margin: 0;
+  }
+
+  .quarterly-field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .quarterly-field-grid textarea,
+  .quarterly-article-editor textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .quarterly-field-grid input,
+  .quarterly-field-grid textarea,
+  .quarterly-article-editor textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+    line-height: 1.55;
+    color: var(--text-primary);
+    outline: none;
+  }
+
+  .quarterly-album-row {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-album-row img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    background: var(--bg-card);
+  }
+
+  .quarterly-album-name {
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .quarterly-article-editor {
+    border-top: 1px solid var(--border-color);
+    padding-top: 14px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .quarterly-media-editor {
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    padding: 16px;
+    display: none;
+    gap: 10px;
+  }
+
+  .quarterly-issue-alerts {
+    display: grid;
+    gap: 8px;
+  }
+
+  .quarterly-issue-alert {
+    border: 1px solid rgba(230, 126, 34, 0.45);
+    background: rgba(230, 126, 34, 0.06);
+    padding: 10px 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .quarterly-issue-alert strong {
+    display: block;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .quarterly-media-editor.active {
+    display: grid;
+  }
+
+  .quarterly-candidate-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .quarterly-candidate {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 8px;
+  }
+
+  .quarterly-candidate img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+  }
+
+  @media (max-width: 900px) {
+    .quarterly-admin-grid,
+    .quarterly-admin-layout,
+    .quarterly-field-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .quarterly-album-row {
+      grid-template-columns: 48px minmax(0, 1fr);
+    }
+
+    .quarterly-album-row .action-btn-sm {
+      grid-column: 1 / -1;
+      width: fit-content;
+    }
+
+    .quarterly-issue-alert {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 {{HEADER}}
@@ -366,6 +636,7 @@ path_depth: "../"
       <button class="admin-tab-btn active" data-tab="products">Products</button>
       <button class="admin-tab-btn" data-tab="orders">Orders</button>
       <button class="admin-tab-btn" data-tab="subscribers">Subscribers</button>
+      <button class="admin-tab-btn" data-tab="quarterly">Quarterly</button>
     </div>
 
     <!-- Products Pane -->
@@ -469,6 +740,47 @@ path_depth: "../"
         </table>
       </div>
     </div>
+
+    <!-- Quarterly Pane -->
+    <div class="tab-pane" id="pane-quarterly">
+      <div class="admin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
+          <div>
+            <h3 class="admin-card-title" style="margin-bottom:8px;">Quarterly Content Health</h3>
+            <p class="quarterly-small-muted" style="margin:0;">ACHA issues, Bugs cover overrides, featured article body parsing, and Now artic. quarter matching.</p>
+          </div>
+          <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div id="quarterly-status" class="quarterly-small-muted" style="margin-bottom:16px;">Quarterly data has not been loaded yet.</div>
+
+      <div class="quarterly-admin-grid" id="quarterly-summary-grid">
+        <!-- Dynamic metrics -->
+      </div>
+
+      <div class="quarterly-admin-layout">
+        <div class="quarterly-issue-list">
+          <div class="quarterly-panel-head">
+            <span class="quarterly-panel-title">Issues</span>
+            <span class="quarterly-small-muted" id="quarterly-override-count"></span>
+          </div>
+          <div id="quarterly-issue-list">
+            <!-- Dynamic issue buttons -->
+          </div>
+        </div>
+
+        <div class="quarterly-detail">
+          <div class="quarterly-panel-head">
+            <span class="quarterly-panel-title">Detail / Fixes</span>
+            <span class="quarterly-small-muted">Preview before write</span>
+          </div>
+          <div class="quarterly-detail-body" id="quarterly-detail-body">
+            <p class="quarterly-small-muted" style="margin:0;">Select an issue to inspect tiers, covers, and featured articles.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -486,6 +798,9 @@ path_depth: "../"
     const tabPanes = document.querySelectorAll('.tab-pane');
 
     let adminToken = localStorage.getItem('artic-admin-token') || '';
+    let quarterlyAdminData = null;
+    let selectedQuarterlyIssueId = '';
+    let quarterlyLoaded = false;
 
     // Tab Switching
     tabButtons.forEach(btn => {
@@ -496,6 +811,9 @@ path_depth: "../"
 
         btn.classList.add('active');
         document.getElementById(`pane-${tab}`).classList.add('active');
+        if (tab === 'quarterly' && !quarterlyLoaded) {
+          loadQuarterlyAdminData();
+        }
       });
     });
 
@@ -541,8 +859,13 @@ path_depth: "../"
         if (res.status === 401) {
           localStorage.removeItem('artic-admin-token');
           adminToken = '';
+          authError.textContent = 'Incorrect admin token. Use ADMIN_TOKEN from functions/.env.local for local dev.';
+          authError.style.display = 'block';
           checkAuth();
           throw new Error('Unauthorized');
+        }
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.error || 'Failed to load admin data') });
         }
         return res.json();
       })
@@ -553,6 +876,10 @@ path_depth: "../"
       })
       .catch(err => {
         console.error('Error fetching admin data:', err);
+        if (err.message !== 'Unauthorized') {
+          authError.textContent = err.message;
+          authError.style.display = 'block';
+        }
       });
     }
 
@@ -886,6 +1213,533 @@ path_depth: "../"
         tbody.appendChild(tr);
       });
     }
+
+    function escapeHtml(value) {
+      return String(value === undefined || value === null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getQuarterlyAdminUrl() {
+      return window.getArticApiUrl ? window.getArticApiUrl('quarterlyAdmin') : '/api/admin/quarterly';
+    }
+
+    function parseQuarterlyResponse(res) {
+      return res.text().then(text => {
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (err) {
+          const looksLikeHtml = /^\s*</.test(text || '');
+          data = {
+            error: looksLikeHtml
+              ? `Quarterly admin API is unavailable. HTTP ${res.status}.`
+              : (text ? text.slice(0, 240) : `HTTP ${res.status}`)
+          };
+        }
+        if (!res.ok) throw new Error(data.error || data.message || 'Quarterly admin request failed');
+        return data;
+      });
+    }
+
+    function postQuarterlyAdmin(body) {
+      return fetch(getQuarterlyAdminUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify(body)
+      })
+      .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem('artic-admin-token');
+          adminToken = '';
+          checkAuth();
+          throw new Error('Unauthorized');
+        }
+        return parseQuarterlyResponse(res);
+      });
+    }
+
+    function getIssueDiagnostics(issueId) {
+      return (quarterlyAdminData?.diagnostics?.issues || []).find(item => item.issueId === issueId) || {};
+    }
+
+    function getQuarterlyIssue(issueId) {
+      return (quarterlyAdminData?.archive?.issues || []).find(issue => issue.id === issueId) || null;
+    }
+
+    function renderQuarterlySummary(summary) {
+      const grid = document.getElementById('quarterly-summary-grid');
+      const metrics = [
+        ['Issues', summary.issueCount || 0],
+        ['Albums', summary.albumCount || 0],
+        ['Cover Fixes', (summary.coverMissing || 0) + (summary.coverLowResolution || 0)],
+        ['Cover Review', (summary.coverReview || 0) + (summary.coverUnverified || 0)],
+        ['Article Fixes', summary.articleMissingBody || 0]
+      ];
+
+      grid.innerHTML = metrics.map(([label, value]) => `
+        <div class="quarterly-metric">
+          <div class="quarterly-metric-label">${escapeHtml(label)}</div>
+          <div class="quarterly-metric-value">${escapeHtml(value)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderQuarterlyIssueList() {
+      const list = document.getElementById('quarterly-issue-list');
+      const issues = quarterlyAdminData?.archive?.issues || [];
+      const diagnostics = quarterlyAdminData?.diagnostics?.issues || [];
+      document.getElementById('quarterly-override-count').textContent = `${quarterlyAdminData?.mediaOverrides?.count || 0} overrides`;
+
+      if (!issues.length) {
+        list.innerHTML = '<p class="quarterly-small-muted" style="padding:16px; margin:0;">No published quarterly issues.</p>';
+        return;
+      }
+
+      list.innerHTML = issues.map(issue => {
+        const health = diagnostics.find(item => item.issueId === issue.id) || {};
+        const warningCount = (health.warnings || []).length;
+        return `
+          <button class="quarterly-issue-button ${issue.id === selectedQuarterlyIssueId ? 'active' : ''}" type="button" data-issue-id="${escapeHtml(issue.id)}">
+            <span class="quarterly-issue-title">${escapeHtml(issue.title || issue.issue)}</span>
+            <span class="quarterly-issue-meta">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.date || '')}${issue.lastEditedTime ? ` · edited ${escapeHtml(new Date(issue.lastEditedTime).toLocaleString('ko-KR'))}` : ''}</span>
+            <span class="quarterly-health-row">
+              <span class="quarterly-pill ${warningCount ? 'warn' : 'ok'}">${warningCount ? `${warningCount} warnings` : 'ok'}</span>
+              <span class="quarterly-pill">${health.albumCount || 0} albums</span>
+              <span class="quarterly-pill">${health.essayCount || 0} articles</span>
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      list.querySelectorAll('.quarterly-issue-button').forEach(button => {
+        button.addEventListener('click', () => {
+          selectedQuarterlyIssueId = button.dataset.issueId;
+          renderQuarterlyIssueList();
+          renderQuarterlyDetail();
+        });
+      });
+    }
+
+    function renderQuarterlyAlbumRow(album) {
+      const encoded = encodeURIComponent(JSON.stringify(album));
+      const image = album.imageUrl
+        ? `<img src="${escapeHtml(album.imageUrl)}" alt="">`
+        : '<div style="width:56px; height:56px; background:var(--bg-card); border:1px solid var(--border-color);"></div>';
+      const imageState = album.imageUrl
+        ? (/\/album\/images\/1000\//.test(album.imageUrl) ? 'high-res' : 'low-res')
+        : 'missing cover';
+      return `
+        <div class="quarterly-album-row">
+          ${image}
+          <div>
+            <div class="quarterly-album-name">${escapeHtml(album.album || '-')}</div>
+            <div class="quarterly-small-muted">${escapeHtml(album.artist || '-')} · Tier ${escapeHtml(album.tierRank)} ${escapeHtml(album.tierLabel || '')} · ${escapeHtml(imageState)}</div>
+          </div>
+          <button class="action-btn-sm" type="button" onclick="openQuarterlyCoverEditor('${encoded}')">Cover</button>
+        </div>
+      `;
+    }
+
+    function findQuarterlyAlbum(issue, target) {
+      const targetKey = target?.mediaKey || '';
+      const targetAlbum = String(target?.album || '').trim().toLowerCase();
+      const targetArtist = String(target?.artist || '').trim().toLowerCase();
+      for (const tier of issue?.tiers || []) {
+        for (const item of tier.items || []) {
+          const mediaKey = `${String(item.artist || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '')}::${String(item.album || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '')}`;
+          const directMatch = targetKey && mediaKey === targetKey;
+          const nameMatch = String(item.album || '').trim().toLowerCase() === targetAlbum
+            && String(item.artist || '').trim().toLowerCase() === targetArtist;
+          if (directMatch || nameMatch) {
+            return {
+              ...item,
+              tierRank: tier.rank,
+              tierLabel: tier.label,
+              mediaKey,
+            };
+          }
+        }
+      }
+      return null;
+    }
+
+    function formatCoverDimensions(item) {
+      if (item.dimensions?.width && item.dimensions?.height) {
+        return `${item.dimensions.width}x${item.dimensions.height}px`;
+      }
+      return 'size unknown';
+    }
+
+    function renderQuarterlyCoverAlerts(issue, health) {
+      const missingItems = health.coverHealth?.missingItems || [];
+      const lowResolutionItems = health.coverHealth?.lowResolutionItems || [];
+      const reviewItems = health.coverHealth?.reviewItems || [];
+      const unverifiedItems = health.coverHealth?.unverifiedItems || [];
+      const items = [
+        ...missingItems.map(item => ({ ...item, issueType: 'Missing cover' })),
+        ...lowResolutionItems.map(item => ({ ...item, issueType: `Low-resolution cover under ${health.coverHealth?.minCoverSidePx || 1000}px` })),
+        ...reviewItems.map(item => ({ ...item, issueType: `${item.sourceType || 'External'} high-res source review`, canResolve: true })),
+        ...unverifiedItems.map(item => ({ ...item, issueType: 'Image size could not be verified', canResolve: true })),
+      ];
+
+      if (!items.length) return '';
+
+      return `
+        <div class="quarterly-detail-section">
+          <div class="quarterly-panel-title">Cover Review</div>
+          <div class="quarterly-issue-alerts">
+            ${items.map((item, index) => {
+              const album = findQuarterlyAlbum(issue, item) || item;
+              const encoded = encodeURIComponent(JSON.stringify(album));
+              const reviewEncoded = encodeURIComponent(JSON.stringify(item));
+              return `
+                <div class="quarterly-issue-alert">
+                  <div>
+                    <strong>${escapeHtml(item.album || '-')}</strong>
+                    <div class="quarterly-small-muted">${escapeHtml(item.artist || '-')} · Tier ${escapeHtml(item.tierRank || '-')} ${escapeHtml(item.tierLabel || '')} · ${escapeHtml(item.issueType)} · ${escapeHtml(formatCoverDimensions(item))}</div>
+                  </div>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                    ${item.canResolve ? `<button class="action-btn-sm" type="button" onclick="markQuarterlyCoverResolved('${reviewEncoded}')">Mark Resolved</button>` : ''}
+                    <button class="action-btn-sm" type="button" onclick="openQuarterlyCoverEditor('${encoded}')">Fix Cover</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderQuarterlyDetail() {
+      const body = document.getElementById('quarterly-detail-body');
+      const issue = getQuarterlyIssue(selectedQuarterlyIssueId);
+      if (!issue) {
+        body.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Select an issue to inspect tiers, covers, and featured articles.</p>';
+        return;
+      }
+
+      const health = getIssueDiagnostics(issue.id);
+      const warnings = health.warnings || [];
+      const tierHtml = (issue.tiers || []).map(tier => `
+        <div class="quarterly-detail-section">
+          <div class="quarterly-panel-title">Tier ${escapeHtml(tier.rank)} · ${escapeHtml(tier.label || '')} · ${(tier.items || []).length} albums</div>
+          ${(tier.items || []).map(item => renderQuarterlyAlbumRow({ ...item, tierRank: tier.rank, tierLabel: tier.label })).join('') || '<p class="quarterly-small-muted" style="margin:0;">No albums in this tier.</p>'}
+        </div>
+      `).join('');
+
+      const articleHtml = (issue.essays || []).map((essay, index) => `
+        <div class="quarterly-article-editor">
+          <div>
+            <div class="quarterly-panel-title">Featured Article ${index + 1}</div>
+            <h4 class="quarterly-detail-title" style="font-size:0.95rem; margin-top:6px;">${escapeHtml(essay.title || 'Untitled')}</h4>
+            <p class="quarterly-small-muted" style="margin:6px 0 0;">${escapeHtml([essay.album, essay.artist, essay.tierLabel].filter(Boolean).join(' · '))}${essay.lastEditedTime ? ` · edited ${escapeHtml(new Date(essay.lastEditedTime).toLocaleString('ko-KR'))}` : ''}</p>
+          </div>
+          <textarea id="quarterly-essay-${index}" spellcheck="false">${escapeHtml(essay.content || '')}</textarea>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="action-btn-sm" type="button" onclick="saveQuarterlyArticle('${escapeHtml(issue.id)}', ${index})">Save to Notion</button>
+            <span class="quarterly-small-muted">${essay.content ? `${essay.content.length} chars loaded` : 'No parsed body content'}</span>
+          </div>
+        </div>
+      `).join('') || '<p class="quarterly-small-muted" style="margin:0;">No featured articles parsed for this issue.</p>';
+
+      body.innerHTML = `
+        <div class="quarterly-detail-section">
+          <div>
+            <h3 class="quarterly-detail-title">${escapeHtml(issue.title || issue.issue)}</h3>
+            <p class="quarterly-small-muted" style="margin:8px 0 0;">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.publicationStatus || '')} · ${escapeHtml(issue.date || '')}</p>
+          </div>
+          <div class="quarterly-health-row">
+            <span class="quarterly-pill">${health.tierHeadingCount || 0}/7 tiers</span>
+            <span class="quarterly-pill">${health.albumCount || 0} albums</span>
+            <span class="quarterly-pill ${health.coverHealth?.missing || health.coverHealth?.lowResolution ? 'warn' : 'ok'}">${health.coverHealth?.missing || 0} missing covers</span>
+            <span class="quarterly-pill ${health.coverHealth?.lowResolution ? 'warn' : 'ok'}">${health.coverHealth?.lowResolution || 0} low-res covers</span>
+            <span class="quarterly-pill">${(health.coverHealth?.review || 0) + (health.coverHealth?.unverified || 0)} cover reviews</span>
+            <span class="quarterly-pill ${health.articleHealth?.missingBody ? 'warn' : 'ok'}">${health.articleHealth?.missingBody || 0} empty articles</span>
+            <span class="quarterly-pill">${health.nowArticHealth?.matchedCount || 0} now artic.</span>
+          </div>
+          ${warnings.length ? `<div class="quarterly-small-muted">${warnings.map(escapeHtml).join('<br>')}</div>` : ''}
+        </div>
+
+        ${renderQuarterlyCoverAlerts(issue, health)}
+
+        <div class="quarterly-detail-section">
+          <div class="quarterly-panel-title">Issue Properties</div>
+          <div class="quarterly-field-grid">
+            <label class="form-col-group">
+              <span>Slug</span>
+              <input type="text" id="quarterly-issue-slug" value="${escapeHtml(issue.slug || '')}">
+            </label>
+            <label class="form-col-group">
+              <span>Issue</span>
+              <input type="text" id="quarterly-issue-label" value="${escapeHtml(issue.issue || '')}">
+            </label>
+            <label class="form-col-group" style="grid-column:1 / -1;">
+              <span>Excerpt</span>
+              <textarea id="quarterly-issue-excerpt">${escapeHtml(issue.excerpt || '')}</textarea>
+            </label>
+          </div>
+          <button class="action-btn-sm" type="button" style="width:fit-content;" onclick="saveQuarterlyIssueProperties('${escapeHtml(issue.id)}')">Save Issue Properties</button>
+        </div>
+
+        <div class="quarterly-media-editor" id="quarterly-media-editor">
+          <div>
+            <div class="quarterly-panel-title">Album Cover Override</div>
+            <div class="quarterly-album-name" id="quarterly-media-editor-title"></div>
+          </div>
+          <div class="quarterly-field-grid">
+            <label class="form-col-group">
+              <span>Image URL</span>
+              <input type="text" id="quarterly-cover-url">
+            </label>
+            <label class="form-col-group">
+              <span>Source URL</span>
+              <input type="text" id="quarterly-cover-source-url">
+            </label>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="action-btn-sm" type="button" onclick="saveQuarterlyCoverOverride()">Save Override</button>
+            <button class="action-btn-sm" type="button" onclick="refreshQuarterlyBugsCandidates()">Find Bugs Candidates</button>
+          </div>
+          <div class="quarterly-candidate-list" id="quarterly-cover-candidates"></div>
+        </div>
+
+        <div class="quarterly-detail-section">
+          <div class="quarterly-panel-title">Tier Albums</div>
+          ${tierHtml}
+        </div>
+
+        <div class="quarterly-detail-section">
+          <div class="quarterly-panel-title">Featured Articles</div>
+          ${articleHtml}
+        </div>
+      `;
+    }
+
+    function loadQuarterlyAdminData() {
+      const status = document.getElementById('quarterly-status');
+      status.textContent = 'Loading quarterly content diagnostics...';
+      document.getElementById('quarterly-refresh-btn').disabled = true;
+
+      fetch(getQuarterlyAdminUrl(), {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
+      .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem('artic-admin-token');
+          adminToken = '';
+          checkAuth();
+          throw new Error('Unauthorized');
+        }
+        return parseQuarterlyResponse(res);
+      })
+      .then(data => {
+        quarterlyAdminData = data;
+        quarterlyLoaded = true;
+        selectedQuarterlyIssueId = selectedQuarterlyIssueId || data.archive?.issues?.[0]?.id || '';
+        renderQuarterlySummary(data.diagnostics?.summary || {});
+        renderQuarterlyIssueList();
+        renderQuarterlyDetail();
+        status.textContent = `Loaded ${data.archive?.issues?.length || 0} issues. Last check: ${new Date(data.diagnostics?.generatedAt || Date.now()).toLocaleString('ko-KR')}`;
+      })
+      .catch(err => {
+        console.error('Quarterly admin error:', err);
+        status.textContent = err.message;
+      })
+      .finally(() => {
+        document.getElementById('quarterly-refresh-btn').disabled = false;
+      });
+    }
+
+    document.getElementById('quarterly-refresh-btn').addEventListener('click', () => {
+      quarterlyLoaded = false;
+      loadQuarterlyAdminData();
+    });
+
+    let activeQuarterlyAlbum = null;
+
+    window.openQuarterlyCoverEditor = function(encodedAlbum) {
+      activeQuarterlyAlbum = JSON.parse(decodeURIComponent(encodedAlbum));
+      const editor = document.getElementById('quarterly-media-editor');
+      editor.classList.add('active');
+      document.getElementById('quarterly-media-editor-title').textContent = `${activeQuarterlyAlbum.artist || '-'} — ${activeQuarterlyAlbum.album || '-'}`;
+      document.getElementById('quarterly-cover-url').value = activeQuarterlyAlbum.imageUrl || '';
+      document.getElementById('quarterly-cover-source-url').value = activeQuarterlyAlbum.imageSourceUrl || activeQuarterlyAlbum.albumUrl || '';
+      document.getElementById('quarterly-cover-candidates').innerHTML = '';
+      editor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    window.saveQuarterlyCoverOverride = function() {
+      if (!activeQuarterlyAlbum) return;
+      const imageUrl = document.getElementById('quarterly-cover-url').value.trim();
+      const sourceUrl = document.getElementById('quarterly-cover-source-url').value.trim();
+      if (!imageUrl) {
+        alert('Image URL is required.');
+        return;
+      }
+      if (!/^https?:\/\/(?:image\.bugsm\.co\.kr|music\.bugs\.co\.kr|is[1-5]-ssl\.mzstatic\.com)\//i.test(imageUrl)) {
+        alert('Use a Bugs or Apple Music cover image URL.');
+        return;
+      }
+      if (sourceUrl && !/^https?:\/\/(?:music\.bugs\.co\.kr|www\.bugs\.co\.kr|bugs\.co\.kr|music\.apple\.com)\//i.test(sourceUrl)) {
+        alert('Use a Bugs or Apple Music source URL.');
+        return;
+      }
+      if (!confirm(`Save cover override for ${activeQuarterlyAlbum.album}?`)) return;
+
+      postQuarterlyAdmin({
+        action: 'save_album_cover_override',
+        album: activeQuarterlyAlbum.album,
+        artist: activeQuarterlyAlbum.artist,
+        mediaKey: activeQuarterlyAlbum.mediaKey,
+        imageUrl,
+        sourceUrl,
+        source: 'Bugs',
+        verified: true
+      })
+      .then(() => {
+        alert('Cover override saved.');
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message));
+    };
+
+    window.markQuarterlyCoverResolved = function(encodedItem) {
+      const item = JSON.parse(decodeURIComponent(encodedItem));
+      const dimensions = item.dimensions?.width && item.dimensions?.height
+        ? `${item.dimensions.width}x${item.dimensions.height}px`
+        : 'size unknown';
+      if (!confirm(`Mark this cover as resolved?\n\n${item.artist} — ${item.album}\n${item.sourceType || 'External'} · ${dimensions}`)) return;
+
+      postQuarterlyAdmin({
+        action: 'save_cover_review_status',
+        mediaKey: item.mediaKey,
+        album: item.album,
+        artist: item.artist,
+        status: 'resolved',
+        note: 'Marked as acceptable in admin dashboard.',
+        sourceType: item.sourceType || '',
+        dimensions: item.dimensions || null,
+        imageUrl: item.imageUrl || ''
+      })
+      .then(() => {
+        alert('Cover review marked resolved.');
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message));
+    };
+
+    window.refreshQuarterlyBugsCandidates = function() {
+      if (!activeQuarterlyAlbum) return;
+      const list = document.getElementById('quarterly-cover-candidates');
+      list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Searching Bugs...</p>';
+      postQuarterlyAdmin({
+        action: 'refresh_bugs_cover_candidate',
+        album: activeQuarterlyAlbum.album,
+        artist: activeQuarterlyAlbum.artist
+      })
+      .then(data => {
+        const candidates = data.candidates || [];
+        if (!candidates.length) {
+          list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No Bugs candidates found.</p>';
+          return;
+        }
+        list.innerHTML = candidates.map((candidate, index) => `
+          <div class="quarterly-candidate">
+            <img src="${escapeHtml(candidate.imageUrl)}" alt="">
+            <div>
+              <div class="quarterly-album-name">${escapeHtml(candidate.album)} · ${escapeHtml(candidate.artist)}</div>
+              <div class="quarterly-small-muted">${escapeHtml(candidate.text || candidate.albumUrl || '')}</div>
+            </div>
+            <button class="action-btn-sm" type="button" onclick="useQuarterlyCandidate(${index})">Use</button>
+          </div>
+        `).join('');
+        window.quarterlyCoverCandidates = candidates;
+      })
+      .catch(err => {
+        list.innerHTML = `<p class="quarterly-small-muted" style="margin:0;">${escapeHtml(err.message)}</p>`;
+      });
+    };
+
+    window.useQuarterlyCandidate = function(index) {
+      const candidate = (window.quarterlyCoverCandidates || [])[index];
+      if (!candidate) return;
+      document.getElementById('quarterly-cover-url').value = candidate.imageUrl || '';
+      document.getElementById('quarterly-cover-source-url').value = candidate.albumUrl || '';
+    };
+
+    window.saveQuarterlyArticle = function(issueId, essayIndex) {
+      const issue = getQuarterlyIssue(issueId);
+      const essay = issue?.essays?.[essayIndex];
+      if (!essay?.id) return;
+      const textarea = document.getElementById(`quarterly-essay-${essayIndex}`);
+      const content = textarea.value.trim();
+      if (!content) {
+        alert('Article body cannot be empty.');
+        return;
+      }
+      const previousLength = String(essay.content || '').length;
+      const nextLength = content.length;
+      const message = [
+        `Save article body to Notion page "${essay.title}"?`,
+        '',
+        'This replaces the current editable body blocks on that page.',
+        `Current parsed length: ${previousLength} chars`,
+        `New length: ${nextLength} chars`
+      ].join('\n');
+      if (!confirm(message)) return;
+
+      postQuarterlyAdmin({
+        action: 'save_article_content',
+        pageId: essay.id,
+        expectedTitle: essay.title || '',
+        expectedLastEditedTime: essay.lastEditedTime || '',
+        content
+      })
+      .then(() => {
+        alert('Article saved to Notion.');
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message));
+    };
+
+    window.saveQuarterlyIssueProperties = function(issueId) {
+      const issue = getQuarterlyIssue(issueId);
+      if (!issue?.id) return;
+      const slug = document.getElementById('quarterly-issue-slug').value.trim();
+      const issueLabel = document.getElementById('quarterly-issue-label').value.trim();
+      const excerpt = document.getElementById('quarterly-issue-excerpt').value.trim();
+      if (!confirm(`Save issue properties for "${issue.title}"?\n\nIf the Notion page changed after this dashboard loaded, the save will be rejected.`)) return;
+
+      postQuarterlyAdmin({
+        action: 'save_issue_properties',
+        pageId: issue.id,
+        expectedTitle: issue.title || '',
+        expectedLastEditedTime: issue.lastEditedTime || '',
+        properties: {
+          Slug: slug,
+          Issue: issueLabel,
+          Excerpt: excerpt
+        }
+      })
+      .then(() => {
+        alert('Issue properties saved.');
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message));
+    };
 
     checkAuth();
   });

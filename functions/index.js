@@ -6,17 +6,27 @@ const nodemailer = require("nodemailer");
 const cors = require("cors")({ origin: true });
 const fs = require("fs");
 const path = require("path");
+const {
+  VALID_ORDER_STATUSES,
+  getInventoryTransition,
+} = require("./order_inventory");
 
 admin.initializeApp();
 const db = admin.firestore();
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || (process.env.FUNCTIONS_EMULATOR === "true" ? "articadmin2026" : "");
-const VALID_ORDER_STATUSES = new Set(["pending", "paid", "shipped", "delivered"]);
-const FULFILLMENT_STATUSES = new Set(["shipped", "delivered"]);
 
 function parsePositiveInteger(value, fallback = 1) {
   const normalized = value === undefined || value === null || value === "" ? fallback : value;
   const num = Number(normalized);
   return Number.isInteger(num) && num > 0 ? num : null;
+}
+
+function isValidEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
+function isValidKoreanMobile(value) {
+  return /^01[016789]\d{7,8}$/.test(String(value || "").replace(/\D/g, ""));
 }
 
 // Load templates helper
@@ -43,7 +53,7 @@ async function sendEmail({ to, subject, body, html }) {
   const smtpPassword = process.env.SMTP_PASSWORD;
   const fromAddr = smtpUser || "admin@artic.live";
 
-  if (!smtpUser || !smtpPassword) {
+  if (process.env.FUNCTIONS_EMULATOR === "true" || !smtpUser || !smtpPassword) {
     console.log("\n=== [EMAIL MOCK] ===");
     console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
@@ -123,6 +133,14 @@ exports.checkout = onRequest((req, res) => {
 
       if (!product_id || !name || !email || !phone || !address) {
         res.status(400).json({ error: "Missing required fields" });
+        return;
+      }
+      if (!isValidEmail(email)) {
+        res.status(400).json({ error: "Invalid email format" });
+        return;
+      }
+      if (!isValidKoreanMobile(phone)) {
+        res.status(400).json({ error: "Invalid phone number format" });
         return;
       }
       if (!qty) {
@@ -404,16 +422,64 @@ exports.waitlist = onRequest((req, res) => {
         return;
       }
 
+      const regDateFormatted = new Date().toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "Asia/Seoul",
+      });
+      const customerSubject = "[artic.] quarterly artic. 대기명단 등록 완료";
+      const customerBody = `You are now on the waitlist.
+
+안녕하세요, ${name} 님.
+Quarterly. 대기명단 등록이 완료되었습니다.
+
+[등록 정보]
+- 이름: ${name}
+- 이메일: ${email}
+- 등록일: ${regDateFormatted}
+
+Quarterly. is a quarterly publication by artic. that delivers curated albums, artworks, and diverse artistic insights.
+
+Quarterly.는 artic.의 매 분기 발매된 앨범, 작품, 그리고 다양한 예술 소식을 전하는 분기별 정기간행물입니다.
+Quarterly.에 대한 새로운 소식을 제일 먼저 받아보세요.
+
+감사합니다.
+ⓒ 2026 artic. All Rights Reserved.`;
+
+      const customerEmailSent = await sendEmail({ to: email, subject: customerSubject, body: customerBody });
+      if (!customerEmailSent) {
+        res.status(400).json({ error: "invalid address" });
+        return;
+      }
+
       const subscriberData = {
         name,
         email,
         type: "quarterly",
-        welcome_email_sent: false,
+        welcome_email_sent: true,
         created_at: FieldValue.serverTimestamp(),
       };
 
       const docRef = await db.collection("subscribers").add(subscriberData);
       console.log(`Waitlist subscriber successfully saved to Firestore (ID: ${docRef.id}).`);
+
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@artic.live";
+      const totalSnapshot = await db.collection("subscribers").where("type", "==", "quarterly").get();
+      await sendEmail({
+        to: adminEmail,
+        subject: `[ADMIN] 새로운 Waitlist 구독 접수 - ${email}`,
+        body: `새로운 고객이 Quarterly Join Waitlist에 가입했습니다.
+
+[신청 정보]
+- 가입 이름: ${name}
+- 가입 이메일: ${email}
+- 가입 일시: ${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} (KST)
+- 현재 총 등록 인원: ${totalSnapshot.size}명
+
+Firestore 컬렉션 subscribers에 적재되었습니다.
+문서 ID: ${docRef.id}`,
+      });
 
       res.status(200).json({ success: true, saved_to_cloud: true, id: docRef.id });
     } catch (err) {
@@ -609,8 +675,8 @@ exports.products = onRequest((req, res) => {
           return;
         }
         // Seed default products in firestore
-        const p1 = { id: "1", name: "1MC1PD: The Interview", price: 15000, inventory: 10, status: "for-sale" };
-        const p2 = { id: "2", name: "Lyric Booklet", price: 0, inventory: 0, status: "Distributed in Listening Party" };
+        const p1 = { id: "1", name: "1MC1PD: The Interview", price: 15000, inventory: 10, status: "for-sale", note: "Limited Edition" };
+        const p2 = { id: "2", name: "Lyric Booklet", price: 0, inventory: 0, status: "not-for-sale", note: "Distributed in Listening Party" };
         await db.collection("products").doc(p1.id).set(p1);
         await db.collection("products").doc(p2.id).set(p2);
         res.status(200).json([p1, p2]);
@@ -703,21 +769,20 @@ exports.admin = onRequest((req, res) => {
               throw new Error("Order not found");
             }
             const oData = orderDoc.data();
-            const isDeducted = oData.inventory_deducted || false;
             const qty = parsePositiveInteger(oData.quantity, 1);
             if (!qty) {
               throw new Error("Invalid order quantity");
             }
+            const inventoryTransition = getInventoryTransition(oData, status);
 
             let updateData = {
               status: status,
-              tracking_number: tracking_number || ""
+              tracking_number: tracking_number || "",
+              inventory_deducted: inventoryTransition.inventory_deducted
             };
 
-            const shouldDeductInventory = FULFILLMENT_STATUSES.has(status);
-
             // Transition into fulfillment: deduct inventory once.
-            if (shouldDeductInventory && !isDeducted) {
+            if (inventoryTransition.action === "deduct") {
               const productRef = db.collection("products").doc(oData.product_id);
               const productDoc = await transaction.get(productRef);
               if (!productDoc.exists) {
@@ -736,12 +801,10 @@ exports.admin = onRequest((req, res) => {
                 inventory: newInventory,
                 status: newStatus
               });
-
-              updateData.inventory_deducted = true;
             }
 
             // Transition out of fulfillment: restore inventory if it had already been deducted.
-            if (!shouldDeductInventory && isDeducted) {
+            if (inventoryTransition.action === "restore") {
               const productRef = db.collection("products").doc(oData.product_id);
               const productDoc = await transaction.get(productRef);
               if (!productDoc.exists) {
@@ -755,8 +818,6 @@ exports.admin = onRequest((req, res) => {
                 inventory: restoredInventory,
                 status: restoredStatus
               });
-
-              updateData.inventory_deducted = false;
             }
 
             transaction.update(orderRef, updateData);
@@ -831,7 +892,7 @@ exports.admin = onRequest((req, res) => {
         }
 
         // Default: save/update product
-        let { id, name, price, inventory, status } = req.body;
+        let { id, name, price, inventory, status, note } = req.body;
         if (!name || price === undefined || inventory === undefined || !status) {
           res.status(400).json({ error: "Missing required fields" });
           return;
@@ -856,7 +917,8 @@ exports.admin = onRequest((req, res) => {
           name,
           price: Number(price),
           inventory: Number(inventory),
-          status
+          status,
+          note: note || ""
         };
 
         await db.collection("products").doc(id).set(productData);

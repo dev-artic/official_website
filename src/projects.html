@@ -76,219 +76,151 @@ additional_head: '<link rel="stylesheet" href="style.css">'
         });
     })();
 
-    document.addEventListener('projects-loaded', function() {
-      initDialScrollLogic();
-    });
+    var viewport = null;
+    var nodes = [];
+    var cards = [];
+    var activeYear = '';
+    var lastScrollLeft = 0;
+    var wheelTimeout = null;
+    var snapTimeout = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const viewport = document.getElementById('dial-viewport');
-      // nodes/cards queried dynamically after projects-loaded
-      let nodes = [];
-      let cards = [];
-      let activeYear = '';
-      let lastScrollLeft = 0;
+    function getDialPadding() {
+      return window.innerWidth >= 768 ? 40 : 24;
+    }
 
-      // Desktop: Translate vertical/horizontal mouse wheel scroll to horizontal container scroll with smooth snapping
-      let wheelTimeout = null;
-      let snapTimeout = null;
+    function getFirstActiveCard() {
+      if (!viewport || !cards.length) return null;
 
-      viewport.addEventListener('wheel', (e) => {
+      var viewRect = viewport.getBoundingClientRect();
+      var refPoint = viewRect.left + getDialPadding();
+
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var cardRect = card.getBoundingClientRect();
+        var cardCenter = cardRect.left + cardRect.width / 2;
+        if (cardCenter >= refPoint) {
+          return card;
+        }
+      }
+
+      return cards[cards.length - 1] || null;
+    }
+
+    function updateActiveYear() {
+      if (!viewport || !cards.length) return;
+
+      var scrollLeft = viewport.scrollLeft;
+      var direction = scrollLeft > lastScrollLeft ? 'right' : 'left';
+      lastScrollLeft = scrollLeft;
+
+      var activeCard = getFirstActiveCard();
+      if (!activeCard) return;
+
+      var parentNode = activeCard.closest('.dial-year-node');
+      if (!parentNode) return;
+
+      var year = parentNode.dataset.year;
+      if (year === activeYear) return;
+
+      activeYear = year;
+      nodes.forEach(function(node) {
+        var title = node.querySelector('.year-title');
+        if (title) title.classList.remove('active-pop-right', 'active-pop-left');
+      });
+
+      var activeTitle = parentNode.querySelector('.year-title');
+      if (activeTitle) {
+        activeTitle.classList.add(direction === 'right' ? 'active-pop-right' : 'active-pop-left');
+      }
+    }
+
+    function scrollToYearNode(node) {
+      if (!viewport || !node) return;
+
+      var firstCard = node.querySelector('.project-card');
+      if (!firstCard) return;
+
+      var viewRect = viewport.getBoundingClientRect();
+      var cardRect = firstCard.getBoundingClientRect();
+      var targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - getDialPadding();
+
+      if (wheelTimeout) clearTimeout(wheelTimeout);
+      if (snapTimeout) clearTimeout(snapTimeout);
+
+      viewport.style.scrollSnapType = 'none';
+      viewport.style.scrollBehavior = 'auto';
+      viewport.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+
+      snapTimeout = setTimeout(function() {
+        viewport.style.scrollSnapType = 'x mandatory';
+        updateActiveYear();
+      }, 400);
+    }
+
+    function snapToClosestCard() {
+      var targetCard = getFirstActiveCard();
+
+      if (!viewport || !targetCard) {
+        if (viewport) viewport.style.scrollSnapType = 'x mandatory';
+        return;
+      }
+
+      var viewRect = viewport.getBoundingClientRect();
+      var cardRect = targetCard.getBoundingClientRect();
+      var targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - getDialPadding();
+
+      viewport.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+
+      snapTimeout = setTimeout(function() {
+        viewport.style.scrollSnapType = 'x mandatory';
+        updateActiveYear();
+      }, 400);
+    }
+
+    function initDialScrollLogic() {
+      viewport = document.getElementById('dial-viewport');
+      if (!viewport) return;
+
+      nodes = Array.from(document.querySelectorAll('.dial-year-node'));
+      cards = Array.from(document.querySelectorAll('.project-card'));
+
+      nodes.forEach(function(node) {
+        var title = node.querySelector('.year-title');
+        if (!title || title.dataset.dialClickBound === 'true') return;
+
+        title.dataset.dialClickBound = 'true';
+        title.style.cursor = 'pointer';
+        title.addEventListener('click', function() {
+          scrollToYearNode(node);
+        });
+      });
+
+      setTimeout(updateActiveYear, 100);
+    }
+
+    document.addEventListener('projects-loaded', initDialScrollLogic);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      viewport = document.getElementById('dial-viewport');
+      if (!viewport) return;
+
+      viewport.addEventListener('wheel', function(e) {
         if (window.innerWidth >= 768) {
-          // Prevent browser's default scroll behavior
           e.preventDefault();
 
-          // Clear any active snap timer
           if (wheelTimeout) clearTimeout(wheelTimeout);
           if (snapTimeout) clearTimeout(snapTimeout);
 
-          // Temporarily disable native CSS snap to allow fluid wheel movement
           viewport.style.scrollSnapType = 'none';
           viewport.style.scrollBehavior = 'auto';
+          viewport.scrollLeft += e.deltaY !== 0 ? e.deltaY : e.deltaX;
 
-          // Accumulate scroll (translating Y or X delta to horizontal scroll)
-          const delta = e.deltaY !== 0 ? e.deltaY : e.deltaX;
-          viewport.scrollLeft += delta;
-
-          // Set debounce timer to trigger snap when wheel interaction stops
-          wheelTimeout = setTimeout(() => {
-            snapToClosestCard();
-          }, 150);
+          wheelTimeout = setTimeout(snapToClosestCard, 150);
         }
       }, { passive: false });
 
-      function snapToClosestCard() {
-        const scrollLeft = viewport.scrollLeft;
-        const pad = window.innerWidth >= 768 ? 40 : 24;
-        const viewRect = viewport.getBoundingClientRect();
-        const refPoint = viewRect.left + pad;
-
-        let targetCard = null;
-
-        // Find the first card whose center coordinate has not crossed to the left of refPoint (50% threshold)
-        for (let i = 0; i < cards.length; i++) {
-          const card = cards[i];
-          const cardRect = card.getBoundingClientRect();
-          const cardCenter = cardRect.left + cardRect.width / 2;
-          if (cardCenter >= refPoint) {
-            targetCard = card;
-            break;
-          }
-        }
-
-        // Fallback to the last card if scrolled completely to the end
-        if (!targetCard && cards.length > 0) {
-          targetCard = cards[cards.length - 1];
-        }
-
-        if (targetCard) {
-          // Calculate the target scroll position for this card to align with scroll-padding-left
-          const cardRect = targetCard.getBoundingClientRect();
-          const targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - pad;
-          
-          viewport.scrollTo({
-            left: targetScrollLeft,
-            behavior: 'smooth'
-          });
-
-          // Restore scroll-snap-type after the smooth scroll finishes
-          snapTimeout = setTimeout(() => {
-            viewport.style.scrollSnapType = 'x mandatory';
-            // Trigger active year update manually once snapped
-            updateActiveYear();
-          }, 400);
-        } else {
-          // Fallback if no cards found
-          viewport.style.scrollSnapType = 'x mandatory';
-        }
-      }
-
-      // Track active year and trigger pop animation when it snaps/aligns to left edge
-      function updateActiveYear() {
-        const scrollLeft = viewport.scrollLeft;
-        const direction = scrollLeft > lastScrollLeft ? 'right' : 'left';
-        lastScrollLeft = scrollLeft;
-
-        let activeCard = null;
-        const viewRect = viewport.getBoundingClientRect();
-        
-        // Offset padding on mobile is 24px, on desktop is 40px
-        const pad = window.innerWidth >= 768 ? 40 : 24;
-        const refPoint = viewRect.left + pad;
-
-        // Find the first card whose center coordinate has not crossed the reference point
-        // Meaning the previous card has crossed by more than 50% of its width
-        for (let i = 0; i < cards.length; i++) {
-          const card = cards[i];
-          const cardRect = card.getBoundingClientRect();
-          const cardCenter = cardRect.left + cardRect.width / 2;
-          if (cardCenter >= refPoint) {
-            activeCard = card;
-            break;
-          }
-        }
-
-        // Fallback to the last card if scrolled completely to the end
-        if (!activeCard && cards.length > 0) {
-          activeCard = cards[cards.length - 1];
-        }
-
-        if (activeCard) {
-          // Find the parent year node to extract the year
-          const parentNode = activeCard.closest('.dial-year-node');
-          if (parentNode) {
-            const year = parentNode.dataset.year;
-            if (year !== activeYear) {
-              activeYear = year;
-              
-              // Reset active classes
-              nodes.forEach(n => {
-                const t = n.querySelector('.year-title');
-                if (t) {
-                  t.classList.remove('active-pop-right', 'active-pop-left');
-                }
-              });
-              
-              // Add directional chewy transition class to new active year title
-              const activeTitle = parentNode.querySelector('.year-title');
-              if (activeTitle) {
-                const popClass = direction === 'right' ? 'active-pop-right' : 'active-pop-left';
-                activeTitle.classList.add(popClass);
-              }
-            }
-          }
-        }
-      }
-
-      // Click on Year Title to scroll directly to that year's first project
-      nodes.forEach(node => {
-        const title = node.querySelector('.year-title');
-        if (title) {
-          title.style.cursor = 'pointer';
-          title.addEventListener('click', () => {
-            const firstCard = node.querySelector('.project-card');
-            if (firstCard) {
-              const pad = window.innerWidth >= 768 ? 40 : 24;
-              const viewRect = viewport.getBoundingClientRect();
-              const cardRect = firstCard.getBoundingClientRect();
-              const targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - pad;
-
-              if (wheelTimeout) clearTimeout(wheelTimeout);
-              if (snapTimeout) clearTimeout(snapTimeout);
-
-              viewport.style.scrollSnapType = 'none';
-              viewport.style.scrollBehavior = 'auto';
-
-              viewport.scrollTo({
-                left: targetScrollLeft,
-                behavior: 'smooth'
-              });
-
-              snapTimeout = setTimeout(() => {
-                viewport.style.scrollSnapType = 'x mandatory';
-                updateActiveYear();
-              }, 400);
-            }
-          });
-        }
-      });
-
-      // Track scroll position for header snapping transitions
       viewport.addEventListener('scroll', updateActiveYear);
       window.addEventListener('resize', updateActiveYear);
-      
-      // Initialize state
-      setTimeout(updateActiveYear, 100);
+      initDialScrollLogic();
     });
-
-    function initDialScrollLogic() {
-      // Re-query after DOM is populated
-      nodes = Array.from(document.querySelectorAll('.dial-year-node'));
-      cards = Array.from(document.querySelectorAll('.project-card'));
-      // Re-bind year title click handlers
-      nodes.forEach(function(node) {
-        var title = node.querySelector('.year-title');
-        if (title) {
-          title.style.cursor = 'pointer';
-          title.addEventListener('click', function() {
-            var firstCard = node.querySelector('.project-card');
-            if (firstCard) {
-              var pad = window.innerWidth >= 768 ? 40 : 24;
-              var viewRect = viewport.getBoundingClientRect();
-              var cardRect = firstCard.getBoundingClientRect();
-              var targetScrollLeft = viewport.scrollLeft + (cardRect.left - viewRect.left) - pad;
-              if (wheelTimeout) clearTimeout(wheelTimeout);
-              if (snapTimeout) clearTimeout(snapTimeout);
-              viewport.style.scrollSnapType = 'none';
-              viewport.style.scrollBehavior = 'auto';
-              viewport.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
-              snapTimeout = setTimeout(function() {
-                viewport.style.scrollSnapType = 'x mandatory';
-                updateActiveYear();
-              }, 400);
-            }
-          });
-        }
-      });
-      setTimeout(updateActiveYear, 100);
-    }
   </script>

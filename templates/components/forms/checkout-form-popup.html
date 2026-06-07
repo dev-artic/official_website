@@ -19,7 +19,14 @@
   </div>
   <div class="checkout-form-group">
     <label class="checkout-label">배송지 주소 *</label>
-    <input type="text" id="chk-address" class="checkout-input" required placeholder="배송 주소를 입력하세요">
+    <div class="checkout-address-row">
+      <input type="text" id="chk-address" class="checkout-input" required readonly placeholder="도로명 주소를 검색하세요">
+      <button type="button" id="chk-address-search-btn" class="checkout-address-btn">검색</button>
+    </div>
+  </div>
+  <div class="checkout-form-group">
+    <label class="checkout-label">상세 주소 *</label>
+    <input type="text" id="chk-address-detail" class="checkout-input" required placeholder="동/호수, 공동현관 등 상세 주소를 입력하세요">
   </div>
   <div class="checkout-form-group">
     <label class="checkout-label">수량 *</label>
@@ -94,6 +101,50 @@
   .checkout-input:focus, .checkout-select:focus, .checkout-textarea:focus {
     border-color: var(--text-primary);
     background-color: var(--bg-card);
+  }
+
+  .checkout-input.checkout-input-error,
+  .checkout-select.checkout-input-error,
+  .checkout-textarea.checkout-input-error {
+    border-color: #E06C75 !important;
+  }
+
+  @keyframes checkoutShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  .checkout-shake {
+    animation: checkoutShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  }
+
+  .checkout-address-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .checkout-address-row .checkout-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .checkout-address-btn {
+    flex: 0 0 auto;
+    border: 1px solid var(--border-color);
+    background-color: var(--text-primary);
+    color: var(--bg-primary);
+    padding: 0 12px;
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+  }
+
+  .checkout-address-btn:hover {
+    opacity: 0.8;
   }
 
   .checkout-textarea {

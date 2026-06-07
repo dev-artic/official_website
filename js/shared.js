@@ -10,6 +10,69 @@ window.addEventListener('pageshow', function(e) {
   window.scrollTo(0, 0);
 });
 
+// ── UAT API Routing ──
+// Localhost normally uses Firebase emulators. QA can explicitly opt into
+// production Cloud Functions with ?artic_uat=production, and reset with
+// ?artic_uat=local.
+(function initApiRouting() {
+  const PROD_API = {
+    waitlist: 'https://waitlist-4n2xy6gsxa-uc.a.run.app',
+    checkout: 'https://checkout-4n2xy6gsxa-uc.a.run.app',
+    products: 'https://products-4n2xy6gsxa-uc.a.run.app',
+    admin: 'https://admin-4n2xy6gsxa-uc.a.run.app'
+  };
+  const LOCAL_API = {
+    waitlist: '/api/waitlist',
+    checkout: '/api/checkout',
+    products: '/api/products',
+    admin: '/api/admin/products',
+    adminData: '/api/admin/data'
+  };
+
+  const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const params = new URLSearchParams(window.location.search);
+  const uatFlag = (params.get('artic_uat') || params.get('api_env') || '').toLowerCase();
+  const urlForcesProduction = ['production', 'prod', 'live'].includes(uatFlag);
+  const urlForcesLocal = ['local', 'emulator', 'staging'].includes(uatFlag);
+
+  try {
+    if (urlForcesProduction) {
+      localStorage.setItem('artic-api-env', 'production');
+    } else if (urlForcesLocal) {
+      localStorage.removeItem('artic-api-env');
+    }
+  } catch (err) {
+    console.warn('Unable to persist artic API environment preference.', err);
+  }
+
+  let forcedProduction = false;
+  try {
+    forcedProduction = localStorage.getItem('artic-api-env') === 'production';
+  } catch (err) {
+    forcedProduction = false;
+  }
+
+  const useProductionApi = !isLocalHost || urlForcesProduction || (!urlForcesLocal && forcedProduction);
+  window.articApiEnv = {
+    mode: useProductionApi ? 'production' : 'local',
+    isProductionApi: useProductionApi,
+    isLocalHost
+  };
+  document.documentElement.dataset.articApiMode = window.articApiEnv.mode;
+
+  window.getArticApiUrl = function getArticApiUrl(key) {
+    if (useProductionApi) {
+      if (key === 'adminData') return PROD_API.admin;
+      return PROD_API[key] || key;
+    }
+    return LOCAL_API[key] || key;
+  };
+
+  if (isLocalHost && useProductionApi) {
+    console.warn('[artic. UAT] Production API mode is enabled on localhost. Real server data and emails may be affected.');
+  }
+})();
+
 // ── 0. Dynamic Navigation Bar ──
 function buildNavigationBar() {
   const nav = document.querySelector('.nav-bar');
@@ -552,10 +615,7 @@ function initWaitlistForm() {
     
     if (messageDiv) messageDiv.innerHTML = '';
 
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const apiUrl = isLocal 
-      ? '/api/waitlist' 
-      : 'https://waitlist-4n2xy6gsxa-uc.a.run.app';
+    const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('waitlist') : '/api/waitlist';
 
     // Promise to ensure the loading line states last at least 800ms for smooth cinematic feel
     const animPromise = new Promise(resolve => setTimeout(resolve, 800));
@@ -596,8 +656,11 @@ function initWaitlistForm() {
       form.classList.remove('submitting');
       
       if (messageDiv) {
-        messageDiv.className = 'waitlist-message error';
-        messageDiv.textContent = err.message || 'An error occurred. Please try again.';
+        const message = err.message || 'An error occurred. Please try again.';
+        const isDuplicate = message.toLowerCase().includes('already registered');
+        const isInvalidAddress = message.toLowerCase().includes('invalid address');
+        messageDiv.className = `waitlist-message ${isDuplicate ? 'duplicate' : 'error'}`;
+        messageDiv.textContent = isInvalidAddress ? 'invalid address' : message;
       }
       if (messageWrapper) messageWrapper.classList.add('active');
     });

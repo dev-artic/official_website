@@ -215,7 +215,22 @@ const server = http.createServer((req, res) => {
   }
 
   // Serve static files
-  let safeUrl = req.url.split('?')[0];
+  const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`);
+  let safeUrl = requestUrl.pathname;
+  const directoryPath = path.join(__dirname, safeUrl);
+
+  if (!safeUrl.endsWith('/') && directoryPath.startsWith(__dirname)) {
+    try {
+      if (fs.existsSync(directoryPath) && fs.statSync(directoryPath).isDirectory()) {
+        res.writeHead(301, { Location: `${safeUrl}/${requestUrl.search}` });
+        res.end();
+        return;
+      }
+    } catch (err) {
+      console.error(`Failed to inspect static path ${directoryPath}:`, err);
+    }
+  }
+
   if (safeUrl.endsWith('/')) {
     safeUrl += 'index.html';
   }

@@ -427,7 +427,11 @@ body {
           <div class="grid-form-cols" style="margin-top: 16px;">
             <div class="form-col-group">
               <label>Status *</label>
-              <input type="text" id="prod-status" placeholder="e.g. for-sale, Distributed in Listening Party" required style="width: 100%; background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 4px; font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-primary); outline: none; transition: border-color 0.3s ease, background-color 0.3s ease;">
+              <input type="text" id="prod-status" placeholder="e.g. for-sale, not-for-sale, sold-out" required style="width: 100%; background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 4px; font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-primary); outline: none; transition: border-color 0.3s ease, background-color 0.3s ease;">
+            </div>
+            <div class="form-col-group">
+              <label>Note</label>
+              <input type="text" id="prod-note" placeholder="e.g. Distributed in Listening Party" style="width: 100%; background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 12px 14px; border-radius: 4px; font-family: var(--font-sans); font-size: 0.78rem; color: var(--text-primary); outline: none; transition: border-color 0.3s ease, background-color 0.3s ease;">
             </div>
             <div class="form-col-group" style="justify-content: flex-end; flex-direction: row; gap: 8px; align-items: flex-end;">
               <button type="button" class="auth-btn" id="delete-prod-btn" style="padding: 10px; background-color: #e74c3c; display: none;">Delete Product</button>
@@ -446,6 +450,7 @@ body {
               <th>Price</th>
               <th>Inventory</th>
               <th>Status</th>
+              <th>Note</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -513,7 +518,7 @@ body {
   © 2026 artic. All Rights Reserved
 </footer>
 
-  <script src="../js/shared.js"></script>
+  <script src="../js/shared.js?v=uat-api-routing-2"></script>
   <script>
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -571,8 +576,7 @@ body {
 
     // Load Data
     function loadDashboardData() {
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-      const apiUrl = isLocal ? '/api/admin/data' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('adminData') : '/api/admin/data';
 
       fetch(apiUrl, {
         headers: {
@@ -603,7 +607,7 @@ body {
       tbody.innerHTML = '';
 
       if (!products || products.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No products registered.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No products registered.</td></tr>`;
         return;
       }
 
@@ -615,27 +619,45 @@ body {
           <td>₩${p.price.toLocaleString()}</td>
           <td>${p.inventory}</td>
           <td><span class="status-badge ${p.status}">${p.status.replace(/-/g, ' ')}</span></td>
+          <td>${p.note || '-'}</td>
           <td>
-            <button class="action-btn-sm" onclick="editProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, ${p.inventory}, '${p.status}')">Edit</button>
+            <button class="action-btn-sm" onclick="editProductFromEncoded('${encodeProductForEdit(p)}')">Edit</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
+    function encodeProductForEdit(p) {
+      return encodeURIComponent(JSON.stringify({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        inventory: p.inventory,
+        status: p.status,
+        note: p.note || ''
+      }));
+    }
+
     let editingProductId = '';
     const deleteProdBtn = document.getElementById('delete-prod-btn');
     const prodForm = document.getElementById('product-form');
 
-    window.editProduct = function(id, name, price, inventory, status) {
+    window.editProductFromEncoded = function(encodedProduct) {
+      const product = JSON.parse(decodeURIComponent(encodedProduct));
+      editProduct(product.id, product.name, product.price, product.inventory, product.status, product.note || '');
+    };
+
+    function editProduct(id, name, price, inventory, status, note) {
       editingProductId = id;
       document.getElementById('prod-name').value = name;
       document.getElementById('prod-price').value = price;
       document.getElementById('prod-inventory').value = inventory;
       document.getElementById('prod-status').value = status;
+      document.getElementById('prod-note').value = note || '';
       deleteProdBtn.style.display = 'block'; // Show delete button when editing
       document.getElementById('prod-name').scrollIntoView({ behavior: 'smooth' });
-    };
+    }
 
     // Helper to generate slug from name
     function generateSlug(text) {
@@ -663,6 +685,7 @@ body {
       const price = Number(document.getElementById('prod-price').value);
       const inventory = Number(document.getElementById('prod-inventory').value);
       const status = document.getElementById('prod-status').value;
+      const note = document.getElementById('prod-note').value.trim();
 
       const id = editingProductId || generateSlug(name);
       if (!id) {
@@ -670,13 +693,13 @@ body {
         return;
       }
 
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname); const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app'; fetch(apiUrl, {
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('admin') : '/api/admin/products'; fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${adminToken}`
         },
-        body: JSON.stringify({ id, name, price, inventory, status })
+        body: JSON.stringify({ id, name, price, inventory, status, note })
       })
       .then(res => {
         if (!res.ok) throw new Error('Failed to save product');
@@ -696,8 +719,7 @@ body {
       if (!editingProductId) return;
       if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
 
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-      const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('admin') : '/api/admin/products';
 
       fetch(apiUrl, {
         method: 'POST',
@@ -790,8 +812,7 @@ body {
       const status = document.getElementById(`status-${orderId}`).value;
       const tracking_number = document.getElementById(`tracking-${orderId}`).value.trim();
 
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-      const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('admin') : '/api/admin/products';
 
       fetch(apiUrl, {
         method: 'POST',
@@ -824,8 +845,7 @@ body {
     window.deleteOrder = function(orderId) {
       if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
 
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-      const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('admin') : '/api/admin/products';
 
       fetch(apiUrl, {
         method: 'POST',
@@ -856,8 +876,7 @@ body {
     window.deleteSubscriber = function(subId) {
       if (!confirm('Are you sure you want to delete this subscriber? This action cannot be undone.')) return;
 
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-      const apiUrl = isLocal ? '/api/admin/products' : 'https://admin-4n2xy6gsxa-uc.a.run.app';
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('admin') : '/api/admin/products';
 
       fetch(apiUrl, {
         method: 'POST',
@@ -895,8 +914,9 @@ body {
       }
 
       subscribers.forEach(s => {
-        const mailStatusClass = s.welcome_email_sent === 1 ? 'sent-success' : 'sent-failed';
-        const mailStatusText = s.welcome_email_sent === 1 ? 'SENT' : 'PENDING';
+        const welcomeEmailSent = s.welcome_email_sent === true || s.welcome_email_sent === 1;
+        const mailStatusClass = welcomeEmailSent ? 'sent-success' : 'sent-failed';
+        const mailStatusText = welcomeEmailSent ? 'SENT' : 'PENDING';
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td style="font-weight:700;">${s.id}</td>

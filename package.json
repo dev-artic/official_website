@@ -9,6 +9,7 @@
     "emulators": "firebase emulators:start --only functions,firestore",
     "server": "node server.js",
     "dev": "concurrently \"npm run emulators\" \"npm run server\"",
-    "build": "node scripts/build_pages.js"
+    "build": "node scripts/build_pages.js",
+    "test:inventory": "node scripts/test_order_inventory_transitions.js"
   }
 }

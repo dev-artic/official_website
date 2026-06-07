@@ -97,6 +97,187 @@
     height: 100%;
   }
 
+.product-showcase-modal {
+    --modal-header-height: 400px;
+    --modal-image-max-height: 280px;
+    --modal-header-padding-y: 60px;
+    --modal-header-padding-x: 40px;
+  }
+
+  @media (max-width: 767px) {
+    .print-modal.product-showcase-modal .print-modal-container {
+      width: min(90vw, 360px);
+      height: min(680px, calc(100dvh - 32px));
+      max-height: calc(100dvh - 32px);
+      border-radius: 16px;
+      overflow: hidden !important;
+      overscroll-behavior: contain !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-image-wrap {
+      position: relative !important;
+      top: 0;
+      left: auto;
+      z-index: 5;
+      width: 100%;
+      height: var(--modal-header-height);
+      min-height: var(--modal-header-height);
+      max-height: var(--modal-header-height);
+      flex: none;
+      padding: var(--modal-header-padding-y) var(--modal-header-padding-x);
+      border-bottom: 1px solid var(--border-color);
+      box-sizing: border-box;
+      overflow: hidden;
+      contain: paint;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-image-wrap img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      max-height: var(--modal-image-max-height);
+      transform: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease, opacity 0.2s ease !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-image-wrap:hover img {
+      transform: none;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-image-wrap:active img {
+      transform: scale(1.025) rotate(-0.5deg);
+      filter: drop-shadow(0 25px 45px rgba(0, 0, 0, 0.18));
+    }
+
+    .print-modal.product-showcase-modal .print-modal-close {
+      transform: none !important;
+      transition: opacity 0.2s ease !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-info {
+      margin-top: 0 !important;
+      padding: 24px 20px 28px 20px !important;
+      gap: 24px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 1 1 auto !important;
+      min-height: 0;
+      overflow: hidden;
+      justify-content: flex-start !important;
+      box-sizing: border-box;
+    }
+
+    .print-modal.product-showcase-modal .print-info-title {
+      flex: 0 0 auto;
+    }
+
+    .print-modal.product-showcase-modal.is-header-collapsed:not(.is-checkout) .print-modal-info,
+    .print-modal.product-showcase-modal.is-header-collapsed.is-success .print-modal-info {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-info-footer {
+      margin-top: 24px !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-slider-viewport {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-slider-track {
+      min-height: 0;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-slide {
+      height: 0 !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      width: 33.333% !important;
+      display: flex !important;
+      flex-direction: column;
+    }
+
+    .print-modal.product-showcase-modal:not(.is-checkout):not(.is-success) .print-modal-slide.slide-details,
+    .print-modal.product-showcase-modal.is-checkout .print-modal-slide.slide-checkout,
+    .print-modal.product-showcase-modal.is-success .print-modal-slide.slide-success,
+    .print-modal.product-showcase-modal.is-transitioning .print-modal-slide {
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-slider-viewport,
+    .print-modal.product-showcase-modal .print-modal-slider-track {
+      height: 100% !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-slider-viewport {
+      width: 100% !important;
+      overflow: hidden !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-slider-track {
+      width: 300% !important;
+      display: flex !important;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .print-modal.product-showcase-modal.is-checkout .print-modal-info {
+      overflow: hidden !important;
+    }
+
+    .print-modal.product-showcase-modal.is-checkout .slide-checkout {
+      min-height: 0 !important;
+    }
+
+    .print-modal.product-showcase-modal.is-checkout .checkout-scroll-container {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none !important;
+      overflow-y: auto !important;
+      overscroll-behavior: contain;
+      padding-bottom: 8px !important;
+      margin-top: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .print-modal.product-showcase-modal.is-checkout .checkout-summary-box,
+    .print-modal.product-showcase-modal.is-checkout .checkout-buttons {
+      flex: 0 0 auto;
+    }
+
+    .print-modal.product-showcase-modal.is-transitioning .print-modal-image-wrap,
+    .print-modal.product-showcase-modal.is-transitioning .print-modal-image-wrap img,
+    .print-modal.product-showcase-modal.is-transitioning .print-modal-info {
+      transition: none !important;
+    }
+
+    .print-modal.product-showcase-modal .print-modal-slide,
+    .print-modal.product-showcase-modal.is-transitioning .print-modal-slide {
+      min-height: 0 !important;
+    }
+
+    .print-modal.product-showcase-modal:not(.is-checkout):not(.is-success) .print-modal-slide.slide-details,
+    .print-modal.product-showcase-modal.is-checkout .print-modal-slide.slide-checkout,
+    .print-modal.product-showcase-modal.is-success .print-modal-slide.slide-success {
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+  }
+
 /* Reset & Base overrides */
     * {
       box-sizing: border-box;
@@ -992,7 +1173,7 @@
   </div>
 
   <!-- Reusable Product Showcase / Checkout Modal Container -->
-<div class="print-modal" id="print-modal" aria-hidden="true" role="dialog">
+<div class="print-modal product-showcase-modal" id="print-modal" aria-hidden="true" role="dialog">
   <div class="print-modal-overlay" id="print-modal-overlay"></div>
   <div class="print-modal-container">
     <button class="print-modal-close" id="print-modal-close" aria-label="Close modal">&times;</button>
@@ -1011,7 +1192,7 @@
   © 2026 artic. All Rights Reserved
 </footer>
 
-  <script src="../../js/shared.js"></script>
+  <script src="../../js/shared.js?v=uat-api-routing-2"></script>
   <script>
 // == Instagram Reel Embed Toggle with UI Cropping ==
     (function() {

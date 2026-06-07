@@ -143,7 +143,7 @@
       };
 
       // Fetch dynamic statuses from database to populate PRINT_DATA
-      const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname); const apiUrl = isLocal ? '/api/products' : 'https://products-4n2xy6gsxa-uc.a.run.app'; fetch(apiUrl)
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('products') : '/api/products'; fetch(apiUrl)
         .then(res => {
           if (!res.ok) throw new Error('Failed to fetch products');
           return res.json();
@@ -153,22 +153,22 @@
             if (PRINT_DATA[p.id]) {
               const item = PRINT_DATA[p.id];
               item.price = p.price;
+              item.status = p.note || item.status;
               if (p.status === 'for-sale') {
                 item.statusClass = 'request-purchase';
                 item.statusText = 'Request Purchase';
-                item.status = `₩${p.price.toLocaleString()} (In Stock: ${p.inventory})`;
               } else if (p.status === 'out-of-stock') {
                 item.statusClass = 'out-of-stock';
                 item.statusText = 'Out of Stock';
-                item.status = 'Out of Stock';
               } else if (p.status === 'sold-out') {
                 item.statusClass = 'sold-out';
                 item.statusText = 'Sold Out';
-                item.status = 'Sold Out';
+              } else if (p.status === 'not-for-sale') {
+                item.statusClass = 'not-for-sale';
+                item.statusText = 'Not For Sale';
               } else {
                 item.statusClass = 'not-for-sale';
                 item.statusText = 'Not For Sale';
-                item.status = p.status;
               }
             }
           });
@@ -180,82 +180,151 @@
       const closeBtn = document.getElementById('print-modal-close');
       const modalImg = document.getElementById('print-modal-image');
       const modalInfo = document.getElementById('print-modal-info');
+      const MOBILE_HEADER_SCROLL_RANGE = 304;
+      let mobileHeaderProgress = 0;
+      let modalTouchY = null;
+
+      function setMobileHeaderProgress(progress) {
+        const clamped = Math.min(Math.max(progress, 0), 1);
+        const headerHeight = 400 - 304 * clamped;       // 400px -> 96px
+        const imageMaxHeight = 280 - 214 * clamped;     // 280px -> 66px
+        const paddingY = 60 - 44 * clamped;             // 60px -> 16px
+
+        modal.style.setProperty('--modal-header-height', `${headerHeight}px`);
+        modal.style.setProperty('--modal-image-max-height', `${imageMaxHeight}px`);
+        modal.style.setProperty('--modal-header-padding-y', `${paddingY}px`);
+        modal.classList.toggle('is-header-collapsed', clamped >= 0.999);
+        mobileHeaderProgress = clamped;
+      }
 
       function resetMobileCollapsingHeader() {
-        const imageWrap = modal.querySelector('.print-modal-image-wrap');
-        if (!imageWrap) return;
-        
-        const inTransition = modal.classList.contains('is-transitioning');
-        if (!inTransition) {
-          imageWrap.classList.add('resetting');
-          if (modalImg) {
-            modalImg.classList.add('resetting');
-          }
-          if (closeBtn) {
-            closeBtn.classList.add('resetting');
-          }
+        modal.style.removeProperty('--modal-header-height');
+        modal.style.removeProperty('--modal-image-max-height');
+        modal.style.removeProperty('--modal-header-padding-y');
+        modal.classList.remove('is-header-collapsed');
+        mobileHeaderProgress = 0;
+      }
+
+      function getActiveModalScroller() {
+        if (modal.classList.contains('is-checkout')) {
+          return modal.querySelector('.checkout-scroll-container');
         }
-        
-        imageWrap.style.height = '';
-        imageWrap.style.padding = '';
-        if (modalImg) {
-          modalImg.style.maxHeight = '';
-        }
-        if (!inTransition) {
-          imageWrap.style.transform = '';
-          if (closeBtn) {
-            closeBtn.style.transform = '';
-          }
-        }
-        
-        setTimeout(() => {
-          imageWrap.classList.remove('resetting');
-          if (modalImg) {
-            modalImg.classList.remove('resetting');
-          }
-          if (closeBtn) {
-            closeBtn.classList.remove('resetting');
-          }
-        }, 300);
+        return modalInfo;
+      }
+
+      function resetActiveModalScroller() {
+        const scroller = getActiveModalScroller();
+        if (scroller) scroller.scrollTop = 0;
       }
 
       function handleModalScroll() {
         if (window.innerWidth < 768) {
-          const container = modal.querySelector('.print-modal-container');
-          const imageWrap = modal.querySelector('.print-modal-image-wrap');
-          if (container && imageWrap) {
-            const scrollTop = container.scrollTop;
-            
-            if (modal.classList.contains('is-transitioning')) {
-              // Only update translateY to follow smooth scroll during transition
-              imageWrap.style.transform = `translateY(${scrollTop}px)`;
-              if (closeBtn) {
-                closeBtn.style.transform = `translateY(${scrollTop}px)`;
-              }
-              return;
-            }
-            
-            const maxScrollLimit = container.scrollHeight - container.clientHeight;
-            const cleanScrollTop = Math.min(Math.max(0, scrollTop), maxScrollLimit);
-            
-            const ratio = Math.min(cleanScrollTop / 315, 1);
-            const wrapHeight = 400 - 315 * ratio;     // 400px -> 85px
-            const imgMaxHeight = 280 - 220 * ratio;   // 280px -> 60px
-            const padding = 60 - 48 * ratio;          // 60px -> 12px
-            
-            imageWrap.style.height = `${wrapHeight}px`;
-            imageWrap.style.padding = `${padding}px 40px`;
-            imageWrap.style.transform = `translateY(${scrollTop}px)`;
-            if (closeBtn) {
-              closeBtn.style.transform = `translateY(${scrollTop}px)`;
-            }
-            if (modalImg) {
-              modalImg.style.maxHeight = `${imgMaxHeight}px`;
-            }
+          if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
+            setMobileHeaderProgress(1);
           }
         } else {
           resetMobileCollapsingHeader();
         }
+      }
+
+      function routeMobileModalScroll(deltaY) {
+        if (window.innerWidth >= 768 || !modal.classList.contains('is-active')) {
+          return false;
+        }
+
+        if (modal.classList.contains('is-checkout') || modal.classList.contains('is-success')) {
+          setMobileHeaderProgress(1);
+          return false;
+        }
+
+        const scroller = getActiveModalScroller();
+        const scrollerTop = scroller ? scroller.scrollTop : 0;
+
+        if (deltaY > 0 && mobileHeaderProgress < 1) {
+          setMobileHeaderProgress(mobileHeaderProgress + deltaY / MOBILE_HEADER_SCROLL_RANGE);
+          return true;
+        }
+
+        if (deltaY < 0 && scrollerTop <= 0 && mobileHeaderProgress > 0) {
+          setMobileHeaderProgress(mobileHeaderProgress + deltaY / MOBILE_HEADER_SCROLL_RANGE);
+          return true;
+        }
+
+        return false;
+      }
+
+      function handleModalWheel(e) {
+        if (routeMobileModalScroll(e.deltaY)) {
+          e.preventDefault();
+          return;
+        }
+
+        if (window.innerWidth < 768 && mobileHeaderProgress >= 1) {
+          const scroller = getActiveModalScroller();
+          if (scroller && !scroller.contains(e.target)) {
+            const before = scroller.scrollTop;
+            scroller.scrollTop += e.deltaY;
+            if (scroller.scrollTop !== before) {
+              e.preventDefault();
+            }
+          }
+        }
+      }
+
+      function handleModalTouchStart(e) {
+        if (window.innerWidth >= 768 || !e.touches || e.touches.length !== 1) return;
+        modalTouchY = e.touches[0].clientY;
+      }
+
+      function handleModalTouchMove(e) {
+        if (modalTouchY === null || !e.touches || e.touches.length !== 1) return;
+        const currentY = e.touches[0].clientY;
+        const deltaY = modalTouchY - currentY;
+        if (routeMobileModalScroll(deltaY)) {
+          e.preventDefault();
+        }
+        modalTouchY = currentY;
+      }
+
+      function handleModalTouchEnd() {
+        modalTouchY = null;
+      }
+
+      function loadDaumPostcodeApi() {
+        if (window.daum && window.daum.Postcode) {
+          return Promise.resolve();
+        }
+
+        if (window.__articPostcodePromise) {
+          return window.__articPostcodePromise;
+        }
+
+        window.__articPostcodePromise = new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error('주소 검색 API를 불러오지 못했습니다.'));
+          document.head.appendChild(script);
+        });
+
+        return window.__articPostcodePromise;
+      }
+
+      function formatKoreanPhone(value) {
+        const digits = value.replace(/\D/g, '').slice(0, 11);
+        if (digits.length <= 3) return digits;
+        if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+        return `${digits.slice(0, 3)}-${digits.slice(3, digits.length - 4)}-${digits.slice(-4)}`;
+      }
+
+      function isValidCheckoutEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      }
+
+      function isValidKoreanMobile(value) {
+        const digits = value.replace(/\D/g, '');
+        return /^01[016789]\d{7,8}$/.test(digits);
       }
 
       function openModal(key) {
@@ -375,33 +444,93 @@
           const chkEmail = document.getElementById('chk-email');
           const chkPhone = document.getElementById('chk-phone');
           const chkAddress = document.getElementById('chk-address');
+          const chkAddressDetail = document.getElementById('chk-address-detail');
+          const addressSearchBtn = document.getElementById('chk-address-search-btn');
           const chkDepositor = document.getElementById('chk-depositor');
 
-          // Initialize submit button as disabled
-          submitBtn.disabled = true;
+          function getCheckoutFields() {
+            return [chkName, chkEmail, chkPhone, chkAddress, chkAddressDetail, chkDepositor, document.getElementById('chk-notes')].filter(Boolean);
+          }
 
-          function validateRequiredFields() {
-            const name = chkName.value.trim();
-            const email = chkEmail.value.trim();
-            const phone = chkPhone.value.trim();
-            const address = chkAddress.value.trim();
-            const depositor = chkDepositor.value.trim();
+          function clearCheckoutFieldError(field) {
+            if (!field) return;
+            field.classList.remove('checkout-input-error', 'checkout-shake');
+            field.removeAttribute('aria-invalid');
+          }
 
-            if (name && email && phone && address && depositor) {
-              submitBtn.disabled = false;
-            } else {
-              submitBtn.disabled = true;
+          function showCheckoutFieldError(field) {
+            if (!field) return;
+            field.classList.remove('checkout-shake');
+            field.classList.add('checkout-input-error');
+            field.setAttribute('aria-invalid', 'true');
+            void field.offsetWidth;
+            field.classList.add('checkout-shake');
+          }
+
+          function validateCheckoutForm({ reveal = false } = {}) {
+            const checks = [
+              { field: chkName, valid: chkName.value.trim().length > 0 },
+              { field: chkEmail, valid: isValidCheckoutEmail(chkEmail.value.trim()) },
+              { field: chkPhone, valid: isValidKoreanMobile(chkPhone.value.trim()) },
+              { field: chkAddress, valid: chkAddress.value.trim().length > 0 },
+              { field: chkAddressDetail, valid: chkAddressDetail.value.trim().length > 0 }
+            ];
+
+            let firstInvalid = null;
+            checks.forEach(({ field, valid }) => {
+              if (valid) {
+                clearCheckoutFieldError(field);
+                return;
+              }
+              if (!firstInvalid) firstInvalid = field;
+              if (reveal) showCheckoutFieldError(field);
+            });
+
+            if (reveal && firstInvalid) {
+              firstInvalid.scrollIntoView({ block: 'center', behavior: 'smooth' });
+              firstInvalid.focus({ preventScroll: true });
             }
+
+            return !firstInvalid;
           }
 
           chkName.addEventListener('input', function() {
             chkDepositor.value = chkName.value;
-            validateRequiredFields();
+            clearCheckoutFieldError(chkName);
           });
-          chkDepositor.addEventListener('input', validateRequiredFields);
-          chkEmail.addEventListener('input', validateRequiredFields);
-          chkPhone.addEventListener('input', validateRequiredFields);
-          chkAddress.addEventListener('input', validateRequiredFields);
+          getCheckoutFields().forEach(field => {
+            field.addEventListener('input', () => clearCheckoutFieldError(field));
+          });
+          chkEmail.addEventListener('blur', () => {
+            if (chkEmail.value.trim() && !isValidCheckoutEmail(chkEmail.value.trim())) {
+              showCheckoutFieldError(chkEmail);
+            }
+          });
+          chkPhone.addEventListener('input', () => {
+            chkPhone.value = formatKoreanPhone(chkPhone.value);
+          });
+          chkPhone.addEventListener('blur', () => {
+            if (chkPhone.value.trim() && !isValidKoreanMobile(chkPhone.value.trim())) {
+              showCheckoutFieldError(chkPhone);
+            }
+          });
+          addressSearchBtn.addEventListener('click', function() {
+            loadDaumPostcodeApi()
+              .then(() => {
+                new window.daum.Postcode({
+                  oncomplete: function(addressData) {
+                    const roadAddress = addressData.roadAddress || addressData.address;
+                    chkAddress.value = roadAddress;
+                    clearCheckoutFieldError(chkAddress);
+                    chkAddressDetail.focus();
+                  }
+                }).open();
+              })
+              .catch(err => {
+                console.error(err);
+                alert('주소 검색을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+              });
+          });
 
           quantitySelect.addEventListener('change', function() {
             const qty = parseInt(quantitySelect.value, 10);
@@ -414,7 +543,8 @@
           actionBtn.addEventListener('click', function() {
             modal.classList.add('is-transitioning');
             modal.classList.add('is-checkout');
-            resetMobileCollapsingHeader();
+            setMobileHeaderProgress(1);
+            resetActiveModalScroller();
             setTimeout(() => {
               modal.classList.remove('is-transitioning');
             }, 600);
@@ -423,7 +553,8 @@
           backBtn.addEventListener('click', function() {
             modal.classList.add('is-transitioning');
             modal.classList.remove('is-checkout');
-            resetMobileCollapsingHeader();
+            setMobileHeaderProgress(1);
+            resetActiveModalScroller();
             setTimeout(() => {
               modal.classList.remove('is-transitioning');
             }, 600);
@@ -437,12 +568,14 @@
             const name = chkName.value.trim();
             const email = chkEmail.value.trim();
             const phone = chkPhone.value.trim();
-            const address = chkAddress.value.trim();
+            const roadAddress = chkAddress.value.trim();
+            const addressDetail = chkAddressDetail.value.trim();
+            const address = `${roadAddress} ${addressDetail}`.trim();
             const quantity = parseInt(quantitySelect.value, 10);
             const depositor = chkDepositor.value.trim() || name;
             const notes = document.getElementById('chk-notes').value.trim();
 
-            if (!name || !email || !phone || !address || !depositor) {
+            if (!validateCheckoutForm({ reveal: true })) {
               return;
             }
 
@@ -459,10 +592,7 @@
 
             const payload = { product_id: key, name, email, phone, address, quantity, depositor, notes };
 
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const apiUrl = isLocal 
-              ? '/api/checkout' 
-              : 'https://checkout-4n2xy6gsxa-uc.a.run.app';
+            const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('checkout') : '/api/checkout';
 
             fetch(apiUrl, {
               method: 'POST',
@@ -478,7 +608,8 @@
               document.getElementById('success-email-display').textContent = email;
               modal.classList.add('is-transitioning');
               modal.classList.add('is-success');
-              resetMobileCollapsingHeader();
+              setMobileHeaderProgress(1);
+              resetActiveModalScroller();
               setTimeout(() => {
                 modal.classList.remove('is-transitioning');
               }, 600);
@@ -548,6 +679,11 @@
       const modalContainer = modal.querySelector('.print-modal-container');
       if (modalContainer) {
         modalContainer.addEventListener('scroll', handleModalScroll);
+        modalContainer.addEventListener('wheel', handleModalWheel, { passive: false });
+        modalContainer.addEventListener('touchstart', handleModalTouchStart, { passive: true });
+        modalContainer.addEventListener('touchmove', handleModalTouchMove, { passive: false });
+        modalContainer.addEventListener('touchend', handleModalTouchEnd);
+        modalContainer.addEventListener('touchcancel', handleModalTouchEnd);
       }
       window.addEventListener('resize', function() {
         if (window.innerWidth >= 768) {

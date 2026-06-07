@@ -574,16 +574,6 @@
     letter-spacing: 0.12em;
   }
 
-  .acha-empty-tier {
-    margin: 0;
-    padding-top: 18px;
-    border-top: 1px solid var(--border-color);
-    font-family: var(--font-sans);
-    font-size: 0.72rem;
-    line-height: 1.7;
-    color: var(--text-muted);
-  }
-
   .acha-source {
     display: inline-block;
     margin-top: 12px;
@@ -1680,7 +1670,7 @@
     const tiers = issue.tiers || [];
     const essays = issue.essays || [];
 
-    statsEl.innerHTML = tiers.map((tier) => [
+    statsEl.innerHTML = tiers.filter((tier) => (tier.items || []).some((item) => item.album)).map((tier) => [
       `Tier ${tier.rank || ''}${tier.label ? ` · ${tier.label}` : ''}`,
       `${(tier.items || []).filter((item) => item.album).length}`
     ]).map(([label, value]) => `
@@ -1699,9 +1689,8 @@
 
     essayReaderEl.innerHTML = '';
 
-    bodyEl.innerHTML = tiers.map((tier) => {
+    bodyEl.innerHTML = tiers.filter((tier) => (tier.items || []).some((item) => item.album)).map((tier) => {
       const canon = getTierCanon(data.tierCanon, tier);
-      const albumItems = (tier.items || []).filter((item) => item.album);
       return `
         <section class="acha-tier ${Number(tier.rank) <= 3 ? 'is-featured' : ''}">
           <div class="acha-tier-heading">
@@ -1713,14 +1702,14 @@
                 ${canon.criteria.map((criterion) => `<li>${escapeHtml(criterion)}</li>`).join('')}
               </ul>
             ` : ''}
-            <small>${escapeHtml(albumItems.length)} albums</small>
+            <small>${escapeHtml((tier.items || []).length)} albums</small>
           </div>
           <div class="acha-album-list">
-            ${albumItems.length ? albumItems.map((item) => renderAlbum(issue, {
+            ${(tier.items || []).filter((item) => item.album).map((item) => renderAlbum(issue, {
               ...item,
               tierRank: tier.rank,
               tierLabel: tier.label
-            })).join('') : '<p class="acha-empty-tier">No albums in this tier.</p>'}
+            })).join('')}
           </div>
         </section>
       `;

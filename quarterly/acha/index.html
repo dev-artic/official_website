@@ -1791,9 +1791,17 @@ body {
     }
   }
 
+  function getQuarterlyContentsApiUrl() {
+    if (window.getArticApiUrl) return window.getArticApiUrl('quarterlyContents');
+    const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    return isLocalHost
+      ? '/api/quarterly-contents'
+      : 'https://quarterlycontents-4n2xy6gsxa-uc.a.run.app';
+  }
+
   async function loadIssue() {
     try {
-      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('quarterlyContents') : '/api/quarterly-contents';
+      const apiUrl = getQuarterlyContentsApiUrl();
       const response = await fetch(apiUrl, { cache: 'no-cache' });
       if (!response.ok) throw new Error(`Archive API returned ${response.status}`);
       const data = await response.json();
@@ -1827,7 +1835,7 @@ body {
   © 2026 artic. All Rights Reserved
 </footer>
 
-  <script src="../../js/shared.js?v=uat-api-routing-2"></script>
+  <script src="../../js/shared.js?v=quarterly-archive-1"></script>
   
 </body>
 </html>

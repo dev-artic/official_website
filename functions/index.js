@@ -1,5 +1,6 @@
 const { onRequest } = require("firebase-functions/v2/https");
-const functions = require("firebase-functions");
+const { defineSecret } = require("firebase-functions/params");
+const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 const { FieldValue } = require("firebase-admin/firestore");
 const nodemailer = require("nodemailer");
@@ -13,7 +14,17 @@ const {
 
 admin.initializeApp();
 const db = admin.firestore();
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || (process.env.FUNCTIONS_EMULATOR === "true" ? "articadmin2026" : "");
+const ADMIN_TOKEN_SECRET = defineSecret("ADMIN_TOKEN");
+
+function getAdminToken() {
+  let secretValue = "";
+  try {
+    secretValue = ADMIN_TOKEN_SECRET.value();
+  } catch (err) {
+    secretValue = "";
+  }
+  return secretValue || process.env.ADMIN_TOKEN || (process.env.FUNCTIONS_EMULATOR === "true" ? "articadmin2026" : "");
+}
 
 function parsePositiveInteger(value, fallback = 1) {
   const normalized = value === undefined || value === null || value === "" ? fallback : value;
@@ -691,16 +702,17 @@ exports.products = onRequest((req, res) => {
   });
 });
 
-exports.admin = onRequest((req, res) => {
+exports.admin = onRequest({ secrets: [ADMIN_TOKEN_SECRET] }, (req, res) => {
   cors(req, res, async () => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 
     const authHeader = req.headers.authorization;
-    if (!ADMIN_TOKEN) {
+    const adminToken = getAdminToken();
+    if (!adminToken) {
       res.status(500).json({ error: "Admin token is not configured" });
       return;
     }
-    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== ADMIN_TOKEN) {
+    if (!authHeader || authHeader.replace(/^Bearer\s+/i, "") !== adminToken) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }

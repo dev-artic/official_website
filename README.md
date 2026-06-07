@@ -15,7 +15,7 @@
   <img src="https://img.shields.io/badge/Architecture-Modular%20Templates-black?style=flat" alt="Arch">
   <img src="https://img.shields.io/badge/Local%20Staging-Node%20server.js-lightgrey?style=flat" alt="Staging">
   <img src="https://img.shields.io/badge/Database-Firestore%20%26%20Notion-blue?style=flat" alt="DB">
-  <img src="https://img.shields.io/badge/Backend-Cloud%20Functions-orange?style=flat" alt="Backend">
+  <img src="https://img.shields.io/badge/Backend-Cloud%20Functions%20Node.js%2022-orange?style=flat" alt="Backend">
 </p>
 
 ---
@@ -80,10 +80,12 @@ Homepage/
 │   └── animations.css    # cinematic 페이드인, 스크롤 리빌, 마우스오버 줌 트랜지션 등
 ├── js/                   # [클라이언트 스크립트]
 │   └── shared.js         # 다크모드 상태 관리, 모바일 햄버거 토글, 아코디언/카러셀 모션 등 공통 로직
-├── functions/            # [백엔드 API] Node.js 기반 Firebase Cloud Functions 코드베이스
+├── functions/            # [백엔드 API] Node.js 22 기반 Firebase Cloud Functions 코드베이스
+│   ├── index.js                # checkout/waitlist/products/admin API 및 Firestore trigger
+│   ├── order_inventory.js      # 주문 배송 상태별 재고 차감/복구 판단 로직
+│   └── templates/              # 결제/구독 메일 HTML 템플릿
 ├── projects.json         # 메인 프리뷰 렌더링용 단일 데이터 소스
-├── server.js             # [로컬 스테이징] 로컬 디바이스용 HTTP 웹 서버 및 SQLite Proxy API 서버
-└── orders.db             # 로컬 테스트용 SQLite 가상 주문 데이터베이스
+└── server.js             # [로컬 스테이징] 정적 파일 서버 및 Firebase Emulator API 프록시
 ```
 
 ---
@@ -109,11 +111,9 @@ graph TD
         AutoSwitch{"API 호스트 자동 분기 <br> window.location.hostname"}
         FirebaseEmul["Firebase Local Emulator Suite <br> Functions :5001 / Suite UI :4000"]
         LocalFirestore[("가상 Firestore DB <br> Emulator :8080")]
-        SQLiteBackup[("SQLite 데이터 백업 <br> orders.db")]
 
         NodeServ -->|브라우저 로드| AutoSwitch
         AutoSwitch -->|Localhost 접속 시| FirebaseEmul
-        AutoSwitch -.->|Firebase emulator 미기동 시 Fallback| SQLiteBackup
         FirebaseEmul -->|데이터 적재| LocalFirestore
     end
 
@@ -142,7 +142,8 @@ graph TD
     ```
   * 이 스크립트는 `templates/`에 구성된 디자인 요소들을 `src/` 본문과 결합하여 최종 HTML을 빌드하고, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 통합하는 렌더링 최적화를 수행합니다.
 * **백엔드 API 로직 개발**:
-  * 대기명단 가입 및 결제 주문 처리는 **`functions/index.js`** 파일에서 Node.js를 기반으로 안전하게 설계 및 작성됩니다.
+  * 대기명단 가입 및 결제 주문 처리는 **`functions/index.js`** 파일에서 Node.js 22 기반 Firebase Functions로 설계 및 작성됩니다.
+  * 주문 상태별 재고 변경 규칙은 **`functions/order_inventory.js`** 에 분리되어 있으며, `npm run test:inventory`로 회귀 테스트합니다.
 
 ---
 
@@ -159,9 +160,21 @@ graph TD
      * **Node Proxy Server**: `localhost:8000` (정적 파일 서빙 및 API 프록시)
 2. **에뮬레이터 연동 확인**:
    * 브라우저에서 `http://localhost:8000`에 접속하여 프론트엔드 기능을 이용하면, 모든 API 요청이 로컬 에뮬레이터 백엔드로 자동 라우팅(Proxy)되어 100% 동일한 비즈니스 로직으로 실행됩니다.
+   * UAT가 필요한 경우 `?artic_uat=production`을 붙여 localhost에서도 production Cloud Functions를 명시적으로 사용할 수 있습니다. 이 모드는 실제 Firestore/SMTP에 영향을 줄 수 있으므로 승인된 QA에서만 사용합니다.
+   * 로컬 에뮬레이터로 되돌릴 때는 `?artic_uat=local`을 사용하거나 `localStorage`의 `artic-api-env` 값을 제거합니다.
 3. **가상 적재 데이터 및 이메일 확인**:
    * 폼 입력 제출 시 에뮬레이터 UI(`http://localhost:4000/firestore`)에서 실시간으로 저장된 가상 데이터를 조회할 수 있습니다.
    * 가입/결제 완료 시 발송되는 이메일 HTML 파일은 루트 디렉토리의 `scratch/` 폴더에 `last-customer-waitlist.html` 등의 미리보기 파일로 자동 생성되므로 브라우저에서 디자인을 검토할 수 있습니다.
+4. **필수 검증 명령**:
+   ```bash
+   npm run build
+   node scripts/validate_templates.js
+   node --check server.js
+   node --check functions/index.js
+   node --check functions/order_inventory.js
+   node --check scripts/test_order_inventory_transitions.js
+   npm run test:inventory
+   ```
 
 ---
 
@@ -178,13 +191,20 @@ graph TD
     *   **접속 도메인**: 웹사이트 `https://artic.live` | 어드민 `https://artic.live/admin`
     *   **데이터베이스**: 구글 클라우드에 구성된 **실제 운영 Firestore DB** (Firebase Console을 통해 접근)
     *   **특징**: 실제 사용자들의 가입 및 주문 정보가 적재되며, 결제 및 대기자 신청 완료 시 지정된 메일 발송 서버(SMTP)를 거쳐 메일 발신이 이루어집니다.
+    *   **런타임**: Firebase Cloud Functions는 Node.js 22 런타임으로 배포됩니다.
+    *   **Admin Secret**: 운영 admin bearer token은 Firebase Secret Manager의 `ADMIN_TOKEN`으로 관리합니다. 로컬 보관용 token은 `functions/.env.local`에 둘 수 있으며, 이 파일은 Git에 커밋하지 않습니다.
 *   **환경 변수 및 라우팅 자동화**:
     *   클라이언트 단의 공통 스크립트(`js/shared.js` 등)가 브라우저의 현재 호스트명(`window.location.hostname`)을 감지합니다.
     *   호스트가 `localhost` 또는 `127.0.0.1`일 때는 로컬 백엔드 주소(`http://localhost:8000/api`)로 통신하고, `artic.live` 도메인일 때는 실제 클라우드 백엔드 주소로 API 호출 경로가 자동 전환되므로 빌드 시 별도로 소스코드를 수정할 필요가 없습니다.
+    *   `?artic_uat=production` / `?artic_uat=local` 쿼리로 QA 중 API 라우팅을 명시적으로 전환할 수 있습니다.
 
 ---
 
 ### 3️⃣ 배포 단계 (Deployment Phase)
+* **0. README 동기화 게이트 (절대 규칙)**:
+  * production 배포 전에는 반드시 `README.md`를 처음부터 끝까지 읽고, 이번 변경으로 달라진 아키텍처/환경변수/명령어/QA 플로우/운영 제약이 있으면 함께 수정합니다.
+  * README 수정이 필요한 경우 배포 코드와 같은 커밋 또는 같은 배포 단위로 커밋/푸시합니다.
+  * README 수정이 필요 없다고 판단한 경우에도 “전체 README 검토 완료, 변경 없음”을 배포 보고에 명시합니다.
 * **A. 프론트엔드 배포 (GitHub Pages)**:
   * 로컬에서 컴파일러(`npm run build`) 실행 후, 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.
     ```bash
@@ -201,6 +221,17 @@ graph TD
     
     # 또는 특정 함수만 빠르게 배포 (예: waitlist)
     npx firebase-tools deploy --only functions:waitlist
+    ```
+  * admin 함수는 Secret Manager의 `ADMIN_TOKEN`에 의존하므로, token을 회전한 뒤에는 아래 순서로 반영합니다.
+    ```bash
+    # 값은 출력하지 않고 stdin으로 입력
+    printf "%s" "$ADMIN_TOKEN" | npx firebase-tools functions:secrets:set ADMIN_TOKEN --project artic-official-home
+    npx firebase-tools deploy --only functions:admin --project artic-official-home
+    ```
+  * 배포 후 다음 smoke를 확인합니다.
+    ```bash
+    npx firebase-tools functions:list --project artic-official-home
+    curl -sS https://products-4n2xy6gsxa-uc.a.run.app
     ```
 * **C. 유튜브 플레이리스트 갱신 자동화 (GitHub Actions Workflow)**:
   * 매주 월요일 오전 9시(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
@@ -229,10 +260,11 @@ graph TD
 ### 3. 백엔드 연동 폼 컴포넌트 (`templates/components/forms/`)
 * **`waitlist-form-embedded.html` [구독/대기 폼 - embedded 타입]**:
   * **사용처**: `quarterly/` 등 페이지 내부 임베드 섹션.
-  * **데이터 매핑**: 로컬 SQLite `quarterly_subscribers` 테이블 및 실서버 Cloud Functions `/waitlist` API를 경유하여 Firestore `quarterly_subscribers` 컬렉션에 적재됩니다.
+  * **데이터 매핑**: 로컬 Firebase Emulator 또는 실서버 Cloud Functions `/waitlist` API를 경유하여 Firestore `subscribers` 컬렉션에 적재됩니다.
 * **`checkout-form-popup.html` [주문 폼 - popup 타입]**:
   * **사용처**: `deus-ex-machina/` 등 LP/CD 구매 팝업 모달.
-  * **데이터 매핑**: 로컬 SQLite `orders` 테이블 및 실서버 Cloud Functions `/checkout` API를 경유하여 Firestore `orders` 컬렉션에 적재됩니다.
+  * **데이터 매핑**: 로컬 Firebase Emulator 또는 실서버 Cloud Functions `/checkout` API를 경유하여 Firestore `orders` 컬렉션에 적재됩니다.
+  * **재고 규칙**: 주문 생성과 `paid` 상태에서는 재고를 유지하고, `shipped` 진입 시 차감, `delivered`에서는 유지, `paid/pending`으로 되돌릴 때 복구합니다.
 
 ### 4. 프로젝트 특화 컴포넌트 (`templates/components/projects/`)
 * **`player.html`**: 중앙 오디오 플레이 위젯 및 프로그레스바 트랙.
@@ -338,4 +370,3 @@ graph TD
 - [x] 메일 발송 잘 되고 있는지 테스트발송해서 확인 (어드민 수령 메일 단일화 완료)
 - [x] 음악 가사등록 시스템이 어떻게 구축되어있는지 확인 (벅스 가사 크롤링 자동화 및 100ms 싱크 에디팅 시스템 개선 완료)
 - [ ] 프로젝트 등록 방식도 어드민으로 옮길지 고민
-

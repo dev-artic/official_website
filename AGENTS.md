@@ -49,6 +49,9 @@ Homepage/
 
 Always run the following commands to build and verify your changes:
 
+### README Synchronization Gate
+Before every production deployment, read `README.md` from top to bottom and update any deployment-relevant documentation that changed with the work (architecture, environment variables, commands, QA flow, backend behavior, admin/product operations, or known limitations). Commit and push the README updates together with the deployed code. If no README changes are needed, explicitly note that the full README was reviewed and no update was required.
+
 ### Build Command
 Compile all source pages and templates into the final output:
 ```bash
@@ -138,4 +141,3 @@ chmod +x setup.sh
 ./setup.sh
 ```
 * 이 스크립트는 Node.js 설치 점검, Firebase CLI 전역 설치, 프로젝트 루트 및 Firebase Functions 디렉토리 의존성(`npm install`), Firebase 로그인 인증을 원스톱으로 처리합니다.
-

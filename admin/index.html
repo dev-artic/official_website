@@ -535,6 +535,13 @@ body {
     border-top: 1px solid var(--border-color);
   }
 
+  .quarterly-album-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
   .quarterly-album-row img {
     width: 56px;
     height: 56px;
@@ -556,7 +563,8 @@ body {
     gap: 10px;
   }
 
-  .quarterly-media-editor {
+  .quarterly-media-editor,
+  .quarterly-album-editor {
     border: 1px solid var(--border-color);
     background: var(--bg-card);
     padding: 16px;
@@ -586,7 +594,8 @@ body {
     overflow-wrap: anywhere;
   }
 
-  .quarterly-media-editor.active {
+  .quarterly-media-editor.active,
+  .quarterly-album-editor.active {
     display: grid;
   }
 
@@ -1373,8 +1382,17 @@ body {
       });
     }
 
+    function makeQuarterlyMediaKey(album, artist) {
+      const normalize = value => String(value || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+      return `${normalize(artist)}::${normalize(album)}`;
+    }
+
     function renderQuarterlyAlbumRow(album) {
-      const encoded = encodeURIComponent(JSON.stringify(album));
+      const albumPayload = {
+        ...album,
+        mediaKey: album.mediaKey || makeQuarterlyMediaKey(album.album, album.artist)
+      };
+      const encoded = encodeURIComponent(JSON.stringify(albumPayload));
       const image = album.imageUrl
         ? `<img src="${escapeHtml(album.imageUrl)}" alt="">`
         : '<div style="width:56px; height:56px; background:var(--bg-card); border:1px solid var(--border-color);"></div>';
@@ -1388,7 +1406,10 @@ body {
             <div class="quarterly-album-name">${escapeHtml(album.album || '-')}</div>
             <div class="quarterly-small-muted">${escapeHtml(album.artist || '-')} · Tier ${escapeHtml(album.tierRank)} ${escapeHtml(album.tierLabel || '')} · ${escapeHtml(imageState)}</div>
           </div>
-          <button class="action-btn-sm" type="button" onclick="openQuarterlyCoverEditor('${encoded}')">Cover</button>
+          <div class="quarterly-album-actions">
+            <button class="action-btn-sm" type="button" onclick="openQuarterlyMetadataEditor('${encoded}')">Edit</button>
+            <button class="action-btn-sm" type="button" onclick="openQuarterlyCoverEditor('${encoded}')">Cover</button>
+          </div>
         </div>
       `;
     }
@@ -1399,7 +1420,7 @@ body {
       const targetArtist = String(target?.artist || '').trim().toLowerCase();
       for (const tier of issue?.tiers || []) {
         for (const item of tier.items || []) {
-          const mediaKey = `${String(item.artist || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '')}::${String(item.album || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '')}`;
+          const mediaKey = makeQuarterlyMediaKey(item.album, item.artist);
           const directMatch = targetKey && mediaKey === targetKey;
           const nameMatch = String(item.album || '').trim().toLowerCase() === targetAlbum
             && String(item.artist || '').trim().toLowerCase() === targetArtist;
@@ -1534,6 +1555,48 @@ body {
           <button class="action-btn-sm" type="button" style="width:fit-content;" onclick="saveQuarterlyIssueProperties('${escapeHtml(issue.id)}')">Save Issue Properties</button>
         </div>
 
+        <div class="quarterly-album-editor" id="quarterly-album-editor">
+          <div>
+            <div class="quarterly-panel-title">Album Metadata</div>
+            <div class="quarterly-album-name" id="quarterly-album-editor-title"></div>
+            <div class="quarterly-small-muted" id="quarterly-album-editor-source"></div>
+          </div>
+          <div class="quarterly-field-grid">
+            <label class="form-col-group">
+              <span>Album</span>
+              <input type="text" id="quarterly-album-title">
+            </label>
+            <label class="form-col-group">
+              <span>Artist</span>
+              <input type="text" id="quarterly-album-artist">
+            </label>
+            <label class="form-col-group">
+              <span>Genre</span>
+              <input type="text" id="quarterly-album-genre">
+            </label>
+            <label class="form-col-group">
+              <span>Release Date</span>
+              <input type="text" id="quarterly-album-release-date">
+            </label>
+            <label class="form-col-group" style="grid-column:1 / -1;">
+              <span>Comment</span>
+              <textarea id="quarterly-album-comment"></textarea>
+            </label>
+            <label class="form-col-group" style="grid-column:1 / -1;">
+              <span>Tracks</span>
+              <textarea id="quarterly-album-tracks"></textarea>
+            </label>
+            <label class="form-col-group" style="grid-column:1 / -1;">
+              <span>Editor Note</span>
+              <textarea id="quarterly-album-note"></textarea>
+            </label>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <button class="action-btn-sm" type="button" onclick="saveQuarterlyAlbumMetadata()">Save to Notion</button>
+            <span class="quarterly-small-muted" id="quarterly-album-editor-status"></span>
+          </div>
+        </div>
+
         <div class="quarterly-media-editor" id="quarterly-media-editor">
           <div>
             <div class="quarterly-panel-title">Album Cover Override</div>
@@ -1611,6 +1674,111 @@ body {
     });
 
     let activeQuarterlyAlbum = null;
+    let activeQuarterlyMetadataAlbum = null;
+
+    function getQuarterlyAlbumEditorFields() {
+      return {
+        album: document.getElementById('quarterly-album-title').value.trim(),
+        artist: document.getElementById('quarterly-album-artist').value.trim(),
+        genre: document.getElementById('quarterly-album-genre').value.trim(),
+        releaseDate: document.getElementById('quarterly-album-release-date').value.trim(),
+        comment: document.getElementById('quarterly-album-comment').value.trim(),
+        tracks: document.getElementById('quarterly-album-tracks').value.trim(),
+        note: document.getElementById('quarterly-album-note').value.trim()
+      };
+    }
+
+    window.openQuarterlyMetadataEditor = function(encodedAlbum) {
+      activeQuarterlyMetadataAlbum = JSON.parse(decodeURIComponent(encodedAlbum));
+      const source = activeQuarterlyMetadataAlbum._source || {};
+      const editor = document.getElementById('quarterly-album-editor');
+      editor.classList.add('active');
+      document.getElementById('quarterly-album-editor-title').textContent = `${activeQuarterlyMetadataAlbum.artist || '-'} — ${activeQuarterlyMetadataAlbum.album || '-'}`;
+      document.getElementById('quarterly-album-editor-source').textContent = source.rowBlockId
+        ? `Notion table row · edited ${source.lastEditedTime ? new Date(source.lastEditedTime).toLocaleString('ko-KR') : 'unknown'}`
+        : 'This album row has no editable Notion source metadata. Refresh quarterly diagnostics after deployment.';
+      document.getElementById('quarterly-album-title').value = activeQuarterlyMetadataAlbum.album || '';
+      document.getElementById('quarterly-album-artist').value = activeQuarterlyMetadataAlbum.artist || '';
+      document.getElementById('quarterly-album-genre').value = activeQuarterlyMetadataAlbum.genre || '';
+      document.getElementById('quarterly-album-release-date').value = activeQuarterlyMetadataAlbum.releaseDate || '';
+      document.getElementById('quarterly-album-comment').value = activeQuarterlyMetadataAlbum.comment || '';
+      document.getElementById('quarterly-album-tracks').value = activeQuarterlyMetadataAlbum.tracks || '';
+      document.getElementById('quarterly-album-note').value = activeQuarterlyMetadataAlbum.note || '';
+      document.getElementById('quarterly-album-editor-status').textContent = source.rowBlockId ? 'Writes to live Notion.' : 'Not editable.';
+      editor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    window.saveQuarterlyAlbumMetadata = function() {
+      if (!activeQuarterlyMetadataAlbum) return;
+      const source = activeQuarterlyMetadataAlbum._source || {};
+      if (!source.rowBlockId) {
+        alert('This album row has no editable Notion source metadata. Refresh quarterly diagnostics after deployment.');
+        return;
+      }
+
+      const fields = getQuarterlyAlbumEditorFields();
+      if (!fields.album || !fields.artist) {
+        alert('Album and artist are required.');
+        return;
+      }
+
+      const previous = {
+        album: activeQuarterlyMetadataAlbum.album || '',
+        artist: activeQuarterlyMetadataAlbum.artist || '',
+        genre: activeQuarterlyMetadataAlbum.genre || '',
+        releaseDate: activeQuarterlyMetadataAlbum.releaseDate || '',
+        comment: activeQuarterlyMetadataAlbum.comment || '',
+        tracks: activeQuarterlyMetadataAlbum.tracks || '',
+        note: activeQuarterlyMetadataAlbum.note || ''
+      };
+      const changed = Object.keys(fields).filter(key => String(fields[key] || '') !== String(previous[key] || ''));
+      if (!changed.length) {
+        alert('No album metadata changes to save.');
+        return;
+      }
+
+      const mediaKeyChanged = makeQuarterlyMediaKey(fields.album, fields.artist) !== activeQuarterlyMetadataAlbum.mediaKey;
+      const lines = [
+        `Save album metadata to Notion?`,
+        '',
+        `${previous.artist} — ${previous.album}`,
+        `→ ${fields.artist} — ${fields.album}`,
+        '',
+        `Changed fields: ${changed.join(', ')}`,
+        mediaKeyChanged && activeQuarterlyMetadataAlbum.imageUrl
+          ? 'Existing cover will be preserved under the new album/artist key.'
+          : ''
+      ].filter(Boolean);
+      if (!confirm(lines.join('\n'))) return;
+
+      const status = document.getElementById('quarterly-album-editor-status');
+      status.textContent = 'Saving to Notion...';
+      postQuarterlyAdmin({
+        action: 'save_album_row_metadata',
+        rowBlockId: source.rowBlockId,
+        expectedLastEditedTime: source.lastEditedTime || '',
+        columnIndexes: source.columnIndexes || {},
+        fields,
+        expectedValues: previous,
+        previousMediaKey: activeQuarterlyMetadataAlbum.mediaKey,
+        imageUrl: activeQuarterlyMetadataAlbum.imageUrl || '',
+        sourceUrl: activeQuarterlyMetadataAlbum.imageSourceUrl || activeQuarterlyMetadataAlbum.albumUrl || '',
+        source: activeQuarterlyMetadataAlbum.imageSource || 'Bugs',
+        preserveCover: true
+      })
+      .then(data => {
+        const suffix = data.coverPreserveWarning
+          ? ` Cover preservation warning: ${data.coverPreserveWarning}`
+          : (data.coverPreserved ? ' Cover preserved.' : '');
+        alert(`Album metadata saved to Notion.${suffix}`);
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => {
+        status.textContent = 'Save failed.';
+        alert(err.message);
+      });
+    };
 
     window.openQuarterlyCoverEditor = function(encodedAlbum) {
       activeQuarterlyAlbum = JSON.parse(decodeURIComponent(encodedAlbum));

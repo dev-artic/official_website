@@ -83,9 +83,10 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    min-height: 44px;
     width: fit-content;
     margin-top: var(--space-md);
-    padding-bottom: 4px;
+    padding: 10px 0 8px;
     position: relative;
     white-space: nowrap;
     transition: color 0.3s ease;
@@ -106,6 +107,14 @@
 
   .acha-back:hover {
     color: var(--text-primary);
+  }
+
+  .acha-back:focus-visible,
+  .acha-inline-essay summary:focus-visible,
+  .acha-instagram-button:focus-visible,
+  .acha-instagram-close:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 4px;
   }
 
   .acha-back:hover::after {
@@ -324,6 +333,8 @@
     overflow-x: auto;
     border-top: 1px solid var(--border-color);
     scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
   }
 
   .acha-stat {
@@ -332,6 +343,7 @@
     gap: 8px;
     min-width: 0;
     padding-top: 14px;
+    scroll-snap-align: start;
   }
 
   .acha-stats::-webkit-scrollbar {
@@ -547,7 +559,9 @@
   }
 
   .acha-cover-strip img:hover,
-  .acha-album img:hover {
+  .acha-album img:hover,
+  .acha-cover-strip img:focus-visible,
+  .acha-album img:focus-visible {
     position: relative;
     z-index: 2;
     transform: scale(1.045);
@@ -668,6 +682,7 @@
     cursor: pointer;
     list-style: none;
     overflow: hidden;
+    touch-action: manipulation;
   }
 
   .acha-inline-essay summary::-webkit-details-marker {
@@ -761,12 +776,14 @@
     font-size: 1.1rem;
     font-weight: 300;
     line-height: 1;
-    transform: translateY(0);
-    transition: transform 0.3s ease;
+    transform: translateY(0) rotate(0deg);
+    transform-origin: center;
+    transition: transform 0.42s var(--ease-out-expo);
   }
 
   .acha-inline-essay.is-toggle-open .acha-essay-toggle::after {
     content: '−';
+    transform: translateY(0) rotate(180deg);
   }
 
   .acha-essay-heading {
@@ -788,7 +805,9 @@
 
   .acha-essay-toggle {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     font-size: 0.6rem;
     font-weight: 700;
     line-height: 1;
@@ -798,8 +817,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 38px;
-    padding: 0 14px;
+    min-height: 44px;
+    padding: 0 15px;
     border: 1px solid rgba(var(--acha-essay-ink-rgb), 0.54);
     border-radius: 0;
     background: rgba(var(--acha-essay-ink-rgb), 0.08);
@@ -887,8 +906,8 @@
   }
 
   .acha-instagram-close {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     border: 1px solid var(--border-color);
     border-radius: 0;
     background: transparent;
@@ -1090,6 +1109,8 @@
     .acha-tier,
     .acha-album,
     .acha-inline-essay[data-enhanced="true"] .acha-essay-content,
+    .acha-instagram-backdrop,
+    .acha-instagram-dialog,
     .acha-essay-visual img,
     .acha-essay-toggle::after {
       animation: none;
@@ -1124,25 +1145,133 @@
 
   @media (max-width: 767px) {
     .acha-page {
-      padding-top: 96px;
+      padding-top: clamp(112px, 18svh, 156px);
+      padding-bottom: var(--space-xl);
+    }
+
+    .acha-hero {
+      min-height: clamp(560px, 82svh, 720px);
+      align-content: end;
+      align-items: end;
+      gap: clamp(24px, 8vw, 42px);
+      padding-bottom: clamp(48px, 13vw, 76px);
+    }
+
+    .acha-back {
+      margin-top: 18px;
+    }
+
+    .acha-hero h1 {
+      font-size: clamp(3.2rem, 19vw, 5.4rem);
+      max-width: 7ch;
+    }
+
+    .acha-summary {
+      font-size: 0.8rem;
+      line-height: 1.78;
+      max-width: 36ch;
     }
 
     .acha-stats {
+      position: relative;
+      gap: 12px;
+      margin-top: clamp(28px, 9vw, 42px);
+      margin-right: calc(var(--gutter) * -1);
+      padding-right: var(--gutter);
+      padding-bottom: 8px;
       overflow-x: auto;
+      mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 34px), transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 34px), transparent 100%);
+    }
+
+    .acha-stat {
+      flex: 0 0 clamp(78px, 24vw, 104px);
+      gap: 6px;
+    }
+
+    .acha-stat strong {
+      font-size: clamp(1.55rem, 9vw, 2.2rem);
     }
 
     .acha-cover-strip img,
     .acha-cover-fallback {
-      width: 92px;
-      flex-basis: 92px;
+      width: 84px;
+      flex-basis: 84px;
     }
 
-    .acha-album,
-    .acha-tier.is-featured .acha-album,
+    .acha-cover-track,
+    .acha-cover-set {
+      gap: 8px;
+    }
+
+    .acha-cover-track {
+      padding: 8px 0;
+    }
+
     .acha-inline-essay,
     .acha-field,
     .acha-essay-list a {
       grid-template-columns: 1fr;
+    }
+
+    .acha-tier {
+      gap: clamp(24px, 8vw, 36px);
+      padding: clamp(48px, 14vw, 76px) 0;
+    }
+
+    .acha-tier-heading {
+      gap: 10px;
+    }
+
+    .acha-tier h2 {
+      font-size: clamp(2rem, 13vw, 3.35rem);
+      max-width: 8ch;
+    }
+
+    .acha-tier-summary {
+      max-width: 34ch;
+      font-size: 0.72rem;
+      line-height: 1.68;
+    }
+
+    .acha-tier-criteria {
+      font-size: 0.66rem;
+      line-height: 1.58;
+    }
+
+    .acha-album,
+    .acha-tier.is-featured .acha-album {
+      grid-template-columns: minmax(82px, 0.3fr) minmax(0, 1fr);
+      gap: 14px;
+      padding-top: 16px;
+    }
+
+    .acha-album-list {
+      row-gap: 22px;
+    }
+
+    .acha-album h3,
+    .acha-essay-list a {
+      font-size: clamp(1.08rem, 6vw, 1.55rem);
+      line-height: 1.12;
+      max-width: 16ch;
+    }
+
+    .acha-album-meta {
+      font-size: 0.68rem;
+      line-height: 1.5;
+    }
+
+    .acha-critic-line {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      line-height: 1.68;
+    }
+
+    .acha-field {
+      gap: 5px;
+      font-size: 0.68rem;
+      line-height: 1.62;
     }
 
     .acha-inline-essay summary {
@@ -1169,6 +1298,16 @@
       padding: 0 clamp(20px, 7vw, 32px) clamp(42px, 12vw, 58px);
     }
 
+    .acha-essay-actions {
+      gap: 8px;
+    }
+
+    .acha-essay-toggle,
+    .acha-instagram-button {
+      min-height: 44px;
+      align-items: center;
+    }
+
     .acha-essay-visual figcaption {
       right: clamp(18px, 6vw, 28px);
       bottom: clamp(16px, 5vw, 24px);
@@ -1180,15 +1319,23 @@
 
     .acha-inline-essay h4 {
       font-size: clamp(1.7rem, 10vw, 2.75rem);
+      max-width: 9ch;
     }
 
     .acha-inline-essay .acha-essay-content {
       column-count: 1;
+      padding: clamp(26px, 8vw, 38px) clamp(18px, 6vw, 28px);
+    }
+
+    .acha-inline-essay .acha-essay-content p,
+    .acha-inline-essay .acha-essay-content li {
+      font-size: 0.82rem;
+      line-height: 1.78;
     }
 
     .acha-album img,
     .acha-album .acha-cover-fallback {
-      max-width: 220px;
+      max-width: 108px;
       min-height: 0;
     }
 
@@ -1196,6 +1343,36 @@
     .acha-essay-visual .acha-cover-fallback {
       max-width: none;
       width: 100%;
+    }
+
+    .acha-instagram-modal {
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    }
+
+    .acha-instagram-dialog {
+      width: 100%;
+      max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    }
+
+    .acha-instagram-frame {
+      height: min(620px, calc(100dvh - 112px));
+    }
+  }
+
+  @media (max-width: 360px) {
+    .acha-album,
+    .acha-tier.is-featured .acha-album {
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .acha-album img,
+    .acha-album .acha-cover-fallback {
+      max-width: 92px;
+    }
+
+    .acha-inline-essay summary {
+      min-height: 330px;
     }
   }
 </style>
@@ -1515,12 +1692,12 @@
     return coverBezierAt(t, 1, 1);
   }
 
-  function setCoverMarqueeTarget(targetVelocity) {
+  function setCoverMarqueeTarget(targetVelocity, duration = 900) {
     coverMarqueeTransition = {
       from: coverMarqueeVelocity,
       to: targetVelocity,
       start: performance.now(),
-      duration: 900
+      duration
     };
     coverMarqueeTargetVelocity = targetVelocity;
   }
@@ -1541,13 +1718,19 @@
     coverMarqueeOffset = 0;
     coverMarqueeVelocity = 0;
     let lastTime = performance.now();
-    const baseVelocity = 0.034;
-    setCoverMarqueeTarget(baseVelocity);
+    const isMobileMarquee = window.matchMedia('(max-width: 767px)').matches;
+    const baseVelocity = isMobileMarquee ? 0.022 : 0.034;
+    const velocityEaseDuration = isMobileMarquee ? 1100 : 900;
+    setCoverMarqueeTarget(baseVelocity, velocityEaseDuration);
 
-    const handleEnter = () => setCoverMarqueeTarget(0);
-    const handleLeave = () => setCoverMarqueeTarget(baseVelocity);
+    const handleEnter = () => setCoverMarqueeTarget(0, velocityEaseDuration);
+    const handleLeave = () => setCoverMarqueeTarget(baseVelocity, velocityEaseDuration);
     strip.addEventListener('mouseenter', handleEnter);
     strip.addEventListener('mouseleave', handleLeave);
+    strip.addEventListener('pointerdown', handleEnter, { passive: true });
+    strip.addEventListener('pointerup', handleLeave, { passive: true });
+    strip.addEventListener('pointercancel', handleLeave, { passive: true });
+    strip.addEventListener('lostpointercapture', handleLeave, { passive: true });
 
     function tick(now) {
       const delta = Math.min(40, now - lastTime);
@@ -1586,7 +1769,7 @@
     }
 
     const revealPassedItems = () => {
-      const trigger = window.innerHeight * 0.86;
+      const trigger = window.innerHeight * (window.matchMedia('(max-width: 767px)').matches ? 0.9 : 0.86);
       items.forEach((item) => {
         if (item.classList.contains(visibleClass)) return;
         if (item.getBoundingClientRect().top < trigger) item.classList.add(visibleClass);
@@ -1604,7 +1787,10 @@
         entry.target.classList.add(visibleClass);
         observer.unobserve(entry.target);
       });
-    }, {
+    }, window.matchMedia('(max-width: 767px)').matches ? {
+      rootMargin: '0px 0px -8% 0px',
+      threshold: 0.08
+    } : {
       rootMargin: '0px 0px -12% 0px',
       threshold: 0.12
     });

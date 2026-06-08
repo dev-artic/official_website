@@ -509,7 +509,25 @@ function getCellByHeader(headers, cells, names, fallbackIndex) {
   return cells[targetIndex] || { text: "", pageMentions: [] };
 }
 
-function mapAlbumRow(headers, cells) {
+function getAlbumColumnIndexes(headers) {
+  const findIndex = (names, fallbackIndex) => {
+    const normalizedNames = names.map(normalizeHeader);
+    const index = headers.findIndex((header) => normalizedNames.includes(normalizeHeader(header)));
+    return index >= 0 ? index : fallbackIndex;
+  };
+
+  return {
+    album: findIndex(["앨범", "Album"], 0),
+    artist: findIndex(["아티스트", "Artist"], 1),
+    genre: findIndex(["장르", "Genre"], 2),
+    releaseDate: findIndex(["발매일", "Release Date"], 3),
+    comment: findIndex(["한줄평", "Comment"], 4),
+    tracks: findIndex(["추천 수록곡", "추천수록곡", "Tracks"], 5),
+    note: findIndex(["에디터 노트", "에디터노트", "Editor Note"], 6),
+  };
+}
+
+function mapAlbumRow(headers, cells, source = null) {
   const byHeader = {};
   headers.forEach((header, index) => {
     byHeader[normalizeHeader(header)] = cellText(cells[index]);
@@ -530,7 +548,7 @@ function mapAlbumRow(headers, cells) {
     return null;
   }
 
-  return {
+  const row = {
     album,
     artist,
     genre,
@@ -541,22 +559,47 @@ function mapAlbumRow(headers, cells) {
     companionEssay,
     companionEssayPages,
   };
+
+  if (source) {
+    row._source = {
+      type: "notion_table_row",
+      tableBlockId: source.tableBlockId || "",
+      rowBlockId: source.rowBlockId || "",
+      lastEditedTime: source.lastEditedTime || "",
+      headers: source.headers || headers,
+      columnIndexes: getAlbumColumnIndexes(headers),
+    };
+  }
+
+  return row;
 }
 
-function parseTableRows(tableRowBlocks) {
+function parseTableRows(tableRowBlocks, options = {}) {
   const rows = tableRowBlocks
     .filter((block) => block.type === "table_row")
-    .map((block) => (block.table_row?.cells || []).map(normalizeTableCell));
+    .map((block) => ({
+      block,
+      cells: (block.table_row?.cells || []).map(normalizeTableCell),
+    }));
 
   if (!rows.length) return [];
-  const firstRow = rows[0].map((cell) => normalizeHeader(cellText(cell)));
+  const firstRow = rows[0].cells.map((cell) => normalizeHeader(cellText(cell)));
   const hasHeader = firstRow.includes("앨범") || firstRow.includes("album");
   const headers = hasHeader
-    ? rows[0].map(cellText)
+    ? rows[0].cells.map(cellText)
     : ["앨범", "아티스트", "장르", "발매일", "한줄평", "추천 수록곡", "에디터 노트", "Companion Essay"];
   const dataRows = hasHeader ? rows.slice(1) : rows;
 
-  return dataRows.map((row) => mapAlbumRow(headers, row)).filter((row) => row && row.album);
+  return dataRows.map((row) => mapAlbumRow(
+    headers,
+    row.cells,
+    options.includeSourceMetadata ? {
+      tableBlockId: options.tableBlockId || "",
+      rowBlockId: row.block.id,
+      lastEditedTime: row.block.last_edited_time || "",
+      headers,
+    } : null,
+  )).filter((row) => row && row.album);
 }
 
 function parseEssayTableRows(tableRowBlocks) {
@@ -588,7 +631,7 @@ function parseEssayTableRows(tableRowBlocks) {
   }).filter(Boolean);
 }
 
-function parseQuarterlyBlocks(blocks, tableRowsByBlockId = {}) {
+function parseQuarterlyBlocks(blocks, tableRowsByBlockId = {}, options = {}) {
   const tiersByRank = new Map();
   const companionEssaysById = new Map();
   let currentTier = null;
@@ -626,7 +669,10 @@ function parseQuarterlyBlocks(blocks, tableRowsByBlockId = {}) {
 
     if (block.type === "table" && currentTier) {
       const tableRows = tableRowsByBlockId[block.id] || [];
-      const items = parseTableRows(tableRows);
+      const items = parseTableRows(tableRows, {
+        includeSourceMetadata: options.includeSourceMetadata,
+        tableBlockId: block.id,
+      });
       const tier = ensureTier(currentTier.rank);
       tier.items.push(...items);
       items.forEach((item) => {
@@ -758,6 +804,10 @@ async function getNotionPage(token, pageId) {
   return notionRequest(`/pages/${pageId}`, { token });
 }
 
+async function getNotionBlock(token, blockId) {
+  return notionRequest(`/blocks/${blockId}`, { token });
+}
+
 function getNotionPageTitle(page) {
   const properties = page?.properties || {};
   const titleProp = Object.values(properties).find((prop) => prop?.type === "title");
@@ -789,6 +839,83 @@ function assertExpectedLastEditedTime(page, expectedLastEditedTime) {
 function richTextFromPlainText(value) {
   const text = String(value || "");
   return text ? [{ type: "text", text: { content: text.slice(0, 2000) } }] : [];
+}
+
+function writableRichTextItem(item) {
+  if (!item || typeof item !== "object") return null;
+  const base = {
+    type: item.type,
+  };
+  if (item.annotations) base.annotations = item.annotations;
+
+  if (item.type === "text") {
+    base.text = {
+      content: item.text?.content || item.plain_text || "",
+    };
+    if (item.text?.link?.url) {
+      base.text.link = { url: item.text.link.url };
+    }
+    return base;
+  }
+
+  if (item.type === "mention" && item.mention) {
+    base.mention = item.mention;
+    return base;
+  }
+
+  if (item.type === "equation" && item.equation) {
+    base.equation = item.equation;
+    return base;
+  }
+
+  return item.plain_text ? { type: "text", text: { content: item.plain_text } } : null;
+}
+
+function writableRichTextCell(cell) {
+  if (!Array.isArray(cell)) return [];
+  return cell.map(writableRichTextItem).filter(Boolean);
+}
+
+async function updateNotionTableRowCells(token, rowBlockId, updatesByIndex, options = {}) {
+  const block = await getNotionBlock(token, rowBlockId);
+  if (block.type !== "table_row") {
+    const error = new Error("Notion block is not a table row.");
+    error.status = 400;
+    throw error;
+  }
+  assertExpectedLastEditedTime(block, options.expectedLastEditedTime);
+
+  const currentCells = block.table_row?.cells || [];
+  const expectedCells = options.expectedCells || {};
+  Object.entries(expectedCells).forEach(([index, expectedValue]) => {
+    const actualValue = textFromRichText(currentCells[Number(index)] || []);
+    if (normalizeCompareValue(actualValue) !== normalizeCompareValue(expectedValue)) {
+      const error = new Error("Notion table row changed after the admin dashboard loaded. Refresh diagnostics before saving.");
+      error.status = 409;
+      throw error;
+    }
+  });
+
+  const nextCells = currentCells.map((cell) => writableRichTextCell(cell));
+  Object.entries(updatesByIndex || {}).forEach(([index, value]) => {
+    const numericIndex = Number(index);
+    if (!Number.isInteger(numericIndex) || numericIndex < 0 || numericIndex >= nextCells.length) {
+      const error = new Error("Album metadata column index is out of range.");
+      error.status = 400;
+      throw error;
+    }
+    nextCells[numericIndex] = richTextFromPlainText(value);
+  });
+
+  return notionRequest(`/blocks/${rowBlockId}`, {
+    method: "PATCH",
+    token,
+    body: {
+      table_row: {
+        cells: nextCells,
+      },
+    },
+  });
 }
 
 function splitTextForNotionParagraphs(content) {
@@ -1004,7 +1131,7 @@ async function listBlockTree(token, blockId, options = {}) {
   return output;
 }
 
-async function parseIssueBlocks(token, pageId) {
+async function parseIssueBlocks(token, pageId, options = {}) {
   const blocks = await listBlockTree(token, pageId, { skipChildPages: true });
   const tableBlocks = blocks.filter((block) => block.type === "table" && block.has_children);
   const tableRowsByBlockId = {};
@@ -1013,7 +1140,9 @@ async function parseIssueBlocks(token, pageId) {
     tableRowsByBlockId[block.id] = await listBlockChildren(token, block.id);
   }));
 
-  const parsed = parseQuarterlyBlocks(blocks, tableRowsByBlockId);
+  const parsed = parseQuarterlyBlocks(blocks, tableRowsByBlockId, {
+    includeSourceMetadata: options.includeSourceMetadata,
+  });
   parsed.companionEssays = await Promise.all((parsed.companionEssays || []).map(async (essay) => {
     try {
       const essayPage = await getNotionPage(token, essay.id);
@@ -1053,7 +1182,7 @@ async function parseIssueBlocks(token, pageId) {
   return parsed;
 }
 
-async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(), mediaCache = null, nowArtic = null, externalLinks = null }) {
+async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(), mediaCache = null, nowArtic = null, externalLinks = null, includeSourceMetadata = false }) {
   if (!token) {
     const error = new Error("NOTION_API_KEY is not configured");
     error.status = 500;
@@ -1062,7 +1191,7 @@ async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(),
 
   const pages = await queryQuarterlyPages(token, dataSourceId);
   const issues = await Promise.all(pages.map(async (page) => {
-    const parsedBlocks = await parseIssueBlocks(token, page.id);
+    const parsedBlocks = await parseIssueBlocks(token, page.id, { includeSourceMetadata });
     return normalizeIssuePage(page, parsedBlocks);
   }));
 
@@ -1106,4 +1235,5 @@ module.exports = {
   replaceNotionPagePlainText,
   shouldPublishPage,
   updateNotionPageProperties,
+  updateNotionTableRowCells,
 };

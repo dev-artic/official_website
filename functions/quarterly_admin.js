@@ -5,6 +5,7 @@ const {
   makeAlbumMediaKey,
   replaceNotionPagePlainText,
   updateNotionPageProperties,
+  updateNotionTableRowCells,
 } = require("./quarterly_notion");
 
 const MEDIA_OVERRIDE_COLLECTION = "quarterly_media_overrides";
@@ -355,6 +356,7 @@ async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, n
     mediaCache: buildMediaCacheWithOverrides(mediaCache, overrides),
     nowArtic,
     externalLinks,
+    includeSourceMetadata: true,
   });
 
   return {
@@ -519,6 +521,79 @@ async function handleQuarterlyAdminAction({ body, token, db, fieldValue }) {
     };
     await db.collection(MEDIA_REVIEW_COLLECTION).doc(mediaKey).set(payload, { merge: true });
     return { success: true, mediaKey, review: { ...payload, updatedAt: new Date().toISOString() } };
+  }
+
+  if (action === "save_album_row_metadata") {
+    const rowBlockId = String(body.rowBlockId || "").trim();
+    const fields = body.fields || {};
+    const columnIndexes = body.columnIndexes || {};
+    if (!rowBlockId) {
+      const error = new Error("Missing required field (rowBlockId).");
+      error.status = 400;
+      throw error;
+    }
+
+    const allowedFields = new Set(["album", "artist", "genre", "releaseDate", "comment", "tracks", "note"]);
+    const updatesByIndex = {};
+    const expectedCells = {};
+    Object.entries(fields).forEach(([field, value]) => {
+      if (!allowedFields.has(field)) return;
+      const index = Number(columnIndexes[field]);
+      if (!Number.isInteger(index) || index < 0) return;
+      updatesByIndex[index] = String(value || "").trim();
+      if (body.expectedValues && Object.prototype.hasOwnProperty.call(body.expectedValues, field)) {
+        expectedCells[index] = body.expectedValues[field] || "";
+      }
+    });
+
+    if (!Object.keys(updatesByIndex).length) {
+      const error = new Error("No supported album metadata fields were provided.");
+      error.status = 400;
+      throw error;
+    }
+
+    const result = await updateNotionTableRowCells(token, rowBlockId, updatesByIndex, {
+      expectedLastEditedTime: body.expectedLastEditedTime || "",
+      expectedCells,
+    });
+
+    const nextAlbum = String(fields.album || body.expectedValues?.album || "").trim();
+    const nextArtist = String(fields.artist || body.expectedValues?.artist || "").trim();
+    const previousMediaKey = String(body.previousMediaKey || "").trim();
+    const nextMediaKey = nextAlbum && nextArtist ? makeAlbumMediaKey(nextAlbum, nextArtist) : "";
+    const response = {
+      success: true,
+      rowBlockId: result.id,
+      mediaKey: nextMediaKey,
+      coverPreserved: false,
+    };
+
+    if (body.preserveCover !== false && previousMediaKey && nextMediaKey && previousMediaKey !== nextMediaKey && body.imageUrl) {
+      try {
+        const imageUrl = getHighResolutionMediaUrl(body.imageUrl);
+        const sourceUrl = body.sourceUrl || body.albumUrl || "";
+        assertAllowedMediaUrl(imageUrl, sourceUrl);
+        const payload = {
+          mediaKey: nextMediaKey,
+          album: nextAlbum,
+          artist: nextArtist,
+          imageUrl,
+          albumUrl: sourceUrl,
+          sourceUrl,
+          source: body.source || "Bugs",
+          verified: true,
+          migratedFromMediaKey: previousMediaKey,
+          updatedAt: fieldValue.serverTimestamp(),
+          updatedBy: "admin-dashboard",
+        };
+        await db.collection(MEDIA_OVERRIDE_COLLECTION).doc(nextMediaKey).set(payload, { merge: true });
+        response.coverPreserved = true;
+      } catch (err) {
+        response.coverPreserveWarning = err.message;
+      }
+    }
+
+    return response;
   }
 
   if (action === "save_article_content") {

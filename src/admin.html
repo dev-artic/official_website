@@ -49,6 +49,32 @@ path_depth: "../"
     letter-spacing: 0.2em;
   }
 
+  .admin-title-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+  }
+
+  .admin-logout-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 8px 10px;
+    font-family: var(--font-sans);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .admin-logout-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+    background-color: var(--bg-card);
+  }
+
   /* Auth Form */
   .auth-container {
     max-width: 360px;
@@ -620,6 +646,17 @@ path_depth: "../"
     .quarterly-issue-alert {
       grid-template-columns: 1fr;
     }
+
+    .admin-title {
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .admin-title-actions {
+      align-items: flex-end;
+      flex-direction: column;
+      gap: 10px;
+    }
   }
 </style>
 
@@ -638,7 +675,10 @@ path_depth: "../"
   <div class="dashboard-container" id="admin-dashboard-box">
     <div class="admin-title">
       <span>Admin Dashboard</span>
-      <span class="sub-title">artic. management console</span>
+      <div class="admin-title-actions">
+        <span class="sub-title">artic. management console</span>
+        <button type="button" class="admin-logout-btn" id="admin-logout-btn">Logout</button>
+      </div>
     </div>
 
     <div class="admin-tabs">
@@ -801,6 +841,7 @@ path_depth: "../"
     const dashboardBox = document.getElementById('admin-dashboard-box');
     const passwordInput = document.getElementById('admin-password');
     const loginBtn = document.getElementById('admin-login-btn');
+    const logoutBtn = document.getElementById('admin-logout-btn');
     const authError = document.getElementById('admin-auth-error');
 
     const tabButtons = document.querySelectorAll('.admin-tab-btn');
@@ -837,6 +878,30 @@ path_depth: "../"
       }
     }
 
+    function clearDashboardData() {
+      document.getElementById('products-table-body').innerHTML = '';
+      document.getElementById('orders-table-body').innerHTML = '';
+      document.getElementById('subscribers-table-body').innerHTML = '';
+      document.getElementById('quarterly-summary-grid').innerHTML = '';
+      document.getElementById('quarterly-issue-list').innerHTML = '';
+      document.getElementById('quarterly-detail-body').innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Select an issue to inspect tiers, covers, and featured articles.</p>';
+      document.getElementById('quarterly-status').textContent = 'Quarterly data has not been loaded yet.';
+      document.getElementById('quarterly-override-count').textContent = '';
+      quarterlyAdminData = null;
+      selectedQuarterlyIssueId = '';
+      quarterlyLoaded = false;
+    }
+
+    function logoutAdmin() {
+      localStorage.removeItem('artic-admin-token');
+      adminToken = '';
+      passwordInput.value = '';
+      authError.style.display = 'none';
+      clearDashboardData();
+      checkAuth();
+      passwordInput.focus();
+    }
+
     loginBtn.addEventListener('click', () => {
       const pass = passwordInput.value.trim();
       if (!pass) {
@@ -854,6 +919,8 @@ path_depth: "../"
         loginBtn.click();
       }
     });
+
+    logoutBtn.addEventListener('click', logoutAdmin);
 
     // Load Data
     function loadDashboardData() {

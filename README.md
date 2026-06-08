@@ -196,6 +196,7 @@ graph TD
     *   **특징**: 실제 사용자들의 가입 및 주문 정보가 적재되며, 결제 및 대기자 신청 완료 시 지정된 메일 발송 서버(SMTP)를 거쳐 메일 발신이 이루어집니다.
     *   **런타임**: Firebase Cloud Functions는 Node.js 22 런타임으로 배포됩니다.
     *   **Admin Secret**: 운영 admin bearer token은 Firebase Secret Manager의 `ADMIN_TOKEN`으로 관리합니다. 로컬 보관용 token은 `functions/.env.local`에 둘 수 있으며, 이 파일은 Git에 커밋하지 않습니다.
+    *   **Admin Logout**: `/admin` dashboard의 Logout 버튼은 브라우저의 `localStorage.artic-admin-token`을 제거하고, dashboard DOM 데이터를 비운 뒤 login 화면과 password input focus로 되돌립니다.
     *   **Notion Secret**: Quarterly 아카이브 조회용 Notion integration token은 Firebase Secret Manager의 `NOTION_API_KEY`로 관리합니다. `분기별 결산` database는 해당 integration에 공유되어 있어야 하며, data source ID는 `NOTION_QUARTERLY_DATA_SOURCE_ID`로 override할 수 있습니다.
 *   **환경 변수 및 라우팅 자동화**:
     *   클라이언트 단의 공통 스크립트(`js/shared.js` 등)가 브라우저의 현재 호스트명(`window.location.hostname`)을 감지합니다.

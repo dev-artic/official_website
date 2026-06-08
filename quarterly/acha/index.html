@@ -1658,6 +1658,13 @@ body {
     animateInlineEssay(details, !details.classList.contains('is-toggle-open'));
   }
 
+  function closeOtherInlineEssays(activeDetails) {
+    document.querySelectorAll('.acha-inline-essay.is-toggle-open, .acha-inline-essay.is-expanding').forEach((details) => {
+      if (details === activeDetails || details.dataset.animating === 'true') return;
+      animateInlineEssay(details, false);
+    });
+  }
+
   function syncEssayFocusMode() {
     const activeEssay = document.querySelector('.acha-inline-essay.is-toggle-open, .acha-inline-essay.is-expanding');
     if (activeEssay) applyFocusPalette(activeEssay);
@@ -1711,6 +1718,7 @@ body {
   function animateInlineEssay(details, shouldOpen) {
     const content = details.querySelector('.acha-essay-content');
     if (!content) return;
+    if (shouldOpen) closeOtherInlineEssays(details);
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       details.open = true;
@@ -1781,7 +1789,7 @@ body {
       if (!summary || !content) return;
       const visualUrl = details.dataset.essayVisualUrl;
       setupEssayPalette(details, visualUrl);
-      const shouldStartOpen = details.open;
+      const shouldStartOpen = false;
       details.dataset.enhanced = 'true';
       details.open = true;
       details.classList.toggle('is-toggle-open', shouldStartOpen);
@@ -2001,7 +2009,7 @@ body {
     const instagramUrl = getEssayInstagramPost(issue, essay, item);
     const visualUrl = getDisplayImageUrl(visual.url || item.imageUrl || '');
     return `
-      <details class="acha-inline-essay" id="essay-${escapeHtml(essay.id || essay.title || '')}" data-essay-visual-url="${escapeHtml(visualUrl)}" open>
+      <details class="acha-inline-essay" id="essay-${escapeHtml(essay.id || essay.title || '')}" data-essay-visual-url="${escapeHtml(visualUrl)}">
         <summary>
           <figure class="acha-essay-visual">
             ${renderEssayVisualImage(visual, item)}

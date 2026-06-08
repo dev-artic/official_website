@@ -6,23 +6,23 @@
 -->
 <div class="waitlist-container">
   <!-- Button Wrapper -->
-  <div id="waitlist-btn-wrapper" class="grid-collapse-wrapper active">
+  <div class="grid-collapse-wrapper waitlist-btn-wrapper active">
     <div class="grid-collapse-content">
-      <button id="waitlist-toggle-btn" class="about-action">Join the Waitlist</button>
+      <button type="button" class="about-action waitlist-toggle-btn">Join the Waitlist</button>
     </div>
   </div>
   
   <!-- Form Wrapper -->
-  <div id="waitlist-form-wrapper" class="grid-collapse-wrapper">
+  <div class="grid-collapse-wrapper waitlist-form-wrapper">
     <div class="grid-collapse-content" style="padding-bottom: 2px;">
-      <form id="waitlist-form" class="waitlist-form" novalidate>
+      <form class="waitlist-form" novalidate>
         <div class="waitlist-fields-wrapper">
           <div class="waitlist-field-group">
-            <input type="text" id="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
+            <input type="text" class="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
           </div>
           <div class="waitlist-field-group">
-            <input type="email" id="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required autocomplete="email">
-            <button type="submit" id="waitlist-submit-btn" aria-label="Submit email">
+            <input type="email" class="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required autocomplete="email">
+            <button type="submit" class="waitlist-submit-btn" aria-label="Submit email">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -39,9 +39,9 @@
   </div>
 
   <!-- Message Wrapper -->
-  <div id="waitlist-message-wrapper" class="grid-collapse-wrapper">
+  <div class="grid-collapse-wrapper waitlist-message-wrapper">
     <div class="grid-collapse-content">
-      <div id="waitlist-message" class="waitlist-message"></div>
+      <div class="waitlist-message"></div>
     </div>
   </div>
 </div>
@@ -54,13 +54,13 @@
     margin-top: 16px;
   }
 
-  #waitlist-toggle-btn {
+  .waitlist-toggle-btn {
     opacity: 1;
     display: inline-flex;
     transition: opacity 0.4s ease, all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .grid-collapse-wrapper:not(.active) #waitlist-toggle-btn {
+  .grid-collapse-wrapper:not(.active) .waitlist-toggle-btn {
     opacity: 0;
     pointer-events: none;
   }

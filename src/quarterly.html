@@ -184,7 +184,7 @@ body {
     .quarterly-hero-jump {
       display: flex;
       justify-content: flex-start;
-      margin-top: clamp(16px, 3vh, 42px);
+      margin-top: clamp(28px, 5vh, 64px);
       opacity: 0;
       transform: translateY(10px);
       animation: quarterlyArchiveCue 0.9s var(--ease-out-expo) 1.15s forwards;
@@ -245,6 +245,16 @@ body {
       }
     }
 
+    @media (min-width: 768px) and (max-width: 1200px) {
+      .about-row:first-child {
+        top: clamp(-72px, -5.5vh, -42px);
+      }
+
+      .quarterly-hero-jump {
+        margin-top: clamp(46px, 6vh, 78px);
+      }
+    }
+
     @media (max-width: 767px) {
       .about-content {
         padding-top: 80px !important;
@@ -258,6 +268,7 @@ body {
         grid-template-columns: 1fr;
         gap: var(--space-lg);
         padding: var(--space-lg) 0 0;
+        top: clamp(-58px, -7svh, -34px);
       }
 
       .about-headline {
@@ -289,6 +300,9 @@ body {
         margin-bottom: 0 !important;
       }
 
+      .quarterly-hero-jump {
+        margin-top: clamp(42px, 8svh, 68px);
+      }
 
     }
 </style>

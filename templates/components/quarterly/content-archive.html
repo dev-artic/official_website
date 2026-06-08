@@ -4,7 +4,6 @@
 -->
 <section class="quarterly-archive is-loading" aria-labelledby="quarterly-archive-title" aria-busy="true">
   <header class="quarterly-archive-head">
-    <p class="quarterly-kicker">Quarterly archive</p>
     <h2 id="quarterly-archive-title">Issues by quarter.</h2>
     <p class="quarterly-archive-note" id="quarterly-archive-note">Seasonal issues, articles, and live notes</p>
   </header>
@@ -47,6 +46,7 @@
   let quarterGroups = [];
   let renderedGroupCount = 0;
   let nowModalItems = [];
+  let hasRenderedAchaIdentity = false;
   const batchSize = 3;
 
   function escapeHtml(value) {
@@ -79,11 +79,11 @@
   }
 
   function getAchaCopy() {
-    return [
-      "ACHA: A's Choice & Home Archive",
-      '4곡 이상 수록된 국내 EP 및 정규 앨범을 기준에 따라 일곱 단계로 분류하고 그중 상위를 소개합니다.',
-      '동일 tier 내 앨범 순서는 발매일 기준입니다.'
-    ].join('\n');
+    return {
+      name: "A's Choice & Home Archive",
+      description: '4곡 이상 수록된 국내 EP 및 정규 앨범을 기준에 따라 일곱 단계로 분류하고 그중 상위를 소개합니다.',
+      rule: '동일 tier 내 앨범 순서는 발매일 기준입니다.'
+    };
   }
 
   function getDisplayImageUrl(url) {
@@ -92,6 +92,21 @@
 
   function getEssayHref(issue, essay) {
     return `./acha/?issue=${encodeURIComponent(issue.slug || issue.id)}&essay=${encodeURIComponent(essay.id || essay.title || '')}#essay-${encodeURIComponent(essay.id || essay.title || '')}`;
+  }
+
+  function getAchaDisplayTitle(issue) {
+    const parsed = parseQuarter(issue);
+    if (parsed.year && parsed.quarter) return `${parsed.year} Q${parsed.quarter} — KR Albums`;
+    return issue.title || 'KR Albums';
+  }
+
+  function getQuarterDisplayParts(group) {
+    const year = Number(group?.year || 0);
+    const quarter = Number(group?.quarter || 0);
+    return {
+      year: year ? String(year).slice(-2) : String(group?.label || '').split(/\s+/)[0] || '',
+      quarter: quarter ? `Q${quarter}` : String(group?.label || '').split(/\s+/)[1] || ''
+    };
   }
 
   function excerptFromText(value, limit) {
@@ -346,12 +361,14 @@
     `;
   }
 
-  function renderAchaModule(issue, variant) {
+  function renderAchaModule(issue, variant, showIdentity) {
     if (!issue) return '';
 
     const href = `./acha/?issue=${encodeURIComponent(issue.slug || issue.id)}`;
     const coverCount = 4;
     const previewLimit = 5;
+    const achaCopy = getAchaCopy();
+    const releasePeriod = getQuarterPeriod(issue);
 
     return `
       <article class="quarterly-module quarterly-module-acha ${variant === 'current' ? 'is-current' : ''}">
@@ -359,12 +376,31 @@
           ${renderCoverStack(issue, coverCount)}
         </div>
         <div class="quarterly-module-body">
-          <p class="quarterly-module-label">ACHA</p>
-          <h4><a href="${escapeHtml(href)}">${escapeHtml(issue.title)}</a></h4>
-          <p class="quarterly-module-meta">${escapeHtml([issue.issue, getQuarterPeriod(issue)].filter(Boolean).join(' · '))}</p>
-          <p class="quarterly-module-copy">${escapeHtml(getAchaCopy())}</p>
+          <div class="quarterly-acha-heading">
+            <p class="quarterly-module-label">ACHA</p>
+            <h4><a href="${escapeHtml(href)}">${escapeHtml(getAchaDisplayTitle(issue))}</a></h4>
+            ${releasePeriod ? `
+              <p class="quarterly-acha-meta">
+                <span>${escapeHtml(releasePeriod)}</span>
+                <span>Ranked by ACHA tier · Ordered by release date within each tier</span>
+              </p>
+            ` : ''}
+          </div>
+          ${showIdentity ? `
+            <div class="quarterly-acha-identity" aria-label="ACHA guide">
+              <strong>${escapeHtml(achaCopy.name)}</strong>
+              <p>${escapeHtml(achaCopy.description)}</p>
+              <em>${escapeHtml(achaCopy.rule)}</em>
+            </div>
+          ` : ''}
+        </div>
+        <div class="quarterly-module-albums">
           ${renderAlbumPreview(issue, previewLimit)}
         </div>
+        <a class="quarterly-text-link quarterly-acha-link" href="${escapeHtml(href)}">
+          <span>View full ACHA</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+        </a>
       </article>
     `;
   }
@@ -450,8 +486,10 @@
     return `
       <article class="quarterly-module quarterly-module-now ${variant === 'current' ? 'is-current' : ''}">
         <div class="quarterly-module-body">
-          <p class="quarterly-module-label">Now artic.</p>
-          <h4>This quarter in motion.</h4>
+          <div class="quarterly-now-heading">
+            <p class="quarterly-module-label">Now artic.</p>
+            <h4>This quarter in motion.</h4>
+          </div>
           <div class="quarterly-now-list">
             ${items.slice(0, 4).map((item) => {
               const modalIndex = nowModalItems.push(item) - 1;
@@ -471,21 +509,21 @@
   }
 
   function renderQuarterGroup(group, variant) {
-    const headline = variant === 'current' ? 'Current quarter' : 'Archive quarter';
     const hasAcha = Boolean(group.acha);
     const hasNow = (group.nowArtic || []).length > 0;
-    const description = hasAcha
-      ? getQuarterPeriod(group.acha)
-      : 'New scenes and moments from this quarter.';
+    const showAchaIdentity = hasAcha && !hasRenderedAchaIdentity;
+    if (showAchaIdentity) hasRenderedAchaIdentity = true;
+    const period = getQuarterDisplayParts(group);
     return `
       <section class="quarterly-quarter ${variant === 'current' ? 'is-current' : ''} ${!hasAcha && hasNow ? 'is-now-only' : ''}" aria-labelledby="${escapeHtml(group.id)}-title">
         <header class="quarterly-quarter-head">
-          <p class="quarterly-kicker">${headline}</p>
-          <h3 id="${escapeHtml(group.id)}-title">${escapeHtml(group.label)}</h3>
-          <p>${description}</p>
+          <h3 id="${escapeHtml(group.id)}-title" aria-label="${escapeHtml(group.label)}">
+            <span aria-hidden="true">${escapeHtml(period.year)}</span>
+            <span aria-hidden="true">${escapeHtml(period.quarter)}</span>
+          </h3>
         </header>
         <div class="quarterly-quarter-modules">
-          ${renderAchaModule(group.acha, variant)}
+          ${renderAchaModule(group.acha, variant, showAchaIdentity)}
           ${renderNowModule(group, variant)}
         </div>
         ${renderFeaturedArticles(group.acha)}
@@ -496,9 +534,6 @@
   function renderArchiveCta() {
     return `
       <section class="quarterly-archive-cta" aria-label="Join the Quarterly waitlist">
-        <div>
-          <p class="quarterly-kicker">Quarterly dispatch</p>
-        </div>
         <div class="quarterly-archive-cta-copy">
           <p class="quarterly-archive-cta-en">
             Curated albums, artworks, and diverse artistic insights,<br>delivered every quarter.
@@ -506,7 +541,7 @@
           <p class="quarterly-archive-cta-ko">
             매 분기 발매된 앨범, 작품,<br>그리고 다양한 예술 소식을 전합니다.
           </p>
-          <a class="about-action quarterly-archive-cta-action" href="#quarterly-waitlist">Join the Waitlist</a>
+          {{WAITLIST_FORM}}
         </div>
       </section>
     `;
@@ -515,6 +550,9 @@
   function completeArchiveFeed() {
     sentinelEl.innerHTML = renderArchiveCta();
     sentinelEl.classList.add('is-complete');
+    if (typeof window.initWaitlistForm === 'function') {
+      window.initWaitlistForm();
+    }
   }
 
   function getQuarterlyContentsApiUrl() {
@@ -542,24 +580,17 @@
     }
   }
 
-  function startInfiniteScroll() {
+  function renderArchive() {
     nowModalItems = [];
+    hasRenderedAchaIdentity = false;
     if (quarterGroups[0]) {
       currentEl.innerHTML = renderQuarterGroup(quarterGroups[0], 'current');
     }
 
-    renderNextBatch();
-    initQuarterlyScrollReveal(document);
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          renderNextBatch();
-        }
-      }, { rootMargin: '640px 0px' });
-      observer.observe(sentinelEl);
-    } else {
-      while (renderedGroupCount < quarterGroups.slice(1).length) renderNextBatch();
+    while (renderedGroupCount < quarterGroups.slice(1).length) {
+      renderNextBatch();
     }
+    initQuarterlyScrollReveal(document);
   }
 
   function settleArchiveLoading() {
@@ -627,7 +658,7 @@
       }
 
       sentinelEl.textContent = '';
-      startInfiniteScroll();
+      renderArchive();
       settleArchiveLoading();
     } catch (err) {
       console.error('Failed to load Quarterly archive.', err);
@@ -675,14 +706,13 @@
 
   .quarterly-archive-head {
     display: grid;
-    grid-template-columns: minmax(160px, 0.22fr) minmax(0, 0.5fr) minmax(220px, 0.28fr);
+    grid-template-columns: minmax(0, 0.66fr) minmax(220px, 0.34fr);
     gap: clamp(20px, 4vw, 56px);
     align-items: end;
     margin-bottom: clamp(52px, 8vw, 108px);
   }
 
   .quarterly-kicker,
-  .quarterly-archive-note,
   .quarterly-feed-sentinel,
   .quarterly-module-label,
   .quarterly-album-preview span,
@@ -693,6 +723,14 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-muted);
+  }
+
+  .quarterly-archive-note {
+    max-width: 34ch;
+    font-family: var(--font-sans);
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
   }
 
   .quarterly-archive-head h2 {
@@ -791,52 +829,101 @@
 
   .quarterly-quarter-head {
     display: grid;
-    gap: 14px;
     align-content: start;
   }
 
   .quarterly-quarter-head h3 {
+    display: grid;
+    width: max-content;
+    max-width: 100%;
     font-family: var(--font-serif);
-    font-size: clamp(1.65rem, 3.6vw, 3.25rem);
-    line-height: 0.98;
+    font-size: clamp(4.2rem, 8vw, 8.4rem);
+    line-height: 0.78;
+    letter-spacing: 0;
     color: var(--text-primary);
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
   }
 
-  .quarterly-quarter-head p:last-child {
-    max-width: 28ch;
-    font-family: var(--font-sans);
-    font-size: 0.76rem;
-    line-height: 1.75;
-    color: var(--text-secondary);
+  .quarterly-quarter-head h3 span {
+    display: block;
   }
 
   .quarterly-quarter-modules {
     display: grid;
-    gap: clamp(36px, 5vw, 72px);
+    gap: clamp(34px, 4.6vw, 64px);
     align-items: start;
   }
 
   .quarterly-module {
     display: grid;
-    gap: clamp(22px, 3vw, 42px);
+    gap: clamp(18px, 2.8vw, 36px);
     align-items: start;
   }
 
   .quarterly-module-acha {
     grid-template-columns: minmax(260px, 0.46fr) minmax(0, 0.54fr);
+    grid-template-rows: auto auto;
     gap: clamp(28px, 5vw, 72px);
   }
 
+  .quarterly-module-acha .quarterly-module-visual {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .quarterly-module-acha .quarterly-module-body,
+  .quarterly-module-acha .quarterly-module-albums {
+    grid-column: 2;
+  }
+
+  .quarterly-module-acha .quarterly-module-body {
+    grid-row: 1;
+  }
+
+  .quarterly-module-acha .quarterly-module-albums {
+    grid-row: 2;
+  }
+
+  .quarterly-module-albums {
+    display: grid;
+    gap: clamp(12px, 1.8vw, 20px);
+    align-content: start;
+  }
+
   .quarterly-module-now {
-    padding-top: clamp(24px, 4vw, 48px);
-    border-top: 1px solid var(--border-color);
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .quarterly-module-acha + .quarterly-module-now {
+    margin-top: clamp(10px, 2vw, 24px);
   }
 
   .quarterly-module-body {
     display: grid;
-    gap: var(--space-md);
+    gap: clamp(18px, 2.4vw, 30px);
     align-content: start;
+  }
+
+  .quarterly-acha-heading,
+  .quarterly-now-heading {
+    display: grid;
+    gap: clamp(10px, 1.4vw, 16px);
+  }
+
+  .quarterly-acha-meta {
+    display: grid;
+    gap: 5px;
+    max-width: 42ch;
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 0.66rem;
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+
+  .quarterly-acha-meta span:first-child {
+    color: var(--text-secondary);
   }
 
   .quarterly-module h4 {
@@ -855,6 +942,40 @@
     line-height: 1.9;
     color: var(--text-secondary);
     white-space: pre-line;
+  }
+
+  .quarterly-acha-identity {
+    display: grid;
+    gap: 7px;
+    max-width: 54ch;
+    padding: clamp(12px, 1.8vw, 18px);
+    border: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--bg-secondary) 36%, transparent);
+  }
+
+  .quarterly-acha-identity strong {
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    line-height: 1.45;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .quarterly-acha-identity p,
+  .quarterly-acha-identity em {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    line-height: 1.72;
+    color: var(--text-secondary);
+    word-break: keep-all;
+  }
+
+  .quarterly-acha-identity em {
+    font-style: normal;
+    color: var(--text-muted);
   }
 
   .quarterly-module-meta {
@@ -915,9 +1036,11 @@
 
   .quarterly-album-preview {
     display: grid;
-    gap: 12px;
+    gap: 0;
     margin: 0;
     padding: 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     list-style: none;
   }
 
@@ -926,8 +1049,23 @@
     grid-template-columns: 48px minmax(0, 1fr);
     gap: 14px;
     align-items: start;
-    padding-top: 12px;
+    padding: 14px 0;
+  }
+
+  .quarterly-album-preview li + li {
     border-top: 1px solid var(--border-color);
+  }
+
+  .quarterly-album-preview > li > span {
+    padding-top: 5px;
+  }
+
+  .quarterly-acha-link {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    align-self: start;
+    margin-top: -0.15em;
   }
 
   .quarterly-album-preview strong {
@@ -959,8 +1097,8 @@
 
   .quarterly-now-list {
     display: grid;
-    gap: 14px;
-    margin-top: var(--space-sm);
+    gap: 0;
+    margin-top: 0;
   }
 
   .quarterly-featured-articles {
@@ -1027,21 +1165,23 @@
   .quarterly-now-trigger {
     display: grid;
     grid-template-columns: minmax(120px, 0.18fr) minmax(0, 0.82fr);
-    gap: 10px;
+    gap: clamp(14px, 2vw, 22px);
     align-items: start;
     min-height: 44px;
-    padding-top: 14px;
-    padding-bottom: 2px;
+    padding: 0;
     background: transparent;
-    border-top: 1px solid var(--border-color);
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
+    border: 0;
     color: var(--text-primary);
     cursor: pointer;
     text-align: left;
     font-family: var(--font-sans);
     transition: color 0.26s ease, border-color 0.26s ease;
+  }
+
+  .quarterly-now-trigger + .quarterly-now-trigger {
+    margin-top: clamp(16px, 2.6vw, 28px);
+    padding-top: clamp(16px, 2.6vw, 28px);
+    border-top: 1px solid var(--border-color);
   }
 
   .quarterly-featured-articles h5 {
@@ -1370,8 +1510,8 @@
 
   .quarterly-archive-cta {
     display: grid;
-    grid-template-columns: minmax(180px, 22%) minmax(0, 1fr);
-    gap: clamp(28px, 5vw, 80px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(18px, 3vw, 36px);
     padding: clamp(44px, 7vw, 96px) 0 0;
     border-top: 1px solid var(--border-color);
   }
@@ -1394,11 +1534,6 @@
     font-size: 0.78rem;
     line-height: 1.75;
     color: var(--text-muted);
-  }
-
-  .quarterly-archive-cta-action {
-    width: fit-content;
-    margin-top: 8px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1429,6 +1564,31 @@
       grid-template-columns: 1fr;
     }
 
+    .quarterly-module-acha .quarterly-module-visual,
+    .quarterly-module-acha .quarterly-module-body,
+    .quarterly-module-acha .quarterly-module-albums,
+    .quarterly-module-acha .quarterly-acha-link {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
+    .quarterly-module-acha .quarterly-module-body {
+      order: 1;
+    }
+
+    .quarterly-module-acha .quarterly-module-visual {
+      order: 2;
+    }
+
+    .quarterly-module-acha .quarterly-module-albums {
+      order: 3;
+    }
+
+    .quarterly-module-acha .quarterly-acha-link {
+      order: 4;
+      margin-top: 0;
+    }
+
   }
 
   @media (max-width: 767px) {
@@ -1453,9 +1613,12 @@
       padding: clamp(46px, 15vw, 76px) 0;
     }
 
-    .quarterly-loading-panel h3,
-    .quarterly-quarter-head h3 {
+    .quarterly-loading-panel h3 {
       font-size: clamp(1.9rem, 10vw, 3rem);
+    }
+
+    .quarterly-quarter-head h3 {
+      font-size: clamp(4.8rem, 28vw, 7.2rem);
     }
 
     .quarterly-quarter {
@@ -1470,17 +1633,9 @@
       gap: clamp(18px, 6vw, 28px);
     }
 
-    .quarterly-module-acha .quarterly-module-body {
-      order: 1;
-    }
-
-    .quarterly-module-acha .quarterly-module-visual {
-      order: 2;
-    }
-
     .quarterly-module-acha .quarterly-cover-stack {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(8px, 3vw, 12px);
     }
 
     .quarterly-module h4 {
@@ -1501,20 +1656,26 @@
     }
 
     .quarterly-album-preview {
-      gap: 10px;
+      gap: 0;
     }
 
     .quarterly-album-preview li {
       grid-template-columns: 40px minmax(0, 1fr);
       gap: 12px;
+      padding: 12px 0;
     }
 
     .quarterly-now-trigger {
       grid-template-columns: 96px minmax(0, 1fr);
       gap: 14px;
       min-height: 112px;
-      padding: 14px 0;
+      padding: 0;
       align-items: center;
+    }
+
+    .quarterly-now-trigger + .quarterly-now-trigger {
+      margin-top: 16px;
+      padding-top: 16px;
     }
 
     .quarterly-featured-articles article {

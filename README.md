@@ -277,6 +277,7 @@ graph TD
 * **`waitlist-form-embedded.html` [구독/대기 폼 - embedded 타입]**:
   * **사용처**: `quarterly/` 등 페이지 내부 임베드 섹션.
   * **데이터 매핑**: 로컬 Firebase Emulator 또는 실서버 Cloud Functions `/waitlist` API를 경유하여 Firestore `subscribers` 컬렉션에 적재됩니다.
+  * **인스턴스 모델**: 같은 페이지 안에 여러 waitlist CTA를 둘 수 있도록 `id`가 아닌 `.waitlist-container` 범위의 class selector로 초기화합니다. 상단 hero와 하단 archive CTA는 같은 컴포넌트를 독립적으로 재사용합니다.
 * **`checkout-form-popup.html` [주문 폼 - popup 타입]**:
   * **사용처**: `deus-ex-machina/` 등 LP/CD 구매 팝업 모달.
   * **데이터 매핑**: 로컬 Firebase Emulator 또는 실서버 Cloud Functions `/checkout` API를 경유하여 Firestore `orders` 컬렉션에 적재됩니다.
@@ -298,7 +299,7 @@ graph TD
   * **분기 정렬 기준**: Archive 노출 순서는 `Year + Quarter`를 1차 기준으로 최신순 정렬하고, 같은 분기 안에서만 `Published At`을 보조 기준으로 사용합니다.
   * **렌더링 모델**: 첫 화면은 기존 waitlist 영역을 유지하고, 스크롤 아래에서 분기별 issue shelf를 최신순으로 렌더링합니다. 각 분기 shelf 안에는 ACHA와 Now artic. 모듈이 함께 배치됩니다.
   * **확장 정보구조**: Gagosian Quarterly의 섹션형 hub 구조를 참고해 `Issues`, `Essays`, `Interviews`, `Videos`, `Studio Visits` 같은 section taxonomy를 수용할 수 있게 두었습니다. 현재 artic. 고유 구조의 중심은 7-tier album framework입니다.
-  * **ACHA naming**: 분기별 앨범 결산 콘텐츠는 웹에서는 `ACHA`(Album Critic Highlight Archive)로 표기합니다. Archive row는 `/quarterly/acha/?issue=<slug>` detail shell로 연결되며, 이 상세 페이지는 앨범이 등록된 티어의 앨범 리스트, 한줄평, 추천곡, 에디터 노트, companion essay, Bugs 커버 출처를 함께 렌더링합니다.
+  * **ACHA naming**: 분기별 앨범 결산 콘텐츠는 웹에서는 `ACHA`(`A's Choice & Home Archive`)로 표기합니다. Archive row는 `YYYY Qn — KR Albums` 형식의 담백한 제목으로 `/quarterly/acha/?issue=<slug>` detail shell에 연결되며, 상세 페이지는 앨범이 등록된 티어의 앨범 리스트, 한줄평, 추천곡, companion essay를 렌더링합니다. 내부 검수용 `Editor Note`와 cover source/source URL은 공개 UI에 표기하지 않습니다.
   * **커버 identity resolver**: live Notion 응답을 `scratch/quarterly_live_contents.json`로 저장한 뒤, Bugs/Apple Music provider album identity를 검증해 누락 cover만 보강합니다. 자동 검색이 불확실한 항목은 임의 fallback을 넣지 않고 cache에 실패 사유를 남깁니다. provider ID가 확인된 예외 표기는 `scripts/resolve_quarterly_album_art.js`의 manual ID map에 명시합니다.
     ```bash
     node scripts/crawl_bugs_album_art.js --archive=scratch/quarterly_live_contents.json --cache=scratch/bugs_album_art_cache.json --artistCache=scratch/bugs_artist_image_cache.json --missingOnly=true --artists=true

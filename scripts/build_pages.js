@@ -73,6 +73,12 @@ function parseFrontMatter(content) {
 }
 
 // Component substitution engine
+function substituteWaitlistForm(html) {
+  if (!html.includes('{{WAITLIST_FORM}}')) return html;
+  if (waitlistFormTpl.styles) pageStyles.add(waitlistFormTpl.styles);
+  return html.replace(/\{\{WAITLIST_FORM\}\}/g, waitlistFormTpl.markup);
+}
+
 function replaceComponents(html, depth, isLayoutLevel = false, slug = '') {
   let result = html;
 
@@ -100,10 +106,7 @@ function replaceComponents(html, depth, isLayoutLevel = false, slug = '') {
   }
 
   // Substitute Waitlist form
-  if (result.includes('{{WAITLIST_FORM}}')) {
-    result = result.replace(/\{\{WAITLIST_FORM\}\}/g, waitlistFormTpl.markup);
-    if (waitlistFormTpl.styles) pageStyles.add(waitlistFormTpl.styles);
-  }
+  result = substituteWaitlistForm(result);
 
   // Checkout form substitute
   if (result.includes('{{CHECKOUT_FORM}}')) {
@@ -115,6 +118,7 @@ function replaceComponents(html, depth, isLayoutLevel = false, slug = '') {
   if (result.includes('{{QUARTERLY_CONTENT_ARCHIVE}}')) {
     result = result.replace(/\{\{QUARTERLY_CONTENT_ARCHIVE\}\}/g, quarterlyContentArchiveTpl.markup);
     if (quarterlyContentArchiveTpl.styles) pageStyles.add(quarterlyContentArchiveTpl.styles);
+    result = substituteWaitlistForm(result);
   }
 
   // Quarterly ACHA detail substitute

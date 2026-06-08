@@ -600,143 +600,149 @@ function initDynamicHeightTransitions() {
 
 // ── Waitlist Form Interactivity ──
 function initWaitlistForm() {
-  const form = document.getElementById('waitlist-form');
-  if (!form) return;
+  const containers = document.querySelectorAll('.waitlist-container');
+  if (!containers.length) return;
 
-  const toggleBtn = document.getElementById('waitlist-toggle-btn');
-  const nameInput = document.getElementById('waitlist-name');
-  const emailInput = document.getElementById('waitlist-email');
-  const submitBtn = document.getElementById('waitlist-submit-btn');
-  const messageDiv = document.getElementById('waitlist-message');
-  const fieldsWrapper = form.querySelector('.waitlist-fields-wrapper');
-  const btnWrapper = document.getElementById('waitlist-btn-wrapper');
-  const formWrapper = document.getElementById('waitlist-form-wrapper');
-  const messageWrapper = document.getElementById('waitlist-message-wrapper');
-  const container = document.querySelector('.waitlist-container');
+  containers.forEach((container) => {
+    if (container.dataset.waitlistInitialized === 'true') return;
+    const form = container.querySelector('.waitlist-form');
+    if (!form) return;
+    container.dataset.waitlistInitialized = 'true';
 
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      if (btnWrapper) btnWrapper.classList.remove('active');
-      if (formWrapper) formWrapper.classList.add('active');
-      if (nameInput) {
-        setTimeout(() => nameInput.focus(), 250);
-      }
-    });
-  }
+    const toggleBtn = container.querySelector('.waitlist-toggle-btn');
+    const nameInput = container.querySelector('.waitlist-name');
+    const emailInput = container.querySelector('.waitlist-email');
+    const submitBtn = container.querySelector('.waitlist-submit-btn');
+    const messageDiv = container.querySelector('.waitlist-message');
+    const fieldsWrapper = form.querySelector('.waitlist-fields-wrapper');
+    const btnWrapper = container.querySelector('.waitlist-btn-wrapper');
+    const formWrapper = container.querySelector('.waitlist-form-wrapper');
+    const messageWrapper = container.querySelector('.waitlist-message-wrapper');
 
-  // Input event listeners to clear error outlines instantly
-  if (nameInput) {
-    nameInput.addEventListener('input', () => {
-      nameInput.classList.remove('waitlist-input-error');
-    });
-  }
-  if (emailInput) {
-    emailInput.addEventListener('input', () => {
-      emailInput.classList.remove('waitlist-input-error');
-    });
-  }
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const name = nameInput ? nameInput.value.trim() : '';
-    const email = emailInput ? emailInput.value.trim() : '';
-
-    let hasError = false;
-
-    // Clear previous validation states
-    if (nameInput) nameInput.classList.remove('waitlist-input-error');
-    if (emailInput) emailInput.classList.remove('waitlist-input-error');
-    if (fieldsWrapper) fieldsWrapper.classList.remove('waitlist-shake');
-
-    // 1. Name validation
-    if (!name) {
-      if (nameInput) {
-        nameInput.classList.add('waitlist-input-error');
-        nameInput.focus();
-      }
-      hasError = true;
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        if (btnWrapper) btnWrapper.classList.remove('active');
+        if (formWrapper) formWrapper.classList.add('active');
+        if (nameInput) {
+          setTimeout(() => nameInput.focus(), 250);
+        }
+      });
     }
 
-    // 2. Email validation (Format check)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-      if (emailInput) {
-        emailInput.classList.add('waitlist-input-error');
-        if (!hasError) emailInput.focus();
-      }
-      hasError = true;
+    // Input event listeners to clear error outlines instantly
+    if (nameInput) {
+      nameInput.addEventListener('input', () => {
+        nameInput.classList.remove('waitlist-input-error');
+      });
+    }
+    if (emailInput) {
+      emailInput.addEventListener('input', () => {
+        emailInput.classList.remove('waitlist-input-error');
+      });
     }
 
-    // Tactile shake response for invalid submissions
-    if (hasError) {
-      if (fieldsWrapper) {
-        // Force reflow to restart keyframe animation
-        fieldsWrapper.offsetHeight;
-        fieldsWrapper.classList.add('waitlist-shake');
-      }
-      return;
-    }
-
-    // Disable inputs and start submitting visual feedback
-    if (nameInput) nameInput.disabled = true;
-    if (emailInput) emailInput.disabled = true;
-    if (submitBtn) submitBtn.disabled = true;
-    
-    if (container) container.classList.add('submitting');
-    form.classList.add('submitting');
-    if (messageWrapper) messageWrapper.classList.remove('active');
-    
-    if (messageDiv) messageDiv.innerHTML = '';
-
-    const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('waitlist') : '/api/waitlist';
-
-    // Promise to ensure the loading line states last at least 800ms for smooth cinematic feel
-    const animPromise = new Promise(resolve => setTimeout(resolve, 800));
-
-    const fetchPromise = fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ name: name, email: email })
-    })
-    .then(res => {
-      if (!res.ok) {
-        return res.json().then(err => { throw new Error(err.error || 'Submission failed') });
-      }
-      return res.json();
-    });
-
-    Promise.all([fetchPromise, animPromise])
-    .then(([data]) => {
-      if (container) container.classList.remove('submitting');
-      if (formWrapper) formWrapper.classList.remove('active');
-
-      if (messageDiv) {
-        messageDiv.innerHTML = `
-          <div class="success-title">artic.</div>
-          <div class="success-desc">You have been successfully registered on the quarterly artic. waitlist.</div>
-        `;
-      }
-      if (messageWrapper) messageWrapper.classList.add('active');
-    })
-    .catch(err => {
-      // Restore form fields in case of API errors (e.g. duplicate email)
-      if (nameInput) nameInput.disabled = false;
-      if (emailInput) emailInput.disabled = false;
-      if (submitBtn) submitBtn.disabled = false;
-      if (container) container.classList.remove('submitting');
-      form.classList.remove('submitting');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
       
-      if (messageDiv) {
-        const message = err.message || 'An error occurred. Please try again.';
-        const isDuplicate = message.toLowerCase().includes('already registered');
-        const isInvalidAddress = message.toLowerCase().includes('invalid address');
-        messageDiv.className = `waitlist-message ${isDuplicate ? 'duplicate' : 'error'}`;
-        messageDiv.textContent = isInvalidAddress ? 'invalid address' : message;
+      const name = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim() : '';
+
+      let hasError = false;
+
+      // Clear previous validation states
+      if (nameInput) nameInput.classList.remove('waitlist-input-error');
+      if (emailInput) emailInput.classList.remove('waitlist-input-error');
+      if (fieldsWrapper) fieldsWrapper.classList.remove('waitlist-shake');
+
+      // 1. Name validation
+      if (!name) {
+        if (nameInput) {
+          nameInput.classList.add('waitlist-input-error');
+          nameInput.focus();
+        }
+        hasError = true;
       }
-      if (messageWrapper) messageWrapper.classList.add('active');
+
+      // 2. Email validation (Format check)
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        if (emailInput) {
+          emailInput.classList.add('waitlist-input-error');
+          if (!hasError) emailInput.focus();
+        }
+        hasError = true;
+      }
+
+      // Tactile shake response for invalid submissions
+      if (hasError) {
+        if (fieldsWrapper) {
+          // Force reflow to restart keyframe animation
+          fieldsWrapper.offsetHeight;
+          fieldsWrapper.classList.add('waitlist-shake');
+        }
+        return;
+      }
+
+      // Disable inputs and start submitting visual feedback
+      if (nameInput) nameInput.disabled = true;
+      if (emailInput) emailInput.disabled = true;
+      if (submitBtn) submitBtn.disabled = true;
+      
+      if (container) container.classList.add('submitting');
+      form.classList.add('submitting');
+      if (messageWrapper) messageWrapper.classList.remove('active');
+      
+      if (messageDiv) messageDiv.innerHTML = '';
+
+      const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('waitlist') : '/api/waitlist';
+
+      // Promise to ensure the loading line states last at least 800ms for smooth cinematic feel
+      const animPromise = new Promise(resolve => setTimeout(resolve, 800));
+
+      const fetchPromise = fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: name, email: email })
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.error || 'Submission failed') });
+        }
+        return res.json();
+      });
+
+      Promise.all([fetchPromise, animPromise])
+      .then(([data]) => {
+        if (container) container.classList.remove('submitting');
+        if (formWrapper) formWrapper.classList.remove('active');
+
+        if (messageDiv) {
+          messageDiv.innerHTML = `
+            <div class="success-title">artic.</div>
+            <div class="success-desc">You have been successfully registered on the quarterly artic. waitlist.</div>
+          `;
+        }
+        if (messageWrapper) messageWrapper.classList.add('active');
+      })
+      .catch(err => {
+        // Restore form fields in case of API errors (e.g. duplicate email)
+        if (nameInput) nameInput.disabled = false;
+        if (emailInput) emailInput.disabled = false;
+        if (submitBtn) submitBtn.disabled = false;
+        if (container) container.classList.remove('submitting');
+        form.classList.remove('submitting');
+        
+        if (messageDiv) {
+          const message = err.message || 'An error occurred. Please try again.';
+          const isDuplicate = message.toLowerCase().includes('already registered');
+          const isInvalidAddress = message.toLowerCase().includes('invalid address');
+          messageDiv.className = `waitlist-message ${isDuplicate ? 'duplicate' : 'error'}`;
+          messageDiv.textContent = isInvalidAddress ? 'invalid address' : message;
+        }
+        if (messageWrapper) messageWrapper.classList.add('active');
+      });
     });
   });
 }

@@ -168,6 +168,75 @@ async function handleGetQuarterlyContents(req, res) {
   }
 }
 
+function getProxyImageUrlFromRequest(req) {
+  const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`);
+  const rawUrl = requestUrl.searchParams.get('url') || '';
+  if (!rawUrl) {
+    const err = new Error('Missing required url parameter.');
+    err.status = 400;
+    throw err;
+  }
+
+  let imageUrl;
+  try {
+    imageUrl = new URL(rawUrl);
+  } catch (err) {
+    const error = new Error('Invalid image URL.');
+    error.status = 400;
+    throw error;
+  }
+
+  if (!['http:', 'https:'].includes(imageUrl.protocol)) {
+    const err = new Error('Only http and https image URLs are supported.');
+    err.status = 400;
+    throw err;
+  }
+
+  return imageUrl.toString();
+}
+
+async function handleImageProxy(req, res) {
+  let imageUrl = '';
+  try {
+    imageUrl = getProxyImageUrlFromRequest(req);
+    const response = await fetch(imageUrl, {
+      headers: {
+        Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'User-Agent': 'artic-image-proxy/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      sendJSON(res, response.status, { error: 'Image request failed', status: response.status });
+      return;
+    }
+
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    if (!contentType.toLowerCase().startsWith('image/')) {
+      sendJSON(res, 415, { error: 'URL did not return an image.' });
+      return;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Cache-Control': 'public, max-age=86400, s-maxage=604800',
+      'Access-Control-Allow-Origin': '*',
+      'X-artic-Proxied-Image': imageUrl,
+    });
+
+    if (req.method === 'HEAD') {
+      res.end();
+    } else {
+      res.end(Buffer.from(arrayBuffer));
+    }
+  } catch (err) {
+    sendJSON(res, err.status || 500, {
+      error: err.message || 'Failed to proxy image.',
+    });
+  }
+}
+
 function handleSaveLyrics(req, res, bodyText) {
   try {
     const data = JSON.parse(bodyText);
@@ -299,12 +368,15 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.method === 'GET') {
+  if (req.method === 'GET' || req.method === 'HEAD') {
     if (requestPath === '/api/get-lyrics') {
       handleGetLyrics(req, res);
       return;
     } else if (requestPath === '/api/quarterly-contents') {
       handleGetQuarterlyContents(req, res);
+      return;
+    } else if (requestPath === '/api/image-proxy') {
+      handleImageProxy(req, res);
       return;
     } else if (requestPath === '/api/products') {
       proxyToEmulator(req, res, null, 'products');

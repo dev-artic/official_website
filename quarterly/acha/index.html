@@ -25,6 +25,39 @@
 <style>
 body {
     overflow-x: hidden;
+    transition:
+      background-color 0.72s var(--ease-out-expo),
+      color 0.72s var(--ease-out-expo);
+  }
+
+  body.acha-essay-focus-mode {
+    --bg-primary: rgb(var(--acha-focus-bg-rgb, 17, 17, 17));
+    --bg-secondary: rgb(var(--acha-focus-panel-rgb, 23, 23, 23));
+    --text-primary: rgb(var(--acha-focus-ink-rgb, 243, 241, 237));
+    --text-secondary: rgba(var(--acha-focus-ink-rgb, 243, 241, 237), 0.72);
+    --text-muted: rgba(var(--acha-focus-ink-rgb, 243, 241, 237), 0.48);
+    --border-color: rgba(var(--acha-focus-ink-rgb, 243, 241, 237), 0.16);
+    --glass-bg: rgba(var(--acha-focus-bg-rgb, 17, 17, 17), 0.68);
+    background-color: rgb(var(--acha-focus-bg-rgb, 17, 17, 17)) !important;
+  }
+
+  body.acha-essay-focus-mode .mobile-header-bar {
+    background: linear-gradient(to bottom, rgba(var(--acha-focus-bg-rgb, 17, 17, 17), 0.92) 50%, transparent 100%);
+  }
+
+  body.acha-essay-focus-mode .nav-link,
+  body.acha-essay-focus-mode .nav-home {
+    color: rgba(var(--acha-focus-ink-rgb, 243, 241, 237), 0.58);
+  }
+
+  body.acha-essay-focus-mode .nav-link:hover,
+  body.acha-essay-focus-mode .nav-link.active,
+  body.acha-essay-focus-mode .nav-home:hover {
+    color: rgba(var(--acha-focus-ink-rgb, 243, 241, 237), 0.92);
+  }
+
+  body.acha-essay-focus-mode .burger-line {
+    background-color: rgba(var(--acha-focus-ink-rgb, 243, 241, 237), 0.86);
   }
 
   .acha-page {
@@ -33,6 +66,9 @@ body {
     margin: 0 auto;
     padding: 120px var(--gutter) var(--space-xxl);
     box-sizing: border-box;
+    transition:
+      color 0.72s var(--ease-out-expo),
+      background-color 0.72s var(--ease-out-expo);
   }
 
   .acha-page * {
@@ -609,6 +645,10 @@ body {
   }
 
   .acha-inline-essay {
+    --acha-essay-bg-rgb: 17, 17, 17;
+    --acha-essay-panel-rgb: 18, 18, 18;
+    --acha-essay-ink-rgb: 245, 245, 245;
+    --acha-essay-difference-rgb: 255, 255, 255;
     grid-column: 1 / -1;
     display: grid;
     gap: clamp(14px, 2.4vw, 26px);
@@ -618,6 +658,12 @@ body {
     border-top: 0;
     scroll-margin-top: 96px;
     transition: margin-top 0.56s var(--ease-out-expo), padding-top 0.56s var(--ease-out-expo), gap 0.56s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay.is-toggle-open,
+  .acha-inline-essay.is-expanding {
+    gap: 0;
+    background-color: rgb(var(--acha-essay-bg-rgb));
   }
 
   .acha-inline-essay:not(.is-toggle-open) {
@@ -655,8 +701,8 @@ body {
   .acha-essay-visual {
     grid-area: 1 / 1;
     display: grid;
-    width: min(100%, 980px);
-    justify-self: end;
+    width: 100%;
+    justify-self: stretch;
     margin: 0;
     position: relative;
     overflow: hidden;
@@ -670,15 +716,32 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.54) 0%, rgba(0, 0, 0, 0.24) 42%, rgba(0, 0, 0, 0.04) 100%);
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0.32) 44%, rgba(0, 0, 0, 0.06) 100%),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.28), transparent 42%);
     pointer-events: none;
     margin: 0;
+    transition: background 0.7s var(--ease-out-expo), opacity 0.7s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay.is-toggle-open .acha-essay-visual::after,
+  .acha-inline-essay.is-expanding .acha-essay-visual::after {
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.34) 44%, rgba(0, 0, 0, 0.08) 100%),
+      linear-gradient(
+        0deg,
+        rgb(var(--acha-essay-bg-rgb)) 0%,
+        rgba(var(--acha-essay-bg-rgb), 0.86) 12%,
+        rgba(var(--acha-essay-bg-rgb), 0.22) 48%,
+        transparent 76%
+      );
   }
 
   .acha-essay-visual img,
   .acha-essay-visual .acha-cover-fallback {
     width: 100%;
-    aspect-ratio: 16 / 6;
+    aspect-ratio: 21 / 8;
+    min-height: clamp(260px, 32vw, 440px);
     object-fit: cover;
     object-position: center;
     background: var(--bg-secondary);
@@ -755,10 +818,10 @@ body {
     justify-content: center;
     min-height: 38px;
     padding: 0 14px;
-    border: 1px solid rgba(255, 255, 255, 0.54);
+    border: 1px solid rgba(var(--acha-essay-ink-rgb), 0.54);
     border-radius: 0;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: rgba(var(--acha-essay-ink-rgb), 0.08);
+    color: rgb(var(--acha-essay-ink-rgb));
     font-family: var(--font-sans);
     font-size: 0.58rem;
     line-height: 1;
@@ -769,8 +832,8 @@ body {
   }
 
   .acha-instagram-button:hover {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.82);
+    background: rgba(var(--acha-essay-ink-rgb), 0.16);
+    border-color: rgba(var(--acha-essay-ink-rgb), 0.82);
     transform: translateY(-1px);
   }
 
@@ -871,27 +934,120 @@ body {
     font-family: var(--font-serif);
     font-size: clamp(1.7rem, 4.2vw, 4.2rem);
     line-height: 0.98;
-    color: #fff;
+    color: rgb(var(--acha-essay-ink-rgb));
     word-break: keep-all;
     text-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
   }
 
   .acha-inline-essay .acha-essay-content {
     max-width: none;
-    padding-top: clamp(22px, 4vw, 48px);
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: clamp(28px, 4.6vw, 62px) clamp(18px, 4vw, 58px);
     column-count: 2;
     column-gap: clamp(30px, 5vw, 76px);
+    background-color: transparent;
+    color: var(--text-secondary);
+    transition: background-color 0.7s var(--ease-out-expo), color 0.7s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay .acha-essay-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.68), rgba(0, 0, 0, 0.38)),
+      var(--acha-essay-bg-image, none);
+    background-size: cover;
+    background-position: center;
+    filter: grayscale(1) saturate(0.82) contrast(1.05) brightness(0.66);
+    opacity: 0;
+    transform: scale(1.035);
+    transition: opacity 0.82s var(--ease-out-expo), transform 1.2s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay .acha-essay-content::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: color-mix(in srgb, var(--bg-primary) 8%, transparent);
+    opacity: 0;
+    transition: opacity 0.82s var(--ease-out-expo);
+  }
+
+  .acha-inline-essay.is-toggle-open .acha-essay-content::before,
+  .acha-inline-essay.is-expanding .acha-essay-content::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .acha-inline-essay.is-toggle-open .acha-essay-content::after,
+  .acha-inline-essay.is-expanding .acha-essay-content::after {
+    opacity: 1;
+  }
+
+  .acha-inline-essay.is-toggle-open .acha-essay-content,
+  .acha-inline-essay.is-expanding .acha-essay-content {
+    background-color: rgb(var(--acha-essay-bg-rgb));
+    background-image:
+      linear-gradient(180deg, rgb(var(--acha-essay-bg-rgb)) 0%, rgba(var(--acha-essay-bg-rgb), 0.74) 16%, rgba(var(--acha-essay-bg-rgb), 0.5) 100%),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.34)),
+      var(--acha-essay-bg-image, none);
+    background-size: cover;
+    background-position: center;
+    color: rgb(var(--acha-essay-ink-rgb));
+    margin-top: -1px;
+  }
+
+  .acha-inline-essay.is-toggle-open .acha-essay-content p,
+  .acha-inline-essay.is-toggle-open .acha-essay-content li,
+  .acha-inline-essay.is-toggle-open .acha-essay-content h3,
+  .acha-inline-essay.is-toggle-open .acha-essay-content h4,
+  .acha-inline-essay.is-toggle-open .acha-essay-content h5,
+  .acha-inline-essay.is-expanding .acha-essay-content p,
+  .acha-inline-essay.is-expanding .acha-essay-content li,
+  .acha-inline-essay.is-expanding .acha-essay-content h3,
+  .acha-inline-essay.is-expanding .acha-essay-content h4,
+  .acha-inline-essay.is-expanding .acha-essay-content h5 {
+    color: rgb(var(--acha-essay-ink-rgb));
+    text-shadow: 0 1px 18px rgba(0, 0, 0, 0.34);
+  }
+
+  @supports (mix-blend-mode: difference) {
+    .acha-inline-essay.is-toggle-open .acha-essay-content p,
+    .acha-inline-essay.is-toggle-open .acha-essay-content li,
+    .acha-inline-essay.is-toggle-open .acha-essay-content h3,
+    .acha-inline-essay.is-toggle-open .acha-essay-content h4,
+    .acha-inline-essay.is-toggle-open .acha-essay-content h5,
+    .acha-inline-essay.is-expanding .acha-essay-content p,
+    .acha-inline-essay.is-expanding .acha-essay-content li,
+    .acha-inline-essay.is-expanding .acha-essay-content h3,
+    .acha-inline-essay.is-expanding .acha-essay-content h4,
+    .acha-inline-essay.is-expanding .acha-essay-content h5 {
+      color: rgb(var(--acha-essay-difference-rgb));
+      mix-blend-mode: difference;
+    }
   }
 
   .acha-inline-essay[data-enhanced="true"] .acha-essay-content {
     overflow: hidden;
-    transition: height 0.86s var(--ease-out-expo), opacity 0.58s ease, transform 0.86s var(--ease-out-expo), padding-top 0.86s var(--ease-out-expo);
+    transition:
+      height 0.86s var(--ease-out-expo),
+      opacity 0.58s ease,
+      transform 0.86s var(--ease-out-expo),
+      padding 0.86s var(--ease-out-expo),
+      background-color 0.7s var(--ease-out-expo),
+      color 0.7s var(--ease-out-expo);
   }
 
   .acha-inline-essay.is-collapsing .acha-essay-content {
     opacity: 0;
     transform: translateY(-10px);
     padding-top: 0;
+    padding-bottom: 0;
   }
 
   .acha-inline-essay[data-enhanced="true"]:not(.is-toggle-open) .acha-essay-content {
@@ -899,6 +1055,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
     padding-top: 0;
+    padding-bottom: 0;
     pointer-events: none;
   }
 
@@ -1039,6 +1196,12 @@ body {
     .acha-album .acha-cover-fallback {
       max-width: 220px;
       min-height: 0;
+    }
+
+    .acha-essay-visual img,
+    .acha-essay-visual .acha-cover-fallback {
+      max-width: none;
+      width: 100%;
     }
   }
 </style>
@@ -1195,6 +1358,168 @@ body {
       .replace(/\/artist\/images\/\d+\//, '/artist/images/1000/');
   }
 
+  function getImageProxyEndpoint() {
+    if (window.getArticApiUrl) return window.getArticApiUrl('imageProxy');
+    return ['localhost', '127.0.0.1'].includes(window.location.hostname)
+      ? '/api/image-proxy'
+      : 'https://imageproxy-4n2xy6gsxa-uc.a.run.app';
+  }
+
+  function getSampleableImageUrl(url) {
+    const displayUrl = getDisplayImageUrl(url);
+    if (!/^https?:\/\//i.test(displayUrl)) return displayUrl;
+    const endpoint = getImageProxyEndpoint();
+    const separator = endpoint.includes('?') ? '&' : '?';
+    return `${endpoint}${separator}url=${encodeURIComponent(displayUrl)}`;
+  }
+
+  function getSafeCssUrl(url) {
+    return String(url || '').replace(/["\\\n\r]/g, '');
+  }
+
+  function clampByte(value) {
+    return Math.max(0, Math.min(255, Math.round(value)));
+  }
+
+  function rgbToCss(rgb) {
+    return rgb.map(clampByte).join(', ');
+  }
+
+  function mixRgb(a, b, amount) {
+    return a.map((value, index) => value * (1 - amount) + b[index] * amount);
+  }
+
+  function relativeLuminance(rgb) {
+    const [r, g, b] = rgb.map((value) => {
+      const channel = value / 255;
+      return channel <= 0.03928
+        ? channel / 12.92
+        : Math.pow((channel + 0.055) / 1.055, 2.4);
+    });
+    return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+  }
+
+  function buildEssayPalette(sampledRgb) {
+    const imageLum = relativeLuminance(sampledRgb);
+    const darkAnchor = imageLum > 0.58 ? [12, 12, 12] : [18, 18, 18];
+    const bgMix = imageLum > 0.58 ? 0.68 : 0.46;
+    const background = mixRgb(sampledRgb, darkAnchor, bgMix);
+    const panel = mixRgb(background, sampledRgb, 0.16);
+    const ink = relativeLuminance(background) < 0.48 ? [246, 243, 236] : [16, 16, 16];
+    const muted = mixRgb(ink, background, 0.36);
+
+    return {
+      background: rgbToCss(background),
+      panel: rgbToCss(panel),
+      ink: rgbToCss(ink),
+      muted: rgbToCss(muted),
+      sampled: rgbToCss(sampledRgb)
+    };
+  }
+
+  function loadSampleableImage(url) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+      image.decoding = 'async';
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error(`Unable to load sampleable image: ${url}`));
+      image.src = url;
+    });
+  }
+
+  async function sampleImagePalette(url) {
+    const image = await loadSampleableImage(url);
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    if (!sourceWidth || !sourceHeight) throw new Error('Sampleable image has no dimensions.');
+
+    const canvas = document.createElement('canvas');
+    const sampleWidth = 96;
+    const sampleHeight = 42;
+    const targetAspect = 21 / 8;
+    const sourceAspect = sourceWidth / sourceHeight;
+    let sx = 0;
+    let sy = 0;
+    let sw = sourceWidth;
+    let sh = sourceHeight;
+
+    if (sourceAspect > targetAspect) {
+      sw = sourceHeight * targetAspect;
+      sx = (sourceWidth - sw) / 2;
+    } else {
+      sh = sourceWidth / targetAspect;
+      sy = (sourceHeight - sh) / 2;
+    }
+
+    canvas.width = sampleWidth;
+    canvas.height = sampleHeight;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(image, sx, sy, sw, sh, 0, 0, sampleWidth, sampleHeight);
+    const { data } = context.getImageData(0, 0, sampleWidth, sampleHeight);
+    const centerX = sampleWidth / 2;
+    const centerY = sampleHeight / 2;
+    const maxDistance = Math.hypot(centerX, centerY);
+    let red = 0;
+    let green = 0;
+    let blue = 0;
+    let weightTotal = 0;
+
+    for (let y = 0; y < sampleHeight; y += 1) {
+      for (let x = 0; x < sampleWidth; x += 1) {
+        const index = (y * sampleWidth + x) * 4;
+        const alpha = data[index + 3] / 255;
+        if (alpha < 0.5) continue;
+        const distance = Math.hypot(x - centerX, y - centerY);
+        const centerWeight = 1 - Math.min(1, distance / maxDistance);
+        const weight = alpha * (0.62 + centerWeight * 0.38);
+        red += data[index] * weight;
+        green += data[index + 1] * weight;
+        blue += data[index + 2] * weight;
+        weightTotal += weight;
+      }
+    }
+
+    if (!weightTotal) throw new Error('Sampleable image produced no color pixels.');
+    return buildEssayPalette([red / weightTotal, green / weightTotal, blue / weightTotal]);
+  }
+
+  function applyEssayPalette(details, palette) {
+    details.style.setProperty('--acha-essay-bg-rgb', palette.background);
+    details.style.setProperty('--acha-essay-panel-rgb', palette.panel);
+    details.style.setProperty('--acha-essay-ink-rgb', palette.ink);
+    details.style.setProperty('--acha-essay-muted-rgb', palette.muted);
+    details.style.setProperty('--acha-essay-sampled-rgb', palette.sampled);
+    details.dataset.paletteReady = 'true';
+    if (details.classList.contains('is-toggle-open') || details.classList.contains('is-expanding')) {
+      syncEssayFocusMode();
+    }
+  }
+
+  function applyFocusPalette(details) {
+    const computed = getComputedStyle(details);
+    const backgroundRgb = computed.getPropertyValue('--acha-essay-bg-rgb').trim();
+    document.body.style.setProperty('--acha-focus-bg-rgb', backgroundRgb);
+    document.body.style.setProperty('--acha-focus-panel-rgb', computed.getPropertyValue('--acha-essay-panel-rgb').trim());
+    document.body.style.setProperty('--acha-focus-ink-rgb', computed.getPropertyValue('--acha-essay-ink-rgb').trim());
+    document.body.style.setProperty('--acha-focus-muted-rgb', computed.getPropertyValue('--acha-essay-muted-rgb').trim());
+    document.body.style.setProperty('background-color', `rgb(${backgroundRgb})`, 'important');
+    document.body.style.setProperty('background', `rgb(${backgroundRgb})`, 'important');
+  }
+
+  function setupEssayPalette(details, visualUrl) {
+    if (!visualUrl) return;
+    const sampleableUrl = getSampleableImageUrl(visualUrl);
+    details.dataset.essaySampleUrl = sampleableUrl;
+    details.style.setProperty('--acha-essay-bg-image', `url("${getSafeCssUrl(sampleableUrl)}")`);
+    sampleImagePalette(sampleableUrl)
+      .then((palette) => applyEssayPalette(details, palette))
+      .catch((err) => {
+        details.dataset.paletteError = err.message || 'palette sampling failed';
+        console.warn('[artic. quarterly] Unable to sample essay image palette.', err);
+      });
+  }
+
   function coverBezierAt(t, p1, p2) {
     const inv = 1 - t;
     return 3 * inv * inv * t * p1 + 3 * inv * t * t * p2 + t * t * t;
@@ -1333,6 +1658,17 @@ body {
     animateInlineEssay(details, !details.classList.contains('is-toggle-open'));
   }
 
+  function syncEssayFocusMode() {
+    const activeEssay = document.querySelector('.acha-inline-essay.is-toggle-open, .acha-inline-essay.is-expanding');
+    if (activeEssay) applyFocusPalette(activeEssay);
+    const hasOpenEssay = Boolean(activeEssay);
+    document.body.classList.toggle('acha-essay-focus-mode', hasOpenEssay);
+    if (!hasOpenEssay) {
+      document.body.style.removeProperty('background');
+      document.body.style.removeProperty('background-color');
+    }
+  }
+
   function handleInlineEssayClick(event) {
     const instagramButton = event.target.closest?.('[data-instagram-post-url]');
     if (instagramButton && bodyEl.contains(instagramButton)) {
@@ -1380,6 +1716,7 @@ body {
       details.open = true;
       details.classList.toggle('is-toggle-open', shouldOpen);
       details.querySelector('summary')?.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+      syncEssayFocusMode();
       return;
     }
 
@@ -1392,6 +1729,7 @@ body {
       details.querySelector('summary')?.setAttribute('aria-expanded', 'true');
       details.classList.remove('is-collapsing');
       details.classList.add('is-expanding');
+      syncEssayFocusMode();
       content.style.height = '0px';
       content.style.opacity = '0';
       content.style.transform = 'translateY(-8px)';
@@ -1426,9 +1764,11 @@ body {
       content.style.opacity = '';
       content.style.transform = '';
       content.style.paddingTop = '';
+      content.style.paddingBottom = '';
       content.style.overflow = '';
       details.classList.remove('is-expanding', 'is-collapsing');
       delete details.dataset.animating;
+      syncEssayFocusMode();
     };
 
     content.addEventListener('transitionend', finish);
@@ -1439,6 +1779,8 @@ body {
       const summary = details.querySelector('summary');
       const content = details.querySelector('.acha-essay-content');
       if (!summary || !content) return;
+      const visualUrl = details.dataset.essayVisualUrl;
+      setupEssayPalette(details, visualUrl);
       const shouldStartOpen = details.open;
       details.dataset.enhanced = 'true';
       details.open = true;
@@ -1448,6 +1790,7 @@ body {
       summary.setAttribute('tabindex', '0');
       content.style.height = shouldStartOpen ? 'auto' : '';
     });
+    syncEssayFocusMode();
   }
 
   function getEssayHref(issue, essay) {
@@ -1475,7 +1818,10 @@ body {
 
   function renderEssayVisualImage(visual, fallbackItem) {
     if (visual.url) {
-      return `<img src="${escapeHtml(getDisplayImageUrl(visual.url))}" alt="${escapeHtml(visual.alt || visual.caption || 'Featured article image')}" loading="lazy" decoding="async">`;
+      return `<img src="${escapeHtml(getSampleableImageUrl(visual.url))}" alt="${escapeHtml(visual.alt || visual.caption || 'Featured article image')}" loading="lazy" decoding="async" crossorigin="anonymous">`;
+    }
+    if (fallbackItem?.imageUrl) {
+      return `<img src="${escapeHtml(getSampleableImageUrl(fallbackItem.imageUrl))}" alt="${escapeHtml(`${fallbackItem.album || 'Featured article'} image`)}" loading="lazy" decoding="async" crossorigin="anonymous">`;
     }
     return renderCover(fallbackItem);
   }
@@ -1653,8 +1999,9 @@ body {
     if (!essay) return '';
     const visual = getEssayVisual(issue, essay);
     const instagramUrl = getEssayInstagramPost(issue, essay, item);
+    const visualUrl = getDisplayImageUrl(visual.url || item.imageUrl || '');
     return `
-      <details class="acha-inline-essay" id="essay-${escapeHtml(essay.id || essay.title || '')}" open>
+      <details class="acha-inline-essay" id="essay-${escapeHtml(essay.id || essay.title || '')}" data-essay-visual-url="${escapeHtml(visualUrl)}" open>
         <summary>
           <figure class="acha-essay-visual">
             ${renderEssayVisualImage(visual, item)}

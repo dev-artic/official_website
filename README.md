@@ -81,7 +81,7 @@ Homepage/
 ├── js/                   # [클라이언트 스크립트]
 │   └── shared.js         # 다크모드 상태 관리, 모바일 햄버거 토글, 아코디언/카러셀 모션 등 공통 로직
 ├── functions/            # [백엔드 API] Node.js 22 기반 Firebase Cloud Functions 코드베이스
-│   ├── index.js                # checkout/waitlist/products/admin/quarterlyContents/quarterlyAdmin API 및 Firestore trigger
+│   ├── index.js                # checkout/waitlist/products/admin/quarterlyContents/quarterlyAdmin/imageProxy API 및 Firestore trigger
 │   ├── order_inventory.js      # 주문 배송 상태별 재고 차감/복구 판단 로직
 │   ├── quarterly_notion.js     # Notion `분기별 결산` data source adapter
 │   ├── quarterly_admin.js      # Quarterly admin 진단/수정 API 및 Firestore media override 병합
@@ -144,7 +144,7 @@ graph TD
     ```
   * 이 스크립트는 `templates/`에 구성된 디자인 요소들을 `src/` 본문과 결합하여 최종 HTML을 빌드하고, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 통합하는 렌더링 최적화를 수행합니다.
 * **백엔드 API 로직 개발**:
-  * 대기명단 가입, 결제 주문, 상품 조회, Quarterly Notion 아카이브 조회는 **`functions/index.js`** 파일에서 Node.js 22 기반 Firebase Functions로 설계 및 작성됩니다.
+  * 대기명단 가입, 결제 주문, 상품 조회, Quarterly Notion 아카이브 조회, CORS-safe 이미지 프록시는 **`functions/index.js`** 파일에서 Node.js 22 기반 Firebase Functions로 설계 및 작성됩니다.
   * 주문 상태별 재고 변경 규칙은 **`functions/order_inventory.js`** 에 분리되어 있으며, `npm run test:inventory`로 회귀 테스트합니다.
   * Quarterly 아카이브는 **`functions/quarterly_notion.js`** 에서 Notion `분기별 결산` data source를 read-only로 조회하고, 공개 가능한 row만 7-tier webzine JSON으로 정규화합니다. Notion database view를 직접 호출하지 않고 data source query를 사용하므로, 웹 노출 조건은 Notion view 필터가 아니라 adapter의 publish gate가 기준입니다.
 
@@ -238,11 +238,16 @@ graph TD
     printf "%s" "$NOTION_API_KEY" | npx firebase-tools functions:secrets:set NOTION_API_KEY --project artic-official-home
     npx firebase-tools deploy --only functions:quarterlyContents,functions:quarterlyAdmin --project artic-official-home
     ```
+  * imageProxy 함수는 ACHA featured article의 artist image palette sampling을 위해 외부 image URL을 CORS-safe image response로 중계합니다. 함수 로직 변경 후에는 아래처럼 단독 배포할 수 있습니다.
+    ```bash
+    npx firebase-tools deploy --only functions:imageProxy --project artic-official-home
+    ```
   * 배포 후 다음 smoke를 확인합니다.
     ```bash
     npx firebase-tools functions:list --project artic-official-home
     curl -sS https://products-4n2xy6gsxa-uc.a.run.app
     curl -sS https://quarterlycontents-4n2xy6gsxa-uc.a.run.app
+    curl -I "https://imageproxy-4n2xy6gsxa-uc.a.run.app?url=https%3A%2F%2Fimage.bugsm.co.kr%2Fartist%2Fimages%2F1000%2F201436%2F20143604.jpg"
     ```
 * **C. 유튜브 플레이리스트 갱신 자동화 (GitHub Actions Workflow)**:
   * 매주 월요일 오전 9시(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
@@ -288,6 +293,7 @@ graph TD
   * **ACHA 파싱 규칙**: issue 본문에서 `TIER n - 라벨`, `티어 n`, 숫자+라벨, 라벨 단독 heading을 tier heading으로 인식하고, heading 아래 Notion table을 앨범 목록으로 정규화합니다. 빈 tier heading은 API JSON의 canonical tier 구조에는 유지하되, ACHA 상세 페이지 UI에서는 앨범이 있는 tier만 렌더링합니다.
   * **Featured article 연결**: companion/featured article은 issue 본문의 child page와 table `Companion Essay` 셀의 Notion page mention을 모두 수집합니다. table mention에는 album/artist/tier 힌트를 함께 저장해 article 제목이 앨범명과 다르더라도 올바른 앨범 카드에 매칭되도록 합니다. child article 본문이 Notion table 편집본이면 `문체 수정 버전` 컬럼을 공개 본문으로 읽습니다.
   * **Media enrichment**: Notion `분기별 결산` 원문은 album/artist image URL을 필수 필드로 갖지 않습니다. 웹 API는 `functions/data/quarterly_media_cache.json`의 verified media cache를 명시적으로 적용하고, 응답의 `mediaEnrichment`에 source, updatedAt, 적용 개수를 남깁니다. Album cover는 `verified: true`인 cache record만 렌더링하며, Bugs 이미지 URL은 album/artist 모두 `/images/1000/` 고화질 경로로 정규화합니다. 운영에서는 Firestore `quarterly_media_overrides` 컬렉션의 admin 수정값을 static cache보다 우선 적용합니다.
+  * **Featured article palette**: ACHA 상세의 featured article이 열리면 artist image 또는 album image를 `imageProxy` 경유 URL로 canvas sampling하여 배너, 본문, 페이지 focus background의 CSS color variables를 자동 산출합니다. 로컬은 `/api/image-proxy?url=...`, 운영은 `https://imageproxy-4n2xy6gsxa-uc.a.run.app?url=...`를 사용하며, proxy는 `http`/`https` image response만 통과시키고 `Access-Control-Allow-Origin: *`를 반환합니다.
   * **Quarterly admin**: `/admin`의 Quarterly 탭은 `quarterlyAdmin` function을 호출해 live Notion 파싱 결과, tier/album/article diagnostics, cover health, Now artic. 분기 매칭 상태를 확인합니다. 수정은 admin bearer token 인증 후에만 가능하며, featured article 본문은 Notion child page에 paragraph blocks로 저장하고, album cover override는 Firestore `quarterly_media_overrides`에 저장합니다. Bugs 후보 검색은 preview만 반환하며, 사용자가 `Save Override`를 눌러야 Firestore에 기록됩니다. Notion 쓰기는 dashboard가 읽은 `last_edited_time`과 저장 직전 Notion page 상태를 비교해 중간 변경이 있으면 `409`로 거부하고, 빈 article 본문 저장은 기본 차단합니다. Cover resolution 기준은 출처가 아니라 픽셀 크기이며, URL path에서 `1000x1000`, `1200x1200`, Bugs `/images/1000/` 같은 요청 해상도를 읽어 최단 변이 `1000px` 미만일 때만 low-res로 분류합니다. Apple Music 등 외부 고해상도 이미지는 low-res가 아니라 review 대상으로 표시하고, 운영자가 Firestore `quarterly_media_review_overrides`에 resolved 상태를 마킹할 수 있습니다.
   * **분기 정렬 기준**: Archive 노출 순서는 `Year + Quarter`를 1차 기준으로 최신순 정렬하고, 같은 분기 안에서만 `Published At`을 보조 기준으로 사용합니다.
   * **렌더링 모델**: 첫 화면은 기존 waitlist 영역을 유지하고, 스크롤 아래에서 분기별 issue shelf를 최신순으로 렌더링합니다. 각 분기 shelf 안에는 ACHA와 Now artic. 모듈이 함께 배치됩니다.

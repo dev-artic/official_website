@@ -756,6 +756,78 @@ exports.quarterlyContents = onRequest({ secrets: [NOTION_API_KEY_SECRET] }, (req
   });
 });
 
+function getProxyImageUrl(req) {
+  const rawUrl = String(req.query.url || "").trim();
+  if (!rawUrl) {
+    const err = new Error("Missing required url parameter.");
+    err.status = 400;
+    throw err;
+  }
+
+  let imageUrl;
+  try {
+    imageUrl = new URL(rawUrl);
+  } catch (parseErr) {
+    const err = new Error("Invalid image URL.");
+    err.status = 400;
+    throw err;
+  }
+
+  if (!["http:", "https:"].includes(imageUrl.protocol)) {
+    const err = new Error("Only http and https image URLs are supported.");
+    err.status = 400;
+    throw err;
+  }
+
+  return imageUrl.toString();
+}
+
+exports.imageProxy = onRequest((req, res) => {
+  cors(req, res, async () => {
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Cache-Control", "public, max-age=86400, s-maxage=604800");
+
+    if (!["GET", "HEAD"].includes(req.method)) {
+      res.status(405).json({ error: "Method not allowed" });
+      return;
+    }
+
+    try {
+      const imageUrl = getProxyImageUrl(req);
+      const response = await fetch(imageUrl, {
+        headers: {
+          Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+          "User-Agent": "artic-image-proxy/1.0",
+        },
+      });
+
+      if (!response.ok) {
+        res.status(response.status).json({ error: "Image request failed", status: response.status });
+        return;
+      }
+
+      const contentType = response.headers.get("content-type") || "application/octet-stream";
+      if (!contentType.toLowerCase().startsWith("image/")) {
+        res.status(415).json({ error: "URL did not return an image." });
+        return;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      res.set("Content-Type", contentType);
+      res.set("X-artic-Proxied-Image", imageUrl);
+      if (req.method === "HEAD") {
+        res.status(200).end();
+        return;
+      }
+      res.status(200).send(Buffer.from(arrayBuffer));
+    } catch (err) {
+      res.status(err.status || 500).json({
+        error: err.message || "Failed to proxy image.",
+      });
+    }
+  });
+});
+
 exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KEY_SECRET] }, (req, res) => {
   cors(req, res, async () => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");

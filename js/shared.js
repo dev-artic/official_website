@@ -20,6 +20,7 @@ window.addEventListener('pageshow', function(e) {
     checkout: 'https://checkout-4n2xy6gsxa-uc.a.run.app',
     products: 'https://products-4n2xy6gsxa-uc.a.run.app',
     quarterlyContents: 'https://quarterlycontents-4n2xy6gsxa-uc.a.run.app',
+    imageProxy: 'https://imageproxy-4n2xy6gsxa-uc.a.run.app',
     admin: 'https://admin-4n2xy6gsxa-uc.a.run.app',
     quarterlyAdmin: 'https://quarterlyadmin-4n2xy6gsxa-uc.a.run.app'
   };
@@ -28,6 +29,7 @@ window.addEventListener('pageshow', function(e) {
     checkout: '/api/checkout',
     products: '/api/products',
     quarterlyContents: '/api/quarterly-contents',
+    imageProxy: '/api/image-proxy',
     admin: '/api/admin/products',
     adminData: '/api/admin/data',
     quarterlyAdmin: '/api/admin/quarterly'

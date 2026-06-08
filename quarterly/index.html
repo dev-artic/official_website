@@ -237,7 +237,7 @@
     max-width: var(--max-width);
     margin: 0 auto;
     padding: var(--space-xl) var(--gutter) var(--space-xxl);
-    min-height: calc(100dvh + clamp(220px, 30vh, 420px));
+    min-height: calc(var(--viewport-stable) + clamp(220px, 30vh, 420px));
     border-top: 1px solid var(--border-color);
   }
 
@@ -393,18 +393,34 @@
 
   .quarterly-quarter-head h3 {
     display: grid;
+    grid-template-columns: repeat(2, 0.72em);
+    grid-auto-rows: 0.78em;
+    column-gap: 0.02em;
+    row-gap: 0.02em;
+    justify-items: center;
+    align-items: center;
     width: max-content;
     max-width: 100%;
     font-family: var(--font-serif);
     font-size: clamp(4.2rem, 8vw, 8.4rem);
-    line-height: 0.78;
+    line-height: 1;
     letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
     color: var(--text-primary);
     overflow-wrap: normal;
   }
 
   .quarterly-quarter-head h3 span {
     display: block;
+    width: 100%;
+    text-align: center;
+    transform: translateZ(0);
+  }
+
+  .quarterly-quarter-head h3 span:nth-child(2),
+  .quarterly-quarter-head h3 span:nth-child(4) {
+    transform: translateX(0.015em);
   }
 
   .quarterly-quarter-modules {
@@ -1572,7 +1588,7 @@ body {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-height: 100dvh;
+        min-height: var(--viewport-stable);
         padding-top: 100px;
         padding-bottom: 60px;
       }
@@ -1600,7 +1616,7 @@ body {
     @media (max-width: 767px) {
       .about-content {
         padding-top: 80px !important;
-        min-height: 100dvh !important;
+        min-height: var(--viewport-stable) !important;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -1852,9 +1868,14 @@ body {
   function getQuarterDisplayParts(group) {
     const year = Number(group?.year || 0);
     const quarter = Number(group?.quarter || 0);
+    const yearText = year ? String(year).slice(-2) : String(group?.label || '').split(/\s+/)[0] || '';
+    const quarterText = quarter ? `Q${quarter}` : String(group?.label || '').split(/\s+/)[1] || '';
+    const quarterMatch = quarterText.match(/^([A-Za-z]+)([0-9]+)$/);
     return {
-      year: year ? String(year).slice(-2) : String(group?.label || '').split(/\s+/)[0] || '',
-      quarter: quarter ? `Q${quarter}` : String(group?.label || '').split(/\s+/)[1] || ''
+      year: yearText,
+      quarter: quarterText,
+      yearDigits: yearText.padStart(2, '0').slice(-2).split(''),
+      quarterParts: quarterMatch ? [quarterMatch[1], quarterMatch[2]] : quarterText.padEnd(2, ' ').slice(0, 2).split('')
     };
   }
 
@@ -2266,9 +2287,11 @@ body {
     return `
       <section class="quarterly-quarter ${variant === 'current' ? 'is-current' : ''} ${!hasAcha && hasNow ? 'is-now-only' : ''}" aria-labelledby="${escapeHtml(group.id)}-title">
         <header class="quarterly-quarter-head">
-          <h3 id="${escapeHtml(group.id)}-title" aria-label="${escapeHtml(group.label)}">
-            <span aria-hidden="true">${escapeHtml(period.year)}</span>
-            <span aria-hidden="true">${escapeHtml(period.quarter)}</span>
+          <h3 class="quarterly-period-mark" id="${escapeHtml(group.id)}-title" aria-label="${escapeHtml(group.label)}">
+            <span aria-hidden="true">${escapeHtml(period.yearDigits[0] || '')}</span>
+            <span aria-hidden="true">${escapeHtml(period.yearDigits[1] || '')}</span>
+            <span aria-hidden="true">${escapeHtml(period.quarterParts[0] || '')}</span>
+            <span aria-hidden="true">${escapeHtml(period.quarterParts[1] || '')}</span>
           </h3>
         </header>
         <div class="quarterly-quarter-modules">

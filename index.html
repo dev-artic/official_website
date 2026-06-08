@@ -90,7 +90,7 @@
     /* -- Hero About Button (discover) -- */
     .hero-about-btn {
       position: absolute;
-      top: calc(50dvh + 100px); /* Logo center (50dvh) + half height (36px) + gap (64px) */
+      top: calc(50svh + 100px); /* Logo center (50svh) + half height (36px) + gap (64px) */
       left: 50%;
       opacity: 0;
       transform: translate(-50%, 10px);
@@ -110,13 +110,13 @@
     /* ??Hero Section ??*/
     .hero {
       min-height: 100vh;
-      min-height: 100dvh;
+      min-height: var(--viewport-stable);
       position: relative;
     }
 
     .logo-split {
       position: absolute;
-      top: 50dvh;
+      top: 50svh;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 100px;

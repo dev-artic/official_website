@@ -50,7 +50,7 @@
       width: 100%;
       gap: 32px;
       margin-bottom: 80px;
-      transform: translateY(calc(50dvh - 310px));
+      transform: translateY(calc(50svh - 310px));
       will-change: transform;
       animation: showcaseSlideUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
     }
@@ -67,7 +67,7 @@
         text-align: left;
         align-items: center;
         gap: 48px;
-        transform: translateY(calc(50dvh - 210px));
+        transform: translateY(calc(50svh - 210px));
       }
     }
 

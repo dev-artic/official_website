@@ -2000,7 +2000,7 @@ path_depth: "../"
       document.getElementById('quarterly-youtube-editor-title').textContent = `${activeQuarterlyYoutubeAlbum.artist || '-'} — ${activeQuarterlyYoutubeAlbum.album || '-'}`;
       document.getElementById('quarterly-youtube-editor-status').textContent = quarterlyAdminData?.youtubeTrackOverrides?.resolverConfigured
         ? 'Resolver is configured. Notion can keep track names only.'
-        : 'YOUTUBE_API_KEY is not configured; manual override can still be saved if a YouTube ID is known.';
+        : 'YouTube API key is not configured; manual override can still be saved if a YouTube ID is known.';
       document.getElementById('quarterly-youtube-candidates').innerHTML = '';
       renderQuarterlyYoutubeTrackList();
       editor.scrollIntoView({ behavior: 'smooth', block: 'center' });

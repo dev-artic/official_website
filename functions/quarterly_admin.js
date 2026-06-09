@@ -390,7 +390,7 @@ async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, n
       count: Object.keys(youtubeOverrides.tracks || {}).length,
       updatedAt: youtubeOverrides.updatedAt,
       collection: "quarterly_youtube_track_overrides",
-      resolverConfigured: Boolean(youtubeApiKey || process.env.YOUTUBE_API_KEY || process.env.YOUTUBE_DATA_API_KEY),
+      resolverConfigured: Boolean(youtubeApiKey || process.env.MJ_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY || process.env.YOUTUBE_DATA_API_KEY),
     },
   };
 }

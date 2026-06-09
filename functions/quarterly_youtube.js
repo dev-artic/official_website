@@ -203,7 +203,7 @@ function buildYoutubeTrackDiagnostics(archive) {
 }
 
 function getYouTubeApiKey(secretValue = "") {
-  return secretValue || process.env.YOUTUBE_API_KEY || process.env.YOUTUBE_DATA_API_KEY || "";
+  return secretValue || process.env.MJ_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY || process.env.YOUTUBE_DATA_API_KEY || "";
 }
 
 async function youtubeApi(pathname, params, apiKey) {
@@ -277,7 +277,7 @@ function matchPlaylistItem(track, items, artist) {
 async function resolveYoutubeAlbumTracks({ album, artist, tracks, apiKey }) {
   const key = getYouTubeApiKey(apiKey);
   if (!key) {
-    const error = new Error("YOUTUBE_API_KEY is not configured.");
+    const error = new Error("YouTube API key is not configured.");
     error.status = 500;
     throw error;
   }

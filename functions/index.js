@@ -31,7 +31,7 @@ admin.initializeApp();
 const db = admin.firestore();
 const ADMIN_TOKEN_SECRET = defineSecret("ADMIN_TOKEN");
 const NOTION_API_KEY_SECRET = defineSecret("NOTION_API_KEY");
-const YOUTUBE_API_KEY_SECRET = defineSecret("YOUTUBE_API_KEY");
+const YOUTUBE_API_KEY_SECRET = defineSecret("MJ_YOUTUBE_API_KEY");
 const QUARTERLY_MEDIA_CACHE_FILE = path.join(__dirname, "data", "quarterly_media_cache.json");
 const QUARTERLY_NOW_ARTIC_FILE = path.join(__dirname, "data", "quarterly_now_artic.json");
 const QUARTERLY_EXTERNAL_LINKS_FILE = path.join(__dirname, "data", "quarterly_external_links.json");

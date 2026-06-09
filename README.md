@@ -198,7 +198,7 @@ graph TD
     *   **Admin Secret**: 운영 admin bearer token은 Firebase Secret Manager의 `ADMIN_TOKEN`으로 관리합니다. 로컬 보관용 token은 `functions/.env.local`에 둘 수 있으며, 이 파일은 Git에 커밋하지 않습니다.
     *   **Admin Logout**: `/admin` dashboard의 Logout 버튼은 브라우저의 `localStorage.artic-admin-token`을 제거하고, dashboard DOM 데이터를 비운 뒤 login 화면과 password input focus로 되돌립니다.
     *   **Notion Secret**: Quarterly 아카이브 조회용 Notion integration token은 Firebase Secret Manager의 `NOTION_API_KEY`로 관리합니다. `분기별 결산` database는 해당 integration에 공유되어 있어야 하며, data source ID는 `NOTION_QUARTERLY_DATA_SOURCE_ID`로 override할 수 있습니다.
-    *   **YouTube Resolver Secret**: ACHA highlighted track audio resolver는 YouTube Data API key를 `YOUTUBE_API_KEY` Firebase Secret 또는 로컬 `functions/.env.local` 값에서 읽습니다. Notion에는 곡명만 유지하고, `/admin` Quarterly 탭에서 앨범별 YouTube album playlist 후보를 조회한 뒤 Firestore `quarterly_youtube_track_overrides`에 검증된 `videoId`를 저장합니다.
+    *   **YouTube Resolver Secret**: ACHA highlighted track audio resolver는 YouTube Data API key를 `MJ_YOUTUBE_API_KEY` Firebase Secret 또는 로컬 `functions/.env.local` 값에서 읽습니다. 로컬 env는 `MJ_YOUTUBE_API_KEY`, `YOUTUBE_API_KEY`, `YOUTUBE_DATA_API_KEY`를 순서대로 지원합니다. Notion에는 곡명만 유지하고, `/admin` Quarterly 탭에서 앨범별 YouTube album playlist 후보를 조회한 뒤 Firestore `quarterly_youtube_track_overrides`에 검증된 `videoId`를 저장합니다.
 *   **환경 변수 및 라우팅 자동화**:
     *   클라이언트 단의 공통 스크립트(`js/shared.js` 등)가 브라우저의 현재 호스트명(`window.location.hostname`)을 감지합니다.
     *   호스트가 `localhost` 또는 `127.0.0.1`일 때는 로컬 백엔드 주소(`http://localhost:8000/api`)로 통신하고, `artic.live` 도메인일 때는 실제 클라우드 백엔드 주소로 API 호출 경로가 자동 전환되므로 빌드 시 별도로 소스코드를 수정할 필요가 없습니다.
@@ -240,10 +240,10 @@ graph TD
     printf "%s" "$NOTION_API_KEY" | npx firebase-tools functions:secrets:set NOTION_API_KEY --project artic-official-home
     npx firebase-tools deploy --only functions:quarterlyContents,functions:quarterlyAdmin --project artic-official-home
     ```
-  * ACHA highlighted track 자동 YouTube 후보 검색은 `quarterlyAdmin` 함수의 `YOUTUBE_API_KEY` secret에 의존합니다. 처음 연결하거나 key를 회전할 때는 아래 순서로 반영합니다.
+  * ACHA highlighted track 자동 YouTube 후보 검색은 `quarterlyAdmin` 함수의 `MJ_YOUTUBE_API_KEY` secret에 의존합니다. 이 이름은 기존 GitHub Actions playlist sync secret과 맞춘 운영 이름입니다. 처음 연결하거나 key를 회전할 때는 아래 순서로 반영합니다.
     ```bash
     # 값은 출력하지 않고 stdin으로 입력
-    printf "%s" "$YOUTUBE_API_KEY" | npx firebase-tools functions:secrets:set YOUTUBE_API_KEY --project artic-official-home
+    printf "%s" "$MJ_YOUTUBE_API_KEY" | npx firebase-tools functions:secrets:set MJ_YOUTUBE_API_KEY --project artic-official-home
     npx firebase-tools deploy --only functions:quarterlyAdmin,functions:quarterlyContents --project artic-official-home
     ```
   * imageProxy 함수는 ACHA featured article의 artist image palette sampling을 위해 외부 image URL을 CORS-safe image response로 중계합니다. 함수 로직 변경 후에는 아래처럼 단독 배포할 수 있습니다.

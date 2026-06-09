@@ -651,6 +651,26 @@ body {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
+  .quarterly-youtube-manual {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .quarterly-youtube-manual input {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 0 10px;
+    font-family: var(--font-sans);
+    font-size: 0.72rem;
+  }
+
   @media (max-width: 900px) {
     .quarterly-admin-grid,
     .quarterly-admin-layout,
@@ -668,6 +688,10 @@ body {
     }
 
     .quarterly-issue-alert {
+      grid-template-columns: 1fr;
+    }
+
+    .quarterly-youtube-manual {
       grid-template-columns: 1fr;
     }
 
@@ -2035,6 +2059,12 @@ body {
             <div class="quarterly-small-muted">${track.youtubeId ? `Resolved · ${escapeHtml(track.youtubeId)}${track.videoTitle ? ` · ${escapeHtml(track.videoTitle)}` : ''}` : 'Unresolved · Notion only has the track name.'}</div>
           </div>
           ${track.youtubeId ? `<a class="action-btn-sm" href="https://www.youtube.com/watch?v=${encodeURIComponent(track.youtubeId)}" target="_blank" rel="noopener noreferrer">Open</a>` : ''}
+          ${track.youtubeId ? '' : `
+            <div class="quarterly-youtube-manual">
+              <input type="text" id="quarterly-youtube-manual-${escapeHtml(track.number || '')}" placeholder="YouTube URL or video ID" aria-label="Manual YouTube URL or video ID for ${escapeHtml(track.number || '')} ${escapeHtml(track.title || '')}">
+              <button class="action-btn-sm" type="button" onclick="saveQuarterlyYoutubeManual('${encodeURIComponent(track.number || '')}')">Save Manual</button>
+            </div>
+          `}
         </div>
       `).join('');
     }
@@ -2069,7 +2099,7 @@ body {
         const playlistText = (data.playlistCandidates || []).map(item => `${item.title} (${item.channelTitle})`).slice(0, 3).join(' / ');
         status.textContent = `${data.candidates?.length || 0}/${data.tracks?.length || 0} candidate(s) found${playlistText ? ` · ${playlistText}` : ''}`;
         if (!window.quarterlyYoutubeCandidates.length) {
-          list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No confident YouTube candidate found. Try manual YouTube ID save after checking the official channel.</p>';
+          list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No confident YouTube candidate found. Paste a YouTube URL or video ID into the track row above after checking the official channel.</p>';
           return;
         }
         list.innerHTML = window.quarterlyYoutubeCandidates.map((candidate, index) => `
@@ -2102,6 +2132,34 @@ body {
       })
       .then(() => {
         alert('YouTube audio override saved.');
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message));
+    };
+
+    window.saveQuarterlyYoutubeManual = function(encodedNumber) {
+      if (!activeQuarterlyYoutubeAlbum) return;
+      const number = decodeURIComponent(encodedNumber || '');
+      const track = (activeQuarterlyYoutubeAlbum.highlightedTracks || []).find(item => String(item.number || '') === number);
+      const input = document.getElementById(`quarterly-youtube-manual-${number}`);
+      const youtubeId = input?.value?.trim() || '';
+      if (!track || !youtubeId) {
+        alert('Enter a YouTube URL or video ID first.');
+        return;
+      }
+      if (!confirm(`Save manual YouTube audio for ${number} ${track.title}?\n\n${youtubeId}`)) return;
+      postQuarterlyAdmin({
+        action: 'save_youtube_track_override',
+        album: activeQuarterlyYoutubeAlbum.album,
+        artist: activeQuarterlyYoutubeAlbum.artist,
+        number: track.number,
+        title: track.title,
+        youtubeId,
+        confidence: 'manual'
+      })
+      .then(() => {
+        alert('Manual YouTube audio override saved.');
         quarterlyLoaded = false;
         loadQuarterlyAdminData();
       })

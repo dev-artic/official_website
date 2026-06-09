@@ -2308,7 +2308,7 @@
     const scrollAnchor = createInlineEssayScrollAnchor(details, options.control, shouldOpen);
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      details.open = true;
+      details.open = shouldOpen;
       details.classList.toggle('is-toggle-open', shouldOpen);
       syncInlineEssayControls(details, shouldOpen);
       syncEssayFocusMode();
@@ -2358,7 +2358,7 @@
       if (event && (event.target !== content || event.propertyName !== 'height')) return;
       content.removeEventListener('transitionend', finish);
       window.clearTimeout(details._essayAnimationFallback);
-      details.open = true;
+      details.open = shouldOpen;
       content.style.height = shouldOpen ? 'auto' : '';
       content.style.opacity = '';
       content.style.transform = '';
@@ -2384,7 +2384,7 @@
       setupEssayPalette(details, visualUrl);
       const shouldStartOpen = false;
       details.dataset.enhanced = 'true';
-      details.open = true;
+      details.open = shouldStartOpen;
       details.classList.toggle('is-toggle-open', shouldStartOpen);
       syncInlineEssayControls(details, shouldStartOpen);
       summary.setAttribute('role', 'button');

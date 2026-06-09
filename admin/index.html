@@ -203,10 +203,106 @@ body {
   /* Tab Panes */
   .tab-pane {
     display: none;
+    position: relative;
+    min-height: 180px;
   }
 
   .tab-pane.active {
     display: block;
+  }
+
+  .tab-pane > * {
+    transition: opacity 0.24s ease, filter 0.24s ease;
+  }
+
+  .tab-pane.is-loading {
+    pointer-events: none;
+  }
+
+  .tab-pane.is-loading > * {
+    opacity: 0.34;
+    filter: saturate(0.82);
+  }
+
+  .tab-pane.is-loading::before {
+    content: attr(data-loading-label);
+    position: absolute;
+    z-index: 4;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 176px;
+    padding: 12px 18px 14px;
+    border: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.08);
+    animation: adminLoadingFloat 1.2s ease-in-out infinite;
+  }
+
+  .tab-pane.is-loading::after {
+    content: '';
+    position: absolute;
+    z-index: 5;
+    top: 50px;
+    left: 50%;
+    width: 128px;
+    height: 1px;
+    transform: translateX(-50%);
+    background:
+      linear-gradient(90deg, transparent, var(--text-primary), transparent),
+      linear-gradient(90deg, var(--border-color), var(--border-color));
+    background-size: 42px 1px, 100% 1px;
+    background-repeat: no-repeat;
+    animation: adminLoadingTrack 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .admin-tab-btn.is-loading {
+    color: var(--text-primary);
+  }
+
+  .admin-tab-btn.is-loading::before {
+    content: '';
+    position: absolute;
+    top: 7px;
+    right: -10px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    animation: adminLoadingDot 0.9s ease-in-out infinite;
+  }
+
+  @keyframes adminLoadingTrack {
+    0% { background-position: -42px 0, 0 0; }
+    100% { background-position: 128px 0, 0 0; }
+  }
+
+  @keyframes adminLoadingFloat {
+    0%, 100% { opacity: 0.86; transform: translate(-50%, 0); }
+    50% { opacity: 1; transform: translate(-50%, -2px); }
+  }
+
+  @keyframes adminLoadingDot {
+    0%, 100% { opacity: 0.35; transform: scale(0.72); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tab-pane > *,
+    .tab-pane.is-loading::before,
+    .tab-pane.is-loading::after,
+    .admin-tab-btn.is-loading::before {
+      animation: none;
+      transition: none;
+    }
   }
 
   /* Tables and Data list */
@@ -927,19 +1023,57 @@ body {
     let quarterlyAdminData = null;
     let selectedQuarterlyIssueId = '';
     let quarterlyLoaded = false;
+    let activeAdminTab = 'products';
+    let dashboardLoadId = 0;
+    const dataBackedTabs = new Set(['products', 'orders', 'subscribers']);
+    const tabLoadingLabels = {
+      products: 'Updating products',
+      orders: 'Updating orders',
+      subscribers: 'Updating subscribers',
+      quarterly: 'Updating quarterly'
+    };
+
+    function getPane(tab) {
+      return document.getElementById(`pane-${tab}`);
+    }
+
+    function setPaneLoading(tab, isLoading, label) {
+      const pane = getPane(tab);
+      const button = document.querySelector(`.admin-tab-btn[data-tab="${tab}"]`);
+      if (!pane || !button) return;
+      pane.classList.toggle('is-loading', isLoading);
+      button.classList.toggle('is-loading', isLoading);
+      pane.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+      if (isLoading) {
+        pane.dataset.loadingLabel = label || tabLoadingLabels[tab] || 'Updating';
+      } else {
+        pane.removeAttribute('data-loading-label');
+      }
+    }
+
+    function setActiveAdminTab(tab) {
+      activeAdminTab = tab;
+      tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      tabPanes.forEach(p => p.classList.toggle('active', p.id === `pane-${tab}`));
+    }
+
+    function refreshActiveAdminTab(tab) {
+      if (dataBackedTabs.has(tab)) {
+        loadDashboardData({ focusTab: tab });
+        return;
+      }
+      if (tab === 'quarterly' && !quarterlyLoaded) {
+        loadQuarterlyAdminData();
+      }
+    }
 
     // Tab Switching
     tabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const tab = btn.dataset.tab;
-        tabButtons.forEach(b => b.classList.remove('active'));
-        tabPanes.forEach(p => p.classList.remove('active'));
-
-        btn.classList.add('active');
-        document.getElementById(`pane-${tab}`).classList.add('active');
-        if (tab === 'quarterly' && !quarterlyLoaded) {
-          loadQuarterlyAdminData();
-        }
+        if (!tab || tab === activeAdminTab) return;
+        setActiveAdminTab(tab);
+        refreshActiveAdminTab(tab);
       });
     });
 
@@ -963,6 +1097,12 @@ body {
       document.getElementById('quarterly-detail-body').innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Select an issue to inspect tiers, covers, and featured articles.</p>';
       document.getElementById('quarterly-status').textContent = 'Quarterly data has not been loaded yet.';
       document.getElementById('quarterly-override-count').textContent = '';
+      tabButtons.forEach(button => button.classList.remove('is-loading'));
+      tabPanes.forEach(pane => {
+        pane.classList.remove('is-loading');
+        pane.setAttribute('aria-busy', 'false');
+        pane.removeAttribute('data-loading-label');
+      });
       quarterlyAdminData = null;
       selectedQuarterlyIssueId = '';
       quarterlyLoaded = false;
@@ -999,8 +1139,16 @@ body {
     logoutBtn.addEventListener('click', logoutAdmin);
 
     // Load Data
-    function loadDashboardData() {
+    function loadDashboardData(options = {}) {
+      const focusTab = options.focusTab || activeAdminTab || 'products';
+      const requestId = ++dashboardLoadId;
       const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('adminData') : '/api/admin/data';
+      if (dataBackedTabs.has(focusTab)) {
+        dataBackedTabs.forEach(tab => {
+          if (tab !== focusTab) setPaneLoading(tab, false);
+        });
+        setPaneLoading(focusTab, true, tabLoadingLabels[focusTab]);
+      }
 
       fetch(apiUrl, {
         headers: {
@@ -1022,6 +1170,7 @@ body {
         return res.json();
       })
       .then(data => {
+        if (requestId !== dashboardLoadId) return;
         renderProducts(data.products);
         renderOrders(data.orders);
         renderSubscribers(data.subscribers);
@@ -1031,6 +1180,11 @@ body {
         if (err.message !== 'Unauthorized') {
           authError.textContent = err.message;
           authError.style.display = 'block';
+        }
+      })
+      .finally(() => {
+        if (requestId === dashboardLoadId && dataBackedTabs.has(focusTab)) {
+          setPaneLoading(focusTab, false);
         }
       });
     }
@@ -1786,6 +1940,7 @@ body {
     function loadQuarterlyAdminData() {
       const status = document.getElementById('quarterly-status');
       status.textContent = 'Loading quarterly content diagnostics...';
+      setPaneLoading('quarterly', true, tabLoadingLabels.quarterly);
       document.getElementById('quarterly-refresh-btn').disabled = true;
 
       fetch(getQuarterlyAdminUrl(), {
@@ -1816,6 +1971,7 @@ body {
         status.textContent = err.message;
       })
       .finally(() => {
+        setPaneLoading('quarterly', false);
         document.getElementById('quarterly-refresh-btn').disabled = false;
       });
     }

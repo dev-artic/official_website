@@ -2214,11 +2214,11 @@ path_depth: "../"
         }
         list.innerHTML = window.quarterlyYoutubeCandidates.map((candidate, index) => `
           <div class="quarterly-candidate quarterly-youtube-candidate">
-            <div>
-              <div class="quarterly-album-name">${escapeHtml(candidate.number || '')} ${escapeHtml(candidate.title || '-')}</div>
-              <div class="quarterly-small-muted">${escapeHtml(candidate.videoTitle || candidate.youtubeId || '')} · ${escapeHtml(candidate.channelTitle || candidate.playlistChannelTitle || '')} · ${escapeHtml(candidate.confidence || 'review')}</div>
-              <div class="quarterly-small-muted">${escapeHtml(candidate.playlistTitle || '')}</div>
-            </div>
+          <div>
+            <div class="quarterly-album-name">${escapeHtml(candidate.number || '')} ${escapeHtml(candidate.title || '-')}</div>
+            <div class="quarterly-small-muted">${escapeHtml(candidate.videoTitle || candidate.youtubeId || '')} · ${escapeHtml(candidate.channelTitle || candidate.playlistChannelTitle || '')} · ${escapeHtml(candidate.source || 'candidate')} · ${escapeHtml(candidate.confidence || 'review')}</div>
+            <div class="quarterly-small-muted">${escapeHtml(candidate.playlistTitle || '')}</div>
+          </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
               <a class="action-btn-sm" href="https://www.youtube.com/watch?v=${encodeURIComponent(candidate.youtubeId)}" target="_blank" rel="noopener noreferrer">Open</a>
               <button class="action-btn-sm" type="button" onclick="saveQuarterlyYoutubeCandidate(${index})">Use</button>

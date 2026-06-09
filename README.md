@@ -198,6 +198,7 @@ graph TD
     *   **Admin Secret**: 운영 admin bearer token은 Firebase Secret Manager의 `ADMIN_TOKEN`으로 관리합니다. 로컬 보관용 token은 `functions/.env.local`에 둘 수 있으며, 이 파일은 Git에 커밋하지 않습니다.
     *   **Admin Logout**: `/admin` dashboard의 Logout 버튼은 브라우저의 `localStorage.artic-admin-token`을 제거하고, dashboard DOM 데이터를 비운 뒤 login 화면과 password input focus로 되돌립니다.
     *   **Notion Secret**: Quarterly 아카이브 조회용 Notion integration token은 Firebase Secret Manager의 `NOTION_API_KEY`로 관리합니다. `분기별 결산` database는 해당 integration에 공유되어 있어야 하며, data source ID는 `NOTION_QUARTERLY_DATA_SOURCE_ID`로 override할 수 있습니다.
+    *   **YouTube Resolver Secret**: ACHA highlighted track audio resolver는 YouTube Data API key를 `YOUTUBE_API_KEY` Firebase Secret 또는 로컬 `functions/.env.local` 값에서 읽습니다. Notion에는 곡명만 유지하고, `/admin` Quarterly 탭에서 앨범별 YouTube album playlist 후보를 조회한 뒤 Firestore `quarterly_youtube_track_overrides`에 검증된 `videoId`를 저장합니다.
 *   **환경 변수 및 라우팅 자동화**:
     *   클라이언트 단의 공통 스크립트(`js/shared.js` 등)가 브라우저의 현재 호스트명(`window.location.hostname`)을 감지합니다.
     *   호스트가 `localhost` 또는 `127.0.0.1`일 때는 로컬 백엔드 주소(`http://localhost:8000/api`)로 통신하고, `artic.live` 도메인일 때는 실제 클라우드 백엔드 주소로 API 호출 경로가 자동 전환되므로 빌드 시 별도로 소스코드를 수정할 필요가 없습니다.
@@ -238,6 +239,12 @@ graph TD
     # 값은 출력하지 않고 stdin으로 입력
     printf "%s" "$NOTION_API_KEY" | npx firebase-tools functions:secrets:set NOTION_API_KEY --project artic-official-home
     npx firebase-tools deploy --only functions:quarterlyContents,functions:quarterlyAdmin --project artic-official-home
+    ```
+  * ACHA highlighted track 자동 YouTube 후보 검색은 `quarterlyAdmin` 함수의 `YOUTUBE_API_KEY` secret에 의존합니다. 처음 연결하거나 key를 회전할 때는 아래 순서로 반영합니다.
+    ```bash
+    # 값은 출력하지 않고 stdin으로 입력
+    printf "%s" "$YOUTUBE_API_KEY" | npx firebase-tools functions:secrets:set YOUTUBE_API_KEY --project artic-official-home
+    npx firebase-tools deploy --only functions:quarterlyAdmin,functions:quarterlyContents --project artic-official-home
     ```
   * imageProxy 함수는 ACHA featured article의 artist image palette sampling을 위해 외부 image URL을 CORS-safe image response로 중계합니다. 함수 로직 변경 후에는 아래처럼 단독 배포할 수 있습니다.
     ```bash
@@ -295,8 +302,9 @@ graph TD
   * **ACHA 파싱 규칙**: issue 본문에서 `TIER n - 라벨`, `티어 n`, 숫자+라벨, 라벨 단독 heading을 tier heading으로 인식하고, heading 아래 Notion table을 앨범 목록으로 정규화합니다. 빈 tier heading은 API JSON의 canonical tier 구조에는 유지하되, ACHA 상세 페이지 UI에서는 앨범이 있는 tier만 렌더링합니다.
   * **Featured article 연결**: companion/featured article은 issue 본문의 child page와 table `Companion Essay` 셀의 Notion page mention을 모두 수집합니다. table mention에는 album/artist/tier 힌트를 함께 저장해 article 제목이 앨범명과 다르더라도 올바른 앨범 카드에 매칭되도록 합니다. child article 본문이 Notion table 편집본이면 `문체 수정 버전` 컬럼을 공개 본문으로 읽습니다.
   * **Media enrichment**: Notion `분기별 결산` 원문은 album/artist image URL을 필수 필드로 갖지 않습니다. 웹 API는 `functions/data/quarterly_media_cache.json`의 verified media cache를 명시적으로 적용하고, 응답의 `mediaEnrichment`에 source, updatedAt, 적용 개수를 남깁니다. Album cover는 `verified: true`인 cache record만 렌더링하며, Bugs 이미지 URL은 album/artist 모두 `/images/1000/` 고화질 경로로 정규화합니다. 운영에서는 Firestore `quarterly_media_overrides` 컬렉션의 admin 수정값을 static cache보다 우선 적용합니다.
+  * **Highlighted track audio enrichment**: ACHA issue 본문 table의 `추천 수록곡`/`Tracks` 컬럼에는 `#트랙번호 곡명 / #트랙번호 곡명` 형식으로 곡명만 입력합니다. 운영자는 `/admin` Quarterly 탭의 album `Audio` 버튼에서 YouTube Data API 기반 album playlist 후보를 조회하고, 검증된 후보를 `Use`로 저장합니다. 저장값은 Firestore `quarterly_youtube_track_overrides` 컬렉션에 `artist+album+track number+title` key로 보존되며, public `quarterlyContents` 응답은 이 cache를 적용해 `highlightedTracks[].youtubeId`를 내려줍니다. 자동 검색 실패 또는 애매한 후보는 임의 publish하지 않고 admin review 상태로 남깁니다.
   * **Featured article palette**: ACHA 상세의 featured article이 열리면 artist image 또는 album image를 `imageProxy` 경유 URL로 canvas sampling하여 배너, 본문, 페이지 focus background의 CSS color variables를 자동 산출합니다. 로컬은 `/api/image-proxy?url=...`, 운영은 `https://imageproxy-4n2xy6gsxa-uc.a.run.app?url=...`를 사용하며, proxy는 `http`/`https` image response만 통과시키고 `Access-Control-Allow-Origin: *`를 반환합니다.
-  * **Quarterly admin**: `/admin`의 Quarterly 탭은 `quarterlyAdmin` function을 호출해 live Notion 파싱 결과, tier/album/article diagnostics, cover health, Now artic. 분기 매칭 상태를 확인합니다. 수정은 admin bearer token 인증 후에만 가능하며, featured article 본문은 Notion child page에 paragraph blocks로 저장하고, album cover override는 Firestore `quarterly_media_overrides`에 저장합니다. Bugs 후보 검색은 preview만 반환하며, 사용자가 `Save Override`를 눌러야 Firestore에 기록됩니다. Notion 쓰기는 dashboard가 읽은 `last_edited_time`과 저장 직전 Notion page 상태를 비교해 중간 변경이 있으면 `409`로 거부하고, 빈 article 본문 저장은 기본 차단합니다. Cover resolution 기준은 출처가 아니라 픽셀 크기이며, URL path에서 `1000x1000`, `1200x1200`, Bugs `/images/1000/` 같은 요청 해상도를 읽어 최단 변이 `1000px` 미만일 때만 low-res로 분류합니다. Apple Music 등 외부 고해상도 이미지는 low-res가 아니라 review 대상으로 표시하고, 운영자가 Firestore `quarterly_media_review_overrides`에 resolved 상태를 마킹할 수 있습니다.
+  * **Quarterly admin**: `/admin`의 Quarterly 탭은 `quarterlyAdmin` function을 호출해 live Notion 파싱 결과, tier/album/article diagnostics, cover health, highlighted track audio health, Now artic. 분기 매칭 상태를 확인합니다. 수정은 admin bearer token 인증 후에만 가능하며, featured article 본문은 Notion child page에 paragraph blocks로 저장하고, album cover override는 Firestore `quarterly_media_overrides`에 저장합니다. Bugs 후보 검색은 preview만 반환하며, 사용자가 `Save Override`를 눌러야 Firestore에 기록됩니다. YouTube 후보 검색도 preview만 반환하며, 사용자가 `Use`를 눌러야 Firestore `quarterly_youtube_track_overrides`에 기록됩니다. Notion 쓰기는 dashboard가 읽은 `last_edited_time`과 저장 직전 Notion page 상태를 비교해 중간 변경이 있으면 `409`로 거부하고, 빈 article 본문 저장은 기본 차단합니다. Cover resolution 기준은 출처가 아니라 픽셀 크기이며, URL path에서 `1000x1000`, `1200x1200`, Bugs `/images/1000/` 같은 요청 해상도를 읽어 최단 변이 `1000px` 미만일 때만 low-res로 분류합니다. Apple Music 등 외부 고해상도 이미지는 low-res가 아니라 review 대상으로 표시하고, 운영자가 Firestore `quarterly_media_review_overrides`에 resolved 상태를 마킹할 수 있습니다.
   * **분기 정렬 기준**: Archive 노출 순서는 `Year + Quarter`를 1차 기준으로 최신순 정렬하고, 같은 분기 안에서만 `Published At`을 보조 기준으로 사용합니다.
   * **렌더링 모델**: 첫 화면은 기존 waitlist 영역을 유지하고, 스크롤 아래에서 분기별 issue shelf를 최신순으로 렌더링합니다. 각 분기 shelf 안에는 ACHA와 Now artic. 모듈이 함께 배치됩니다.
   * **확장 정보구조**: Gagosian Quarterly의 섹션형 hub 구조를 참고해 `Issues`, `Essays`, `Interviews`, `Videos`, `Studio Visits` 같은 section taxonomy를 수용할 수 있게 두었습니다. 현재 artic. 고유 구조의 중심은 7-tier album framework입니다.

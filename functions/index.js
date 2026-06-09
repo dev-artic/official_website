@@ -22,11 +22,16 @@ const {
   handleQuarterlyAdminAction,
   readQuarterlyMediaOverrides,
 } = require("./quarterly_admin");
+const {
+  applyQuarterlyYoutubeTracks,
+  readQuarterlyYoutubeTrackOverrides,
+} = require("./quarterly_youtube");
 
 admin.initializeApp();
 const db = admin.firestore();
 const ADMIN_TOKEN_SECRET = defineSecret("ADMIN_TOKEN");
 const NOTION_API_KEY_SECRET = defineSecret("NOTION_API_KEY");
+const YOUTUBE_API_KEY_SECRET = defineSecret("YOUTUBE_API_KEY");
 const QUARTERLY_MEDIA_CACHE_FILE = path.join(__dirname, "data", "quarterly_media_cache.json");
 const QUARTERLY_NOW_ARTIC_FILE = path.join(__dirname, "data", "quarterly_now_artic.json");
 const QUARTERLY_EXTERNAL_LINKS_FILE = path.join(__dirname, "data", "quarterly_external_links.json");
@@ -736,13 +741,14 @@ exports.quarterlyContents = onRequest({ secrets: [NOTION_API_KEY_SECRET] }, (req
       }
 
       const mediaOverrides = await readQuarterlyMediaOverrides(db);
-      const data = await fetchQuarterlyContents({
+      const youtubeOverrides = await readQuarterlyYoutubeTrackOverrides(db);
+      const data = applyQuarterlyYoutubeTracks(await fetchQuarterlyContents({
         token: getNotionToken(notionSecret),
         dataSourceId: getDataSourceId(),
         mediaCache: buildMediaCacheWithOverrides(readQuarterlyMediaCache(), mediaOverrides),
         nowArtic: readQuarterlyNowArtic(),
         externalLinks: readQuarterlyExternalLinks(),
-      });
+      }), youtubeOverrides.tracks);
       res.set("X-artic-Data-Source", "notion-live");
       res.set("X-artic-Notion-Query-Mode", data.queryMode || "data_source_direct");
       res.status(200).json(data);
@@ -828,7 +834,7 @@ exports.imageProxy = onRequest((req, res) => {
   });
 });
 
-exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KEY_SECRET] }, (req, res) => {
+exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KEY_SECRET, YOUTUBE_API_KEY_SECRET] }, (req, res) => {
   cors(req, res, async () => {
     res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     res.set("Pragma", "no-cache");
@@ -856,6 +862,12 @@ exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KE
       res.status(500).json({ error: "NOTION_API_KEY is not configured" });
       return;
     }
+    let youtubeSecret = "";
+    try {
+      youtubeSecret = YOUTUBE_API_KEY_SECRET.value();
+    } catch (err) {
+      youtubeSecret = "";
+    }
 
     try {
       if (req.method === "GET") {
@@ -866,6 +878,7 @@ exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KE
           mediaCache: readQuarterlyMediaCache(),
           nowArtic: readQuarterlyNowArtic(),
           externalLinks: readQuarterlyExternalLinks(),
+          youtubeApiKey: youtubeSecret,
         });
         res.status(200).json(payload);
         return;
@@ -877,6 +890,7 @@ exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KE
           token,
           db,
           fieldValue: FieldValue,
+          youtubeApiKey: youtubeSecret,
         });
         res.status(200).json(result);
         return;

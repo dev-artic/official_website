@@ -146,13 +146,14 @@ async function handleGetQuarterlyContents(req, res) {
 
   try {
     const { fetchQuarterlyContents } = require('./functions/quarterly_notion');
-    const data = await fetchQuarterlyContents({
+    const { applyQuarterlyYoutubeTracks } = require('./functions/quarterly_youtube');
+    const data = applyQuarterlyYoutubeTracks(await fetchQuarterlyContents({
       token,
       dataSourceId,
       mediaCache: readQuarterlyMediaCache(),
       nowArtic: readQuarterlyNowArtic(),
       externalLinks: readQuarterlyExternalLinks(),
-    });
+    }), {});
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'X-artic-Data-Source': 'local-notion-live',

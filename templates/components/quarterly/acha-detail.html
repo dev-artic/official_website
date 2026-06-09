@@ -646,6 +646,274 @@
     letter-spacing: 0.12em;
   }
 
+  .acha-highlighted-track {
+    align-items: start;
+  }
+
+  .acha-highlighted-track > span {
+    padding-top: 0;
+    line-height: 1.35;
+  }
+
+  .acha-track-module {
+    display: grid;
+    gap: 9px;
+    min-width: 0;
+  }
+
+  .acha-track-list {
+    display: grid;
+    gap: 7px;
+  }
+
+  .acha-track-trigger {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-sans);
+  }
+
+  .acha-track-trigger:hover .acha-track-title,
+  .acha-track-trigger.is-active .acha-track-title {
+    opacity: 0.62;
+  }
+
+  .acha-track-num {
+    flex: 0 0 30px;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    line-height: 1.35;
+  }
+
+  .acha-track-title {
+    display: block;
+    min-width: 0;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    letter-spacing: 0;
+    color: var(--text-primary);
+    transition: opacity 0.28s ease;
+  }
+
+  .acha-track-player {
+    display: grid;
+    gap: 13px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0 solid transparent;
+    transition:
+      max-height 0.46s var(--ease-out-expo),
+      opacity 0.34s ease,
+      margin-top 0.34s ease,
+      padding-top 0.34s ease,
+      border-color 0.34s ease;
+  }
+
+  .acha-track-player.is-open {
+    max-height: 132px;
+    opacity: 1;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top-width: 1px;
+    border-top-color: var(--border-color);
+  }
+
+  .acha-play-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .acha-play-status-row {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .acha-play-track-info {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    user-select: none;
+  }
+
+  .acha-play-track-num {
+    min-width: 24px;
+    flex-shrink: 0;
+    font-family: var(--font-sans);
+    font-size: 0.55rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .acha-play-track-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .acha-play-track-title {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.96rem;
+    font-weight: 500;
+    line-height: 1.32;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.3s ease;
+  }
+
+  .acha-play-track-status {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .acha-play-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .acha-play-time {
+    min-width: 30px;
+    flex-shrink: 0;
+    font-family: var(--font-sans);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .acha-play-time.dur {
+    text-align: right;
+  }
+
+  .acha-play-bar-track {
+    flex: 1;
+    height: 1px;
+    background-color: var(--border-color);
+    position: relative;
+  }
+
+  .acha-play-bar-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background-color: var(--text-primary);
+    transition: width 0.35s linear;
+  }
+
+  .acha-play-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .acha-play-ctrl-btn,
+  .acha-play-main-btn {
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0;
+    transition: color 0.28s ease, opacity 0.28s ease;
+  }
+
+  .acha-play-ctrl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .acha-play-ctrl-btn[disabled] {
+    opacity: 0.24;
+    cursor: default;
+  }
+
+  .acha-play-ctrl-btn:not([disabled]):hover,
+  .acha-play-main-btn:hover {
+    color: var(--text-primary);
+  }
+
+  .acha-play-main-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+  }
+
+  .acha-play-main-btn svg,
+  .acha-play-ctrl-btn svg {
+    width: 11px;
+    height: 11px;
+    fill: currentColor;
+    pointer-events: none;
+  }
+
+  .acha-play-track-info.track-anim-out-up {
+    animation: achaTrackFadeOutUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .acha-play-track-info.track-anim-in-up {
+    animation: achaTrackFadeInUp 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .acha-play-track-info.track-anim-out-down {
+    animation: achaTrackFadeOutDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .acha-play-track-info.track-anim-in-down {
+    animation: achaTrackFadeInDown 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes achaTrackFadeOutUp {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-8px); }
+  }
+
+  @keyframes achaTrackFadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes achaTrackFadeOutDown {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(8px); }
+  }
+
+  @keyframes achaTrackFadeInDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .acha-source {
     display: inline-block;
     margin-top: 12px;
@@ -980,6 +1248,11 @@
     color: rgb(var(--acha-essay-ink-rgb));
     word-break: keep-all;
     text-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+  }
+
+  .acha-essay-title-artist,
+  .acha-essay-title-album {
+    display: block;
   }
 
   .acha-inline-essay .acha-essay-content {
@@ -1510,6 +1783,14 @@
   let coverMarqueeVelocity = 0;
   let coverMarqueeTransition = null;
   let coverMarqueeTargetVelocity = 0;
+  let activeAchaTrackModule = null;
+  let activeAchaAudio = null;
+  let activeAchaYoutubePlayer = null;
+  let activeAchaYoutubeModule = null;
+  let achaYoutubeReadyPromise = null;
+  let achaYoutubeResolve = null;
+  let achaYoutubeReject = null;
+  let activeAchaProgressTimer = 0;
 
   function escapeHtml(value) {
     return String(value ?? '')
@@ -1899,7 +2180,7 @@
   function toggleInlineEssayFromControl(control) {
     const details = control.closest('.acha-inline-essay');
     if (!details || details.dataset.animating === 'true') return;
-    animateInlineEssay(details, !details.classList.contains('is-toggle-open'));
+    animateInlineEssay(details, !details.classList.contains('is-toggle-open'), { control });
   }
 
   function syncInlineEssayControls(details, isOpen) {
@@ -1931,6 +2212,8 @@
   }
 
   function handleInlineEssayClick(event) {
+    if (handleHighlightedTrackClick(event)) return;
+
     const essayToggle = event.target.closest?.('[data-essay-toggle]');
     if (essayToggle && bodyEl.contains(essayToggle)) {
       event.preventDefault();
@@ -1955,6 +2238,7 @@
 
   function handleInlineEssayKeydown(event) {
     if (!['Enter', ' '].includes(event.key)) return;
+
     const essayToggle = event.target.closest?.('[data-essay-toggle]');
     if (essayToggle && bodyEl.contains(essayToggle)) {
       event.preventDefault();
@@ -1985,16 +2269,50 @@
     if (event.key === 'Escape') closeInstagramModal();
   }
 
-  function animateInlineEssay(details, shouldOpen) {
+  function createInlineEssayScrollAnchor(details, control, shouldOpen) {
+    if (shouldOpen || !control?.classList?.contains('acha-essay-collapse')) return null;
+    const album = details.closest('.acha-album');
+    const anchor = album?.nextElementSibling || details;
+    if (!anchor) return null;
+    const initialTop = anchor.getBoundingClientRect().top;
+    let frameId = 0;
+    let stopped = false;
+
+    const sync = () => {
+      const delta = anchor.getBoundingClientRect().top - initialTop;
+      if (Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+    };
+
+    const tick = () => {
+      if (stopped) return;
+      sync();
+      frameId = window.requestAnimationFrame(tick);
+    };
+
+    return {
+      start() {
+        frameId = window.requestAnimationFrame(tick);
+      },
+      stop() {
+        stopped = true;
+        window.cancelAnimationFrame(frameId);
+        sync();
+      }
+    };
+  }
+
+  function animateInlineEssay(details, shouldOpen, options = {}) {
     const content = details.querySelector('.acha-essay-content');
     if (!content) return;
     if (shouldOpen) closeOtherInlineEssays(details);
+    const scrollAnchor = createInlineEssayScrollAnchor(details, options.control, shouldOpen);
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       details.open = true;
       details.classList.toggle('is-toggle-open', shouldOpen);
       syncInlineEssayControls(details, shouldOpen);
       syncEssayFocusMode();
+      window.requestAnimationFrame(() => scrollAnchor?.stop());
       return;
     }
 
@@ -2029,6 +2347,7 @@
       content.style.transform = 'translateY(0)';
       content.getBoundingClientRect();
       requestAnimationFrame(() => {
+        scrollAnchor?.start();
         content.style.height = '0px';
         content.style.opacity = '0';
         content.style.transform = 'translateY(-8px)';
@@ -2048,6 +2367,7 @@
       content.style.overflow = '';
       details.classList.remove('is-expanding', 'is-collapsing');
       delete details.dataset.animating;
+      scrollAnchor?.stop();
       syncEssayFocusMode();
     };
 
@@ -2072,6 +2392,366 @@
       content.style.height = shouldStartOpen ? 'auto' : '';
     });
     syncEssayFocusMode();
+  }
+
+  function stopAchaTrackAudio() {
+    if (activeAchaProgressTimer) {
+      window.clearInterval(activeAchaProgressTimer);
+      activeAchaProgressTimer = 0;
+    }
+    if (activeAchaAudio) {
+      activeAchaAudio.pause();
+      activeAchaAudio.src = '';
+      activeAchaAudio = null;
+    }
+    if (activeAchaYoutubePlayer && typeof activeAchaYoutubePlayer.pauseVideo === 'function') {
+      try { activeAchaYoutubePlayer.pauseVideo(); } catch (err) {}
+    }
+    activeAchaYoutubeModule = null;
+  }
+
+  function getAchaTrackData(field) {
+    try {
+      return JSON.parse(field.dataset.achaTracks || '[]');
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function formatTrackTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+
+  function setAchaPlayIcon(module, isPlaying) {
+    const icon = module.querySelector('[data-acha-play-toggle] svg');
+    if (!icon) return;
+    icon.innerHTML = isPlaying
+      ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
+      : '<polygon points="5 3 19 12 5 21 5 3"/>';
+  }
+
+  function setAchaPlayerStatus(module, status) {
+    const statusEl = module.querySelector('[data-acha-play-status]');
+    if (statusEl) statusEl.textContent = status;
+  }
+
+  function resetAchaPlayerProgress(module) {
+    const current = module.querySelector('[data-acha-play-current]');
+    const fill = module.querySelector('[data-acha-play-fill]');
+    if (current) current.textContent = '0:00';
+    if (fill) fill.style.width = '0%';
+  }
+
+  function startAchaMediaProgress(module, getCurrent, getDuration) {
+    if (activeAchaProgressTimer) {
+      window.clearInterval(activeAchaProgressTimer);
+      activeAchaProgressTimer = 0;
+    }
+    activeAchaProgressTimer = window.setInterval(() => {
+      const currentSeconds = getCurrent();
+      const durationSeconds = getDuration();
+      const current = module.querySelector('[data-acha-play-current]');
+      const duration = module.querySelector('[data-acha-play-duration]');
+      const fill = module.querySelector('[data-acha-play-fill]');
+      if (current) current.textContent = formatTrackTime(currentSeconds);
+      if (durationSeconds && duration) duration.textContent = formatTrackTime(durationSeconds);
+      if (fill && durationSeconds) fill.style.width = `${Math.min(100, (currentSeconds / durationSeconds) * 100)}%`;
+    }, 160);
+  }
+
+  function ensureAchaYoutubePlayer() {
+    if (activeAchaYoutubePlayer) return Promise.resolve(activeAchaYoutubePlayer);
+    if (achaYoutubeReadyPromise) return achaYoutubeReadyPromise;
+
+    achaYoutubeReadyPromise = new Promise((resolve, reject) => {
+      achaYoutubeResolve = resolve;
+      achaYoutubeReject = reject;
+      const bootPlayer = () => {
+        if (!window.YT?.Player) {
+          reject(new Error('YouTube IFrame API unavailable.'));
+          return;
+        }
+        let holder = document.getElementById('acha-youtube-hidden-player');
+        if (!holder) {
+          holder = document.createElement('div');
+          holder.id = 'acha-youtube-hidden-player';
+          holder.style.cssText = 'position:fixed;bottom:-200px;right:-200px;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-9999;';
+          document.body.appendChild(holder);
+        }
+        activeAchaYoutubePlayer = new window.YT.Player(holder.id, {
+          height: '1',
+          width: '1',
+          playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
+          events: {
+            onReady: () => resolve(activeAchaYoutubePlayer),
+            onStateChange: (event) => {
+              const module = activeAchaYoutubeModule;
+              if (!module || !window.YT?.PlayerState) return;
+              if (event.data === window.YT.PlayerState.PLAYING) {
+                setAchaPlayIcon(module, true);
+                setAchaPlayerStatus(module, 'Now Playing');
+                startAchaMediaProgress(
+                  module,
+                  () => activeAchaYoutubePlayer?.getCurrentTime?.() || 0,
+                  () => activeAchaYoutubePlayer?.getDuration?.() || 0
+                );
+              } else if (event.data === window.YT.PlayerState.PAUSED) {
+                setAchaPlayIcon(module, false);
+                setAchaPlayerStatus(module, 'Paused');
+              } else if (event.data === window.YT.PlayerState.ENDED) {
+                setAchaPlayIcon(module, false);
+                setAchaPlayerStatus(module, 'Ready');
+                resetAchaPlayerProgress(module);
+                activeAchaYoutubeModule = null;
+              }
+            }
+          }
+        });
+      };
+
+      if (window.YT?.Player) {
+        bootPlayer();
+        return;
+      }
+
+      const previousReady = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (typeof previousReady === 'function') previousReady();
+        bootPlayer();
+      };
+
+      if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+        const script = document.createElement('script');
+        script.src = 'https://www.youtube.com/iframe_api';
+        script.onerror = () => reject(new Error('Unable to load YouTube IFrame API.'));
+        document.head.appendChild(script);
+      }
+    }).catch((err) => {
+      achaYoutubeReadyPromise = null;
+      if (achaYoutubeReject) achaYoutubeReject(err);
+      throw err;
+    });
+
+    return achaYoutubeReadyPromise;
+  }
+
+  function updateAchaTrackUI(module, index, direction = 'next') {
+    const field = module.closest('.acha-highlighted-track');
+    const tracks = getAchaTrackData(field);
+    const track = tracks[index];
+    if (!track) return;
+
+    const info = module.querySelector('.acha-play-track-info');
+    const apply = () => {
+      module.dataset.activeTrackIndex = String(index);
+      module.querySelectorAll('.acha-track-trigger').forEach((button) => {
+        const isActive = Number(button.dataset.achaTrackIndex) === index;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+      });
+      const num = module.querySelector('[data-acha-play-num]');
+      const title = module.querySelector('[data-acha-play-title]');
+      const duration = module.querySelector('[data-acha-play-duration]');
+      if (num) num.textContent = track.number || padTrackNumber(index + 1);
+      if (title) title.textContent = track.title || '';
+      if (duration) duration.textContent = track.duration || '0:00';
+      resetAchaPlayerProgress(module);
+    };
+
+    if (!info) {
+      apply();
+      return;
+    }
+
+    info.classList.remove('track-anim-out-up', 'track-anim-out-down', 'track-anim-in-up', 'track-anim-in-down');
+    const outClass = direction === 'prev' ? 'track-anim-out-down' : 'track-anim-out-up';
+    const inClass = direction === 'prev' ? 'track-anim-in-down' : 'track-anim-in-up';
+    info.classList.add(outClass);
+    window.setTimeout(() => {
+      apply();
+      info.classList.remove(outClass);
+      info.classList.add(inClass);
+    }, 220);
+  }
+
+  function closeAchaTrackModule(module) {
+    if (!module) return;
+    const player = module.querySelector('.acha-track-player');
+    module.querySelectorAll('.acha-track-trigger').forEach((button) => {
+      button.classList.remove('is-active');
+      button.setAttribute('aria-expanded', 'false');
+    });
+    if (player) {
+      player.classList.remove('is-open');
+      player.setAttribute('aria-hidden', 'true');
+    }
+    setAchaPlayIcon(module, false);
+    setAchaPlayerStatus(module, 'Ready');
+    resetAchaPlayerProgress(module);
+    if (activeAchaTrackModule === module) activeAchaTrackModule = null;
+  }
+
+  function openAchaTrackModule(module, index, options = {}) {
+    const player = module.querySelector('.acha-track-player');
+    if (!player) return;
+    if (activeAchaTrackModule && activeAchaTrackModule !== module) {
+      stopAchaTrackAudio();
+      closeAchaTrackModule(activeAchaTrackModule);
+    }
+
+    const currentIndex = Number(module.dataset.activeTrackIndex || 0);
+    updateAchaTrackUI(module, index, index < currentIndex ? 'prev' : 'next');
+    player.classList.add('is-open');
+    player.setAttribute('aria-hidden', 'false');
+    activeAchaTrackModule = module;
+    if (options.play) playAchaTrack(module);
+  }
+
+  async function playAchaTrack(module) {
+    const field = module.closest('.acha-highlighted-track');
+    const tracks = getAchaTrackData(field);
+    const index = Number(module.dataset.activeTrackIndex || 0);
+    const track = tracks[index];
+
+    stopAchaTrackAudio();
+    resetAchaPlayerProgress(module);
+
+    if (track?.youtubeId) {
+      setAchaPlayerStatus(module, 'Loading');
+      try {
+        const player = await ensureAchaYoutubePlayer();
+        activeAchaYoutubeModule = module;
+        if (typeof player.loadVideoById === 'function') {
+          player.loadVideoById(track.youtubeId);
+        }
+      } catch (err) {
+        activeAchaYoutubeModule = null;
+        setAchaPlayIcon(module, false);
+        setAchaPlayerStatus(module, 'Playback unavailable');
+      }
+      return;
+    }
+
+    if (!track?.source) {
+      setAchaPlayIcon(module, false);
+      setAchaPlayerStatus(module, 'Preview unavailable');
+      return;
+    }
+
+    activeAchaAudio = new Audio(track.source);
+    activeAchaAudio.addEventListener('loadedmetadata', () => {
+      const duration = module.querySelector('[data-acha-play-duration]');
+      if (duration) duration.textContent = formatTrackTime(activeAchaAudio.duration);
+    }, { once: true });
+    activeAchaAudio.addEventListener('ended', () => {
+      setAchaPlayIcon(module, false);
+      setAchaPlayerStatus(module, 'Ready');
+      resetAchaPlayerProgress(module);
+      stopAchaTrackAudio();
+    });
+    activeAchaAudio.play()
+      .then(() => {
+        setAchaPlayIcon(module, true);
+        setAchaPlayerStatus(module, 'Now Playing');
+        startAchaMediaProgress(
+          module,
+          () => activeAchaAudio?.currentTime || 0,
+          () => activeAchaAudio?.duration || 0
+        );
+      })
+      .catch(() => {
+        setAchaPlayIcon(module, false);
+        setAchaPlayerStatus(module, 'Playback blocked');
+      });
+  }
+
+  function toggleAchaTrackModule(module, index) {
+    const player = module.querySelector('.acha-track-player');
+    const isOpen = player?.classList.contains('is-open');
+    const currentIndex = Number(module.dataset.activeTrackIndex || 0);
+
+    if (isOpen && currentIndex === index) {
+      stopAchaTrackAudio();
+      closeAchaTrackModule(module);
+      return;
+    }
+
+    stopAchaTrackAudio();
+    openAchaTrackModule(module, index, { play: true });
+  }
+
+  function moveAchaTrack(module, direction) {
+    const field = module.closest('.acha-highlighted-track');
+    const tracks = getAchaTrackData(field);
+    if (tracks.length <= 1) return;
+    const currentIndex = Number(module.dataset.activeTrackIndex || 0);
+    const nextIndex = direction === 'prev'
+      ? (currentIndex - 1 + tracks.length) % tracks.length
+      : (currentIndex + 1) % tracks.length;
+    stopAchaTrackAudio();
+    openAchaTrackModule(module, nextIndex, { play: true });
+  }
+
+  function handleHighlightedTrackClick(event) {
+    const trackButton = event.target.closest?.('[data-acha-track-index]');
+    if (trackButton && bodyEl.contains(trackButton)) {
+      event.preventDefault();
+      const module = trackButton.closest('.acha-track-module');
+      toggleAchaTrackModule(module, Number(trackButton.dataset.achaTrackIndex || 0));
+      return true;
+    }
+
+    const toggleButton = event.target.closest?.('[data-acha-play-toggle]');
+    if (toggleButton && bodyEl.contains(toggleButton)) {
+      event.preventDefault();
+      const module = toggleButton.closest('.acha-track-module');
+      if (!module) return true;
+      const hasAudio = Boolean((activeAchaAudio && activeAchaTrackModule === module) || activeAchaYoutubeModule === module);
+      if (hasAudio) {
+        stopAchaTrackAudio();
+        setAchaPlayIcon(module, false);
+        setAchaPlayerStatus(module, 'Paused');
+      } else {
+        playAchaTrack(module);
+      }
+      return true;
+    }
+
+    const progressBar = event.target.closest?.('[data-acha-play-bar]');
+    if (progressBar && bodyEl.contains(progressBar)) {
+      event.preventDefault();
+      const module = progressBar.closest('.acha-track-module');
+      const rect = progressBar.getBoundingClientRect();
+      const ratio = rect.width ? Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) : 0;
+      const fill = module?.querySelector('[data-acha-play-fill]');
+      if (fill) fill.style.width = `${ratio * 100}%`;
+      if (activeAchaAudio && activeAchaTrackModule === module && activeAchaAudio.duration) {
+        activeAchaAudio.currentTime = activeAchaAudio.duration * ratio;
+      } else if (activeAchaYoutubeModule === module && activeAchaYoutubePlayer?.getDuration && activeAchaYoutubePlayer?.seekTo) {
+        const duration = activeAchaYoutubePlayer.getDuration() || 0;
+        if (duration) activeAchaYoutubePlayer.seekTo(duration * ratio, true);
+      }
+      return true;
+    }
+
+    const prevButton = event.target.closest?.('[data-acha-play-prev]');
+    if (prevButton && bodyEl.contains(prevButton) && !prevButton.disabled) {
+      event.preventDefault();
+      moveAchaTrack(prevButton.closest('.acha-track-module'), 'prev');
+      return true;
+    }
+
+    const nextButton = event.target.closest?.('[data-acha-play-next]');
+    if (nextButton && bodyEl.contains(nextButton) && !nextButton.disabled) {
+      event.preventDefault();
+      moveAchaTrack(nextButton.closest('.acha-track-module'), 'next');
+      return true;
+    }
+
+    return false;
   }
 
   function getEssayHref(issue, essay) {
@@ -2249,6 +2929,16 @@
     return essay.title || 'Featured article';
   }
 
+  function getEssayDisplayTitleParts(issue, essay) {
+    const album = findEssayAlbum(issue, essay);
+    if (album?.artist && album?.album) {
+      return { artist: album.artist, album: album.album, fallback: '' };
+    }
+    const match = String(essay.title || '').match(/\(([^)]+)\)\s*\[([^\]]+)\]/);
+    if (match) return { artist: match[1], album: match[2], fallback: '' };
+    return { artist: '', album: '', fallback: essay.title || 'Featured article' };
+  }
+
   function getAchaSummary() {
     return [
       "ACHA: A's Choice & Home Archive",
@@ -2281,6 +2971,10 @@
     const visual = getEssayVisual(issue, essay);
     const instagramUrl = getEssayInstagramPost(issue, essay, item);
     const visualUrl = getDisplayImageUrl(visual.url || item.imageUrl || '');
+    const titleParts = getEssayDisplayTitleParts(issue, essay);
+    const titleHtml = titleParts.fallback
+      ? escapeHtml(titleParts.fallback)
+      : `<span class="acha-essay-title-artist">${escapeHtml(titleParts.artist)} &mdash;</span><span class="acha-essay-title-album">${escapeHtml(titleParts.album)}</span>`;
     return `
       <details class="acha-inline-essay" id="essay-${escapeHtml(essay.id || essay.title || '')}" data-essay-visual-url="${escapeHtml(visualUrl)}">
         <summary>
@@ -2290,7 +2984,7 @@
           </figure>
           <div class="acha-essay-heading">
             <p class="acha-kicker">Featured article</p>
-            <h4>${escapeHtml(getEssayDisplayTitle(issue, essay))}</h4>
+            <h4>${titleHtml}</h4>
             <div class="acha-essay-actions">
               <button class="acha-essay-toggle" type="button" data-essay-toggle aria-expanded="false">
                 <span data-essay-toggle-label>Full article</span>
@@ -2313,6 +3007,152 @@
     `;
   }
 
+  function padTrackNumber(value) {
+    const numeric = Number.parseInt(String(value || '').replace(/\D/g, ''), 10);
+    if (!numeric) return String(value || '').trim() || '01';
+    return numeric < 10 ? `0${numeric}` : String(numeric);
+  }
+
+  function extractYouTubeVideoId(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const bracket = raw.match(/\[youtube:([a-zA-Z0-9_-]{11})\]/i);
+    if (bracket) return bracket[1];
+    const short = raw.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/i);
+    if (short) return short[1];
+    const watch = raw.match(/[?&]v=([a-zA-Z0-9_-]{11})/i);
+    if (watch) return watch[1];
+    const embed = raw.match(/youtube\.com\/(?:embed|shorts)\/([a-zA-Z0-9_-]{11})/i);
+    if (embed) return embed[1];
+    return /^[a-zA-Z0-9_-]{11}$/.test(raw) ? raw : '';
+  }
+
+  function extractTrackMedia(rawValue) {
+    const raw = String(rawValue || '');
+    const urlMatch = raw.match(/https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s)\]]+/i);
+    const bracketMatch = raw.match(/\[youtube:[a-zA-Z0-9_-]{11}\]/i);
+    const youtubeId = extractYouTubeVideoId(urlMatch?.[0] || bracketMatch?.[0] || '');
+    const title = raw
+      .replace(urlMatch?.[0] || '', '')
+      .replace(bracketMatch?.[0] || '', '')
+      .trim();
+    return { title, youtubeId };
+  }
+
+  function parseTrackToken(token, index) {
+    const media = extractTrackMedia(token);
+    const raw = media.title.trim();
+    const numbered = raw.match(/^#?\s*([0-9]+)\s+(.+)$/);
+    if (numbered) {
+      return {
+        number: padTrackNumber(numbered[1]),
+        title: numbered[2].trim(),
+        source: '',
+        youtubeId: media.youtubeId
+      };
+    }
+    return {
+      number: padTrackNumber(index + 1),
+      title: raw,
+      source: '',
+      youtubeId: media.youtubeId
+    };
+  }
+
+  function getTrackSource(track) {
+    return track.audioUrl || track.audio || track.previewUrl || track.source || track.url || '';
+  }
+
+  function getTrackYoutubeId(track) {
+    return track.youtubeId || track.youtubeVideoId || track.videoId || extractYouTubeVideoId(track.youtubeUrl || track.youtube || track.videoUrl || track.url || '');
+  }
+
+  function normalizeHighlightedTracks(value) {
+    const sortTracks = (tracks) => tracks
+      .map((track, order) => ({
+        ...track,
+        _order: order,
+        _sortNumber: Number.parseInt(String(track.number || '').replace(/\D/g, ''), 10)
+      }))
+      .sort((a, b) => {
+        const aNumber = Number.isFinite(a._sortNumber) ? a._sortNumber : Number.MAX_SAFE_INTEGER;
+        const bNumber = Number.isFinite(b._sortNumber) ? b._sortNumber : Number.MAX_SAFE_INTEGER;
+        return aNumber === bNumber ? a._order - b._order : aNumber - bNumber;
+      })
+      .map(({ _order, _sortNumber, ...track }) => track);
+
+    if (Array.isArray(value)) {
+      return sortTracks(value.map((track, index) => {
+        if (typeof track === 'string') return parseTrackToken(track, index);
+        return {
+          number: padTrackNumber(track.number || track.trackNumber || index + 1),
+          title: String(track.title || track.name || track.track || '').trim(),
+          source: getTrackSource(track),
+          youtubeId: getTrackYoutubeId(track),
+          duration: track.duration || ''
+        };
+      }).filter((track) => track.title));
+    }
+
+    const raw = String(value || '').trim();
+    if (!hasValue(raw)) return [];
+    return sortTracks(raw
+      .split(/\s+\/\s+|\n+/)
+      .map((item, index) => parseTrackToken(item, index))
+      .filter((track) => track.title));
+  }
+
+  function renderHighlightedTracks(item) {
+    const tracks = normalizeHighlightedTracks(item.highlightedTracks || item.tracks).map((track) => ({
+      ...track,
+      artist: item.artist || '',
+      album: item.album || ''
+    }));
+    if (!tracks.length) return '';
+    const playerId = `acha-track-player-${Math.random().toString(36).slice(2)}`;
+    const encodedTracks = escapeHtml(JSON.stringify(tracks));
+    return `
+      <div class="acha-field acha-highlighted-track" data-acha-tracks="${encodedTracks}">
+        <span>Highlighted <br>track</span>
+        <div class="acha-track-module">
+          <div class="acha-track-list">
+            ${tracks.map((track, index) => `
+              <button class="acha-track-trigger" type="button" data-acha-track-index="${index}" aria-expanded="false" aria-controls="${playerId}">
+                <span class="acha-track-num">${escapeHtml(track.number)}</span>
+                <span class="acha-track-title">${escapeHtml(track.title)}</span>
+              </button>
+            `).join('')}
+          </div>
+          <div class="acha-track-player" id="${playerId}" aria-hidden="true">
+            <div class="acha-play-widget">
+              <div class="acha-play-status-row">
+                <span class="acha-play-track-status" data-acha-play-status>Ready</span>
+              </div>
+              <div class="acha-play-progress-wrap">
+                <span class="acha-play-time" data-acha-play-current>0:00</span>
+                <div class="acha-play-bar-track" data-acha-play-bar><div class="acha-play-bar-fill" data-acha-play-fill></div></div>
+                <span class="acha-play-time dur" data-acha-play-duration>${escapeHtml(tracks[0].duration || '0:00')}</span>
+              </div>
+              <div class="acha-play-controls">
+                <button class="acha-play-ctrl-btn" type="button" data-acha-play-prev ${tracks.length <= 1 ? 'disabled' : ''}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                  Prev
+                </button>
+                <button class="acha-play-main-btn" type="button" data-acha-play-toggle aria-label="Play highlighted track">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </button>
+                <button class="acha-play-ctrl-btn" type="button" data-acha-play-next ${tracks.length <= 1 ? 'disabled' : ''}>
+                  Next
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function renderField(label, value) {
     if (!hasValue(value)) return '';
     return `
@@ -2332,7 +3172,7 @@
           <h3>${escapeHtml(item.album)}</h3>
           <span class="acha-album-meta">${[item.artist, item.genre, item.releaseDate].filter(Boolean).map(escapeHtml).join(' · ')}</span>
           ${hasValue(item.comment) ? `<p class="acha-critic-line">${escapeHtml(item.comment)}</p>` : ''}
-          ${renderField('Tracks', item.tracks)}
+          ${renderHighlightedTracks(item)}
         </div>
         ${inlineEssay}
       </article>

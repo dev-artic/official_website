@@ -589,6 +589,7 @@ body {
     gap: 10px;
   }
 
+  .quarterly-youtube-editor,
   .quarterly-media-editor,
   .quarterly-album-editor {
     border: 1px solid var(--border-color);
@@ -620,6 +621,7 @@ body {
     overflow-wrap: anywhere;
   }
 
+  .quarterly-youtube-editor.active,
   .quarterly-media-editor.active,
   .quarterly-album-editor.active {
     display: grid;
@@ -643,6 +645,10 @@ body {
     width: 44px;
     height: 44px;
     object-fit: cover;
+  }
+
+  .quarterly-youtube-candidate {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   @media (max-width: 900px) {
@@ -1391,6 +1397,10 @@ body {
       return (quarterlyAdminData?.diagnostics?.issues || []).find(item => item.issueId === issueId) || {};
     }
 
+    function getIssueYoutubeDiagnostics(issueId) {
+      return (quarterlyAdminData?.diagnostics?.youtubeTrackHealth?.issues || []).find(item => item.issueId === issueId) || {};
+    }
+
     function getQuarterlyIssue(issueId) {
       return (quarterlyAdminData?.archive?.issues || []).find(issue => issue.id === issueId) || null;
     }
@@ -1402,7 +1412,8 @@ body {
         ['Albums', summary.albumCount || 0],
         ['Cover Fixes', (summary.coverMissing || 0) + (summary.coverLowResolution || 0)],
         ['Cover Review', (summary.coverReview || 0) + (summary.coverUnverified || 0)],
-        ['Article Fixes', summary.articleMissingBody || 0]
+        ['Article Fixes', summary.articleMissingBody || 0],
+        ['Audio Resolved', `${summary.youtubeTrackResolved || 0}/${summary.youtubeTrackTotal || 0}`]
       ];
 
       grid.innerHTML = metrics.map(([label, value]) => `
@@ -1417,7 +1428,7 @@ body {
       const list = document.getElementById('quarterly-issue-list');
       const issues = quarterlyAdminData?.archive?.issues || [];
       const diagnostics = quarterlyAdminData?.diagnostics?.issues || [];
-      document.getElementById('quarterly-override-count').textContent = `${quarterlyAdminData?.mediaOverrides?.count || 0} overrides`;
+      document.getElementById('quarterly-override-count').textContent = `${quarterlyAdminData?.mediaOverrides?.count || 0} cover · ${quarterlyAdminData?.youtubeTrackOverrides?.count || 0} audio`;
 
       if (!issues.length) {
         list.innerHTML = '<p class="quarterly-small-muted" style="padding:16px; margin:0;">No published quarterly issues.</p>';
@@ -1466,16 +1477,21 @@ body {
       const imageState = album.imageUrl
         ? (/\/album\/images\/1000\//.test(album.imageUrl) ? 'high-res' : 'low-res')
         : 'missing cover';
+      const highlightedTracks = album.highlightedTracks || [];
+      const audioTotal = highlightedTracks.length;
+      const audioResolved = highlightedTracks.filter(track => track.youtubeId).length;
+      const audioState = audioTotal ? `audio ${audioResolved}/${audioTotal}` : 'no highlighted track';
       return `
         <div class="quarterly-album-row">
           ${image}
           <div>
             <div class="quarterly-album-name">${escapeHtml(album.album || '-')}</div>
-            <div class="quarterly-small-muted">${escapeHtml(album.artist || '-')} · Tier ${escapeHtml(album.tierRank)} ${escapeHtml(album.tierLabel || '')} · ${escapeHtml(imageState)}</div>
+            <div class="quarterly-small-muted">${escapeHtml(album.artist || '-')} · Tier ${escapeHtml(album.tierRank)} ${escapeHtml(album.tierLabel || '')} · ${escapeHtml(imageState)} · ${escapeHtml(audioState)}</div>
           </div>
           <div class="quarterly-album-actions">
             <button class="action-btn-sm" type="button" onclick="openQuarterlyMetadataEditor('${encoded}')">Edit</button>
             <button class="action-btn-sm" type="button" onclick="openQuarterlyCoverEditor('${encoded}')">Cover</button>
+            <button class="action-btn-sm" type="button" onclick="openQuarterlyYoutubeEditor('${encoded}')">Audio</button>
           </div>
         </div>
       `;
@@ -1551,6 +1567,35 @@ body {
       `;
     }
 
+    function renderQuarterlyYoutubeAlerts(issue) {
+      const youtubeHealth = getIssueYoutubeDiagnostics(issue.id);
+      const items = youtubeHealth.unresolvedItems || [];
+      if (!items.length) return '';
+
+      return `
+        <div class="quarterly-detail-section">
+          <div class="quarterly-panel-title">Audio Review</div>
+          <div class="quarterly-issue-alerts">
+            ${items.map(item => {
+              const album = findQuarterlyAlbum(issue, item) || item;
+              const encoded = encodeURIComponent(JSON.stringify(album));
+              return `
+                <div class="quarterly-issue-alert">
+                  <div>
+                    <strong>${escapeHtml(item.number || '')} ${escapeHtml(item.title || '-')}</strong>
+                    <div class="quarterly-small-muted">${escapeHtml(item.artist || '-')} · ${escapeHtml(item.album || '-')} · YouTube audio unresolved</div>
+                  </div>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                    <button class="action-btn-sm" type="button" onclick="openQuarterlyYoutubeEditor('${encoded}')">Resolve Audio</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     function renderQuarterlyDetail() {
       const body = document.getElementById('quarterly-detail-body');
       const issue = getQuarterlyIssue(selectedQuarterlyIssueId);
@@ -1560,6 +1605,7 @@ body {
       }
 
       const health = getIssueDiagnostics(issue.id);
+      const youtubeHealth = getIssueYoutubeDiagnostics(issue.id);
       const warnings = health.warnings || [];
       const tierHtml = (issue.tiers || []).map(tier => `
         <div class="quarterly-detail-section">
@@ -1596,12 +1642,14 @@ body {
             <span class="quarterly-pill ${health.coverHealth?.lowResolution ? 'warn' : 'ok'}">${health.coverHealth?.lowResolution || 0} low-res covers</span>
             <span class="quarterly-pill">${(health.coverHealth?.review || 0) + (health.coverHealth?.unverified || 0)} cover reviews</span>
             <span class="quarterly-pill ${health.articleHealth?.missingBody ? 'warn' : 'ok'}">${health.articleHealth?.missingBody || 0} empty articles</span>
+            <span class="quarterly-pill ${youtubeHealth.unresolved ? 'warn' : 'ok'}">${youtubeHealth.resolved || 0}/${youtubeHealth.total || 0} audio</span>
             <span class="quarterly-pill">${health.nowArticHealth?.matchedCount || 0} now artic.</span>
           </div>
           ${warnings.length ? `<div class="quarterly-small-muted">${warnings.map(escapeHtml).join('<br>')}</div>` : ''}
         </div>
 
         ${renderQuarterlyCoverAlerts(issue, health)}
+        ${renderQuarterlyYoutubeAlerts(issue)}
 
         <div class="quarterly-detail-section">
           <div class="quarterly-panel-title">Issue Properties</div>
@@ -1686,6 +1734,19 @@ body {
           <div class="quarterly-candidate-list" id="quarterly-cover-candidates"></div>
         </div>
 
+        <div class="quarterly-youtube-editor" id="quarterly-youtube-editor">
+          <div>
+            <div class="quarterly-panel-title">Highlighted Track Audio</div>
+            <div class="quarterly-album-name" id="quarterly-youtube-editor-title"></div>
+            <div class="quarterly-small-muted" id="quarterly-youtube-editor-status"></div>
+          </div>
+          <div class="quarterly-candidate-list" id="quarterly-youtube-track-list"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="action-btn-sm" type="button" onclick="refreshQuarterlyYoutubeCandidates()">Find YouTube Album Playlist</button>
+          </div>
+          <div class="quarterly-candidate-list" id="quarterly-youtube-candidates"></div>
+        </div>
+
         <div class="quarterly-detail-section">
           <div class="quarterly-panel-title">Tier Albums</div>
           ${tierHtml}
@@ -1742,6 +1803,7 @@ body {
 
     let activeQuarterlyAlbum = null;
     let activeQuarterlyMetadataAlbum = null;
+    let activeQuarterlyYoutubeAlbum = null;
 
     function getQuarterlyAlbumEditorFields() {
       return {
@@ -1957,6 +2019,93 @@ body {
       if (!candidate) return;
       document.getElementById('quarterly-cover-url').value = candidate.imageUrl || '';
       document.getElementById('quarterly-cover-source-url').value = candidate.albumUrl || '';
+    };
+
+    function renderQuarterlyYoutubeTrackList() {
+      const list = document.getElementById('quarterly-youtube-track-list');
+      const tracks = activeQuarterlyYoutubeAlbum?.highlightedTracks || [];
+      if (!tracks.length) {
+        list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No highlighted tracks found for this album.</p>';
+        return;
+      }
+      list.innerHTML = tracks.map(track => `
+        <div class="quarterly-candidate quarterly-youtube-candidate">
+          <div>
+            <div class="quarterly-album-name">${escapeHtml(track.number || '')} ${escapeHtml(track.title || '-')}</div>
+            <div class="quarterly-small-muted">${track.youtubeId ? `Resolved · ${escapeHtml(track.youtubeId)}${track.videoTitle ? ` · ${escapeHtml(track.videoTitle)}` : ''}` : 'Unresolved · Notion only has the track name.'}</div>
+          </div>
+          ${track.youtubeId ? `<a class="action-btn-sm" href="https://www.youtube.com/watch?v=${encodeURIComponent(track.youtubeId)}" target="_blank" rel="noopener noreferrer">Open</a>` : ''}
+        </div>
+      `).join('');
+    }
+
+    window.openQuarterlyYoutubeEditor = function(encodedAlbum) {
+      activeQuarterlyYoutubeAlbum = JSON.parse(decodeURIComponent(encodedAlbum));
+      const editor = document.getElementById('quarterly-youtube-editor');
+      editor.classList.add('active');
+      document.getElementById('quarterly-youtube-editor-title').textContent = `${activeQuarterlyYoutubeAlbum.artist || '-'} — ${activeQuarterlyYoutubeAlbum.album || '-'}`;
+      document.getElementById('quarterly-youtube-editor-status').textContent = quarterlyAdminData?.youtubeTrackOverrides?.resolverConfigured
+        ? 'Resolver is configured. Notion can keep track names only.'
+        : 'YOUTUBE_API_KEY is not configured; manual override can still be saved if a YouTube ID is known.';
+      document.getElementById('quarterly-youtube-candidates').innerHTML = '';
+      renderQuarterlyYoutubeTrackList();
+      editor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    window.refreshQuarterlyYoutubeCandidates = function() {
+      if (!activeQuarterlyYoutubeAlbum) return;
+      const list = document.getElementById('quarterly-youtube-candidates');
+      const status = document.getElementById('quarterly-youtube-editor-status');
+      list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Searching YouTube album playlists...</p>';
+      status.textContent = 'Resolving from artist, album, and highlighted track names...';
+      postQuarterlyAdmin({
+        action: 'refresh_youtube_track_candidates',
+        album: activeQuarterlyYoutubeAlbum.album,
+        artist: activeQuarterlyYoutubeAlbum.artist,
+        tracks: activeQuarterlyYoutubeAlbum.tracks || ''
+      })
+      .then(data => {
+        window.quarterlyYoutubeCandidates = data.candidates || [];
+        const playlistText = (data.playlistCandidates || []).map(item => `${item.title} (${item.channelTitle})`).slice(0, 3).join(' / ');
+        status.textContent = `${data.candidates?.length || 0}/${data.tracks?.length || 0} candidate(s) found${playlistText ? ` · ${playlistText}` : ''}`;
+        if (!window.quarterlyYoutubeCandidates.length) {
+          list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No confident YouTube candidate found. Try manual YouTube ID save after checking the official channel.</p>';
+          return;
+        }
+        list.innerHTML = window.quarterlyYoutubeCandidates.map((candidate, index) => `
+          <div class="quarterly-candidate quarterly-youtube-candidate">
+            <div>
+              <div class="quarterly-album-name">${escapeHtml(candidate.number || '')} ${escapeHtml(candidate.title || '-')}</div>
+              <div class="quarterly-small-muted">${escapeHtml(candidate.videoTitle || candidate.youtubeId || '')} · ${escapeHtml(candidate.channelTitle || candidate.playlistChannelTitle || '')} · ${escapeHtml(candidate.confidence || 'review')}</div>
+              <div class="quarterly-small-muted">${escapeHtml(candidate.playlistTitle || '')}</div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+              <a class="action-btn-sm" href="https://www.youtube.com/watch?v=${encodeURIComponent(candidate.youtubeId)}" target="_blank" rel="noopener noreferrer">Open</a>
+              <button class="action-btn-sm" type="button" onclick="saveQuarterlyYoutubeCandidate(${index})">Use</button>
+            </div>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        status.textContent = 'Resolve failed.';
+        list.innerHTML = `<p class="quarterly-small-muted" style="margin:0;">${escapeHtml(err.message)}</p>`;
+      });
+    };
+
+    window.saveQuarterlyYoutubeCandidate = function(index) {
+      const candidate = (window.quarterlyYoutubeCandidates || [])[index];
+      if (!candidate) return;
+      if (!confirm(`Use this YouTube audio for ${candidate.number} ${candidate.title}?\n\n${candidate.videoTitle || candidate.youtubeId}`)) return;
+      postQuarterlyAdmin({
+        action: 'save_youtube_track_override',
+        ...candidate
+      })
+      .then(() => {
+        alert('YouTube audio override saved.');
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message));
     };
 
     window.saveQuarterlyArticle = function(issueId, essayIndex) {

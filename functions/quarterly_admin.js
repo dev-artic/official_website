@@ -7,6 +7,13 @@ const {
   updateNotionPageProperties,
   updateNotionTableRowCells,
 } = require("./quarterly_notion");
+const {
+  applyQuarterlyYoutubeTracks,
+  buildYoutubeTrackDiagnostics,
+  readQuarterlyYoutubeTrackOverrides,
+  resolveYoutubeAlbumTracks,
+  saveYoutubeTrackOverride,
+} = require("./quarterly_youtube");
 
 const MEDIA_OVERRIDE_COLLECTION = "quarterly_media_overrides";
 const MEDIA_REVIEW_COLLECTION = "quarterly_media_review_overrides";
@@ -347,10 +354,11 @@ function buildQuarterlyAdminDiagnostics(archive, mediaReviews = {}) {
   };
 }
 
-async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, nowArtic, externalLinks }) {
+async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, nowArtic, externalLinks, youtubeApiKey = "" }) {
   const overrides = await readQuarterlyMediaOverrides(db);
   const reviewOverrides = await readQuarterlyMediaReviewOverrides(db);
-  const archive = await fetchQuarterlyContents({
+  const youtubeOverrides = await readQuarterlyYoutubeTrackOverrides(db);
+  const baseArchive = await fetchQuarterlyContents({
     token,
     dataSourceId,
     mediaCache: buildMediaCacheWithOverrides(mediaCache, overrides),
@@ -358,10 +366,16 @@ async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, n
     externalLinks,
     includeSourceMetadata: true,
   });
+  const archive = applyQuarterlyYoutubeTracks(baseArchive, youtubeOverrides.tracks);
+  const diagnostics = buildQuarterlyAdminDiagnostics(archive, reviewOverrides.reviews);
+  diagnostics.youtubeTrackHealth = buildYoutubeTrackDiagnostics(archive);
+  diagnostics.summary.youtubeTrackTotal = diagnostics.youtubeTrackHealth.summary.total;
+  diagnostics.summary.youtubeTrackResolved = diagnostics.youtubeTrackHealth.summary.resolved;
+  diagnostics.summary.youtubeTrackUnresolved = diagnostics.youtubeTrackHealth.summary.unresolved;
 
   return {
     archive,
-    diagnostics: buildQuarterlyAdminDiagnostics(archive, reviewOverrides.reviews),
+    diagnostics,
     mediaOverrides: {
       count: Object.keys(overrides.albumArt || {}).length,
       updatedAt: overrides.updatedAt,
@@ -371,6 +385,12 @@ async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, n
       count: Object.keys(reviewOverrides.reviews || {}).length,
       updatedAt: reviewOverrides.updatedAt,
       collection: MEDIA_REVIEW_COLLECTION,
+    },
+    youtubeTrackOverrides: {
+      count: Object.keys(youtubeOverrides.tracks || {}).length,
+      updatedAt: youtubeOverrides.updatedAt,
+      collection: "quarterly_youtube_track_overrides",
+      resolverConfigured: Boolean(youtubeApiKey || process.env.YOUTUBE_API_KEY || process.env.YOUTUBE_DATA_API_KEY),
     },
   };
 }
@@ -460,7 +480,7 @@ async function refreshBugsCoverCandidate({ album, artist }) {
   return { candidates: candidates.slice(0, 5) };
 }
 
-async function handleQuarterlyAdminAction({ body, token, db, fieldValue }) {
+async function handleQuarterlyAdminAction({ body, token, db, fieldValue, youtubeApiKey = "" }) {
   const action = body?.action;
 
   if (action === "save_album_cover_override") {
@@ -494,6 +514,19 @@ async function handleQuarterlyAdminAction({ body, token, db, fieldValue }) {
 
   if (action === "refresh_bugs_cover_candidate") {
     return refreshBugsCoverCandidate(body);
+  }
+
+  if (action === "refresh_youtube_track_candidates") {
+    return resolveYoutubeAlbumTracks({
+      album: String(body.album || "").trim(),
+      artist: String(body.artist || "").trim(),
+      tracks: body.tracks || "",
+      apiKey: youtubeApiKey,
+    });
+  }
+
+  if (action === "save_youtube_track_override") {
+    return saveYoutubeTrackOverride({ db, fieldValue, payload: body });
   }
 
   if (action === "save_cover_review_status") {

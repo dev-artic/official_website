@@ -430,3 +430,14 @@ graph TD
 - [x] 메일 발송 잘 되고 있는지 테스트발송해서 확인 (어드민 수령 메일 단일화 완료)
 - [x] 음악 가사등록 시스템이 어떻게 구축되어있는지 확인 (벅스 가사 크롤링 자동화 및 100ms 싱크 에디팅 시스템 개선 완료)
 - [ ] 프로젝트 등록 방식도 어드민으로 옮길지 고민
+- [ ] **백엔드 Firebase Cloud Functions 배포 (Home PC 또는 로컬 터미널에서 실행)**
+  - 아카이브 분기별 캐싱 최적화 코드가 로컬 `functions/` 디렉토리에 반영 완료되었습니다. 실서버(artic-official-home)로 배포가 필요합니다.
+  - 실행 명령어:
+    ```bash
+    # (Node.js/NPM 환경이 구성된 로컬 터미널에서 실행)
+    npx firebase-tools deploy --only functions:quarterlyContents,functions:quarterlyAdmin --project artic-official-home
+    ```
+- [ ] **실서버 배포 후 아카이브(ACHA) 캐시 동작 확인 및 성능 검증**
+  - Notion API 호출량 감소 및 첫 로딩 속도 향상 확인.
+  - 관리자 페이지(Admin Dashboard)에서 Notion 리프레시 시 `last_edited_time` 비교 기반 증분 캐싱 정상 수집 검증.
+

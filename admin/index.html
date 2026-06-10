@@ -1223,7 +1223,7 @@ body {
         inventory: p.inventory,
         status: p.status,
         note: p.note || ''
-      }));
+      })).replace(/'/g, "%27");
     }
 
     let editingProductId = '';
@@ -1648,7 +1648,7 @@ body {
         ...album,
         mediaKey: album.mediaKey || makeQuarterlyMediaKey(album.album, album.artist)
       };
-      const encoded = encodeURIComponent(JSON.stringify(albumPayload));
+      const encoded = encodeURIComponent(JSON.stringify(albumPayload)).replace(/'/g, "%27");
       const image = album.imageUrl
         ? `<img src="${escapeHtml(album.imageUrl)}" alt="">`
         : '<div style="width:56px; height:56px; background:var(--bg-card); border:1px solid var(--border-color);"></div>';
@@ -1725,8 +1725,8 @@ body {
           <div class="quarterly-issue-alerts">
             ${items.map((item, index) => {
               const album = findQuarterlyAlbum(issue, item) || item;
-              const encoded = encodeURIComponent(JSON.stringify(album));
-              const reviewEncoded = encodeURIComponent(JSON.stringify(item));
+              const encoded = encodeURIComponent(JSON.stringify(album)).replace(/'/g, "%27");
+              const reviewEncoded = encodeURIComponent(JSON.stringify(item)).replace(/'/g, "%27");
               return `
                 <div class="quarterly-issue-alert">
                   <div>
@@ -1756,7 +1756,7 @@ body {
           <div class="quarterly-issue-alerts">
             ${items.map(item => {
               const album = findQuarterlyAlbum(issue, item) || item;
-              const encoded = encodeURIComponent(JSON.stringify(album));
+              const encoded = encodeURIComponent(JSON.stringify(album)).replace(/'/g, "%27");
               return `
                 <div class="quarterly-issue-alert">
                   <div>

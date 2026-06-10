@@ -1664,7 +1664,7 @@ body {
           ${image}
           <div>
             <div class="quarterly-album-name">${escapeHtml(album.album || '-')}</div>
-            <div class="quarterly-small-muted">${escapeHtml(album.artist || '-')} · Tier ${escapeHtml(album.tierRank)} ${escapeHtml(album.tierLabel || '')} · ${escapeHtml(imageState)} · ${escapeHtml(audioState)}</div>
+            <div class="quarterly-small-muted">${escapeHtml(album.artist || '-')} · Tier ${escapeHtml(album.tierRank)} ${escapeHtml(album.tierLabel || '')} · ${escapeHtml(imageState)} · <span id="quarterly-album-audio-state-${albumPayload.mediaKey}">${escapeHtml(audioState)}</span></div>
           </div>
           <div class="quarterly-album-actions">
             <button class="action-btn-sm" type="button" onclick="openQuarterlyMetadataEditor('${encoded}')">Edit</button>
@@ -1823,14 +1823,16 @@ body {
             <span class="quarterly-pill ${health.coverHealth?.lowResolution ? 'warn' : 'ok'}">${health.coverHealth?.lowResolution || 0} low-res covers</span>
             <span class="quarterly-pill">${(health.coverHealth?.review || 0) + (health.coverHealth?.unverified || 0)} cover reviews</span>
             <span class="quarterly-pill ${health.articleHealth?.missingBody ? 'warn' : 'ok'}">${health.articleHealth?.missingBody || 0} empty articles</span>
-            <span class="quarterly-pill ${youtubeHealth.unresolved ? 'warn' : 'ok'}">${youtubeHealth.resolved || 0}/${youtubeHealth.total || 0} audio</span>
+            <span class="quarterly-pill ${youtubeHealth.unresolved ? 'warn' : 'ok'}" id="quarterly-detail-audio-pill">${youtubeHealth.resolved || 0}/${youtubeHealth.total || 0} audio</span>
             <span class="quarterly-pill">${health.nowArticHealth?.matchedCount || 0} now artic.</span>
           </div>
           ${warnings.length ? `<div class="quarterly-small-muted">${warnings.map(escapeHtml).join('<br>')}</div>` : ''}
         </div>
 
         ${renderQuarterlyCoverAlerts(issue, health)}
-        ${renderQuarterlyYoutubeAlerts(issue)}
+        <div id="quarterly-youtube-alerts-container">
+          ${renderQuarterlyYoutubeAlerts(issue)}
+        </div>
 
         <div class="quarterly-detail-section">
           <div class="quarterly-panel-title">Issue Properties</div>
@@ -2308,6 +2310,16 @@ body {
 
       renderQuarterlyYoutubeTrackList();
 
+      // Locally update the album row audio state label in the Tier Albums list
+      const albumAudioState = document.getElementById(`quarterly-album-audio-state-${activeQuarterlyYoutubeAlbum.mediaKey}`);
+      if (albumAudioState) {
+        const tracks = activeQuarterlyYoutubeAlbum.highlightedTracks || [];
+        const audioTotal = tracks.length;
+        const audioResolved = tracks.filter(t => t.youtubeId).length;
+        const audioState = audioTotal ? `audio ${audioResolved}/${audioTotal}` : 'no highlighted track';
+        albumAudioState.textContent = audioState;
+      }
+
       fetch(getQuarterlyAdminUrl(), {
         headers: {
           'Authorization': `Bearer ${adminToken}`
@@ -2318,6 +2330,21 @@ body {
         quarterlyAdminData = data;
         renderQuarterlySummary(data.diagnostics?.summary || {});
         renderQuarterlyIssueList();
+
+        // Update the issue health audio pill (orange/green status)
+        const audioPill = document.getElementById('quarterly-detail-audio-pill');
+        const issue = getQuarterlyIssue(selectedQuarterlyIssueId);
+        if (audioPill && issue) {
+          const ytHealth = getIssueYoutubeDiagnostics(issue.id);
+          audioPill.textContent = `${ytHealth.resolved || 0}/${ytHealth.total || 0} audio`;
+          audioPill.className = `quarterly-pill ${ytHealth.unresolved ? 'warn' : 'ok'}`;
+        }
+
+        // Update the unresolved Audio Review warnings list container
+        const alertsContainer = document.getElementById('quarterly-youtube-alerts-container');
+        if (alertsContainer && issue) {
+          alertsContainer.innerHTML = renderQuarterlyYoutubeAlerts(issue);
+        }
       })
       .catch(err => console.warn('Quiet background sync failed:', err));
     }

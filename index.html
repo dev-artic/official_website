@@ -610,6 +610,134 @@
         gap: 0 !important;
       }
     }
+
+    /* ── Quarterly Teaser Section ── */
+    .quarterly-teaser-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-xl);
+      align-items: center;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .quarterly-teaser-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-xxl);
+      }
+    }
+
+    .cover-art-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .cover-art-item {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .cover-art-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s var(--ease-out-expo);
+    }
+
+    .cover-art-item:hover img {
+      transform: scale(1.08);
+    }
+
+    .teaser-card {
+      position: relative;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: var(--space-lg);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-sizing: border-box;
+      min-height: 320px;
+    }
+
+    @media (min-width: 768px) {
+      .teaser-card {
+        aspect-ratio: 4 / 3;
+        padding: var(--space-xl);
+      }
+    }
+
+    .teaser-card-bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 8px;
+      box-sizing: border-box;
+      filter: blur(6px) opacity(0.35);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .teaser-card-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .teaser-card-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 2;
+    }
+
+    .teaser-content {
+      position: relative;
+      z-index: 3;
+      color: var(--text-primary);
+    }
+
+    .teaser-tag {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-xs);
+    }
+
+    .teaser-heading {
+      font-family: var(--font-serif);
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: var(--space-md);
+      text-transform: uppercase;
+    }
+
+    .teaser-text {
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      max-width: 380px;
+      margin-bottom: var(--space-lg);
+    }
 </style>
 </head>
 <body>
@@ -674,6 +802,58 @@
   <span>View All Projects</span>
   <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
 </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Quarterly Teaser ── -->
+  <section class="content-section reveal">
+    <div class="quarterly-teaser-grid">
+      <!-- Left side: Album Cover Grid -->
+      <div class="cover-art-grid">
+        <div class="cover-art-item">
+          <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core" loading="lazy">
+        </div>
+        <div class="cover-art-item">
+          <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK" loading="lazy">
+        </div>
+        <div class="cover-art-item">
+          <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning" loading="lazy">
+        </div>
+        <div class="cover-art-item">
+          <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL" loading="lazy">
+        </div>
+        <div class="cover-art-item">
+          <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE" loading="lazy">
+        </div>
+        <div class="cover-art-item">
+          <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER" loading="lazy">
+        </div>
+      </div>
+
+      <!-- Right side: Glassmorphic Teaser Card -->
+      <div class="teaser-card">
+        <div class="teaser-card-bg">
+          <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="" loading="lazy">
+          <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="" loading="lazy">
+          <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="" loading="lazy">
+          <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="" loading="lazy">
+          <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="" loading="lazy">
+          <img src="https://image.bugsm.co.kr/album/images/1000/41345/4134568.jpg?version=20260227015343" alt="" loading="lazy">
+        </div>
+        <div class="teaser-card-overlay"></div>
+        <div class="teaser-content">
+          <span class="teaser-tag">upcoming</span>
+          <h3 class="teaser-heading">quarterly in physical</h3>
+          <p class="teaser-text">
+            디지털 공간에 기록해 온 quarterly 아카이브의 흔적들을 손 끝으로 만질 수 있는 물성의 지류 매체(Printed Issue)로 담아낼 예정입니다. 음악을 소유하고 소장하는 감각의 물리적 연속성을 지류 잡지로 경험해 보세요.
+          </p>
+          <!-- Reusable Text Link Button with Underline Drawing and Arrow Transition -->
+<a href="/quarterly/" class="section-link " >
+  <span>view archive</span>
+  <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+</a>
+        </div>
       </div>
     </div>
   </section>

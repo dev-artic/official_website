@@ -2314,7 +2314,11 @@ body {
   function createInlineEssayScrollAnchor(details, control, shouldOpen) {
     if (shouldOpen || !control?.classList?.contains('acha-essay-collapse')) return null;
     const album = details.closest('.acha-album');
-    const anchor = album?.nextElementSibling || details;
+    const anchor = album?.nextElementSibling || 
+                   album?.closest('.acha-tier')?.nextElementSibling || 
+                   document.getElementById('acha-essays') || 
+                   document.getElementById('acha-status') || 
+                   details;
     if (!anchor) return null;
     const initialTop = anchor.getBoundingClientRect().top;
     let frameId = 0;

@@ -2397,7 +2397,16 @@ path_depth: "../"
         issueId: issue.id
       })
       .then(data => {
-        alert(`공식 음원 일괄 매칭 완료!\n총 ${data.resolvedCount}개의 트랙이 자동으로 매칭 및 저장되었습니다.`);
+        let msg = `공식 음원 일괄 매칭 완료!\n총 ${data.resolvedCount}개의 트랙이 자동으로 매칭 및 저장되었습니다.`;
+        if (data.errors && data.errors.length) {
+          const hasQuotaError = data.errors.some(err => /quota|limit/i.test(err));
+          if (hasQuotaError) {
+            msg += `\n\n[주의] YouTube API 호출 횟수 제한(Quota Exceeded)에 도달하여 일부 곡의 매칭이 완료되지 못했습니다. 잠시 후 혹은 다음 날 다시 시도해 주세요.`;
+          } else {
+            msg += `\n\n[오류 내역]\n` + data.errors.slice(0, 3).join('\n') + (data.errors.length > 3 ? '\n...' : '');
+          }
+        }
+        alert(msg);
         quarterlyLoaded = false;
         loadQuarterlyAdminData();
       })

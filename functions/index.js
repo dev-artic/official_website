@@ -35,6 +35,23 @@ const YOUTUBE_API_KEY_SECRET = defineSecret("MJ_YOUTUBE_API_KEY");
 const QUARTERLY_MEDIA_CACHE_FILE = path.join(__dirname, "data", "quarterly_media_cache.json");
 const QUARTERLY_NOW_ARTIC_FILE = path.join(__dirname, "data", "quarterly_now_artic.json");
 const QUARTERLY_EXTERNAL_LINKS_FILE = path.join(__dirname, "data", "quarterly_external_links.json");
+const QUARTERLY_CONTENTS_CACHE_FILE = path.join(__dirname, "data", "quarterly_contents_cache.json");
+
+function writeQuarterlyContentsCacheFile(archive) {
+  try {
+    const cacheDir = path.dirname(QUARTERLY_CONTENTS_CACHE_FILE);
+    if (!fs.existsSync(cacheDir)) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+    }
+    fs.writeFileSync(QUARTERLY_CONTENTS_CACHE_FILE, JSON.stringify({
+      archive,
+      cachedAt: new Date().toISOString(),
+    }, null, 2), "utf8");
+    console.log("Successfully wrote local quarterly contents cache file.");
+  } catch (err) {
+    console.warn("Failed to write local quarterly contents cache file:", err.message);
+  }
+}
 
 function readQuarterlyMediaCache() {
   try {
@@ -733,6 +750,23 @@ exports.quarterlyContents = onRequest({ secrets: [NOTION_API_KEY_SECRET] }, (req
     }
 
     try {
+      // 1. Try to read from Firestore cache
+      try {
+        const cacheDoc = await db.collection("quarterly_cache").doc("archive").get();
+        if (cacheDoc.exists) {
+          const cacheData = cacheDoc.data();
+          if (cacheData && cacheData.archive) {
+            res.set("X-artic-Data-Source", "firestore-cache");
+            res.set("X-artic-Cache-Hits", "true");
+            res.status(200).json(cacheData.archive);
+            return;
+          }
+        }
+      } catch (cacheErr) {
+        console.warn("Failed to read quarterly contents from Firestore cache, falling back to live Notion:", cacheErr.message);
+      }
+
+      // 2. Fallback to live Notion fetch
       let notionSecret = "";
       try {
         notionSecret = NOTION_API_KEY_SECRET.value();
@@ -749,7 +783,23 @@ exports.quarterlyContents = onRequest({ secrets: [NOTION_API_KEY_SECRET] }, (req
         nowArtic: readQuarterlyNowArtic(),
         externalLinks: readQuarterlyExternalLinks(),
       }), youtubeOverrides.tracks);
-      res.set("X-artic-Data-Source", "notion-live");
+
+      data.queryMode = "firestore_fallback_live";
+      data.cachedAt = new Date().toISOString();
+
+      // Write fallback to Firestore cache
+      try {
+        await db.collection("quarterly_cache").doc("archive").set({
+          archive: data,
+          cachedAt: FieldValue.serverTimestamp(),
+        });
+        writeQuarterlyContentsCacheFile(data);
+      } catch (writeErr) {
+        console.warn("Failed to update quarterly contents cache on fallback:", writeErr.message);
+      }
+
+      res.set("X-artic-Data-Source", "notion-live-fallback");
+      res.set("X-artic-Cache-Hits", "false");
       res.set("X-artic-Notion-Query-Mode", data.queryMode || "data_source_direct");
       res.status(200).json(data);
     } catch (err) {
@@ -871,6 +921,17 @@ exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KE
 
     try {
       if (req.method === "GET") {
+        let existingCache = null;
+        try {
+          const cacheDoc = await db.collection("quarterly_cache").doc("archive").get();
+          if (cacheDoc.exists) {
+            const cacheData = cacheDoc.data();
+            existingCache = cacheData ? cacheData.archive : null;
+          }
+        } catch (cacheErr) {
+          console.warn("Failed to read quarterly cache for admin diagnostics:", cacheErr.message);
+        }
+
         const payload = await getQuarterlyAdminPayload({
           token,
           dataSourceId: getDataSourceId(),
@@ -879,7 +940,28 @@ exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KE
           nowArtic: readQuarterlyNowArtic(),
           externalLinks: readQuarterlyExternalLinks(),
           youtubeApiKey: youtubeSecret,
+          existingCache,
         });
+
+        // Update Firestore cache and local file cache with the latest archive
+        if (payload && payload.archive) {
+          try {
+            const archiveToCache = {
+              ...payload.archive,
+              queryMode: "firestore_cached",
+              cachedAt: new Date().toISOString()
+            };
+            await db.collection("quarterly_cache").doc("archive").set({
+              archive: archiveToCache,
+              cachedAt: FieldValue.serverTimestamp(),
+            });
+            writeQuarterlyContentsCacheFile(archiveToCache);
+            console.log("Successfully updated quarterly contents cache from admin payload.");
+          } catch (cacheErr) {
+            console.warn("Failed to update quarterly contents cache from admin panel:", cacheErr.message);
+          }
+        }
+
         res.status(200).json(payload);
         return;
       }

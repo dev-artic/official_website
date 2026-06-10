@@ -354,7 +354,7 @@ function buildQuarterlyAdminDiagnostics(archive, mediaReviews = {}) {
   };
 }
 
-async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, nowArtic, externalLinks, youtubeApiKey = "" }) {
+async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, nowArtic, externalLinks, youtubeApiKey = "", existingCache = null }) {
   const overrides = await readQuarterlyMediaOverrides(db);
   const reviewOverrides = await readQuarterlyMediaReviewOverrides(db);
   const youtubeOverrides = await readQuarterlyYoutubeTrackOverrides(db);
@@ -365,6 +365,7 @@ async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, n
     nowArtic,
     externalLinks,
     includeSourceMetadata: true,
+    existingCache,
   });
   const archive = applyQuarterlyYoutubeTracks(baseArchive, youtubeOverrides.tracks);
   const diagnostics = buildQuarterlyAdminDiagnostics(archive, reviewOverrides.reviews);

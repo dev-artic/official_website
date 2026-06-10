@@ -5,6 +5,7 @@ const path = require('path');
 const PORT = 8000;
 const LYRICS_DB_FILE = path.join(__dirname, 'scratch', 'synced_lyrics_estimate.json');
 const QUARTERLY_MEDIA_CACHE_FILE = path.join(__dirname, 'functions', 'data', 'quarterly_media_cache.json');
+const QUARTERLY_CONTENTS_CACHE_FILE = path.join(__dirname, 'functions', 'data', 'quarterly_contents_cache.json');
 const QUARTERLY_EXTERNAL_LINKS_FILE = path.join(__dirname, 'functions', 'data', 'quarterly_external_links.json');
 const QUARTERLY_NOW_ARTIC_FILES = [
   path.join(__dirname, 'functions', 'data', 'quarterly_now_artic.json'),
@@ -133,6 +134,54 @@ function readQuarterlyExternalLinks() {
 }
 
 async function handleGetQuarterlyContents(req, res) {
+  const requestUrl = new URL(req.url, `http://${req.headers.host || `localhost:${PORT}`}`);
+  const bypassCache = requestUrl.searchParams.get('live') === 'true' || requestUrl.searchParams.get('refresh') === 'true';
+
+  let cachedArchive = null;
+  let useCache = false;
+
+  if (!bypassCache && fs.existsSync(QUARTERLY_CONTENTS_CACHE_FILE)) {
+    try {
+      const stats = fs.statSync(QUARTERLY_CONTENTS_CACHE_FILE);
+      const fileAgeMs = Date.now() - stats.mtimeMs;
+      const cacheTtlMs = 5 * 60 * 1000; // 5 minutes
+      if (fileAgeMs < cacheTtlMs) {
+        const fileContent = fs.readFileSync(QUARTERLY_CONTENTS_CACHE_FILE, 'utf8');
+        const parsed = JSON.parse(fileContent);
+        if (parsed && parsed.archive) {
+          cachedArchive = parsed.archive;
+          useCache = true;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to read local quarterly contents cache file:', err.message);
+    }
+  }
+
+  if (useCache) {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'X-artic-Data-Source': 'local-file-cache',
+      'X-artic-Cache-Hits': 'true',
+    });
+    res.end(JSON.stringify(cachedArchive));
+    return;
+  }
+
+  // Read existing cache if available (even if expired/bypassed) to pass it as existingCache
+  let existingCache = null;
+  if (fs.existsSync(QUARTERLY_CONTENTS_CACHE_FILE)) {
+    try {
+      const fileContent = fs.readFileSync(QUARTERLY_CONTENTS_CACHE_FILE, 'utf8');
+      const parsed = JSON.parse(fileContent);
+      if (parsed && parsed.archive) {
+        existingCache = parsed.archive;
+      }
+    } catch (err) {
+      // Ignore parsing errors
+    }
+  }
+
   const token = readLocalEnvValue('NOTION_API_KEY') || readLocalEnvValue('NOTION_TOKEN');
   const dataSourceId = readLocalEnvValue('NOTION_QUARTERLY_DATA_SOURCE_ID') || undefined;
 
@@ -153,10 +202,28 @@ async function handleGetQuarterlyContents(req, res) {
       mediaCache: readQuarterlyMediaCache(),
       nowArtic: readQuarterlyNowArtic(),
       externalLinks: readQuarterlyExternalLinks(),
+      existingCache,
     }), {});
+
+    // Save to local cache file
+    try {
+      const cacheDir = path.dirname(QUARTERLY_CONTENTS_CACHE_FILE);
+      if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+      }
+      fs.writeFileSync(QUARTERLY_CONTENTS_CACHE_FILE, JSON.stringify({
+        archive: data,
+        cachedAt: new Date().toISOString()
+      }, null, 2), 'utf8');
+      console.log('Successfully wrote local quarterly contents cache file.');
+    } catch (cacheErr) {
+      console.warn('Failed to write local quarterly contents cache file:', cacheErr.message);
+    }
+
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'X-artic-Data-Source': 'local-notion-live',
+      'X-artic-Data-Source': 'local-notion-live-fallback',
+      'X-artic-Cache-Hits': 'false',
       'X-artic-Notion-Query-Mode': data.queryMode || 'data_source_direct',
     });
     res.end(JSON.stringify(data));

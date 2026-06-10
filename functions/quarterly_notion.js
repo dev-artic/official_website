@@ -1182,7 +1182,7 @@ async function parseIssueBlocks(token, pageId, options = {}) {
   return parsed;
 }
 
-async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(), mediaCache = null, nowArtic = null, externalLinks = null, includeSourceMetadata = false }) {
+async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(), mediaCache = null, nowArtic = null, externalLinks = null, includeSourceMetadata = false, existingCache = null }) {
   if (!token) {
     const error = new Error("NOTION_API_KEY is not configured");
     error.status = 500;
@@ -1190,7 +1190,80 @@ async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(),
   }
 
   const pages = await queryQuarterlyPages(token, dataSourceId);
+  
+  // Create a map of existing cached issues for fast lookup
+  const cachedIssuesMap = new Map();
+  if (existingCache && Array.isArray(existingCache.issues)) {
+    existingCache.issues.forEach((issue) => {
+      if (issue && issue.id) {
+        cachedIssuesMap.set(issue.id, issue);
+      }
+    });
+  }
+
   const issues = await Promise.all(pages.map(async (page) => {
+    const cachedIssue = cachedIssuesMap.get(page.id);
+    const liveLastEditedTime = page.last_edited_time || "";
+    
+    // Check if the issue page itself has changed
+    const issuePageChanged = !cachedIssue || cachedIssue.lastEditedTime !== liveLastEditedTime;
+    
+    if (!issuePageChanged) {
+      let essaysChanged = false;
+      const cachedEssays = cachedIssue.essays || [];
+      
+      const checkedEssays = await Promise.all(cachedEssays.map(async (cachedEssay) => {
+        try {
+          const liveEssayPage = await getNotionPage(token, cachedEssay.id);
+          const liveEssayLastEdited = liveEssayPage.last_edited_time || "";
+          if (cachedEssay.lastEditedTime !== liveEssayLastEdited) {
+            essaysChanged = true;
+            console.log(`[INCREMENTAL] Essay updated in Notion: "${cachedEssay.title}" (${cachedEssay.id}). Re-fetching blocks.`);
+            
+            // Re-fetch and parse the essay blocks
+            const essayBlocks = await listBlockTree(token, cachedEssay.id);
+            const essayTableBlocks = essayBlocks.filter((block) => block.type === "table" && block.has_children);
+            const essayTableRowsByBlockId = {};
+            await Promise.all(essayTableBlocks.map(async (block) => {
+              essayTableRowsByBlockId[block.id] = await listBlockChildren(token, block.id);
+            }));
+            const normalizedBlocks = normalizeEssayBlocks(essayBlocks, essayTableRowsByBlockId);
+            const content = normalizedBlocks
+              .filter((block) => block.text)
+              .map((block) => block.text)
+              .join("\n\n")
+              .trim();
+              
+            return {
+              ...cachedEssay,
+              lastEditedTime: liveEssayLastEdited,
+              blocks: normalizedBlocks,
+              content,
+              excerpt: essayExcerptFromContent(content),
+              instagramUrl: cachedEssay.instagramUrl || findInstagramUrlFromBlocks(normalizedBlocks),
+            };
+          }
+          return cachedEssay;
+        } catch (err) {
+          console.warn(`[INCREMENTAL] Failed to verify essay page ${cachedEssay.id}:`, err.message);
+          return cachedEssay; // Fallback to cached essay on error
+        }
+      }));
+      
+      if (!essaysChanged) {
+        console.log(`[INCREMENTAL] Reusing cached ACHA issue: "${cachedIssue.title}" (${page.id})`);
+        return cachedIssue;
+      } else {
+        console.log(`[INCREMENTAL] Reusing cached ACHA issue: "${cachedIssue.title}" (${page.id}) with updated essays.`);
+        return {
+          ...cachedIssue,
+          essays: checkedEssays,
+          lastEditedTime: liveLastEditedTime
+        };
+      }
+    }
+
+    console.log(`[INCREMENTAL] ACHA issue page changed or not cached: "${page.url || page.id}". Fetching all blocks and essays.`);
     const parsedBlocks = await parseIssueBlocks(token, page.id, { includeSourceMetadata });
     return normalizeIssuePage(page, parsedBlocks);
   }));

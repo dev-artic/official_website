@@ -2169,12 +2169,10 @@ path_depth: "../"
             <div class="quarterly-small-muted">${track.youtubeId ? `Resolved · ${escapeHtml(track.youtubeId)}${track.videoTitle ? ` · ${escapeHtml(track.videoTitle)}` : ''}` : 'Unresolved · Notion only has the track name.'}</div>
           </div>
           ${track.youtubeId ? `<a class="action-btn-sm" href="https://www.youtube.com/watch?v=${encodeURIComponent(track.youtubeId)}" target="_blank" rel="noopener noreferrer">Open</a>` : ''}
-          ${track.youtubeId ? '' : `
-            <div class="quarterly-youtube-manual">
-              <input type="text" id="quarterly-youtube-manual-${escapeHtml(track.number || '')}" placeholder="YouTube URL or video ID" aria-label="Manual YouTube URL or video ID for ${escapeHtml(track.number || '')} ${escapeHtml(track.title || '')}">
-              <button class="action-btn-sm" type="button" onclick="saveQuarterlyYoutubeManual('${encodeURIComponent(track.number || '')}')">Save Manual</button>
-            </div>
-          `}
+          <div class="quarterly-youtube-manual">
+            <input type="text" id="quarterly-youtube-manual-${escapeHtml(track.number || '')}" placeholder="YouTube URL or video ID" value="${escapeHtml(track.youtubeId || '')}" aria-label="Manual YouTube URL or video ID for ${escapeHtml(track.number || '')} ${escapeHtml(track.title || '')}">
+            <button class="action-btn-sm" type="button" onclick="saveQuarterlyYoutubeManual('${encodeURIComponent(track.number || '')}')">Save Manual</button>
+          </div>
         </div>
       `).join('');
     }

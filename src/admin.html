@@ -2230,6 +2230,49 @@ path_depth: "../"
       });
     };
 
+    function updateLocalTrackAudio(number, youtubeId, videoTitle, channelTitle) {
+      if (!activeQuarterlyYoutubeAlbum) return;
+
+      const track = (activeQuarterlyYoutubeAlbum.highlightedTracks || []).find(item => String(item.number || '') === String(number));
+      if (track) {
+        track.youtubeId = youtubeId;
+        track.videoTitle = videoTitle || '';
+        track.channelTitle = channelTitle || '';
+        track.audioStatus = 'resolved';
+      }
+
+      const masterIssues = quarterlyAdminData?.archive?.issues || [];
+      masterIssues.forEach(issue => {
+        (issue.tiers || []).forEach(tier => {
+          const item = (tier.items || []).find(it => makeQuarterlyMediaKey(it.album, it.artist) === activeQuarterlyYoutubeAlbum.mediaKey);
+          if (item) {
+            const masterTrack = (item.highlightedTracks || []).find(t => String(t.number || '') === String(number));
+            if (masterTrack) {
+              masterTrack.youtubeId = youtubeId;
+              masterTrack.videoTitle = videoTitle || '';
+              masterTrack.channelTitle = channelTitle || '';
+              masterTrack.audioStatus = 'resolved';
+            }
+          }
+        });
+      });
+
+      renderQuarterlyYoutubeTrackList();
+
+      fetch(getQuarterlyAdminUrl(), {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
+      .then(res => parseQuarterlyResponse(res))
+      .then(data => {
+        quarterlyAdminData = data;
+        renderQuarterlySummary(data.diagnostics?.summary || {});
+        renderQuarterlyIssueList();
+      })
+      .catch(err => console.warn('Quiet background sync failed:', err));
+    }
+
     window.saveQuarterlyYoutubeCandidate = function(index) {
       const candidate = (window.quarterlyYoutubeCandidates || [])[index];
       if (!candidate) return;
@@ -2239,9 +2282,8 @@ path_depth: "../"
         ...candidate
       })
       .then(() => {
+        updateLocalTrackAudio(candidate.number, candidate.youtubeId, candidate.videoTitle, candidate.channelTitle);
         alert('YouTube audio override saved.');
-        quarterlyLoaded = false;
-        loadQuarterlyAdminData();
       })
       .catch(err => alert(err.message));
     };
@@ -2267,9 +2309,8 @@ path_depth: "../"
         confidence: 'manual'
       })
       .then(() => {
+        updateLocalTrackAudio(track.number, youtubeId, '', '');
         alert('Manual YouTube audio override saved.');
-        quarterlyLoaded = false;
-        loadQuarterlyAdminData();
       })
       .catch(err => alert(err.message));
     };

@@ -542,102 +542,199 @@ path_depth: ""
       }
     }
 
-    /* ── Quarterly Teaser Section ── */
-    .quarterly-teaser-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--space-xl);
-      align-items: center;
-      width: 100%;
-    }
-
-    @media (min-width: 768px) {
-      .quarterly-teaser-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-xxl);
-      }
-    }
-
-    .cover-art-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      width: 100%;
-    }
-
-    .cover-art-item {
+    /* ── Quarterly Teaser Section (New Flowing Design) ── */
+    .quarterly-teaser-wrap {
       position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
+      min-height: 640px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
-      background-color: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+      background-color: var(--bg-primary);
+      transition: background-color 0.5s ease;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .cover-art-item img {
+    .quarterly-flow-marquee {
+      display: flex;
+      overflow: hidden;
+      user-select: none;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      height: 220px;
+    }
+
+    .quarterly-flow-marquee.track-1 {
+      top: 5%;
+      z-index: 2;
+    }
+
+    .quarterly-flow-marquee.track-2 {
+      top: 33%;
+      z-index: 4; /* Floats above track 1 and track 3 */
+    }
+
+    .quarterly-flow-marquee.track-3 {
+      top: 62%;
+      z-index: 3;
+    }
+
+    .marquee-group {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      min-width: 100%;
+    }
+
+    /* Assign different animation durations for organic visual variation */
+    .quarterly-flow-marquee.track-1 .marquee-group {
+      animation: marqueeScroll 75s linear infinite;
+    }
+    .quarterly-flow-marquee.track-2 .marquee-group {
+      animation: marqueeScroll 95s linear infinite;
+    }
+    .quarterly-flow-marquee.track-3 .marquee-group {
+      animation: marqueeScroll 60s linear infinite;
+    }
+
+    @keyframes marqueeScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-100%); }
+    }
+
+    /* Pause animation on hover to allow detailed inspection of covers */
+    .quarterly-teaser-wrap:hover .marquee-group {
+      animation-play-state: paused;
+    }
+
+    .flow-cover-item {
+      position: relative;
+      flex: 0 0 200px;
+      width: 200px;
+      aspect-ratio: 1 / 1;
+      margin: 0 -40px; /* Strong overlapping, zero gap layout */
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-secondary);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo), border-color 0.5s ease;
+    }
+
+    .flow-cover-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transition: transform 0.6s var(--ease-out-expo);
+      pointer-events: none;
     }
 
-    .cover-art-item:hover img {
-      transform: scale(1.08);
+    /* Add hover state to single covers for micro-interaction */
+    .flow-cover-item:hover {
+      transform: scale(1.12) rotate(0deg) translateY(-10px) !important;
+      z-index: 15 !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      border-color: var(--text-primary);
+    }
+    .flow-cover-item:hover img {
+      transform: scale(1.05);
+    }
+
+    /* Random-looking offsets and rotations for organic feel */
+    .flow-cover-item:nth-child(5n+1) {
+      transform: rotate(-4deg) translateY(-25px);
+      z-index: 3;
+    }
+    .flow-cover-item:nth-child(5n+2) {
+      transform: rotate(3deg) translateY(20px);
+      z-index: 4;
+      flex-basis: 220px;
+      width: 220px;
+    }
+    .flow-cover-item:nth-child(5n+3) {
+      transform: rotate(-1.5deg) translateY(-5px);
+      z-index: 2;
+    }
+    .flow-cover-item:nth-child(5n+4) {
+      transform: rotate(5deg) translateY(15px);
+      z-index: 5;
+      flex-basis: 180px;
+      width: 180px;
+    }
+    .flow-cover-item:nth-child(5n+5) {
+      transform: rotate(-2.5deg) translateY(-15px);
+      z-index: 3;
+    }
+
+    /* Static Editorial Grid Lines */
+    .editorial-line {
+      position: absolute;
+      background-color: var(--border-color);
+      pointer-events: none;
+      transition: background-color 0.5s ease;
+    }
+    
+    .line-h {
+      left: 0;
+      width: 100%;
+      height: 1px;
+    }
+    
+    .line-v {
+      top: 0;
+      width: 1px;
+      height: 100%;
+    }
+
+    /* Editorial Line depths (weaving under and over marquees) */
+    .line-h.h1 { top: 15%; z-index: 1; opacity: 0.8; }
+    .line-h.h2 { top: 42%; z-index: 3; opacity: 0.6; }
+    .line-h.h3 { top: 68%; z-index: 5; opacity: 0.5; }
+    .line-h.h4 { top: 88%; z-index: 7; opacity: 0.9; }
+
+    .line-v.v1 { left: 8%; z-index: 1; opacity: 0.6; }
+    .line-v.v2 { left: 28%; z-index: 5; opacity: 0.4; }
+    .line-v.v3 { left: 48%; z-index: 3; opacity: 0.7; }
+    .line-v.v4 { left: 65%; z-index: 7; opacity: 0.5; }
+    .line-v.v5 { left: 82%; z-index: 1; opacity: 0.8; }
+    .line-v.v6 { left: 93%; z-index: 6; opacity: 0.6; }
+
+    /* Floating Teaser Card Container */
+    .teaser-card-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: var(--max-width);
+      padding: 0 var(--gutter);
+      box-sizing: border-box;
+      pointer-events: none; /* Let clicks pass to marquee hover except on the card itself */
+      display: flex;
+      justify-content: flex-end; /* Pin to the right side on desktop */
     }
 
     .teaser-card {
       position: relative;
       width: 100%;
+      max-width: 480px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: var(--space-lg);
+      padding: var(--space-xl);
       border: 1px solid var(--border-color);
-      overflow: hidden;
-      box-sizing: border-box;
-      min-height: 320px;
-    }
-
-    @media (min-width: 768px) {
-      .teaser-card {
-        aspect-ratio: 4 / 3;
-        padding: var(--space-xl);
-      }
-    }
-
-    .teaser-card-bg {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      padding: 8px;
-      box-sizing: border-box;
-      filter: blur(6px) opacity(0.35);
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .teaser-card-bg img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .teaser-card-overlay {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
       background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      z-index: 2;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box;
+      pointer-events: auto; /* Re-enable clicks on the card */
+      transition: border-color 0.5s ease, background-color 0.5s ease;
     }
 
     .teaser-content {
-      position: relative;
-      z-index: 3;
       color: var(--text-primary);
     }
 
@@ -654,7 +751,7 @@ path_depth: ""
 
     .teaser-heading {
       font-family: var(--font-serif);
-      font-size: clamp(1.4rem, 2.8vw, 2rem);
+      font-size: clamp(1.4rem, 2.5vw, 1.8rem);
       font-weight: 700;
       line-height: 1.3;
       margin-bottom: var(--space-md);
@@ -663,12 +760,63 @@ path_depth: ""
 
     .teaser-text {
       font-family: var(--font-sans);
-      font-size: 0.8rem;
-      line-height: 1.7;
+      font-size: 0.75rem;
+      line-height: 1.8;
       color: var(--text-secondary);
-      max-width: 380px;
       margin-bottom: var(--space-lg);
     }
+
+    /* Mobile adjustments */
+    @media (max-width: 767px) {
+      .quarterly-teaser-wrap {
+        min-height: 600px;
+        flex-direction: column;
+        padding: var(--space-lg) 0;
+      }
+      .teaser-card-container {
+        justify-content: center;
+      }
+      .teaser-card {
+        padding: var(--space-lg);
+        max-width: 90%;
+      }
+      .flow-cover-item {
+        flex: 0 0 140px;
+        width: 140px;
+        margin: 0 -25px; /* Sized down for mobile viewport */
+      }
+      .flow-cover-item:nth-child(5n+2) {
+        flex-basis: 150px;
+        width: 150px;
+      }
+      .flow-cover-item:nth-child(5n+4) {
+        flex-basis: 130px;
+        width: 130px;
+      }
+      .quarterly-flow-marquee {
+        height: 160px;
+      }
+      .quarterly-flow-marquee.track-1 {
+        top: 8%;
+      }
+      .quarterly-flow-marquee.track-2 {
+        top: 36%;
+      }
+      .quarterly-flow-marquee.track-3 {
+        top: 64%;
+      }
+      .line-h.h1 { top: 12%; }
+      .line-h.h2 { top: 38%; }
+      .line-h.h3 { top: 66%; }
+      .line-h.h4 { top: 88%; }
+      .line-v.v1 { left: 10%; }
+      .line-v.v2 { display: none; }
+      .line-v.v3 { left: 50%; opacity: 0.3; }
+      .line-v.v4 { display: none; }
+      .line-v.v5 { left: auto; right: 10%; }
+      .line-v.v6 { display: none; }
+    }
+
 </style>
 
 <!-- ── Floating Navigation ── -->
@@ -716,55 +864,662 @@ path_depth: ""
   </section>
 
   <!-- ── Quarterly Teaser ── -->
-  <section class="content-section reveal">
-    <div class="quarterly-teaser-grid">
-      <!-- Left side: Album Cover Grid -->
-      <div class="cover-art-grid">
-        <div class="cover-art-item">
-          <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core" loading="lazy">
+  <section class="content-section reveal" style="padding-left: 0; padding-right: 0; overflow: hidden; width: 100%; border-bottom: 1px solid var(--border-color);">
+    <div class="quarterly-teaser-wrap">
+      <!-- Infinite Marquee Background -->
+      <!-- Track: track-1 -->
+      <div class="quarterly-flow-marquee track-1">
+        <div class="marquee-group">
+
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/396969/39696976.jpg?version=20260203180000" alt="MANA by juun" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41392/4139209.jpg?version=20260204013946" alt="GAME OVER by Bakehour" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41340/4134002.jpg?version=20260305014305" alt="LIT by 저스디스" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="INTOXICATED by DIMO REX" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41417/4141744.jpg?version=20260303120000" alt="KB 3 by 권기백" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207445/20744538.jpg?version=20250809004903" alt="pullup to busan 4 morE hypEr summEr it's gonna bE a fuckin moviE by Effie" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207510/20751037.jpg?version=20250828180005" alt="FANG by Crush" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL by 루피" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41416/4141648.jpg?version=20260313011108" alt="Z.O.O.G by Rich Iggy" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41363/4136382.jpg?version=20260220180010" alt="SHOT CALLERS by LNGSHOT" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207929/20792958.jpg?version=20260304014436" alt="6SEOUL by 식케이" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207986/20798644.jpg?version=20260330120000" alt="The Adventure Story of Nahzam and SSun by 나잠 수 & 문선" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE by A.TRAIN" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK by Kid Milli" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="잇뽕 by huka" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning by DeVita" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207911/20791150.jpg?version=20260213002926" alt="Leader by Omega Sapien" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137748.jpg?version=20260113012628" alt="missing tooth by fish dish" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143352.jpg?version=20260318003557" alt="Concrete Valley by off the menu" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41307/4130779.jpg?version=20251204014600" alt="Jbfm by JINBO the SuperFreak" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="OGI-PATTERN by cwar" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core by 백예린" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/398743/39874335.jpg?version=20260320120000" alt="Bump2's by Bump2Soul" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207388/20738819.jpg?version=20250709004652" alt="DREAM BOY by sokodomo" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207887/20788729.jpg?version=20260606004010" alt="AeLpply by 애리 (AIRY)" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2e/c7/84/2ec78479-2dbe-5143-7ac3-3516ab58900d/artwork.jpg/1000x1000bb.jpg" alt="희 / 노 / 애 / 락 by kimj & Effie & audiogothh" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="THE CORE - 核 by XG" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207509/20750995.jpg?version=20250831120000" alt="TUNDRA by Hippie Kunda" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207854/20785499.jpg?version=20260509004813" alt="SLOPE by jayho & 아이딜" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="Blue Valentine by NMIXX" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER by 놀이도감" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207722/20772238.jpg?version=20251126005300" alt="LAGEON by Mudd the student" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41388/4138853.jpg?version=20260310005815" alt="Delulu Pack by KiiKii" loading="lazy">
+          </div>
         </div>
-        <div class="cover-art-item">
-          <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK" loading="lazy">
+        <div class="marquee-group" aria-hidden="true">
+
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/396969/39696976.jpg?version=20260203180000" alt="MANA by juun">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41392/4139209.jpg?version=20260204013946" alt="GAME OVER by Bakehour">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41340/4134002.jpg?version=20260305014305" alt="LIT by 저스디스">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="INTOXICATED by DIMO REX">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41417/4141744.jpg?version=20260303120000" alt="KB 3 by 권기백">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207445/20744538.jpg?version=20250809004903" alt="pullup to busan 4 morE hypEr summEr it's gonna bE a fuckin moviE by Effie">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207510/20751037.jpg?version=20250828180005" alt="FANG by Crush">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL by 루피">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41416/4141648.jpg?version=20260313011108" alt="Z.O.O.G by Rich Iggy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41363/4136382.jpg?version=20260220180010" alt="SHOT CALLERS by LNGSHOT">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207929/20792958.jpg?version=20260304014436" alt="6SEOUL by 식케이">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207986/20798644.jpg?version=20260330120000" alt="The Adventure Story of Nahzam and SSun by 나잠 수 & 문선">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE by A.TRAIN">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK by Kid Milli">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="잇뽕 by huka">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning by DeVita">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207911/20791150.jpg?version=20260213002926" alt="Leader by Omega Sapien">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137748.jpg?version=20260113012628" alt="missing tooth by fish dish">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143352.jpg?version=20260318003557" alt="Concrete Valley by off the menu">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41307/4130779.jpg?version=20251204014600" alt="Jbfm by JINBO the SuperFreak">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="OGI-PATTERN by cwar">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core by 백예린">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/398743/39874335.jpg?version=20260320120000" alt="Bump2's by Bump2Soul">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207388/20738819.jpg?version=20250709004652" alt="DREAM BOY by sokodomo">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207887/20788729.jpg?version=20260606004010" alt="AeLpply by 애리 (AIRY)">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2e/c7/84/2ec78479-2dbe-5143-7ac3-3516ab58900d/artwork.jpg/1000x1000bb.jpg" alt="희 / 노 / 애 / 락 by kimj & Effie & audiogothh">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="THE CORE - 核 by XG">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207509/20750995.jpg?version=20250831120000" alt="TUNDRA by Hippie Kunda">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207854/20785499.jpg?version=20260509004813" alt="SLOPE by jayho & 아이딜">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="Blue Valentine by NMIXX">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER by 놀이도감">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207722/20772238.jpg?version=20251126005300" alt="LAGEON by Mudd the student">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41388/4138853.jpg?version=20260310005815" alt="Delulu Pack by KiiKii">
+          </div>
         </div>
-        <div class="cover-art-item">
-          <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning" loading="lazy">
+      </div>
+      <!-- Track: track-2 -->
+      <div class="quarterly-flow-marquee track-2">
+        <div class="marquee-group">
+
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning by DeVita" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207509/20750995.jpg?version=20250831120000" alt="TUNDRA by Hippie Kunda" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41340/4134002.jpg?version=20260305014305" alt="LIT by 저스디스" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41392/4139209.jpg?version=20260204013946" alt="GAME OVER by Bakehour" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207854/20785499.jpg?version=20260509004813" alt="SLOPE by jayho & 아이딜" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41307/4130779.jpg?version=20251204014600" alt="Jbfm by JINBO the SuperFreak" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE by A.TRAIN" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL by 루피" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="OGI-PATTERN by cwar" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207986/20798644.jpg?version=20260330120000" alt="The Adventure Story of Nahzam and SSun by 나잠 수 & 문선" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207911/20791150.jpg?version=20260213002926" alt="Leader by Omega Sapien" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="Blue Valentine by NMIXX" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207510/20751037.jpg?version=20250828180005" alt="FANG by Crush" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core by 백예린" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK by Kid Milli" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER by 놀이도감" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/398743/39874335.jpg?version=20260320120000" alt="Bump2's by Bump2Soul" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41363/4136382.jpg?version=20260220180010" alt="SHOT CALLERS by LNGSHOT" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137748.jpg?version=20260113012628" alt="missing tooth by fish dish" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207445/20744538.jpg?version=20250809004903" alt="pullup to busan 4 morE hypEr summEr it's gonna bE a fuckin moviE by Effie" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207388/20738819.jpg?version=20250709004652" alt="DREAM BOY by sokodomo" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207887/20788729.jpg?version=20260606004010" alt="AeLpply by 애리 (AIRY)" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="잇뽕 by huka" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207722/20772238.jpg?version=20251126005300" alt="LAGEON by Mudd the student" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41416/4141648.jpg?version=20260313011108" alt="Z.O.O.G by Rich Iggy" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="THE CORE - 核 by XG" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41417/4141744.jpg?version=20260303120000" alt="KB 3 by 권기백" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207929/20792958.jpg?version=20260304014436" alt="6SEOUL by 식케이" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/396969/39696976.jpg?version=20260203180000" alt="MANA by juun" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143352.jpg?version=20260318003557" alt="Concrete Valley by off the menu" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="INTOXICATED by DIMO REX" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41388/4138853.jpg?version=20260310005815" alt="Delulu Pack by KiiKii" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2e/c7/84/2ec78479-2dbe-5143-7ac3-3516ab58900d/artwork.jpg/1000x1000bb.jpg" alt="희 / 노 / 애 / 락 by kimj & Effie & audiogothh" loading="lazy">
+          </div>
         </div>
-        <div class="cover-art-item">
-          <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL" loading="lazy">
+        <div class="marquee-group" aria-hidden="true">
+
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning by DeVita">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207509/20750995.jpg?version=20250831120000" alt="TUNDRA by Hippie Kunda">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41340/4134002.jpg?version=20260305014305" alt="LIT by 저스디스">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41392/4139209.jpg?version=20260204013946" alt="GAME OVER by Bakehour">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207854/20785499.jpg?version=20260509004813" alt="SLOPE by jayho & 아이딜">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41307/4130779.jpg?version=20251204014600" alt="Jbfm by JINBO the SuperFreak">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE by A.TRAIN">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL by 루피">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="OGI-PATTERN by cwar">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207986/20798644.jpg?version=20260330120000" alt="The Adventure Story of Nahzam and SSun by 나잠 수 & 문선">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207911/20791150.jpg?version=20260213002926" alt="Leader by Omega Sapien">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="Blue Valentine by NMIXX">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207510/20751037.jpg?version=20250828180005" alt="FANG by Crush">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core by 백예린">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK by Kid Milli">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER by 놀이도감">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/398743/39874335.jpg?version=20260320120000" alt="Bump2's by Bump2Soul">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41363/4136382.jpg?version=20260220180010" alt="SHOT CALLERS by LNGSHOT">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137748.jpg?version=20260113012628" alt="missing tooth by fish dish">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207445/20744538.jpg?version=20250809004903" alt="pullup to busan 4 morE hypEr summEr it's gonna bE a fuckin moviE by Effie">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207388/20738819.jpg?version=20250709004652" alt="DREAM BOY by sokodomo">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207887/20788729.jpg?version=20260606004010" alt="AeLpply by 애리 (AIRY)">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="잇뽕 by huka">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207722/20772238.jpg?version=20251126005300" alt="LAGEON by Mudd the student">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41416/4141648.jpg?version=20260313011108" alt="Z.O.O.G by Rich Iggy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="THE CORE - 核 by XG">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41417/4141744.jpg?version=20260303120000" alt="KB 3 by 권기백">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207929/20792958.jpg?version=20260304014436" alt="6SEOUL by 식케이">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/396969/39696976.jpg?version=20260203180000" alt="MANA by juun">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143352.jpg?version=20260318003557" alt="Concrete Valley by off the menu">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="INTOXICATED by DIMO REX">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41388/4138853.jpg?version=20260310005815" alt="Delulu Pack by KiiKii">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2e/c7/84/2ec78479-2dbe-5143-7ac3-3516ab58900d/artwork.jpg/1000x1000bb.jpg" alt="희 / 노 / 애 / 락 by kimj & Effie & audiogothh">
+          </div>
         </div>
-        <div class="cover-art-item">
-          <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE" loading="lazy">
+      </div>
+      <!-- Track: track-3 -->
+      <div class="quarterly-flow-marquee track-3">
+        <div class="marquee-group">
+
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207929/20792958.jpg?version=20260304014436" alt="6SEOUL by 식케이" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143352.jpg?version=20260318003557" alt="Concrete Valley by off the menu" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41307/4130779.jpg?version=20251204014600" alt="Jbfm by JINBO the SuperFreak" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207510/20751037.jpg?version=20250828180005" alt="FANG by Crush" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207911/20791150.jpg?version=20260213002926" alt="Leader by Omega Sapien" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2e/c7/84/2ec78479-2dbe-5143-7ac3-3516ab58900d/artwork.jpg/1000x1000bb.jpg" alt="희 / 노 / 애 / 락 by kimj & Effie & audiogothh" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="Blue Valentine by NMIXX" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207986/20798644.jpg?version=20260330120000" alt="The Adventure Story of Nahzam and SSun by 나잠 수 & 문선" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41388/4138853.jpg?version=20260310005815" alt="Delulu Pack by KiiKii" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41392/4139209.jpg?version=20260204013946" alt="GAME OVER by Bakehour" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="잇뽕 by huka" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207722/20772238.jpg?version=20251126005300" alt="LAGEON by Mudd the student" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE by A.TRAIN" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41416/4141648.jpg?version=20260313011108" alt="Z.O.O.G by Rich Iggy" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER by 놀이도감" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207854/20785499.jpg?version=20260509004813" alt="SLOPE by jayho & 아이딜" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK by Kid Milli" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL by 루피" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41417/4141744.jpg?version=20260303120000" alt="KB 3 by 권기백" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137748.jpg?version=20260113012628" alt="missing tooth by fish dish" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning by DeVita" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207388/20738819.jpg?version=20250709004652" alt="DREAM BOY by sokodomo" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="OGI-PATTERN by cwar" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207445/20744538.jpg?version=20250809004903" alt="pullup to busan 4 morE hypEr summEr it's gonna bE a fuckin moviE by Effie" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41363/4136382.jpg?version=20260220180010" alt="SHOT CALLERS by LNGSHOT" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="INTOXICATED by DIMO REX" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207509/20750995.jpg?version=20250831120000" alt="TUNDRA by Hippie Kunda" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/396969/39696976.jpg?version=20260203180000" alt="MANA by juun" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207887/20788729.jpg?version=20260606004010" alt="AeLpply by 애리 (AIRY)" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41340/4134002.jpg?version=20260305014305" alt="LIT by 저스디스" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core by 백예린" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="THE CORE - 核 by XG" loading="lazy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/398743/39874335.jpg?version=20260320120000" alt="Bump2's by Bump2Soul" loading="lazy">
+          </div>
         </div>
-        <div class="cover-art-item">
-          <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER" loading="lazy">
+        <div class="marquee-group" aria-hidden="true">
+
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207929/20792958.jpg?version=20260304014436" alt="6SEOUL by 식케이">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143352.jpg?version=20260318003557" alt="Concrete Valley by off the menu">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41307/4130779.jpg?version=20251204014600" alt="Jbfm by JINBO the SuperFreak">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207510/20751037.jpg?version=20250828180005" alt="FANG by Crush">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207911/20791150.jpg?version=20260213002926" alt="Leader by Omega Sapien">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2e/c7/84/2ec78479-2dbe-5143-7ac3-3516ab58900d/artwork.jpg/1000x1000bb.jpg" alt="희 / 노 / 애 / 락 by kimj & Effie & audiogothh">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="Blue Valentine by NMIXX">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207986/20798644.jpg?version=20260330120000" alt="The Adventure Story of Nahzam and SSun by 나잠 수 & 문선">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41388/4138853.jpg?version=20260310005815" alt="Delulu Pack by KiiKii">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41392/4139209.jpg?version=20260204013946" alt="GAME OVER by Bakehour">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="잇뽕 by huka">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207722/20772238.jpg?version=20251126005300" alt="LAGEON by Mudd the student">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41293/4129334.jpg?version=20260107004615" alt="POVIDONE ORANGE by A.TRAIN">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41416/4141648.jpg?version=20260313011108" alt="Z.O.O.G by Rich Iggy">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207973/20797318.jpg?version=20260318120000" alt="TRUTHBUSTER by 놀이도감">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207854/20785499.jpg?version=20260509004813" alt="SLOPE by jayho & 아이딜">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/400753/40075373.jpg?version=20260509003638" alt="LOVESICK by Kid Milli">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137720.jpg?version=20260509003238" alt="SEOUL by 루피">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41417/4141744.jpg?version=20260303120000" alt="KB 3 by 권기백">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41377/4137748.jpg?version=20260113012628" alt="missing tooth by fish dish">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41423/4142315.jpg?version=20260306020824" alt="The Tree is Burning by DeVita">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207388/20738819.jpg?version=20250709004652" alt="DREAM BOY by sokodomo">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="OGI-PATTERN by cwar">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207445/20744538.jpg?version=20250809004903" alt="pullup to busan 4 morE hypEr summEr it's gonna bE a fuckin moviE by Effie">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41363/4136382.jpg?version=20260220180010" alt="SHOT CALLERS by LNGSHOT">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="INTOXICATED by DIMO REX">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207509/20750995.jpg?version=20250831120000" alt="TUNDRA by Hippie Kunda">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/396969/39696976.jpg?version=20260203180000" alt="MANA by juun">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207887/20788729.jpg?version=20260606004010" alt="AeLpply by 애리 (AIRY)">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/41340/4134002.jpg?version=20260305014305" alt="LIT by 저스디스">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/388659/38865955.jpg?version=20251018002554" alt="Flash and Core by 백예린">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="THE CORE - 核 by XG">
+          </div>
+          <div class="flow-cover-item">
+            <img src="https://image.bugsm.co.kr/album/images/1000/398743/39874335.jpg?version=20260320120000" alt="Bump2's by Bump2Soul">
+          </div>
         </div>
       </div>
 
-      <!-- Right side: Glassmorphic Teaser Card -->
-      <div class="teaser-card">
-        <div class="teaser-card-bg">
-          <img src="https://image.bugsm.co.kr/album/images/1000/41433/4143353.jpg?version=20260318012218" alt="" loading="lazy">
-          <img src="https://image.bugsm.co.kr/album/images/1000/207843/20784328.jpg?version=20260128002529" alt="" loading="lazy">
-          <img src="https://image.bugsm.co.kr/album/images/1000/41299/4129960.jpg?version=20260512004922" alt="" loading="lazy">
-          <img src="https://image.bugsm.co.kr/album/images/1000/207799/20779919.jpg?version=20260222200504" alt="" loading="lazy">
-          <img src="https://image.bugsm.co.kr/album/images/1000/41393/4139338.jpg?version=20260204023249" alt="" loading="lazy">
-          <img src="https://image.bugsm.co.kr/album/images/1000/41345/4134568.jpg?version=20260227015343" alt="" loading="lazy">
-        </div>
-        <div class="teaser-card-overlay"></div>
-        <div class="teaser-content">
-          <span class="teaser-tag">upcoming</span>
-          <h3 class="teaser-heading">quarterly in physical</h3>
-          <p class="teaser-text">
-            디지털 공간에 기록해 온 quarterly 아카이브의 흔적들을 손 끝으로 만질 수 있는 물성의 지류 매체(Printed Issue)로 담아낼 예정입니다. 음악을 소유하고 소장하는 감각의 물리적 연속성을 지류 잡지로 경험해 보세요.
-          </p>
-          <a href="/quarterly/" class="section-link">
-            <span>view archive</span>
-            <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-          </a>
+      <!-- Static Architectural Editorial Lines -->
+      <div class="editorial-line line-h h1"></div>
+      <div class="editorial-line line-h h2"></div>
+      <div class="editorial-line line-h h3"></div>
+      <div class="editorial-line line-h h4"></div>
+      <div class="editorial-line line-v v1"></div>
+      <div class="editorial-line line-v v2"></div>
+      <div class="editorial-line line-v v3"></div>
+      <div class="editorial-line line-v v4"></div>
+      <div class="editorial-line line-v v5"></div>
+      <div class="editorial-line line-v v6"></div>
+
+      <!-- Floating Teaser Card Container -->
+      <div class="teaser-card-container">
+        <div class="teaser-card">
+          <div class="teaser-content">
+            <span class="teaser-tag">upcoming</span>
+            <h3 class="teaser-heading">quarterly in physical</h3>
+            <p class="teaser-text">
+              디지털 공간에 기록해 온 quarterly 아카이브의 흔적들을 손 끝으로 만질 수 있는 물성의 지류 매체(Printed Issue)로 담아낼 예정입니다. 음악을 소유하고 소장하는 감각의 물리적 연속성을 지류 잡지로 경험해 보세요.
+            </p>
+            <a href="/quarterly/" class="section-link">
+              <span>view archive</span>
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </a>
+          </div>
         </div>
       </div>
     </div>
   </section>
+
 
   <!-- ── Contact ── -->
   <section class="content-section" style="text-align: right;">

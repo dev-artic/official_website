@@ -7,9 +7,11 @@ const {
   updateNotionPageProperties,
   updateNotionTableRowCells,
 } = require("./quarterly_notion");
+
 const {
   applyQuarterlyYoutubeTracks,
   buildYoutubeTrackDiagnostics,
+  parseHighlightedTracks,
   readQuarterlyYoutubeTrackOverrides,
   resolveYoutubeAlbumTracks,
   saveYoutubeTrackOverride,
@@ -662,6 +664,95 @@ async function handleQuarterlyAdminAction({ body, token, db, fieldValue, youtube
       expectedLastEditedTime: body.expectedLastEditedTime || "",
     });
     return { success: true, pageId: result.id };
+  }
+
+  if (action === "batch_auto_resolve_youtube_tracks") {
+    const issueId = String(body.issueId || "").trim();
+    if (!issueId) {
+      const error = new Error("Missing required field (issueId).");
+      error.status = 400;
+      throw error;
+    }
+
+    let archive = null;
+    try {
+      const cacheDoc = await db.collection("quarterly_cache").doc("archive").get();
+      if (cacheDoc.exists) {
+        archive = cacheDoc.data()?.archive || null;
+      }
+    } catch (cacheErr) {
+      console.warn("Failed to read quarterly cache for batch resolve:", cacheErr.message);
+    }
+
+    if (!archive) {
+      const error = new Error("Quarterly cache not found. Load admin dashboard first.");
+      error.status = 404;
+      throw error;
+    }
+
+    const issue = (archive.issues || []).find((is) => is.id === issueId);
+    if (!issue) {
+      const error = new Error("Selected quarterly issue not found.");
+      error.status = 404;
+      throw error;
+    }
+
+    const youtubeOverrides = await readQuarterlyYoutubeTrackOverrides(db);
+    const overriddenKeys = new Set(Object.keys(youtubeOverrides.tracks || {}));
+
+    const albums = [];
+    (issue.tiers || []).forEach((tier) => {
+      (tier.items || []).forEach((item) => {
+        albums.push(item);
+      });
+    });
+
+    let resolvedCount = 0;
+    const errors = [];
+
+    for (const album of albums) {
+      const parsedTracks = parseHighlightedTracks(album.tracks, album.album, album.artist);
+      const unresolvedTracks = parsedTracks.filter((track) => {
+        if (track.youtubeId) return false;
+        if (overriddenKeys.has(track.trackKey)) return false;
+        return true;
+      });
+
+      if (unresolvedTracks.length === 0) continue;
+
+      try {
+        const result = await resolveYoutubeAlbumTracks({
+          album: album.album,
+          artist: album.artist,
+          tracks: album.tracks || "",
+          apiKey: youtubeApiKey,
+        });
+
+        for (const candidate of result.candidates || []) {
+          const isUnresolved = unresolvedTracks.some((ut) => ut.trackKey === candidate.trackKey);
+          if (isUnresolved && candidate.confidence === "high" && candidate.youtubeId) {
+            await saveYoutubeTrackOverride({
+              db,
+              fieldValue,
+              payload: {
+                ...candidate,
+                updatedBy: "admin-batch-auto-resolve",
+              },
+            });
+            resolvedCount++;
+          }
+        }
+      } catch (err) {
+        console.error(`Failed to batch resolve album "${album.album}" by "${album.artist}":`, err.message);
+        errors.push(`${album.album}: ${err.message}`);
+      }
+    }
+
+    return {
+      success: true,
+      resolvedCount,
+      errors: errors.length ? errors : null,
+    };
   }
 
   const error = new Error("Unsupported quarterly admin action.");

@@ -1763,9 +1763,12 @@ path_depth: "../"
 
       body.innerHTML = `
         <div class="quarterly-detail-section">
-          <div>
-            <h3 class="quarterly-detail-title">${escapeHtml(issue.title || issue.issue)}</h3>
-            <p class="quarterly-small-muted" style="margin:8px 0 0;">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.publicationStatus || '')} · ${escapeHtml(issue.date || '')}</p>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+            <div>
+              <h3 class="quarterly-detail-title">${escapeHtml(issue.title || issue.issue)}</h3>
+              <p class="quarterly-small-muted" style="margin:8px 0 0;">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.publicationStatus || '')} · ${escapeHtml(issue.date || '')}</p>
+            </div>
+            <button class="action-btn-sm" type="button" onclick="batchAutoResolveYoutubeTracks('${escapeHtml(issue.id)}')">Auto-Resolve Audio</button>
           </div>
           <div class="quarterly-health-row">
             <span class="quarterly-pill">${health.tierHeadingCount || 0}/7 tiers</span>
@@ -2376,6 +2379,37 @@ path_depth: "../"
         loadQuarterlyAdminData();
       })
       .catch(err => alert(err.message));
+    };
+
+    window.batchAutoResolveYoutubeTracks = function(issueId) {
+      const issue = getQuarterlyIssue(issueId);
+      if (!issue?.id) return;
+      if (!confirm(`전사적으로 공식 앨범 플레이리스트의 순서와 토픽 채널을 대조하여, 공식 음원으로 판단되는 트랙들을 일괄 자동 매칭 및 저장하시겠습니까?\n\n대상: ${issue.title}`)) return;
+
+      const btn = document.querySelector(`button[onclick*="batchAutoResolveYoutubeTracks"]`);
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Auto-Resolving...';
+      }
+
+      postQuarterlyAdmin({
+        action: 'batch_auto_resolve_youtube_tracks',
+        issueId: issue.id
+      })
+      .then(data => {
+        alert(`공식 음원 일괄 매칭 완료!\n총 ${data.resolvedCount}개의 트랙이 자동으로 매칭 및 저장되었습니다.`);
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => {
+        alert(err.message);
+      })
+      .finally(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Auto-Resolve Audio';
+        }
+      });
     };
 
     checkAuth();

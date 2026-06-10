@@ -342,7 +342,7 @@ function scoreVideoCandidate(track, candidate, album, artist) {
   };
 }
 
-function matchPlaylistItem(track, items, artist) {
+function matchPlaylistItem(track, items, artist, isOfficialPlaylist = false) {
   const targetTitle = normalize(track.title);
   const targetNumber = Number.parseInt(track.number, 10);
   let best = null;
@@ -354,7 +354,12 @@ function matchPlaylistItem(track, items, artist) {
     let score = 0;
     if (targetTitle && normalizedTitle === targetTitle) score += 12;
     else if (targetTitle && (normalizedTitle.includes(targetTitle) || targetTitle.includes(normalizedTitle))) score += 8;
-    if (targetNumber && index + 1 === targetNumber) score += 5;
+    
+    if (targetNumber && index + 1 === targetNumber) {
+      score += 5;
+      if (isOfficialPlaylist) score += 15;
+    }
+    
     if (/topic/i.test(item.snippet?.channelTitle || "")) score += 2;
     if (!best || score > best.score) {
       best = {
@@ -479,7 +484,6 @@ async function resolveYoutubeAlbumTracks({ album, artist, tracks, apiKey, youtub
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
   const trackCandidates = [];
-
   for (const playlist of playlistCandidates.slice(0, 3)) {
     const itemsResult = await youtubeApiClient("/playlistItems", {
       part: "snippet",
@@ -488,8 +492,9 @@ async function resolveYoutubeAlbumTracks({ album, artist, tracks, apiKey, youtub
     }, key);
     const items = itemsResult.items || [];
     playlist.itemCount = items.length;
+    const isOfficialPlaylist = /topic/i.test(playlist.channelTitle || "") || playlist.score >= 12;
     highlightedTracks.forEach((track) => {
-      const match = matchPlaylistItem(track, items, artist);
+      const match = matchPlaylistItem(track, items, artist, isOfficialPlaylist);
       if (!match || match.score < 8) return;
       trackCandidates.push({
         ...track,

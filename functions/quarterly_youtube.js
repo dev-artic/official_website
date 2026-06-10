@@ -360,14 +360,36 @@ function matchPlaylistItem(track, items, artist, isOfficialPlaylist = false) {
       if (isOfficialPlaylist) score += 15;
     }
     
-    if (/topic/i.test(item.snippet?.channelTitle || "")) score += 2;
+    const videoChannel = item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle || "";
+    const isTopic = /topic/i.test(videoChannel);
+    
+    const normalizedArtist = normalize(artist);
+    let isArtistChannel = false;
+    if (normalizedArtist) {
+      const normalizedChannel = normalize(videoChannel);
+      if (normalizedChannel.includes(normalizedArtist)) {
+        isArtistChannel = true;
+      } else {
+        const parts = artist.split(/[^a-zA-Z0-9가-힣]+/g).map(p => normalize(p)).filter(p => p.length >= 2);
+        if (parts.some(part => normalizedChannel.includes(part))) {
+          isArtistChannel = true;
+        }
+      }
+    }
+
+    if (isTopic) score += 8;
+    if (isArtistChannel) score += 5;
+    if (videoChannel && !isTopic && !isArtistChannel) {
+      score -= 12;
+    }
+
     if (!best || score > best.score) {
       best = {
         score,
         videoId: item.snippet?.resourceId?.videoId || "",
         videoTitle,
         cleanedTitle: cleaned,
-        channelTitle: item.snippet?.channelTitle || "",
+        channelTitle: videoChannel,
         position: index + 1,
       };
     }

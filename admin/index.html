@@ -717,6 +717,23 @@ body {
     overflow-wrap: anywhere;
   }
 
+  .quarterly-scan-warning {
+    border: 1px solid rgba(231, 76, 60, 0.45);
+    background: rgba(231, 76, 60, 0.06);
+    padding: 10px 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .quarterly-scan-warning strong {
+    display: block;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
   .quarterly-youtube-editor.active,
   .quarterly-media-editor.active,
   .quarterly-album-editor.active {
@@ -731,10 +748,11 @@ body {
   .quarterly-candidate {
     display: grid;
     grid-template-columns: 44px minmax(0, 1fr) auto;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
-    border-top: 1px solid var(--border-color);
-    padding-top: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    padding: 10px 12px;
   }
 
   .quarterly-candidate img {
@@ -752,17 +770,17 @@ body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
-    align-items: center;
+    margin-top: 4px;
   }
 
   .quarterly-youtube-manual input {
+    height: 32px;
+    padding: 0 10px;
     width: 100%;
     min-width: 0;
-    height: 36px;
     border: 1px solid var(--border-color);
     background: var(--bg-primary);
     color: var(--text-primary);
-    padding: 0 10px;
     font-family: var(--font-sans);
     font-size: 0.72rem;
   }
@@ -784,6 +802,10 @@ body {
     }
 
     .quarterly-issue-alert {
+      grid-template-columns: 1fr;
+    }
+
+    .quarterly-scan-warning {
       grid-template-columns: 1fr;
     }
 
@@ -961,7 +983,10 @@ body {
             <h3 class="admin-card-title" style="margin-bottom:8px;">Quarterly Content Health</h3>
             <p class="quarterly-small-muted" style="margin:0;">ACHA issues, Bugs cover overrides, featured article body parsing, and Now artic. quarter matching.</p>
           </div>
-          <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
+          <div style="display:flex; gap:8px;">
+            <button class="action-btn-sm" id="quarterly-scan-btn" type="button" style="display:none; background:var(--bg-card); border:1px solid var(--border-color);">Scan Audio Health</button>
+            <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
+          </div>
         </div>
       </div>
 
@@ -1947,6 +1972,8 @@ body {
       status.textContent = 'Loading quarterly content diagnostics...';
       setPaneLoading('quarterly', true, tabLoadingLabels.quarterly);
       document.getElementById('quarterly-refresh-btn').disabled = true;
+      const scanBtn = document.getElementById('quarterly-scan-btn');
+      if (scanBtn) scanBtn.style.display = 'none';
 
       fetch(getQuarterlyAdminUrl(), {
         headers: {
@@ -1970,6 +1997,7 @@ body {
         renderQuarterlyIssueList();
         renderQuarterlyDetail();
         status.textContent = `Loaded ${data.archive?.issues?.length || 0} issues. Last check: ${new Date(data.diagnostics?.generatedAt || Date.now()).toLocaleString('ko-KR')}`;
+        if (scanBtn) scanBtn.style.display = 'inline-block';
       })
       .catch(err => {
         console.error('Quarterly admin error:', err);
@@ -1985,6 +2013,205 @@ body {
       quarterlyLoaded = false;
       loadQuarterlyAdminData();
     });
+
+    if (document.getElementById('quarterly-scan-btn')) {
+      document.getElementById('quarterly-scan-btn').addEventListener('click', () => {
+        scanAudioHealth();
+      });
+    }
+
+    function scanAudioHealth() {
+      if (!quarterlyAdminData || !quarterlyAdminData.archive || !quarterlyAdminData.archive.issues) {
+        alert('Please wait until quarterly data is loaded.');
+        return;
+      }
+
+      const issues = quarterlyAdminData.archive.issues;
+      const flagged = [];
+
+      // Helper to normalize strings for comparison (remove spaces, special chars, keep alphanumeric + korean)
+      const normalize = str => String(str || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+
+      // Label/uploader validation keywords
+      const officialKeywords = [
+        'topic', 'official', 'poclanos', '1thek', 'genie', 'stone music', 'stone', 'mirrorball',
+        'warner', 'universal', 'sony', 'danal', 'dreamus', 'kakao', 'beatcraze', 'fluxus', 'magic strawberry',
+        'aomg', 'jyp', 'smtown', 'ygent', 'hybe', 'starship', 'woollim', 'cube', 'fnc', 'mystic', 'antenna',
+        'brandnew', 'vismajor', 'vmc', 'ambition', 'h1ghr', 'illionaire', 'cjenm', 'cje&m'
+      ].map(kw => normalize(kw));
+
+      // Regexes for suspicious keywords to check in video titles (if not in track title)
+      const suspiciousRegexes = {
+        'cover': /(\(|\[|\b)cover(\)|\]|\b)/i,
+        'lyrics': /(\(|\[|\b)lyrics?(\)|\]|\b|가사)/i,
+        'karaoke': /(\(|\[|\b)karaoke(\)|\]|\b|노래방)/i,
+        'reaction': /(\(|\[|\b)reaction(\)|\]|\b)/i,
+        'remake': /(\(|\[|\b)remake(\)|\]|\b)/i,
+        'mr': /(\(|\[|\b)mr(\)|\]|\b)/i,
+        'inst': /(\(|\[|\b)inst(rumental)?(\)|\]|\b)/i,
+        'remix': /(\(|\[|\b)remix(\)|\]|\b)/i,
+        'live': /(\(|\[|\b)live(\)|\]|\b)/i,
+      };
+
+      issues.forEach(issue => {
+        (issue.tiers || []).forEach(tier => {
+          (tier.items || []).forEach(album => {
+            const mediaKey = makeQuarterlyMediaKey(album.album, album.artist);
+            const tracks = album.highlightedTracks || [];
+
+            tracks.forEach(track => {
+              // Only check resolved tracks
+              if (!track.youtubeId) return;
+
+              const warnings = [];
+              const videoTitle = track.videoTitle || '';
+              const channelTitle = track.channelTitle || '';
+              const trackTitle = track.title || '';
+              const artistName = album.artist || '';
+
+              // 1. Missing metadata check
+              if (!videoTitle && !channelTitle) {
+                warnings.push('Resolved in Firestore but missing video title/channel metadata');
+              } else {
+                const normTrackTitle = normalize(trackTitle);
+                const normVideoTitle = normalize(videoTitle);
+                const normArtist = normalize(artistName);
+                const normChannel = normalize(channelTitle);
+
+                // 2. Title mismatch
+                if (normTrackTitle && !normVideoTitle.includes(normTrackTitle)) {
+                  warnings.push(`Title mismatch (track title "${trackTitle}" not found in video title)`);
+                }
+
+                // 3. Suspicious keywords
+                for (const [key, regex] of Object.entries(suspiciousRegexes)) {
+                  if (regex.test(videoTitle) && !regex.test(trackTitle)) {
+                    warnings.push(`Suspicious keyword: "${key}" in video title but not in track title`);
+                  }
+                }
+
+                // 4. Suspicious uploader
+                const hasOfficialKeyword = officialKeywords.some(kw => normChannel.includes(kw));
+                const hasArtistName = normArtist && normChannel.includes(normArtist);
+                if (!hasOfficialKeyword && !hasArtistName) {
+                  warnings.push(`Suspicious uploader: "${channelTitle}" (unverified channel)`);
+                }
+              }
+
+              if (warnings.length > 0) {
+                flagged.push({
+                  issueId: issue.id,
+                  issueTitle: issue.title || issue.issue,
+                  album,
+                  mediaKey,
+                  track,
+                  warnings
+                });
+              }
+            });
+          });
+        });
+      });
+
+      renderScanResults(flagged);
+    }
+
+    function renderScanResults(flagged) {
+      const body = document.getElementById('quarterly-detail-body');
+      if (!body) return;
+
+      if (flagged.length === 0) {
+        body.innerHTML = `
+          <div class="quarterly-detail-section">
+            <h3 class="quarterly-detail-title">Audio Health Scan Results</h3>
+            <p style="color:#2ecc71; margin:16px 0 0; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+              <span>✅</span> All resolved audio tracks passed the heuristic health checks (No mismatches or suspicious uploaders detected).
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const countText = `${flagged.length} suspicious match${flagged.length > 1 ? 'es' : ''} found`;
+
+      const flaggedHtml = flagged.map(item => {
+        const album = item.album;
+        const track = item.track;
+        const warningsList = item.warnings.map(w => `<li style="margin:2px 0;">⚠️ ${escapeHtml(w)}</li>`).join('');
+
+        return `
+          <div class="quarterly-scan-warning" style="margin-bottom:8px;">
+            <div>
+              <div class="quarterly-small-muted" style="margin-bottom:4px; font-weight:bold; color:var(--text-secondary);">
+                ${escapeHtml(item.issueTitle)} &middot; ${escapeHtml(album.artist)} - ${escapeHtml(album.album)}
+              </div>
+              <strong style="font-size:0.8rem; margin-bottom:4px; color:var(--text-primary);">
+                Track ${escapeHtml(track.number || '')}: ${escapeHtml(track.title || '')}
+              </strong>
+              <div class="quarterly-small-muted" style="margin-top:4px;">
+                <strong>Matched Video:</strong> ${escapeHtml(track.videoTitle || 'N/A')}
+                <br>
+                <strong>Channel:</strong> ${escapeHtml(track.channelTitle || 'N/A')}
+                ${track.youtubeId ? ` &middot; <a href="https://www.youtube.com/watch?v=${encodeURIComponent(track.youtubeId)}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: underline;">Open Video</a>` : ''}
+              </div>
+              <ul style="margin:6px 0 0 0; padding-left:16px; font-size:0.7rem; color:#e74c3c; list-style-type:none;">
+                ${warningsList}
+              </ul>
+            </div>
+            <div>
+              <button class="action-btn-sm" type="button" style="background:#e74c3c; border-color:#e74c3c; color:white;" onclick="focusAndEditTrack('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}')">Fix</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      body.innerHTML = `
+        <div class="quarterly-detail-section">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 class="quarterly-detail-title">Audio Health Scan Results</h3>
+            <span class="quarterly-pill warn">${escapeHtml(countText)}</span>
+          </div>
+          <p class="quarterly-small-muted" style="margin:8px 0 16px 0;">
+            Below is a list of resolved YouTube tracks that flagged our heuristic checks (e.g. title mismatch, unofficial uploader, or covers/lyrics keywords). Click <strong>Fix</strong> to open the editor directly.
+          </p>
+          <div class="quarterly-issue-alerts">
+            ${flaggedHtml}
+          </div>
+        </div>
+      `;
+
+      body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    window.focusAndEditTrack = function(issueId, mediaKey, trackNumber) {
+      selectedQuarterlyIssueId = issueId;
+      renderQuarterlyIssueList();
+      renderQuarterlyDetail();
+
+      const issue = getQuarterlyIssue(issueId);
+      const album = findQuarterlyAlbum(issue, { mediaKey });
+      if (!album) {
+        console.error('Album not found for mediaKey:', mediaKey);
+        return;
+      }
+      const encoded = encodeURIComponent(JSON.stringify(album)).replace(/'/g, "%27");
+
+      openQuarterlyYoutubeEditor(encoded);
+
+      setTimeout(() => {
+        const inputId = `quarterly-youtube-manual-${trackNumber}`;
+        const inputEl = document.getElementById(inputId);
+        if (inputEl) {
+          inputEl.focus();
+          inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          inputEl.style.outline = '3px solid #e74c3c';
+          inputEl.style.transition = 'outline 0.3s ease';
+          setTimeout(() => {
+            inputEl.style.outline = '';
+          }, 3000);
+        }
+      }, 100);
+    };
 
     let activeQuarterlyAlbum = null;
     let activeQuarterlyMetadataAlbum = null;

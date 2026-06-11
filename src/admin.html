@@ -2514,8 +2514,6 @@ path_depth: "../"
           isYoutubeQuotaExceeded = true;
           updateYoutubeFindButtonState();
           status.textContent = 'YouTube API Quota Exceeded. Use manual search instead.';
-          list.innerHTML = `<p class="quarterly-small-muted" style="margin:0; color:#dc3545; font-weight:700;">[할당량 초과] 위의 [Search YouTube Manually] 버튼을 클릭하면 모든 추천곡의 유튜브 검색창이 새 탭으로 열립니다.</p>`;
-          openManualSearchTabs();
         }
       });
     };

@@ -130,6 +130,7 @@ async function readQuarterlyYoutubeTrackOverrides(db) {
       playlistTitle: data.playlistTitle || "",
       status: data.status || "resolved",
       confidence: data.confidence || "",
+      confirmed: data.confirmed === true,
       updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt || "",
       updatedBy: data.updatedBy || "",
     };

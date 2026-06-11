@@ -598,6 +598,7 @@ module.exports = {
   applyQuarterlyYoutubeTracks,
   buildYoutubeTrackDiagnostics,
   extractYouTubeVideoId,
+  flattenHighlightedTracks,
   getYouTubeApiKey,
   makeTrackKey,
   parseHighlightedTracks,
@@ -605,3 +606,4 @@ module.exports = {
   resolveYoutubeAlbumTracks,
   saveYoutubeTrackOverride,
 };
+

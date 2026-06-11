@@ -11,6 +11,7 @@ const {
 const {
   applyQuarterlyYoutubeTracks,
   buildYoutubeTrackDiagnostics,
+  flattenHighlightedTracks,
   parseHighlightedTracks,
   readQuarterlyYoutubeTrackOverrides,
   resolveYoutubeAlbumTracks,
@@ -274,6 +275,9 @@ function buildIssueDiagnostics(issue, nowArticItems = [], mediaReviews = {}) {
     ...(issue.diagnostics?.warnings || []),
   ];
 
+  const tracks = flattenHighlightedTracks(issue);
+  const unresolvedTracks = tracks.filter((track) => !track.youtubeId);
+
   if ((issue.diagnostics?.tierHeadingCount || 0) < TIER_CANON.length) {
     warnings.push("Tier heading count is lower than the canonical 7-tier framework.");
   }
@@ -285,6 +289,9 @@ function buildIssueDiagnostics(issue, nowArticItems = [], mediaReviews = {}) {
   }
   if (missingArticleBodies.length) {
     warnings.push(`${missingArticleBodies.length} featured article(s) have no parsed body content.`);
+  }
+  if (unresolvedTracks.length) {
+    warnings.push(`${unresolvedTracks.length} highlighted track(s) have no resolved YouTube audio.`);
   }
 
   return {

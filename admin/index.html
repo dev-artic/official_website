@@ -2228,6 +2228,8 @@ body {
         list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No highlighted tracks found for this album.</p>';
         return;
       }
+      const artist = activeQuarterlyYoutubeAlbum?.artist || '';
+      const album = activeQuarterlyYoutubeAlbum?.album || '';
       list.innerHTML = tracks.map(track => `
         <div class="quarterly-candidate quarterly-youtube-candidate">
           <div>
@@ -2238,6 +2240,7 @@ body {
           <div class="quarterly-youtube-manual">
             <input type="text" id="quarterly-youtube-manual-${escapeHtml(track.number || '')}" placeholder="YouTube URL or video ID" value="${escapeHtml(track.youtubeId || '')}" aria-label="Manual YouTube URL or video ID for ${escapeHtml(track.number || '')} ${escapeHtml(track.title || '')}">
             <button class="action-btn-sm" type="button" onclick="saveQuarterlyYoutubeManual('${encodeURIComponent(track.number || '')}')">Save Manual</button>
+            <a class="action-btn-sm" href="https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + album + ' ' + (track.title || ''))}" target="_blank" rel="noopener noreferrer">Search</a>
           </div>
         </div>
       `).join('');
@@ -2262,7 +2265,7 @@ body {
 
       const artist = activeQuarterlyYoutubeAlbum.artist || '';
       const album = activeQuarterlyYoutubeAlbum.album || '';
-      const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + album + ' playlist')}`;
+      const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + album)}`;
 
       if (isYoutubeQuotaExceeded) {
         window.open(searchUrl, '_blank');

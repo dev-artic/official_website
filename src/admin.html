@@ -2016,6 +2016,8 @@ path_depth: "../"
             tracks.forEach(track => {
               // Only check resolved tracks
               if (!track.youtubeId) return;
+              // Skip if explicitly confirmed
+              if (track.confirmed) return;
 
               const warnings = [];
               const videoTitle = track.videoTitle || '';
@@ -2114,8 +2116,9 @@ path_depth: "../"
                 ${warningsList}
               </ul>
             </div>
-            <div>
-              <button class="action-btn-sm" type="button" style="background:#e74c3c; border-color:#e74c3c; color:white;" onclick="focusAndEditTrack('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}')">Fix</button>
+            <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+              <button class="action-btn-sm" type="button" style="background:#e74c3c; border-color:#e74c3c; color:white; width:100%; margin:0;" onclick="focusAndEditTrack('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}')">Fix</button>
+              <button class="action-btn-sm" type="button" style="background:#2ecc71; border-color:#2ecc71; color:white; width:100%; margin:0;" onclick="confirmQuarterlyTrackAudio('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}', this)">Confirm</button>
             </div>
           </div>
         `;
@@ -2167,6 +2170,82 @@ path_depth: "../"
           }, 3000);
         }
       }, 100);
+    };
+
+    window.confirmQuarterlyTrackAudio = function(issueId, mediaKey, trackNumber, btnEl) {
+      if (!quarterlyAdminData || !quarterlyAdminData.archive || !quarterlyAdminData.archive.issues) return;
+
+      let foundIssue = null;
+      let foundAlbum = null;
+      let foundTrack = null;
+
+      for (const issue of quarterlyAdminData.archive.issues) {
+        if (String(issue.id) === String(issueId)) {
+          foundIssue = issue;
+          for (const tier of (issue.tiers || [])) {
+            for (const album of (tier.items || [])) {
+              const albumKey = makeQuarterlyMediaKey(album.album, album.artist);
+              if (albumKey === mediaKey) {
+                foundAlbum = album;
+                foundTrack = (album.highlightedTracks || []).find(t => String(t.number || '') === String(trackNumber));
+                break;
+              }
+            }
+            if (foundTrack) break;
+          }
+        }
+        if (foundTrack) break;
+      }
+
+      if (!foundAlbum || !foundTrack) {
+        alert('Track not found in loaded data.');
+        return;
+      }
+
+      if (btnEl) btnEl.disabled = true;
+
+      postQuarterlyAdmin({
+        action: 'save_youtube_track_override',
+        album: foundAlbum.album,
+        artist: foundAlbum.artist,
+        number: foundTrack.number,
+        title: foundTrack.title,
+        youtubeId: foundTrack.youtubeId,
+        videoTitle: foundTrack.videoTitle || '',
+        channelTitle: foundTrack.channelTitle || '',
+        playlistId: foundTrack.playlistId || '',
+        playlistTitle: foundTrack.playlistTitle || '',
+        confidence: foundTrack.confidence || 'confirmed',
+        confirmed: true
+      })
+      .then(() => {
+        foundTrack.confirmed = true;
+        alert(`Successfully confirmed track "${foundTrack.title}". It will not be flagged as suspicious in future scans.`);
+        
+        // Remove this item from the scan results list on UI
+        const warningContainer = btnEl.closest('.quarterly-scan-warning');
+        if (warningContainer) {
+          warningContainer.style.opacity = '0.4';
+          warningContainer.style.pointerEvents = 'none';
+          btnEl.style.display = 'none';
+        }
+
+        // Quietly fetch summary stats in background to keep metrics in sync
+        fetch(getQuarterlyAdminUrl(), {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.diagnostics && data.diagnostics.summary) {
+            renderQuarterlySummary(data.diagnostics.summary);
+          }
+        })
+        .catch(err => console.warn('Failed to update summary after confirm:', err));
+      })
+      .catch(err => {
+        if (btnEl) btnEl.disabled = false;
+        alert(err.message);
+      });
     };
 
     let activeQuarterlyAlbum = null;

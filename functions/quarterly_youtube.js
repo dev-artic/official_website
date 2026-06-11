@@ -154,6 +154,7 @@ function applyQuarterlyYoutubeTracks(archive, youtubeTracks = {}) {
             channelTitle: override?.channelTitle || "",
             playlistId: override?.playlistId || "",
             playlistTitle: override?.playlistTitle || "",
+            confirmed: override?.confirmed || false,
             audioStatus: track.youtubeId || override?.youtubeId ? "resolved" : "unresolved",
           };
         });
@@ -586,6 +587,7 @@ async function saveYoutubeTrackOverride({ db, fieldValue, payload }) {
     playlistTitle: String(payload.playlistTitle || "").trim(),
     status: "resolved",
     confidence: String(payload.confidence || "manual").trim(),
+    confirmed: payload.confirmed === true || payload.confirmed === "true",
     updatedAt: fieldValue.serverTimestamp(),
     updatedBy: "admin-dashboard",
   };

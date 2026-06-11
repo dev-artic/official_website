@@ -1879,7 +1879,7 @@ path_depth: "../"
           </div>
           <div class="quarterly-candidate-list" id="quarterly-youtube-track-list"></div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button class="action-btn-sm" type="button" onclick="refreshQuarterlyYoutubeCandidates()">Find YouTube Album Playlist</button>
+            <button class="action-btn-sm" id="quarterly-youtube-find-btn" type="button" onclick="refreshQuarterlyYoutubeCandidates()">Find YouTube Album Playlist</button>
           </div>
           <div class="quarterly-candidate-list" id="quarterly-youtube-candidates"></div>
         </div>
@@ -1943,6 +1943,21 @@ path_depth: "../"
     let activeQuarterlyAlbum = null;
     let activeQuarterlyMetadataAlbum = null;
     let activeQuarterlyYoutubeAlbum = null;
+    let isYoutubeQuotaExceeded = false;
+
+    function updateYoutubeFindButtonState() {
+      const btn = document.getElementById('quarterly-youtube-find-btn');
+      if (!btn) return;
+      if (isYoutubeQuotaExceeded) {
+        btn.style.backgroundColor = '#dc3545';
+        btn.style.color = '#ffffff';
+        btn.textContent = 'Search YouTube Manually (Quota Exceeded)';
+      } else {
+        btn.style.backgroundColor = '';
+        btn.style.color = '';
+        btn.textContent = 'Find YouTube Album Playlist';
+      }
+    }
 
     function getQuarterlyAlbumEditorFields() {
       return {
@@ -2192,11 +2207,22 @@ path_depth: "../"
         : 'YouTube API key is not configured; manual override can still be saved if a YouTube ID is known.';
       document.getElementById('quarterly-youtube-candidates').innerHTML = '';
       renderQuarterlyYoutubeTrackList();
+      updateYoutubeFindButtonState();
       editor.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
     window.refreshQuarterlyYoutubeCandidates = function() {
       if (!activeQuarterlyYoutubeAlbum) return;
+
+      const artist = activeQuarterlyYoutubeAlbum.artist || '';
+      const album = activeQuarterlyYoutubeAlbum.album || '';
+      const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + album + ' playlist')}`;
+
+      if (isYoutubeQuotaExceeded) {
+        window.open(searchUrl, '_blank');
+        return;
+      }
+
       const list = document.getElementById('quarterly-youtube-candidates');
       const status = document.getElementById('quarterly-youtube-editor-status');
       list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Searching YouTube album playlists...</p>';
@@ -2232,6 +2258,13 @@ path_depth: "../"
       .catch(err => {
         status.textContent = 'Resolve failed.';
         list.innerHTML = `<p class="quarterly-small-muted" style="margin:0;">${escapeHtml(err.message)}</p>`;
+
+        const errMsg = (err.message || '').toLowerCase();
+        if (errMsg.includes('quota') || errMsg.includes('limit') || errMsg.includes('exceed') || err.status === 403) {
+          isYoutubeQuotaExceeded = true;
+          updateYoutubeFindButtonState();
+          window.open(searchUrl, '_blank');
+        }
       });
     };
 

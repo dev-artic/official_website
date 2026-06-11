@@ -2266,6 +2266,8 @@ path_depth: "../"
         if (errMsg.includes('quota') || errMsg.includes('limit') || errMsg.includes('exceed') || err.status === 403) {
           isYoutubeQuotaExceeded = true;
           updateYoutubeFindButtonState();
+          status.textContent = 'YouTube API Quota Exceeded. Use the search buttons instead.';
+          list.innerHTML = `<p class="quarterly-small-muted" style="margin:0; color:#dc3545; font-weight:700;">[할당량 초과] 각 트랙 우측의 [Search] 버튼이나 상단의 [Search YouTube Manually] 버튼을 클릭해 수동으로 검색해 주세요.</p>`;
           window.open(searchUrl, '_blank');
         }
       });
@@ -2463,7 +2465,7 @@ path_depth: "../"
         let msg = '';
         const hasQuotaError = data.errors && data.errors.length && data.errors.some(err => /quota|limit/i.test(err));
         if (hasQuotaError) {
-          msg += `[주의] YouTube API 호출 횟수 제한(Quota Exceeded)에 도달하여 곡 매칭이 완료되지 못했습니다. 잠시 후 혹은 다음 날 다시 시도해 주세요.`;
+          msg += `[주의] YouTube API 호출 횟수 제한(Quota Exceeded)에 도달하여 곡 매칭이 완료되지 못했습니다. 각 트랙 우측의 [Search] 버튼이나 상단의 [Search YouTube Manually] 버튼을 클릭해 수동으로 검색 및 입력해 주세요.`;
           if (data.resolvedCount > 0) {
             msg += `\n\n(제한 도달 전까지 총 ${data.resolvedCount}개의 트랙은 자동으로 매칭 및 저장되었습니다.)`;
           }

@@ -653,6 +653,7 @@
   .acha-highlighted-track > span {
     padding-top: 0;
     line-height: 1.35;
+    white-space: nowrap;
   }
 
   .acha-track-module {
@@ -3133,7 +3134,7 @@
     const encodedTracks = escapeHtml(JSON.stringify(tracks));
     return `
       <div class="acha-field acha-highlighted-track" data-acha-tracks="${encodedTracks}">
-        <span>Highlighted <br>track</span>
+        <span>Highlighted track</span>
         <div class="acha-track-module">
           <div class="acha-track-list">
             ${tracks.map((track, index) => `

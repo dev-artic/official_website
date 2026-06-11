@@ -2031,6 +2031,59 @@ body {
 
       // Helper to normalize strings for comparison (remove spaces, special chars, keep alphanumeric + korean)
       const normalize = str => String(str || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+      const collapse = str => str.replace(/(.)\1+/g, '$1');
+
+      // Enhanced Artist Matcher to prevent false positives from spelling variants or combined names
+      const matchArtist = (channelTitle, artistName) => {
+        const normChannel = normalize(channelTitle);
+        const normArtist = normalize(artistName);
+        if (!normChannel || !normArtist) return false;
+
+        // Direct inclusion
+        if (normChannel.includes(normArtist) || normArtist.includes(normChannel)) return true;
+
+        // Split artist name to handle "English (Korean)" or "A & B"
+        const parts = artistName.split(/[\s()&+,·•&]/).map(normalize).filter(p => p.length >= 2);
+        for (const part of parts) {
+          if (normChannel.includes(part) || part.includes(normChannel)) return true;
+        }
+
+        // Handle stylistic repeated characters (e.g., KiiKii vs KiiiKiii)
+        const collapsedChannel = collapse(normChannel);
+        const collapsedArtist = collapse(normArtist);
+        if (collapsedChannel.includes(collapsedArtist) || collapsedArtist.includes(collapsedChannel)) return true;
+
+        for (const part of parts) {
+          const collapsedPart = collapse(part);
+          if (collapsedChannel.includes(collapsedPart) || collapsedPart.includes(collapsedChannel)) return true;
+        }
+
+        return false;
+      };
+
+      // Enhanced Title Matcher to prevent false positives from romanizations or translations in parentheses
+      const matchTitle = (videoTitle, trackTitle) => {
+        const normVideo = normalize(videoTitle);
+        const normTrack = normalize(trackTitle);
+        if (!normVideo || !normTrack) return false;
+
+        // Direct inclusion
+        if (normVideo.includes(normTrack)) return true;
+
+        // Split by parentheses/brackets to match main title or alternative title individually
+        // e.g. "멍냥 (MUNGNYANG)" -> matches "멍냥" or "MUNGNYANG"
+        const parts = trackTitle.split(/[()\[\]]/).map(p => p.trim()).filter(p => p.length >= 2);
+        if (parts.length > 1) {
+          for (const part of parts) {
+            // Skip common auxiliary words
+            if (/^(prod|feat|featuring|remix|instrumental|inst|vocals?|with)$/i.test(part)) continue;
+            const normPart = normalize(part);
+            if (normPart.length >= 2 && normVideo.includes(normPart)) return true;
+          }
+        }
+
+        return false;
+      };
 
       // Label/uploader validation keywords
       const officialKeywords = [
@@ -2073,13 +2126,10 @@ body {
               if (!videoTitle && !channelTitle) {
                 warnings.push('Resolved in Firestore but missing video title/channel metadata');
               } else {
-                const normTrackTitle = normalize(trackTitle);
-                const normVideoTitle = normalize(videoTitle);
-                const normArtist = normalize(artistName);
                 const normChannel = normalize(channelTitle);
 
                 // 2. Title mismatch
-                if (normTrackTitle && !normVideoTitle.includes(normTrackTitle)) {
+                if (!matchTitle(videoTitle, trackTitle)) {
                   warnings.push(`Title mismatch (track title "${trackTitle}" not found in video title)`);
                 }
 
@@ -2092,8 +2142,8 @@ body {
 
                 // 4. Suspicious uploader
                 const hasOfficialKeyword = officialKeywords.some(kw => normChannel.includes(kw));
-                const hasArtistName = normArtist && normChannel.includes(normArtist);
-                if (!hasOfficialKeyword && !hasArtistName) {
+                const hasArtistMatch = matchArtist(channelTitle, artistName);
+                if (!hasOfficialKeyword && !hasArtistMatch) {
                   warnings.push(`Suspicious uploader: "${channelTitle}" (unverified channel)`);
                 }
               }

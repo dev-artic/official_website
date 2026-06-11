@@ -636,6 +636,49 @@ async function handleQuarterlyAdminAction({ body, token, db, fieldValue, youtube
       }
     }
 
+    if (previousMediaKey && nextMediaKey && previousMediaKey !== nextMediaKey) {
+      try {
+        const trackOverridesRef = db.collection("quarterly_youtube_track_overrides");
+        const snapshot = await trackOverridesRef
+          .where("__name__", ">=", previousMediaKey + "::")
+          .where("__name__", "<=", previousMediaKey + "::\uf8ff")
+          .get();
+
+        const batch = db.batch();
+        let migratedCount = 0;
+
+        snapshot.forEach((doc) => {
+          const oldTrackKey = doc.id;
+          const data = doc.data();
+          const suffix = oldTrackKey.substring(previousMediaKey.length);
+          const newTrackKey = nextMediaKey + suffix;
+
+          const newDocRef = trackOverridesRef.doc(newTrackKey);
+          const oldDocRef = trackOverridesRef.doc(oldTrackKey);
+
+          batch.set(newDocRef, {
+            ...data,
+            trackKey: newTrackKey,
+            album: nextAlbum,
+            artist: nextArtist,
+            updatedAt: fieldValue.serverTimestamp(),
+            updatedBy: "admin-dashboard-migration",
+          }, { merge: true });
+
+          batch.delete(oldDocRef);
+          migratedCount++;
+        });
+
+        if (migratedCount > 0) {
+          await batch.commit();
+          response.audioTracksMigrated = true;
+          response.audioTracksMigratedCount = migratedCount;
+        }
+      } catch (err) {
+        response.audioMigrateWarning = err.message;
+      }
+    }
+
     return response;
   }
 

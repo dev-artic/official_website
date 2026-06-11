@@ -2050,9 +2050,17 @@ path_depth: "../"
         preserveCover: true
       })
       .then(data => {
-        const suffix = data.coverPreserveWarning
-          ? ` Cover preservation warning: ${data.coverPreserveWarning}`
-          : (data.coverPreserved ? ' Cover preserved.' : '');
+        let suffix = '';
+        if (data.coverPreserveWarning) {
+          suffix += ` Cover preservation warning: ${data.coverPreserveWarning}`;
+        } else if (data.coverPreserved) {
+          suffix += ' Cover preserved.';
+        }
+        if (data.audioMigrateWarning) {
+          suffix += ` Audio migration warning: ${data.audioMigrateWarning}`;
+        } else if (data.audioTracksMigrated) {
+          suffix += ` ${data.audioTracksMigratedCount} audio track(s) migrated.`;
+        }
         alert(`Album metadata saved to Notion.${suffix}`);
         quarterlyLoaded = false;
         loadQuarterlyAdminData();

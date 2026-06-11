@@ -848,6 +848,14 @@ body {
     transition: width 0.35s linear;
   }
 
+  .acha-play-bar-fill.is-seeking {
+    transition: width 0.44s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .acha-play-bar-fill.is-resetting {
+    transition: width 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   .acha-play-controls {
     display: flex;
     align-items: center;
@@ -2488,7 +2496,11 @@ body {
     const current = module.querySelector('[data-acha-play-current]');
     const fill = module.querySelector('[data-acha-play-fill]');
     if (current) current.textContent = '0:00';
-    if (fill) fill.style.width = '0%';
+    if (fill) {
+      fill.classList.add('is-resetting');
+      fill.style.width = '0%';
+      setTimeout(() => fill.classList.remove('is-resetting'), 450);
+    }
   }
 
   function startAchaMediaProgress(module, getCurrent, getDuration) {
@@ -2773,7 +2785,11 @@ body {
       const rect = progressBar.getBoundingClientRect();
       const ratio = rect.width ? Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) : 0;
       const fill = module?.querySelector('[data-acha-play-fill]');
-      if (fill) fill.style.width = `${ratio * 100}%`;
+      if (fill) {
+        fill.classList.add('is-seeking');
+        fill.style.width = `${ratio * 100}%`;
+        setTimeout(() => fill.classList.remove('is-seeking'), 500);
+      }
       if (activeAchaAudio && activeAchaTrackModule === module && activeAchaAudio.duration) {
         activeAchaAudio.currentTime = activeAchaAudio.duration * ratio;
       } else if (activeAchaYoutubeModule === module && activeAchaYoutubePlayer?.getDuration && activeAchaYoutubePlayer?.seekTo) {

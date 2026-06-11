@@ -2228,8 +2228,6 @@ body {
         list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No highlighted tracks found for this album.</p>';
         return;
       }
-      const artist = activeQuarterlyYoutubeAlbum?.artist || '';
-      const album = activeQuarterlyYoutubeAlbum?.album || '';
       list.innerHTML = tracks.map(track => `
         <div class="quarterly-candidate quarterly-youtube-candidate">
           <div>
@@ -2240,7 +2238,6 @@ body {
           <div class="quarterly-youtube-manual">
             <input type="text" id="quarterly-youtube-manual-${escapeHtml(track.number || '')}" placeholder="YouTube URL or video ID" value="${escapeHtml(track.youtubeId || '')}" aria-label="Manual YouTube URL or video ID for ${escapeHtml(track.number || '')} ${escapeHtml(track.title || '')}">
             <button class="action-btn-sm" type="button" onclick="saveQuarterlyYoutubeManual('${encodeURIComponent(track.number || '')}')">Save Manual</button>
-            <a class="action-btn-sm" href="https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + album + ' ' + (track.title || ''))}" target="_blank" rel="noopener noreferrer">Search</a>
           </div>
         </div>
       `).join('');
@@ -2265,10 +2262,23 @@ body {
 
       const artist = activeQuarterlyYoutubeAlbum.artist || '';
       const album = activeQuarterlyYoutubeAlbum.album || '';
-      const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + album)}`;
+      const tracks = activeQuarterlyYoutubeAlbum.highlightedTracks || [];
+
+      const openManualSearchTabs = () => {
+        if (tracks.length > 0) {
+          tracks.forEach(track => {
+            const query = `${artist} ${album} ${track.title || ''}`.trim();
+            const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            window.open(searchUrl, '_blank');
+          });
+        } else {
+          const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + album)}`;
+          window.open(searchUrl, '_blank');
+        }
+      };
 
       if (isYoutubeQuotaExceeded) {
-        window.open(searchUrl, '_blank');
+        openManualSearchTabs();
         return;
       }
 
@@ -2312,9 +2322,9 @@ body {
         if (errMsg.includes('quota') || errMsg.includes('limit') || errMsg.includes('exceed') || err.status === 403) {
           isYoutubeQuotaExceeded = true;
           updateYoutubeFindButtonState();
-          status.textContent = 'YouTube API Quota Exceeded. Use the search buttons instead.';
-          list.innerHTML = `<p class="quarterly-small-muted" style="margin:0; color:#dc3545; font-weight:700;">[할당량 초과] 각 트랙 우측의 [Search] 버튼이나 상단의 [Search YouTube Manually] 버튼을 클릭해 수동으로 검색해 주세요.</p>`;
-          window.open(searchUrl, '_blank');
+          status.textContent = 'YouTube API Quota Exceeded. Use manual search instead.';
+          list.innerHTML = `<p class="quarterly-small-muted" style="margin:0; color:#dc3545; font-weight:700;">[할당량 초과] 위의 [Search YouTube Manually] 버튼을 클릭하면 모든 추천곡의 유튜브 검색창이 새 탭으로 열립니다.</p>`;
+          openManualSearchTabs();
         }
       });
     };

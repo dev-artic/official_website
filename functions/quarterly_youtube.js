@@ -139,14 +139,71 @@ async function readQuarterlyYoutubeTrackOverrides(db) {
   return { source: "Firestore YouTube track overrides", updatedAt, tracks };
 }
 
+function findFallbackYoutubeTrack(track, youtubeTracks) {
+  const normArtist = normalize(track.artist);
+  const normAlbum = normalize(track.album);
+  const normTitle = normalize(track.title);
+  const normNumber = padTrackNumber(track.number);
+
+  for (const key of Object.keys(youtubeTracks)) {
+    const override = youtubeTracks[key];
+    if (!override) continue;
+
+    const overrideNumber = padTrackNumber(override.number);
+    if (overrideNumber !== normNumber) continue;
+
+    const overrideArtist = normalize(override.artist);
+    const overrideAlbum = normalize(override.album);
+    const overrideTitle = normalize(override.title);
+
+    const artistMatches = overrideArtist === normArtist;
+    const albumMatches = overrideAlbum === normAlbum;
+    const titleMatches = overrideTitle === normTitle;
+
+    // Match if at least two of the key strings (artist, album, title) match
+    const matchCount = (artistMatches ? 1 : 0) + (albumMatches ? 1 : 0) + (titleMatches ? 1 : 0);
+    if (matchCount >= 2) {
+      return override;
+    }
+  }
+  return null;
+}
+
 function applyQuarterlyYoutubeTracks(archive, youtubeTracks = {}) {
   const clone = JSON.parse(JSON.stringify(archive || {}));
+  
+  // Build a secondary lookup index for stable rowBlockId + track number matching
+  const overrideList = Object.values(youtubeTracks).filter(Boolean);
+  const rowBlockMap = new Map();
+  overrideList.forEach(override => {
+    if (override.rowBlockId && override.number) {
+      const mapKey = `${override.rowBlockId}::${padTrackNumber(override.number)}`;
+      rowBlockMap.set(mapKey, override);
+    }
+  });
+
   (clone.issues || []).forEach((issue) => {
     (issue.tiers || []).forEach((tier) => {
       (tier.items || []).forEach((item) => {
+        const rowBlockId = item._source?.rowBlockId || "";
         const parsed = parseHighlightedTracks(item.tracks, item.album, item.artist);
         item.highlightedTracks = parsed.map((track) => {
-          const override = youtubeTracks[track.trackKey] || null;
+          const trackNumber = padTrackNumber(track.number);
+          
+          // 1. Try exact trackKey match
+          let override = youtubeTracks[track.trackKey] || null;
+
+          // 2. If not found, try stable rowBlockId + track number match
+          if (!override && rowBlockId) {
+            const mapKey = `${rowBlockId}::${trackNumber}`;
+            override = rowBlockMap.get(mapKey) || null;
+          }
+
+          // 3. If still not found, try the fallback matching heuristic
+          if (!override) {
+            override = findFallbackYoutubeTrack(track, youtubeTracks);
+          }
+
           return {
             ...track,
             youtubeId: track.youtubeId || override?.youtubeId || "",
@@ -588,6 +645,7 @@ async function saveYoutubeTrackOverride({ db, fieldValue, payload }) {
     status: "resolved",
     confidence: String(payload.confidence || "manual").trim(),
     confirmed: payload.confirmed === true || payload.confirmed === "true",
+    rowBlockId: String(payload.rowBlockId || "").trim(),
     updatedAt: fieldValue.serverTimestamp(),
     updatedBy: "admin-dashboard",
   };

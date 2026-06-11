@@ -786,6 +786,7 @@ async function handleQuarterlyAdminAction({ body, token, db, fieldValue, youtube
               fieldValue,
               payload: {
                 ...candidate,
+                rowBlockId: album._source?.rowBlockId || "",
                 updatedBy: "admin-batch-auto-resolve",
               },
             });

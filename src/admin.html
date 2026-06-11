@@ -2216,7 +2216,8 @@ path_depth: "../"
         playlistId: foundTrack.playlistId || '',
         playlistTitle: foundTrack.playlistTitle || '',
         confidence: foundTrack.confidence || 'confirmed',
-        confirmed: true
+        confirmed: true,
+        rowBlockId: foundAlbum._source?.rowBlockId || ''
       })
       .then(() => {
         foundTrack.confirmed = true;
@@ -2671,7 +2672,8 @@ path_depth: "../"
       if (!confirm(`Use this YouTube audio for ${candidate.number} ${candidate.title}?\n\n${candidate.videoTitle || candidate.youtubeId}`)) return;
       postQuarterlyAdmin({
         action: 'save_youtube_track_override',
-        ...candidate
+        ...candidate,
+        rowBlockId: activeQuarterlyYoutubeAlbum?._source?.rowBlockId || ''
       })
       .then(() => {
         updateLocalTrackAudio(candidate.number, candidate.youtubeId, candidate.videoTitle, candidate.channelTitle);
@@ -2698,7 +2700,8 @@ path_depth: "../"
         number: track.number,
         title: track.title,
         youtubeId,
-        confidence: 'manual'
+        confidence: 'manual',
+        rowBlockId: activeQuarterlyYoutubeAlbum._source?.rowBlockId || ''
       })
       .then(() => {
         updateLocalTrackAudio(track.number, youtubeId, '', '');

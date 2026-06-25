@@ -756,10 +756,36 @@ body {
     border-top-color: var(--border-color);
   }
 
+  .acha-track-module.has-youtube-player .acha-track-player.is-open {
+    max-height: 640px;
+  }
+
   .acha-play-widget {
     display: flex;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .acha-youtube-player-shell {
+    display: none;
+    width: 100%;
+    min-height: 200px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .acha-track-module.has-youtube-player .acha-youtube-player-shell {
+    display: block;
+  }
+
+  .acha-youtube-player-shell > div,
+  .acha-youtube-player-shell iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 200px;
+    border: 0;
   }
 
   .acha-play-status-row {
@@ -1838,9 +1864,7 @@ body {
   let activeAchaAudio = null;
   let activeAchaYoutubePlayer = null;
   let activeAchaYoutubeModule = null;
-  let achaYoutubeReadyPromise = null;
-  let achaYoutubeResolve = null;
-  let achaYoutubeReject = null;
+  let achaYoutubeApiPromise = null;
   let activeAchaProgressTimer = 0;
 
   function escapeHtml(value) {
@@ -2521,65 +2545,16 @@ body {
     }, 160);
   }
 
-  function ensureAchaYoutubePlayer() {
-    if (activeAchaYoutubePlayer) return Promise.resolve(activeAchaYoutubePlayer);
-    if (achaYoutubeReadyPromise) return achaYoutubeReadyPromise;
+  function ensureAchaYoutubeApi() {
+    if (window.YT?.Player) return Promise.resolve();
+    if (achaYoutubeApiPromise) return achaYoutubeApiPromise;
 
-    achaYoutubeReadyPromise = new Promise((resolve, reject) => {
-      achaYoutubeResolve = resolve;
-      achaYoutubeReject = reject;
-      const bootPlayer = () => {
-        if (!window.YT?.Player) {
-          reject(new Error('YouTube IFrame API unavailable.'));
-          return;
-        }
-        let holder = document.getElementById('acha-youtube-hidden-player');
-        if (!holder) {
-          holder = document.createElement('div');
-          holder.id = 'acha-youtube-hidden-player';
-          holder.style.cssText = 'position:fixed;bottom:-200px;right:-200px;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-9999;';
-          document.body.appendChild(holder);
-        }
-        activeAchaYoutubePlayer = new window.YT.Player(holder.id, {
-          height: '1',
-          width: '1',
-          playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
-          events: {
-            onReady: () => resolve(activeAchaYoutubePlayer),
-            onStateChange: (event) => {
-              const module = activeAchaYoutubeModule;
-              if (!module || !window.YT?.PlayerState) return;
-              if (event.data === window.YT.PlayerState.PLAYING) {
-                setAchaPlayIcon(module, true);
-                setAchaPlayerStatus(module, 'Now Playing');
-                startAchaMediaProgress(
-                  module,
-                  () => activeAchaYoutubePlayer?.getCurrentTime?.() || 0,
-                  () => activeAchaYoutubePlayer?.getDuration?.() || 0
-                );
-              } else if (event.data === window.YT.PlayerState.PAUSED) {
-                setAchaPlayIcon(module, false);
-                setAchaPlayerStatus(module, 'Paused');
-              } else if (event.data === window.YT.PlayerState.ENDED) {
-                setAchaPlayIcon(module, false);
-                setAchaPlayerStatus(module, 'Ready');
-                resetAchaPlayerProgress(module);
-                activeAchaYoutubeModule = null;
-              }
-            }
-          }
-        });
-      };
-
-      if (window.YT?.Player) {
-        bootPlayer();
-        return;
-      }
-
+    achaYoutubeApiPromise = new Promise((resolve, reject) => {
       const previousReady = window.onYouTubeIframeAPIReady;
       window.onYouTubeIframeAPIReady = () => {
         if (typeof previousReady === 'function') previousReady();
-        bootPlayer();
+        if (window.YT?.Player) resolve();
+        else reject(new Error('YouTube IFrame API unavailable.'));
       };
 
       if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
@@ -2589,12 +2564,77 @@ body {
         document.head.appendChild(script);
       }
     }).catch((err) => {
-      achaYoutubeReadyPromise = null;
-      if (achaYoutubeReject) achaYoutubeReject(err);
+      achaYoutubeApiPromise = null;
       throw err;
     });
 
-    return achaYoutubeReadyPromise;
+    return achaYoutubeApiPromise;
+  }
+
+  function destroyAchaYoutubePlayer() {
+    if (activeAchaYoutubePlayer && typeof activeAchaYoutubePlayer.destroy === 'function') {
+      try { activeAchaYoutubePlayer.destroy(); } catch (err) {}
+    }
+    activeAchaYoutubePlayer = null;
+  }
+
+  async function createAchaYoutubePlayer(module, videoId) {
+    await ensureAchaYoutubeApi();
+    destroyAchaYoutubePlayer();
+
+    const shell = module.querySelector('[data-acha-youtube-shell]');
+    if (!shell) throw new Error('YouTube player host unavailable.');
+    shell.innerHTML = '';
+    const holder = document.createElement('div');
+    holder.id = `acha-youtube-player-${Math.random().toString(36).slice(2)}`;
+    shell.appendChild(holder);
+
+    return new Promise((resolve, reject) => {
+      activeAchaYoutubePlayer = new window.YT.Player(holder.id, {
+        height: '360',
+        width: '640',
+        videoId,
+        playerVars: { autoplay: 0, controls: 1, rel: 0, playsinline: 1 },
+        events: {
+          onReady: (event) => {
+            resolve(activeAchaYoutubePlayer);
+            event.target.playVideo();
+          },
+          onStateChange: (event) => {
+            const activeModule = activeAchaYoutubeModule;
+            if (!activeModule || !window.YT?.PlayerState) return;
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              setAchaPlayIcon(activeModule, true);
+              setAchaPlayerStatus(activeModule, 'Now Playing');
+              startAchaMediaProgress(
+                activeModule,
+                () => activeAchaYoutubePlayer?.getCurrentTime?.() || 0,
+                () => activeAchaYoutubePlayer?.getDuration?.() || 0
+              );
+            } else if (event.data === window.YT.PlayerState.PAUSED) {
+              setAchaPlayIcon(activeModule, false);
+              setAchaPlayerStatus(activeModule, 'Paused');
+            } else if (event.data === window.YT.PlayerState.ENDED) {
+              setAchaPlayIcon(activeModule, false);
+              setAchaPlayerStatus(activeModule, 'Ready');
+              resetAchaPlayerProgress(activeModule);
+              activeAchaYoutubeModule = null;
+            }
+          },
+          onError: () => {
+            setAchaPlayIcon(module, false);
+            setAchaPlayerStatus(module, 'Playback unavailable');
+            activeAchaYoutubeModule = null;
+            reject(new Error('YouTube playback failed.'));
+          },
+          onAutoplayBlocked: () => {
+            setAchaPlayIcon(module, false);
+            setAchaPlayerStatus(module, 'Press play to start');
+            activeAchaYoutubeModule = null;
+          }
+        }
+      });
+    });
   }
 
   function updateAchaTrackUI(module, index, direction = 'next') {
@@ -2617,6 +2657,7 @@ body {
       if (num) num.textContent = track.number || padTrackNumber(index + 1);
       if (title) title.textContent = track.title || '';
       if (duration) duration.textContent = track.duration || '0:00';
+      module.classList.toggle('has-youtube-player', Boolean(track.youtubeId));
       resetAchaPlayerProgress(module);
     };
 
@@ -2680,12 +2721,9 @@ body {
 
     if (track?.youtubeId) {
       setAchaPlayerStatus(module, 'Loading');
+      activeAchaYoutubeModule = module;
       try {
-        const player = await ensureAchaYoutubePlayer();
-        activeAchaYoutubeModule = module;
-        if (typeof player.loadVideoById === 'function') {
-          player.loadVideoById(track.youtubeId);
-        }
+        await createAchaYoutubePlayer(module, track.youtubeId);
       } catch (err) {
         activeAchaYoutubeModule = null;
         setAchaPlayIcon(module, false);
@@ -3188,6 +3226,7 @@ body {
           </div>
           <div class="acha-track-player" id="${playerId}" aria-hidden="true">
             <div class="acha-play-widget">
+              <div class="acha-youtube-player-shell" data-acha-youtube-shell></div>
               <div class="acha-play-status-row">
                 <span class="acha-play-track-status" data-acha-play-status>Ready</span>
               </div>

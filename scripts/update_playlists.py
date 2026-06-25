@@ -76,6 +76,7 @@ def fetch_playlist_items(playlist_id: str) -> list[dict]:
             items.append({
                 "videoId":     vid,
                 "title":       title,
+                "description": snippet.get("description", ""),
                 "publishedAt": pub_str,
                 "publishedAtRaw": pub_raw
             })
@@ -101,10 +102,14 @@ def build_episode_html(item: dict, ep_label: str) -> str:
     vid   = item["videoId"]
     title = item["title"]
     date  = item["publishedAt"]
+    description = item.get("description", "")
 
-    # 출연자 추출: "게스트 | 제목" 패턴이면 앞부분, 없으면 ep_label 사용
+    # YouTube 설명의 Guest 필드를 우선 사용하고, 없을 때만 제목을 보조 정보로 사용.
     guest = ep_label
-    if " | " in title:
+    guest_match = re.search(r"(?im)^\s*Guest\s*\|\s*(.+?)\s*$", description)
+    if guest_match:
+        guest = guest_match.group(1).strip()
+    elif " | " in title:
         candidate = title.split(" | ")[0].strip()
         if len(candidate) > 20:
             guest = candidate[:20] + "…"

@@ -258,8 +258,9 @@ graph TD
     curl -I "https://imageproxy-4n2xy6gsxa-uc.a.run.app?url=https%3A%2F%2Fimage.bugsm.co.kr%2Fartist%2Fimages%2F1000%2F201436%2F20143604.jpg"
     ```
 * **C. 유튜브 플레이리스트 갱신 자동화 (GitHub Actions Workflow)**:
-  * 매주 월요일 오전 9시(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
+  * 매일 오전 9시 15분(KST) 크론 트리거 또는 수동 작동을 통해 `.github/workflows/update-playlists.yml`가 실행됩니다.
   * 워크플로우가 자동으로 `scripts/update_playlists.py`를 실행해 유튜브 API로 최신 비디오들을 가져와 `src/projects/[slug]/left.html` 및 `right.html` 소스를 갱신하고, 즉시 `npm run build`를 기동하여 최종 HTML들을 다시 빌드한 뒤 원격지에 자동 커밋 및 푸시를 적용합니다.
+  * 에피소드 출연자명은 YouTube 영상 설명의 `Guest | 출연자명` 필드를 우선 사용하고, 해당 필드가 없을 때만 제목을 보조 정보로 사용합니다.
 
 ---
 

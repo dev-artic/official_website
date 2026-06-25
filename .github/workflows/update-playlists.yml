@@ -1,9 +1,9 @@
 name: Sync All YouTube Playlists
 
 on:
-  # 매주 월요일 KST 오전 9시 (UTC 00:00)
+  # 매일 KST 오전 9시 15분 (UTC 00:15)
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: '15 0 * * *'
 
   # 수동 즉시 실행 (GitHub Actions → Run workflow)
   workflow_dispatch:

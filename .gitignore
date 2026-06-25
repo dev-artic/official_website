@@ -5,6 +5,7 @@ serviceAccountKey.json
 functions/.env
 functions/.env.local
 functions/.secret.local
+functions/data/quarterly_contents_cache.json
 
 scratch/
 scratch

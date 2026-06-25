@@ -6,6 +6,7 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const ARCHIVE_PATH = path.join(ROOT_DIR, 'scratch', 'quarterly_contents_snapshot.json');
 const NOW_ARTIC_PATH = path.join(ROOT_DIR, 'scratch', 'now_artic_snapshot.json');
 const FUNCTIONS_NOW_ARTIC_PATH = path.join(ROOT_DIR, 'functions', 'data', 'quarterly_now_artic.json');
+const NOW_ARTIC_IMAGE_DIR = path.join(ROOT_DIR, 'images', 'quarterly', 'now-artic');
 const INSTAGRAM_REELS_URL = 'https://www.instagram.com/artic.live/reels/';
 const KEYWORDS = ['실시간', '오늘자', '어제자'];
 const MAX_REELS = Number(process.env.NOW_ARTIC_MAX_REELS || 36);
@@ -69,7 +70,37 @@ function compactCaption(caption) {
   return String(caption || '').replace(/\s+/g, ' ').trim();
 }
 
+function getInstagramShortcode(url) {
+  return String(url || '').match(/instagram\.com\/(?:[^/?#]+\/)?(?:p|reel|tv)\/([^/?#]+)/i)?.[1] || '';
+}
+
+function getInstagramEmbedUrl(url) {
+  const match = String(url || '').match(/instagram\.com\/(?:[^/?#]+\/)?(p|reel|tv)\/([^/?#]+)/i);
+  if (!match) return '';
+  return `https://www.instagram.com/${match[1].toLowerCase()}/${match[2]}/embed/`;
+}
+
+async function downloadPreviewImage(imageUrl, shortcode) {
+  if (!imageUrl || !shortcode) return '';
+  const response = await fetch(imageUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+      Referer: 'https://www.instagram.com/',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Instagram preview returned ${response.status}`);
+  }
+
+  fs.mkdirSync(NOW_ARTIC_IMAGE_DIR, { recursive: true });
+  const fileName = `${shortcode}.jpg`;
+  fs.writeFileSync(path.join(NOW_ARTIC_IMAGE_DIR, fileName), Buffer.from(await response.arrayBuffer()));
+  return `/images/quarterly/now-artic/${fileName}`;
+}
+
 async function run() {
+  const existingPayload = loadJson(FUNCTIONS_NOW_ARTIC_PATH, { items: [] });
+  const existingItems = Array.isArray(existingPayload.items) ? existingPayload.items : [];
   const browser = await puppeteer.launch({
     headless: HEADLESS,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -121,14 +152,24 @@ async function run() {
       const caption = compactCaption(parsed.caption);
       const label = labelFromCaption(caption);
       if (!label) continue;
+      const shortcode = getInstagramShortcode(url);
+      const existingItem = existingItems.find((item) => getInstagramShortcode(item.url || item.embedUrl) === shortcode) || {};
+      let imageUrl = detail.imageUrl;
+      try {
+        imageUrl = await downloadPreviewImage(detail.imageUrl, shortcode) || detail.imageUrl;
+      } catch (err) {
+        console.warn(`Unable to preserve Instagram preview for ${shortcode}:`, err.message);
+      }
 
       items.push({
+        ...existingItem,
         label,
         caption: caption.slice(0, 260),
         fullCaption: caption,
         date: parsed.date,
         ...quarterFromDate(parsed.date),
-        imageUrl: detail.imageUrl,
+        imageUrl,
+        embedUrl: getInstagramEmbedUrl(url),
         url,
         source: 'Instagram',
       });

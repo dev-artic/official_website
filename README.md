@@ -319,7 +319,7 @@ graph TD
     ```bash
     node scripts/verify_quarterly_media_cache.js --archive=scratch/quarterly_live_contents.json --cache=functions/data/quarterly_media_cache.json --write=true
     ```
-  * **Now artic. 수집**: `instagram.com/artic.live` 공개 reels 목록은 캡션을 노출하지 않으므로, `node scripts/crawl_instagram_now_artic.js`는 각 reel 상세 페이지의 meta description을 열어 `실시간`, `오늘자`, `어제자` 캡션 후보를 읽습니다. Instagram이 headless/public session에 로그인 게이트를 걸면 링크 수집 결과가 0개일 수 있으므로, 안정 운영 전에는 Notion 수동 입력 또는 로그인된 승인 세션 기반 수집을 병행 검토합니다.
+  * **Now artic. 수집**: `instagram.com/artic.live` 공개 reels 목록은 캡션을 노출하지 않으므로, `node scripts/crawl_instagram_now_artic.js`는 각 reel 상세 페이지의 meta description을 열어 `실시간`, `오늘자`, `어제자` 캡션 후보를 읽습니다. Instagram CDN preview URL은 만료되므로 수집 시 `images/quarterly/now-artic/<shortcode>.jpg`로 내려받아 정적 자산으로 보존하고, 공개 모달 재생에는 원본 reel URL에서 생성한 Instagram embed URL을 사용합니다. Instagram이 headless/public session에 로그인 게이트를 걸면 링크 수집 결과가 0개일 수 있으므로, 안정 운영 전에는 Notion 수동 입력 또는 로그인된 승인 세션 기반 수집을 병행 검토합니다.
     ```bash
     NOW_ARTIC_REEL_URLS="https://www.instagram.com/artic.live/reel/..." node scripts/crawl_instagram_now_artic.js
     ```

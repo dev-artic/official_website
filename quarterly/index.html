@@ -856,13 +856,48 @@
     transform: translateX(4px);
   }
 
+  .quarterly-now-preview,
   .quarterly-now-list img,
   .quarterly-now-thumb {
     width: 100%;
     max-width: 220px;
     aspect-ratio: 1;
+  }
+
+  .quarterly-now-preview {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--bg-secondary);
+  }
+
+  .quarterly-now-list img,
+  .quarterly-now-thumb {
     object-fit: cover;
     background: var(--bg-secondary);
+  }
+
+  .quarterly-now-preview-play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.82);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.32);
+    transform: translate(-50%, -50%);
+  }
+
+  .quarterly-now-preview-play::after {
+    content: '';
+    position: absolute;
+    left: 53%;
+    top: 50%;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid #fff;
+    transform: translate(-50%, -50%);
   }
 
   .quarterly-now-trigger > span {
@@ -1391,6 +1426,7 @@
       min-height: 0;
     }
 
+    .quarterly-now-preview,
     .quarterly-now-list img,
     .quarterly-now-thumb {
       max-width: 140px;
@@ -2235,15 +2271,34 @@ body {
     ].filter(([, value]) => hasValue(value));
   }
 
+  function getNowInstagramMatch(item) {
+    return String(item.url || item.embedUrl || '').match(/instagram\.com\/(?:[^/?#]+\/)?(p|reel|tv)\/([^/?#]+)/i);
+  }
+
+  function getNowPreviewUrl(item) {
+    const match = getNowInstagramMatch(item);
+    if (match) return `/images/quarterly/now-artic/${match[2]}.jpg`;
+    return String(item.imageUrl || '');
+  }
+
+  function getNowEmbedUrl(item) {
+    if (item.embedUrl) return String(item.embedUrl);
+    const match = getNowInstagramMatch(item);
+    if (!match) return '';
+    return `https://www.instagram.com/${match[1].toLowerCase()}/${match[2]}/embed/`;
+  }
+
   function renderNowMedia(item) {
+    const embedUrl = getNowEmbedUrl(item);
+    const previewUrl = getNowPreviewUrl(item);
+    if (embedUrl) {
+      return `<iframe src="${escapeHtml(embedUrl)}" title="${escapeHtml(getNowCaption(item) || 'Now artic. media')}" loading="eager" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>`;
+    }
     if (item.videoUrl) {
-      return `<video src="${escapeHtml(item.videoUrl)}" poster="${escapeHtml(item.imageUrl || '')}" controls playsinline></video>`;
+      return `<video src="${escapeHtml(item.videoUrl)}" poster="${escapeHtml(previewUrl)}" controls playsinline></video>`;
     }
-    if (item.embedUrl) {
-      return `<iframe src="${escapeHtml(item.embedUrl)}" title="${escapeHtml(getNowCaption(item) || 'Now artic. media')}" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-    }
-    if (item.imageUrl) {
-      return `<img src="${escapeHtml(item.imageUrl)}" alt="" loading="lazy"><span class="quarterly-now-play" aria-hidden="true"></span>`;
+    if (previewUrl) {
+      return `<img src="${escapeHtml(previewUrl)}" alt="" loading="lazy"><span class="quarterly-now-play" aria-hidden="true"></span>`;
     }
     return '<i class="quarterly-now-thumb" aria-hidden="true"></i>';
   }
@@ -2297,9 +2352,13 @@ body {
           <div class="quarterly-now-list">
             ${items.slice(0, 4).map((item) => {
               const modalIndex = nowModalItems.push(item) - 1;
+              const previewUrl = getNowPreviewUrl(item);
               return `
               <button class="quarterly-now-trigger" type="button" data-now-index="${modalIndex}">
-                ${item.imageUrl ? `<img src="${escapeHtml(item.imageUrl)}" alt="" loading="lazy">` : '<i class="quarterly-now-thumb" aria-hidden="true"></i>'}
+                <span class="quarterly-now-preview">
+                  ${previewUrl ? `<img src="${escapeHtml(previewUrl)}" alt="" loading="lazy">` : '<i class="quarterly-now-thumb" aria-hidden="true"></i>'}
+                  ${getNowEmbedUrl(item) ? '<span class="quarterly-now-preview-play" aria-hidden="true"></span>' : ''}
+                </span>
                 <span>
                   <strong>${escapeHtml(getNowDisplayCaption(item))}</strong>
                   <em>View note</em>

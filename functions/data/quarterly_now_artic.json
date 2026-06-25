@@ -1,7 +1,7 @@
 {
   "source": "instagram-public-reel-pages",
   "profile": "https://www.instagram.com/artic.live/",
-  "crawledAt": "2026-06-07T08:37:43.950Z",
+  "crawledAt": "2026-06-25T16:42:10.202Z",
   "keywords": [
     "실시간",
     "오늘자",
@@ -20,9 +20,10 @@
       "year": 2026,
       "quarter": "Q2",
       "issue": "2026 Q2",
-      "imageUrl": "https://scontent-gmp1-1.cdninstagram.com/v/t51.71878-15/687619294_2013295796731424_2472399639652540784_n.jpg?stp=cmp1_dst-jpg_e35_s640x640_tt6&_nc_cat=106&ccb=7-5&_nc_sid=18de74&efg=eyJlZmdfdGFnIjoiQ0xJUFMuYmVzdF9pbWFnZV91cmxnZW4uQzMifQ%3D%3D&_nc_ohc=9pdRKjrSD_YQ7kNvwHRaXYj&_nc_oc=AdpQAJ922_fFCzZvjl0NEl_oMCRKf4UUhmw25DLiYfc5KBbgxu8XVqUo5xTWcGSiykE&_nc_zt=23&_nc_ht=scontent-gmp1-1.cdninstagram.com&_nc_gid=W13cWqdJuq0Zk04Sq9FB4A&_nc_ss=7b689&oh=00_Af8Jm4Edrp1UDhyysqJT4lMSo7YKfwJLDp5AM7NVSOvXyQ&oe=6A2AEAE5",
+      "imageUrl": "/images/quarterly/now-artic/DYhoO-8PAZX.jpg",
       "url": "https://www.instagram.com/artic.live/reel/DYhoO-8PAZX/",
-      "source": "Instagram"
+      "source": "Instagram",
+      "embedUrl": "https://www.instagram.com/reel/DYhoO-8PAZX/embed/"
     }
   ]
 }

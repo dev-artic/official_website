@@ -2876,7 +2876,7 @@ path_depth: "../"
     };
 
     window.batchAutoFillQuarterlyIssueProperties = function() {
-      if (!confirm('Auto-Fill Drafts는 Notion body 입력이 끝난 draft issue를 찾아 속성을 자동 입력하고, 이미 publish된 issue의 slug/issue와 교차검증합니다.\\n\\n완료 조건:\\n- 7개 tier table이 모두 존재함\\n- 앨범명, 아티스트, 발매일이 입력됨\\n- 발매일로 분기를 추론할 수 있음\\n- 이미 공개된 issue와 slug/issue 충돌 없음\\n\\n이 조건을 확인했습니까?')) return;
+      if (!confirm('Auto-Fill Drafts는 Notion body 입력이 끝난 draft issue를 찾아 속성을 자동 입력하고, 이미 publish된 issue의 slug/issue와 교차검증합니다.\n\n완료 조건:\n- 7개 tier table이 모두 존재함\n- 앨범명, 아티스트, 발매일이 입력됨\n- 발매일로 분기를 추론할 수 있음\n- 이미 공개된 issue와 slug/issue 충돌 없음\n\n이 조건을 확인했습니까?')) return;
 
       const btn = document.getElementById('quarterly-auto-fill-btn');
       if (btn) {
@@ -2917,7 +2917,7 @@ path_depth: "../"
     };
 
     window.publishQuarterlyArchive = function() {
-      if (!confirm('Publish Archive는 Auto-Fill, Refresh, Scan Audio Health 이후 실행하는 최종 반영 단계입니다.\\n\\n완료 조건:\\n- Auto-Fill Drafts가 publishable 검증을 통과함\\n- Refresh로 admin 데이터가 최신화됨\\n- Scan Audio Health로 unresolved audio를 확인/해결함\\n\\n이 조건을 모두 완료했습니까?')) return;
+      if (!confirm('Publish Archive는 Auto-Fill, Refresh, Scan Audio Health 이후 실행하는 최종 반영 단계입니다.\n\n완료 조건:\n- Auto-Fill Drafts가 publishable 검증을 통과함\n- Refresh로 admin 데이터가 최신화됨\n- Scan Audio Health로 unresolved audio를 확인/해결함\n\n이 조건을 모두 완료했습니까?')) return;
 
       const btn = document.getElementById('quarterly-publish-btn');
       if (btn) {

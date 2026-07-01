@@ -485,6 +485,33 @@ path_depth: "../"
     margin-bottom: 24px;
   }
 
+  .quarterly-workflow-actions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    gap: 10px;
+    align-items: stretch;
+    min-width: min(100%, 680px);
+  }
+
+  .quarterly-workflow-step {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    min-width: 0;
+  }
+
+  .quarterly-workflow-step .action-btn-sm {
+    width: 100%;
+    min-height: 30px;
+  }
+
+  .quarterly-workflow-note {
+    color: var(--text-muted);
+    font-size: 0.55rem;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+  }
+
   .quarterly-metric {
     border: 1px solid var(--border-color);
     padding: 16px;
@@ -807,6 +834,11 @@ path_depth: "../"
       grid-template-columns: 1fr;
     }
 
+    .quarterly-workflow-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+    }
+
     .admin-title {
       align-items: flex-start;
       gap: 16px;
@@ -958,11 +990,23 @@ path_depth: "../"
             <h3 class="admin-card-title" style="margin-bottom:8px;">Quarterly Content Health</h3>
             <p class="quarterly-small-muted" style="margin:0;">ACHA issues, Bugs cover overrides, featured article body parsing, and Now artic. quarter matching.</p>
           </div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-            <button class="action-btn-sm is-secondary" id="quarterly-auto-fill-btn" type="button">Auto-Fill Drafts</button>
-            <button class="action-btn-sm" id="quarterly-publish-btn" type="button">Publish Archive</button>
-            <button class="action-btn-sm is-secondary" id="quarterly-scan-btn" type="button" style="display:none;">Scan Audio Health</button>
-            <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
+          <div class="quarterly-workflow-actions" aria-label="Quarterly publish workflow">
+            <div class="quarterly-workflow-step">
+              <button class="action-btn-sm is-secondary" id="quarterly-auto-fill-btn" type="button">Auto-Fill Drafts</button>
+              <span class="quarterly-workflow-note">Click after Notion body tier tables are complete.</span>
+            </div>
+            <div class="quarterly-workflow-step">
+              <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
+              <span class="quarterly-workflow-note">Click after auto-fill verifies publishable metadata.</span>
+            </div>
+            <div class="quarterly-workflow-step">
+              <button class="action-btn-sm is-secondary" id="quarterly-scan-btn" type="button">Scan Audio Health</button>
+              <span class="quarterly-workflow-note">Click after refreshed admin data shows the target issue.</span>
+            </div>
+            <div class="quarterly-workflow-step">
+              <button class="action-btn-sm" id="quarterly-publish-btn" type="button">Publish Archive</button>
+              <span class="quarterly-workflow-note">Click after audio health is resolved or reviewed.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1948,7 +1992,7 @@ path_depth: "../"
       const publishBtn = document.getElementById('quarterly-publish-btn');
       if (publishBtn) publishBtn.disabled = true;
       const scanBtn = document.getElementById('quarterly-scan-btn');
-      if (scanBtn) scanBtn.style.display = 'none';
+      if (scanBtn) scanBtn.disabled = true;
 
       fetch(getQuarterlyAdminUrl(), {
         headers: {
@@ -1972,7 +2016,6 @@ path_depth: "../"
         renderQuarterlyIssueList();
         renderQuarterlyDetail();
         status.textContent = `Loaded ${data.archive?.issues?.length || 0} issues. Last check: ${new Date(data.diagnostics?.generatedAt || Date.now()).toLocaleString('ko-KR')}`;
-        if (scanBtn) scanBtn.style.display = 'inline-block';
       })
       .catch(err => {
         console.error('Quarterly admin error:', err);
@@ -1983,16 +2026,19 @@ path_depth: "../"
         document.getElementById('quarterly-refresh-btn').disabled = false;
         if (autoFillBtn) autoFillBtn.disabled = false;
         if (publishBtn) publishBtn.disabled = false;
+        if (scanBtn) scanBtn.disabled = false;
       });
     }
 
     document.getElementById('quarterly-refresh-btn').addEventListener('click', () => {
+      if (!confirm('Auto-Fill Drafts가 publish 가능한 상태로 검증된 뒤 admin 데이터를 다시 읽어옵니다.\n\nNotion 속성 자동 입력 및 검증이 완료되었습니까?')) return;
       quarterlyLoaded = false;
       loadQuarterlyAdminData();
     });
 
     if (document.getElementById('quarterly-scan-btn')) {
       document.getElementById('quarterly-scan-btn').addEventListener('click', () => {
+        if (!confirm('Refresh로 최신 Notion issue를 admin에 가져온 뒤 audio health를 스캔합니다.\n\n최신 Quarterly 데이터가 admin에 로드되었습니까?')) return;
         scanAudioHealth();
       });
     }
@@ -2811,7 +2857,7 @@ path_depth: "../"
     window.autoFillQuarterlyIssueProperties = function(issueId) {
       const issue = getQuarterlyIssue(issueId);
       if (!issue?.id) return;
-      if (!confirm(`본문 tier table을 기준으로 이슈 속성을 자동 채우시겠습니까?\n\n대상: ${issue.title}`)) return;
+      if (!confirm(`본문 tier table을 기준으로 이슈 속성을 자동 채웁니다.\n\n완료 조건:\n- 7개 tier table이 채워짐\n- 앨범명, 아티스트, 발매일이 입력됨\n- featured article 본문 입력 상태 확인\n\n대상: ${issue.title}\n\n계속할까요?`)) return;
 
       postQuarterlyAdmin({
         action: 'auto_fill_issue_properties',
@@ -2830,7 +2876,7 @@ path_depth: "../"
     };
 
     window.batchAutoFillQuarterlyIssueProperties = function() {
-      if (!confirm('Notion 분기별 결산 DB에서 앨범 row가 채워진 draft/new issue를 찾아 속성을 일괄 자동 채우시겠습니까?\\n\\n이미 공개 완료된 issue와 빈 템플릿은 기본적으로 건너뜁니다.')) return;
+      if (!confirm('Auto-Fill Drafts는 Notion body 입력이 끝난 draft issue를 찾아 속성을 자동 입력하고, 이미 publish된 issue의 slug/issue와 교차검증합니다.\\n\\n완료 조건:\\n- 7개 tier table이 모두 존재함\\n- 앨범명, 아티스트, 발매일이 입력됨\\n- 발매일로 분기를 추론할 수 있음\\n- 이미 공개된 issue와 slug/issue 충돌 없음\\n\\n이 조건을 확인했습니까?')) return;
 
       const btn = document.getElementById('quarterly-auto-fill-btn');
       if (btn) {
@@ -2844,11 +2890,15 @@ path_depth: "../"
       .then(data => {
         const updated = data.updated || [];
         const skipped = data.skipped || [];
+        const blocked = data.blocked || [];
         const errors = data.errors || [];
-        let message = `Auto-fill complete.\n\nUpdated: ${updated.length}\nSkipped: ${skipped.length}\nErrors: ${errors.length}`;
+        let message = `Auto-fill complete.\n\nVerified publishable: ${data.verifiedCount || 0}\nUpdated: ${updated.length}\nBlocked: ${blocked.length}\nSkipped: ${skipped.length}\nErrors: ${errors.length}`;
         if (updated.length) {
           message += `\n\nUpdated issues:\n${updated.slice(0, 5).map(item => `- ${item.title || item.issue || item.pageId}`).join('\n')}`;
           if (updated.length > 5) message += '\n...';
+        }
+        if (blocked.length) {
+          message += `\n\nBlocked:\n${blocked.slice(0, 3).map(item => `- ${item.title || item.pageId}: ${(item.blockers || []).join(' / ')}`).join('\n')}`;
         }
         if (errors.length) {
           message += `\n\nErrors:\n${errors.slice(0, 3).map(item => `- ${item.error}`).join('\n')}`;
@@ -2867,7 +2917,7 @@ path_depth: "../"
     };
 
     window.publishQuarterlyArchive = function() {
-      if (!confirm('Notion draft 속성을 자동 보정한 뒤, Quarterly archive cache를 갱신해 홈페이지에 반영하시겠습니까?\\n\\n빈 템플릿은 건너뛰고, 이미 공개 완료된 issue는 재작성하지 않습니다.')) return;
+      if (!confirm('Publish Archive는 Auto-Fill, Refresh, Scan Audio Health 이후 실행하는 최종 반영 단계입니다.\\n\\n완료 조건:\\n- Auto-Fill Drafts가 publishable 검증을 통과함\\n- Refresh로 admin 데이터가 최신화됨\\n- Scan Audio Health로 unresolved audio를 확인/해결함\\n\\n이 조건을 모두 완료했습니까?')) return;
 
       const btn = document.getElementById('quarterly-publish-btn');
       if (btn) {
@@ -2879,11 +2929,25 @@ path_depth: "../"
         action: 'publish_quarterly_archive'
       })
       .then(data => {
+        if (data && data.success === false) {
+          const blocked = data.blocked || [];
+          const errors = data.errors || [];
+          let message = data.message || 'Publish blocked.';
+          if (blocked.length) {
+            message += `\n\nBlocked:\n${blocked.slice(0, 5).map(item => `- ${item.title || item.pageId}: ${(item.blockers || []).join(' / ')}`).join('\n')}`;
+          }
+          if (errors.length) {
+            message += `\n\nErrors:\n${errors.slice(0, 3).map(item => `- ${item.error}`).join('\n')}`;
+          }
+          alert(message);
+          return;
+        }
         const updated = data.updated || [];
         const skipped = data.skipped || [];
+        const blocked = data.blocked || [];
         const errors = data.errors || [];
         const issues = data.archive?.issues || [];
-        let message = `Quarterly archive published.\n\nPublished issues in cache: ${issues.length}\nAuto-filled drafts: ${updated.length}\nSkipped: ${skipped.length}\nErrors: ${errors.length}`;
+        let message = `Quarterly archive published.\n\nPublished issues in cache: ${issues.length}\nAuto-filled drafts: ${updated.length}\nBlocked: ${blocked.length}\nSkipped: ${skipped.length}\nErrors: ${errors.length}`;
         if (updated.length) {
           message += `\n\nAuto-filled:\n${updated.slice(0, 5).map(item => `- ${item.title || item.issue || item.pageId}`).join('\n')}`;
           if (updated.length > 5) message += '\n...';

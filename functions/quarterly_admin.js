@@ -61,6 +61,193 @@ function parseQuarterFromIssue(issue) {
   return { year, quarter };
 }
 
+function getQuarterlyPageTitle(page) {
+  return String(page?.properties?.Name?.title?.map((item) => item.plain_text || "").join("") || "").trim();
+}
+
+function getQuarterlyTextProperty(page, name) {
+  const prop = page?.properties?.[name];
+  if (!prop) return "";
+  if (Array.isArray(prop.title)) return prop.title.map((item) => item.plain_text || "").join("").trim();
+  if (Array.isArray(prop.rich_text)) return prop.rich_text.map((item) => item.plain_text || "").join("").trim();
+  return "";
+}
+
+function getQuarterlySelectProperty(page, name) {
+  const prop = page?.properties?.[name];
+  return prop?.status?.name || prop?.select?.name || "";
+}
+
+function isQuarterlyPagePublished(page) {
+  return getQuarterlySelectProperty(page, "Publication Status") === "완료"
+    && page?.properties?.["업로드 확정"]?.checkbox === true;
+}
+
+function isQuarterlyTemplatePage(page) {
+  const title = getQuarterlyPageTitle(page);
+  const sourceFormat = getQuarterlySelectProperty(page, "Source Format");
+  return /template/i.test(title) || /template/i.test(sourceFormat);
+}
+
+function buildPublishedIssueIndex(pages = []) {
+  const bySlug = new Map();
+  const byIssue = new Map();
+
+  pages.forEach((page) => {
+    if (!isQuarterlyPagePublished(page) || isQuarterlyTemplatePage(page)) return;
+    const record = {
+      pageId: page.id,
+      title: getQuarterlyTextProperty(page, "Issue Title") || getQuarterlyPageTitle(page) || page.url,
+      slug: getQuarterlyTextProperty(page, "Slug"),
+      issue: getQuarterlyTextProperty(page, "Issue"),
+    };
+    const slugKey = normalizeIssueKey(record.slug);
+    const issueKey = normalizeIssueKey(record.issue);
+    if (slugKey) bySlug.set(slugKey, record);
+    if (issueKey) byIssue.set(issueKey, record);
+  });
+
+  return { bySlug, byIssue };
+}
+
+function countIncompleteAlbumRows(parsedBlocks = {}) {
+  return (parsedBlocks.tiers || []).reduce((count, tier) => {
+    return count + (tier.items || []).filter((item) => {
+      return (item.album || item.artist) && (!item.album || !item.artist || !item.releaseDate);
+    }).length;
+  }, 0);
+}
+
+function validateQuarterlyAutoFillCandidate({ page, parsedBlocks, inferred, publishedIndex }) {
+  const blockers = [];
+  const warnings = [];
+  const diagnostics = inferred?.diagnostics || {};
+  const properties = inferred?.properties || {};
+  const title = properties["Issue Title"] || getQuarterlyPageTitle(page) || page?.url || page?.id;
+  const tierCount = (parsedBlocks.tiers || []).length;
+  const incompleteAlbumRows = countIncompleteAlbumRows(parsedBlocks);
+
+  if (!diagnostics.albumCount) {
+    blockers.push("No album rows were found in the tier tables.");
+  }
+  if (tierCount < TIER_CANON.length) {
+    blockers.push(`Only ${tierCount}/${TIER_CANON.length} tier sections were found.`);
+  }
+  if (incompleteAlbumRows > 0) {
+    blockers.push(`${incompleteAlbumRows} album row(s) are missing artist or release date fields.`);
+  }
+  if (!diagnostics.inferredFromAlbums) {
+    blockers.push("Issue year/quarter could not be inferred from album release dates.");
+  }
+  if (!properties.Slug || !properties.Issue || !properties.Year || !properties.Quarter) {
+    blockers.push("Required issue properties could not be inferred.");
+  }
+
+  const slugKey = normalizeIssueKey(properties.Slug);
+  const issueKey = normalizeIssueKey(properties.Issue);
+  const existingSlug = slugKey ? publishedIndex.bySlug.get(slugKey) : null;
+  const existingIssue = issueKey ? publishedIndex.byIssue.get(issueKey) : null;
+  if (existingSlug && existingSlug.pageId !== page.id) {
+    blockers.push(`Slug conflicts with already published issue: ${existingSlug.title}.`);
+  }
+  if (existingIssue && existingIssue.pageId !== page.id) {
+    blockers.push(`Issue label conflicts with already published issue: ${existingIssue.title}.`);
+  }
+  if (!diagnostics.essayCount) {
+    warnings.push("No featured article body was parsed for this issue.");
+  }
+
+  return {
+    pageId: page.id,
+    title,
+    blockers,
+    warnings,
+    publishable: blockers.length === 0,
+    tierCount,
+    incompleteAlbumRows,
+  };
+}
+
+async function autoFillQuarterlyDraftIssues(token, options = {}) {
+  const pages = await queryQuarterlyPagesRaw(token);
+  const publishedIndex = buildPublishedIssueIndex(pages);
+  const updated = [];
+  const skipped = [];
+  const blocked = [];
+  const errors = [];
+
+  for (const page of pages) {
+    const pageId = page.id;
+    const pageTitle = getQuarterlyPageTitle(page) || page.url;
+    try {
+      if (isQuarterlyTemplatePage(page) && !options.includeTemplateDrafts) {
+        skipped.push({ pageId, title: pageTitle, reason: "template draft" });
+        continue;
+      }
+      if (isQuarterlyPagePublished(page) && options.includePublished !== true) {
+        skipped.push({ pageId, title: pageTitle, reason: "already published" });
+        continue;
+      }
+
+      const parsedBlocks = await parseIssueBlocks(token, pageId, { includeSourceMetadata: false });
+      const inferred = inferQuarterlyIssueProperties(page, parsedBlocks);
+      if (!inferred.diagnostics.albumCount) {
+        skipped.push({ pageId, title: pageTitle, reason: "no album rows" });
+        continue;
+      }
+
+      const validation = validateQuarterlyAutoFillCandidate({
+        page,
+        parsedBlocks,
+        inferred,
+        publishedIndex,
+      });
+      if (!validation.publishable) {
+        blocked.push({
+          pageId,
+          title: validation.title,
+          blockers: validation.blockers,
+          warnings: validation.warnings,
+          ...inferred.diagnostics,
+        });
+        continue;
+      }
+
+      const result = await updateNotionPageProperties(token, pageId, inferred.properties);
+      const nextPage = await getNotionPage(token, result.id);
+      const nextParsedBlocks = await parseIssueBlocks(token, result.id, { includeSourceMetadata: false });
+      const nextInferred = inferQuarterlyIssueProperties(nextPage, nextParsedBlocks);
+      const nextValidation = validateQuarterlyAutoFillCandidate({
+        page: nextPage,
+        parsedBlocks: nextParsedBlocks,
+        inferred: nextInferred,
+        publishedIndex,
+      });
+
+      updated.push({
+        pageId: result.id,
+        title: nextInferred.properties["Issue Title"],
+        verified: nextValidation.publishable,
+        blockers: nextValidation.blockers,
+        warnings: nextValidation.warnings,
+        ...nextInferred.diagnostics,
+      });
+    } catch (err) {
+      errors.push({ pageId, title: pageTitle, error: err.message });
+    }
+  }
+
+  return {
+    success: errors.length === 0 && blocked.length === 0 && updated.every((item) => item.verified !== false),
+    updated,
+    skipped,
+    blocked,
+    errors,
+    publishable: blocked.length === 0 && errors.length === 0 && updated.every((item) => item.verified !== false),
+    verifiedCount: updated.filter((item) => item.verified !== false).length,
+  };
+}
+
 function nowItemMatchesIssue(item, issue) {
   const issueKeys = [issue?.issue, issue?.slug, getQuarterLabel(issue)].filter(Boolean).map(normalizeIssueKey);
   const itemKeys = [item?.issue, item?.issueSlug, item?.quarterLabel].filter(Boolean).map(normalizeIssueKey);
@@ -758,91 +945,27 @@ async function handleQuarterlyAdminAction({
   }
 
   if (action === "batch_auto_fill_issue_properties") {
-    const pages = await queryQuarterlyPagesRaw(token);
-    const updated = [];
-    const skipped = [];
-    const errors = [];
-
-    for (const page of pages) {
-      const pageId = page.id;
-      try {
-        const pageTitle = String(page.properties?.Name?.title?.map((item) => item.plain_text || "").join("") || "");
-        const status = page.properties?.["Publication Status"]?.status?.name || "";
-        const uploadConfirmed = page.properties?.["업로드 확정"]?.checkbox === true;
-        const isTemplateItself = /template/i.test(pageTitle);
-        const parsedBlocks = await parseIssueBlocks(token, pageId, { includeSourceMetadata: false });
-        const inferred = inferQuarterlyIssueProperties(page, parsedBlocks);
-
-        if (!inferred.diagnostics.albumCount) {
-          skipped.push({ pageId, title: pageTitle || page.url, reason: "no album rows" });
-          continue;
-        }
-        if (isTemplateItself && !body.includeTemplateDrafts) {
-          skipped.push({ pageId, title: pageTitle || page.url, reason: "template draft" });
-          continue;
-        }
-        if (status === "완료" && uploadConfirmed && body.includePublished !== true) {
-          skipped.push({ pageId, title: pageTitle || page.url, reason: "already published" });
-          continue;
-        }
-
-        const result = await updateNotionPageProperties(token, pageId, inferred.properties);
-        updated.push({
-          pageId: result.id,
-          title: inferred.properties["Issue Title"],
-          ...inferred.diagnostics,
-        });
-      } catch (err) {
-        errors.push({ pageId, error: err.message });
-      }
-    }
-
-    return {
-      success: errors.length === 0,
-      updated,
-      skipped,
-      errors,
-    };
+    return autoFillQuarterlyDraftIssues(token, {
+      includePublished: body.includePublished === true,
+      includeTemplateDrafts: body.includeTemplateDrafts === true,
+    });
   }
 
   if (action === "publish_quarterly_archive") {
-    const pages = await queryQuarterlyPagesRaw(token);
-    const updated = [];
-    const skipped = [];
-    const errors = [];
+    const autoFill = await autoFillQuarterlyDraftIssues(token, {
+      includePublished: body.includePublished === true,
+      includeTemplateDrafts: body.includeTemplateDrafts === true,
+    });
 
-    for (const page of pages) {
-      const pageId = page.id;
-      try {
-        const pageTitle = String(page.properties?.Name?.title?.map((item) => item.plain_text || "").join("") || "");
-        const status = page.properties?.["Publication Status"]?.status?.name || "";
-        const uploadConfirmed = page.properties?.["업로드 확정"]?.checkbox === true;
-        const isTemplateItself = /template/i.test(pageTitle);
-        const parsedBlocks = await parseIssueBlocks(token, pageId, { includeSourceMetadata: false });
-        const inferred = inferQuarterlyIssueProperties(page, parsedBlocks);
-
-        if (!inferred.diagnostics.albumCount) {
-          skipped.push({ pageId, title: pageTitle || page.url, reason: "no album rows" });
-          continue;
-        }
-        if (isTemplateItself && !body.includeTemplateDrafts) {
-          skipped.push({ pageId, title: pageTitle || page.url, reason: "template draft" });
-          continue;
-        }
-        if (status === "완료" && uploadConfirmed && body.includePublished !== true) {
-          skipped.push({ pageId, title: pageTitle || page.url, reason: "already published" });
-          continue;
-        }
-
-        const result = await updateNotionPageProperties(token, pageId, inferred.properties);
-        updated.push({
-          pageId: result.id,
-          title: inferred.properties["Issue Title"],
-          ...inferred.diagnostics,
-        });
-      } catch (err) {
-        errors.push({ pageId, error: err.message });
-      }
+    if (!autoFill.publishable) {
+      return {
+        success: false,
+        blocked: autoFill.blocked,
+        updated: autoFill.updated,
+        skipped: autoFill.skipped,
+        errors: autoFill.errors,
+        message: "Publish blocked. Resolve auto-fill validation issues before publishing the archive.",
+      };
     }
 
     const youtubeOverrides = await readQuarterlyYoutubeTrackOverrides(db);
@@ -863,10 +986,11 @@ async function handleQuarterlyAdminAction({
     diagnostics.summary.youtubeTrackUnresolved = diagnostics.youtubeTrackHealth.summary.unresolved;
 
     return {
-      success: errors.length === 0,
-      updated,
-      skipped,
-      errors,
+      success: true,
+      updated: autoFill.updated,
+      skipped: autoFill.skipped,
+      blocked: autoFill.blocked,
+      errors: autoFill.errors,
       archive,
       diagnostics,
       publishedAt: new Date().toISOString(),

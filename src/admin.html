@@ -403,6 +403,18 @@ path_depth: "../"
     transition: opacity 0.3s ease;
   }
 
+  .action-btn-sm.is-secondary {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .dark-mode .action-btn-sm.is-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
   .action-btn-sm:hover {
     opacity: 0.85;
   }
@@ -947,9 +959,9 @@ path_depth: "../"
             <p class="quarterly-small-muted" style="margin:0;">ACHA issues, Bugs cover overrides, featured article body parsing, and Now artic. quarter matching.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-            <button class="action-btn-sm" id="quarterly-auto-fill-btn" type="button" style="background:var(--bg-card); border:1px solid var(--border-color);">Auto-Fill Drafts</button>
+            <button class="action-btn-sm is-secondary" id="quarterly-auto-fill-btn" type="button">Auto-Fill Drafts</button>
             <button class="action-btn-sm" id="quarterly-publish-btn" type="button">Publish Archive</button>
-            <button class="action-btn-sm" id="quarterly-scan-btn" type="button" style="display:none; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-primary);">Scan Audio Health</button>
+            <button class="action-btn-sm is-secondary" id="quarterly-scan-btn" type="button" style="display:none;">Scan Audio Health</button>
             <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
           </div>
         </div>

@@ -972,8 +972,26 @@ exports.quarterlyAdmin = onRequest({ secrets: [ADMIN_TOKEN_SECRET, NOTION_API_KE
           token,
           db,
           fieldValue: FieldValue,
+          dataSourceId: getDataSourceId(),
+          mediaCache: readQuarterlyMediaCache(),
+          nowArtic: readQuarterlyNowArtic(),
+          externalLinks: readQuarterlyExternalLinks(),
           youtubeApiKey: youtubeSecret,
         });
+        if (req.body?.action === "publish_quarterly_archive" && result?.archive) {
+          const archiveToCache = {
+            ...result.archive,
+            queryMode: "firestore_cached",
+            cachedAt: new Date().toISOString(),
+          };
+          await db.collection("quarterly_cache").doc("archive").set({
+            archive: archiveToCache,
+            cachedAt: FieldValue.serverTimestamp(),
+            updatedBy: "admin-publish-archive",
+          });
+          writeQuarterlyContentsCacheFile(archiveToCache);
+          result.archive = archiveToCache;
+        }
         res.status(200).json(result);
         return;
       }

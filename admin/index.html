@@ -983,8 +983,10 @@ body {
             <h3 class="admin-card-title" style="margin-bottom:8px;">Quarterly Content Health</h3>
             <p class="quarterly-small-muted" style="margin:0;">ACHA issues, Bugs cover overrides, featured article body parsing, and Now artic. quarter matching.</p>
           </div>
-          <div style="display:flex; gap:8px;">
-            <button class="action-btn-sm" id="quarterly-scan-btn" type="button" style="display:none; background:var(--bg-card); border:1px solid var(--border-color);">Scan Audio Health</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+            <button class="action-btn-sm" id="quarterly-auto-fill-btn" type="button" style="background:var(--bg-card); border:1px solid var(--border-color);">Auto-Fill Drafts</button>
+            <button class="action-btn-sm" id="quarterly-publish-btn" type="button">Publish Archive</button>
+            <button class="action-btn-sm" id="quarterly-scan-btn" type="button" style="display:none; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-primary);">Scan Audio Health</button>
             <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
           </div>
         </div>
@@ -1875,7 +1877,10 @@ body {
               <textarea id="quarterly-issue-excerpt">${escapeHtml(issue.excerpt || '')}</textarea>
             </label>
           </div>
-          <button class="action-btn-sm" type="button" style="width:fit-content;" onclick="saveQuarterlyIssueProperties('${escapeHtml(issue.id)}')">Save Issue Properties</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="action-btn-sm" type="button" style="width:fit-content;" onclick="autoFillQuarterlyIssueProperties('${escapeHtml(issue.id)}')">Auto-Fill Issue Properties</button>
+            <button class="action-btn-sm" type="button" style="width:fit-content;" onclick="saveQuarterlyIssueProperties('${escapeHtml(issue.id)}')">Save Issue Properties</button>
+          </div>
         </div>
 
         <div class="quarterly-album-editor" id="quarterly-album-editor">
@@ -1972,6 +1977,10 @@ body {
       status.textContent = 'Loading quarterly content diagnostics...';
       setPaneLoading('quarterly', true, tabLoadingLabels.quarterly);
       document.getElementById('quarterly-refresh-btn').disabled = true;
+      const autoFillBtn = document.getElementById('quarterly-auto-fill-btn');
+      if (autoFillBtn) autoFillBtn.disabled = true;
+      const publishBtn = document.getElementById('quarterly-publish-btn');
+      if (publishBtn) publishBtn.disabled = true;
       const scanBtn = document.getElementById('quarterly-scan-btn');
       if (scanBtn) scanBtn.style.display = 'none';
 
@@ -2006,6 +2015,8 @@ body {
       .finally(() => {
         setPaneLoading('quarterly', false);
         document.getElementById('quarterly-refresh-btn').disabled = false;
+        if (autoFillBtn) autoFillBtn.disabled = false;
+        if (publishBtn) publishBtn.disabled = false;
       });
     }
 
@@ -2017,6 +2028,18 @@ body {
     if (document.getElementById('quarterly-scan-btn')) {
       document.getElementById('quarterly-scan-btn').addEventListener('click', () => {
         scanAudioHealth();
+      });
+    }
+
+    if (document.getElementById('quarterly-auto-fill-btn')) {
+      document.getElementById('quarterly-auto-fill-btn').addEventListener('click', () => {
+        batchAutoFillQuarterlyIssueProperties();
+      });
+    }
+
+    if (document.getElementById('quarterly-publish-btn')) {
+      document.getElementById('quarterly-publish-btn').addEventListener('click', () => {
+        publishQuarterlyArchive();
       });
     }
 
@@ -2817,6 +2840,107 @@ body {
         loadQuarterlyAdminData();
       })
       .catch(err => alert(err.message));
+    };
+
+    window.autoFillQuarterlyIssueProperties = function(issueId) {
+      const issue = getQuarterlyIssue(issueId);
+      if (!issue?.id) return;
+      if (!confirm(`본문 tier table을 기준으로 이슈 속성을 자동 채우시겠습니까?\n\n대상: ${issue.title}`)) return;
+
+      postQuarterlyAdmin({
+        action: 'auto_fill_issue_properties',
+        pageId: issue.id,
+        expectedTitle: issue.title || '',
+        expectedLastEditedTime: issue.lastEditedTime || ''
+      })
+      .then(data => {
+        const inferred = data.inferred || {};
+        alert(`Issue properties auto-filled.\n\n${inferred.issue || ''}\n${inferred.slug || ''}\nAlbums: ${inferred.albumCount || 0}\nSource: ${inferred.inferredFromAlbums ? 'album release dates' : 'existing metadata fallback'}`);
+        quarterlyLoaded = false;
+        selectedQuarterlyIssueId = issue.id;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message));
+    };
+
+    window.batchAutoFillQuarterlyIssueProperties = function() {
+      if (!confirm('Notion 분기별 결산 DB에서 앨범 row가 채워진 draft/new issue를 찾아 속성을 일괄 자동 채우시겠습니까?\\n\\n이미 공개 완료된 issue와 빈 템플릿은 기본적으로 건너뜁니다.')) return;
+
+      const btn = document.getElementById('quarterly-auto-fill-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Auto-Filling...';
+      }
+
+      postQuarterlyAdmin({
+        action: 'batch_auto_fill_issue_properties'
+      })
+      .then(data => {
+        const updated = data.updated || [];
+        const skipped = data.skipped || [];
+        const errors = data.errors || [];
+        let message = `Auto-fill complete.\n\nUpdated: ${updated.length}\nSkipped: ${skipped.length}\nErrors: ${errors.length}`;
+        if (updated.length) {
+          message += `\n\nUpdated issues:\n${updated.slice(0, 5).map(item => `- ${item.title || item.issue || item.pageId}`).join('\n')}`;
+          if (updated.length > 5) message += '\n...';
+        }
+        if (errors.length) {
+          message += `\n\nErrors:\n${errors.slice(0, 3).map(item => `- ${item.error}`).join('\n')}`;
+        }
+        alert(message);
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message))
+      .finally(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Auto-Fill Drafts';
+        }
+      });
+    };
+
+    window.publishQuarterlyArchive = function() {
+      if (!confirm('Notion draft 속성을 자동 보정한 뒤, Quarterly archive cache를 갱신해 홈페이지에 반영하시겠습니까?\\n\\n빈 템플릿은 건너뛰고, 이미 공개 완료된 issue는 재작성하지 않습니다.')) return;
+
+      const btn = document.getElementById('quarterly-publish-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Publishing...';
+      }
+
+      postQuarterlyAdmin({
+        action: 'publish_quarterly_archive'
+      })
+      .then(data => {
+        const updated = data.updated || [];
+        const skipped = data.skipped || [];
+        const errors = data.errors || [];
+        const issues = data.archive?.issues || [];
+        let message = `Quarterly archive published.\n\nPublished issues in cache: ${issues.length}\nAuto-filled drafts: ${updated.length}\nSkipped: ${skipped.length}\nErrors: ${errors.length}`;
+        if (updated.length) {
+          message += `\n\nAuto-filled:\n${updated.slice(0, 5).map(item => `- ${item.title || item.issue || item.pageId}`).join('\n')}`;
+          if (updated.length > 5) message += '\n...';
+        }
+        if (errors.length) {
+          message += `\n\nErrors:\n${errors.slice(0, 3).map(item => `- ${item.error}`).join('\n')}`;
+        }
+        alert(message);
+        quarterlyAdminData = data.archive ? {
+          ...quarterlyAdminData,
+          archive: data.archive,
+          diagnostics: data.diagnostics || quarterlyAdminData?.diagnostics
+        } : quarterlyAdminData;
+        quarterlyLoaded = false;
+        loadQuarterlyAdminData();
+      })
+      .catch(err => alert(err.message))
+      .finally(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Publish Archive';
+        }
+      });
     };
 
     window.batchAutoResolveYoutubeTracks = function(issueId) {

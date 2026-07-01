@@ -207,6 +207,151 @@ function compareQuarterlyIssues(a, b) {
   return new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
 }
 
+function parseQuarterToken(value) {
+  const text = String(value || "");
+  const match = text.match(/(?:^|\D)([1-4])\s*Q/i) || text.match(/Q\s*([1-4])/i) || text.match(/([1-4])\s*분기/);
+  const quarter = Number(match?.[1] || 0);
+  return quarter >= 1 && quarter <= 4 ? quarter : 0;
+}
+
+function quarterFromDate(value) {
+  const date = new Date(String(value || ""));
+  if (Number.isNaN(date.getTime())) return 0;
+  return Math.floor(date.getUTCMonth() / 3) + 1;
+}
+
+function quarterLabel(quarter) {
+  const numericQuarter = Number(quarter);
+  return numericQuarter >= 1 && numericQuarter <= 4 ? `${numericQuarter}Q` : "";
+}
+
+function quarterEndDate(year, quarter) {
+  const numericYear = Number(year);
+  const numericQuarter = Number(quarter);
+  if (!numericYear || numericQuarter < 1 || numericQuarter > 4) return "";
+  const monthDay = {
+    1: "03-31",
+    2: "06-30",
+    3: "09-30",
+    4: "12-31",
+  }[numericQuarter];
+  return `${numericYear}-${monthDay}`;
+}
+
+function slugifyQuarterlyIssue(year, quarter, region = "Korea", category = "Korean Albums") {
+  const regionText = String(region || "").trim().toLowerCase();
+  const categoryText = String(category || "").trim().toLowerCase();
+  if (regionText === "korea" && /korean\s+albums?/.test(categoryText)) {
+    return `${year}-q${quarter}-korean-albums`;
+  }
+  const raw = `${region} ${category}`
+    .toLowerCase()
+    .replace(/\bkorea\s+korean\b/g, "korean")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return `${year}-q${quarter}-${raw || "korean-albums"}`;
+}
+
+function parseReleaseYearQuarter(value) {
+  const text = String(value || "").trim();
+  const match = text.match(/(20\d{2})[-./년\s]+(\d{1,2})/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (!year || month < 1 || month > 12) return null;
+  return { year, quarter: Math.floor((month - 1) / 3) + 1 };
+}
+
+function inferYearQuarterFromAlbums(tiers = []) {
+  const counts = new Map();
+  (tiers || []).forEach((tier) => {
+    (tier.items || []).forEach((item) => {
+      const parsed = parseReleaseYearQuarter(item.releaseDate);
+      if (!parsed) return;
+      const key = `${parsed.year}::${parsed.quarter}`;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+  });
+  let best = null;
+  counts.forEach((count, key) => {
+    const [year, quarter] = key.split("::").map(Number);
+    if (!best || count > best.count || (count === best.count && year * 10 + quarter > best.year * 10 + best.quarter)) {
+      best = { year, quarter, count };
+    }
+  });
+  return best || null;
+}
+
+function inferQuarterlyIssueProperties(page, parsedBlocks = {}) {
+  const properties = page?.properties || {};
+  const title = getTextProperty(properties, "Issue Title")
+    || getTextProperty(properties, "Name")
+    || "";
+  const issueText = getTextProperty(properties, "Issue") || title;
+  const existingYear = getNumberValue(properties, "Year") || Number((issueText.match(/20\d{2}/) || [])[0]) || 0;
+  const existingQuarter = parseQuarterToken(getSelectName(properties, "Quarter"))
+    || parseQuarterToken(issueText)
+    || quarterFromDate(getDateValue(properties, "Published At"))
+    || quarterFromDate(getDateValue(properties, "아카이빙일"));
+  const inferredFromAlbums = inferYearQuarterFromAlbums(parsedBlocks.tiers || []);
+  const createdAt = page?.created_time || page?.last_edited_time || "";
+  const createdDate = createdAt ? new Date(createdAt) : null;
+  const fallbackYear = createdDate && !Number.isNaN(createdDate.getTime()) ? createdDate.getUTCFullYear() : new Date().getUTCFullYear();
+  const fallbackQuarter = createdDate && !Number.isNaN(createdDate.getTime()) ? Math.floor(createdDate.getUTCMonth() / 3) + 1 : Math.floor(new Date().getUTCMonth() / 3) + 1;
+  const year = inferredFromAlbums?.year || existingYear || fallbackYear;
+  const quarter = inferredFromAlbums?.quarter || existingQuarter || fallbackQuarter;
+  const quarterText = quarterLabel(quarter);
+  const category = getSelectName(properties, "Category") || "Korean Albums";
+  const region = getSelectName(properties, "Region") || "Korea";
+  const language = getSelectName(properties, "Language") || "ko";
+  const albumCount = (parsedBlocks.tiers || []).reduce((sum, tier) => sum + (tier.items || []).filter((item) => item.album || item.artist).length, 0);
+  const essays = parsedBlocks.companionEssays || [];
+  const inferredCompanionLabels = Array.from(new Set(essays.map((essay) => essay.tierLabel).filter(Boolean)));
+  const companionLabels = inferredCompanionLabels.length
+    ? inferredCompanionLabels
+    : getMultiSelectNames(properties, "Companion Essay Tier Labels");
+  const publishedAt = quarterEndDate(year, quarter);
+  const issue = `${year} ${quarterText}`.trim();
+  const issueTitle = `${issue} 한국앨범 결산`;
+  const excerpt = `${year}년 ${quarter}분기 한국 앨범을 7단계 티어 체계로 정리한 quarterly archive.`;
+  const seoDescription = `artic. quarterly archive for ${issue} Korean albums.`;
+  const slug = slugifyQuarterlyIssue(year, quarter, region, category);
+
+  return {
+    properties: {
+      Name: issueTitle,
+      "Issue Title": issueTitle,
+      Slug: slug,
+      Issue: issue,
+      Excerpt: excerpt,
+      "SEO Description": seoDescription,
+      Year: year,
+      Quarter: quarterText,
+      Category: category,
+      Region: region,
+      Language: language,
+      "Published At": publishedAt,
+      "아카이빙일": publishedAt,
+      "Source Format": "Structured Table",
+      "Publication Status": "완료",
+      "Tier Model": "Seven-Level Albums",
+      "Has Companion Essays": essays.length > 0,
+      "Companion Essay Count": essays.length,
+      "Companion Essay Tier Labels": companionLabels,
+      "업로드 확정": albumCount > 0,
+    },
+    diagnostics: {
+      inferredFromAlbums: Boolean(inferredFromAlbums),
+      albumCount,
+      essayCount: essays.length,
+      year,
+      quarter,
+      issue,
+      slug,
+    },
+  };
+}
+
 function blockPlainText(block) {
   const type = block?.type;
   const value = block?.[type];
@@ -964,6 +1109,10 @@ function buildNotionPropertyValue(currentProperty, value) {
   if (type === "status") {
     return { status: value ? { name: String(value) } : null };
   }
+  if (type === "multi_select") {
+    const values = Array.isArray(value) ? value : String(value || "").split(",");
+    return { multi_select: values.map((name) => String(name || "").trim()).filter(Boolean).map((name) => ({ name })) };
+  }
   return null;
 }
 
@@ -975,6 +1124,7 @@ async function updateNotionPageProperties(token, pageId, properties, options = {
   const allowed = new Set([
     "Slug",
     "Excerpt",
+    "SEO Description",
     "Issue",
     "Issue Title",
     "Publication Status",
@@ -1101,6 +1251,27 @@ async function queryQuarterlyPages(token, dataSourceId = getDataSourceId()) {
   } while (startCursor);
 
   return pages.filter(shouldPublishPage);
+}
+
+async function queryQuarterlyPagesRaw(token, dataSourceId = getDataSourceId()) {
+  const pages = [];
+  let startCursor = undefined;
+
+  do {
+    const payload = await notionRequest(`/data_sources/${dataSourceId}/query`, {
+      method: "POST",
+      token,
+      body: {
+        page_size: 100,
+        start_cursor: startCursor,
+        sorts: [{ timestamp: "last_edited_time", direction: "descending" }],
+      },
+    });
+    pages.push(...(payload.results || []));
+    startCursor = payload.has_more ? payload.next_cursor : undefined;
+  } while (startCursor);
+
+  return pages;
 }
 
 async function listBlockChildren(token, blockId) {
@@ -1298,13 +1469,17 @@ module.exports = {
   compareQuarterlyIssues,
   getDataSourceId,
   getNotionToken,
+  getNotionPage,
   enrichQuarterlyMedia,
   getHighResolutionMediaUrl,
   makeAlbumMediaKey,
   normalizeIssuePage,
+  inferQuarterlyIssueProperties,
   appendNotionPagePlainText,
+  parseIssueBlocks,
   parseQuarterlyBlocks,
   parseTableRows,
+  queryQuarterlyPagesRaw,
   replaceNotionPagePlainText,
   shouldPublishPage,
   updateNotionPageProperties,

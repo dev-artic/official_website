@@ -1,8 +1,12 @@
 const {
   TIER_CANON,
   fetchQuarterlyContents,
+  getNotionPage,
   getHighResolutionMediaUrl,
+  inferQuarterlyIssueProperties,
   makeAlbumMediaKey,
+  parseIssueBlocks,
+  queryQuarterlyPagesRaw,
   replaceNotionPagePlainText,
   updateNotionPageProperties,
   updateNotionTableRowCells,
@@ -490,7 +494,17 @@ async function refreshBugsCoverCandidate({ album, artist }) {
   return { candidates: candidates.slice(0, 5) };
 }
 
-async function handleQuarterlyAdminAction({ body, token, db, fieldValue, youtubeApiKey = "" }) {
+async function handleQuarterlyAdminAction({
+  body,
+  token,
+  db,
+  fieldValue,
+  youtubeApiKey = "",
+  dataSourceId,
+  mediaCache = null,
+  nowArtic = null,
+  externalLinks = null,
+}) {
   const action = body?.action;
 
   if (action === "save_album_cover_override") {
@@ -714,6 +728,149 @@ async function handleQuarterlyAdminAction({ body, token, db, fieldValue, youtube
       expectedLastEditedTime: body.expectedLastEditedTime || "",
     });
     return { success: true, pageId: result.id };
+  }
+
+  if (action === "auto_fill_issue_properties") {
+    const pageId = body.pageId || body.issueId;
+    if (!pageId) {
+      const error = new Error("Missing required field (pageId).");
+      error.status = 400;
+      throw error;
+    }
+    const page = await getNotionPage(token, pageId);
+    const parsedBlocks = await parseIssueBlocks(token, pageId, { includeSourceMetadata: false });
+    const inferred = inferQuarterlyIssueProperties(page, parsedBlocks);
+    if (!inferred.diagnostics.albumCount && body.allowEmpty !== true) {
+      const error = new Error("No album rows were found. Fill the tier tables before auto-filling issue properties.");
+      error.status = 400;
+      throw error;
+    }
+    const result = await updateNotionPageProperties(token, pageId, inferred.properties, {
+      expectedTitle: body.expectedTitle || "",
+      expectedLastEditedTime: body.expectedLastEditedTime || "",
+    });
+    return {
+      success: true,
+      pageId: result.id,
+      inferred: inferred.diagnostics,
+      properties: inferred.properties,
+    };
+  }
+
+  if (action === "batch_auto_fill_issue_properties") {
+    const pages = await queryQuarterlyPagesRaw(token);
+    const updated = [];
+    const skipped = [];
+    const errors = [];
+
+    for (const page of pages) {
+      const pageId = page.id;
+      try {
+        const pageTitle = String(page.properties?.Name?.title?.map((item) => item.plain_text || "").join("") || "");
+        const status = page.properties?.["Publication Status"]?.status?.name || "";
+        const uploadConfirmed = page.properties?.["업로드 확정"]?.checkbox === true;
+        const isTemplateItself = /template/i.test(pageTitle);
+        const parsedBlocks = await parseIssueBlocks(token, pageId, { includeSourceMetadata: false });
+        const inferred = inferQuarterlyIssueProperties(page, parsedBlocks);
+
+        if (!inferred.diagnostics.albumCount) {
+          skipped.push({ pageId, title: pageTitle || page.url, reason: "no album rows" });
+          continue;
+        }
+        if (isTemplateItself && !body.includeTemplateDrafts) {
+          skipped.push({ pageId, title: pageTitle || page.url, reason: "template draft" });
+          continue;
+        }
+        if (status === "완료" && uploadConfirmed && body.includePublished !== true) {
+          skipped.push({ pageId, title: pageTitle || page.url, reason: "already published" });
+          continue;
+        }
+
+        const result = await updateNotionPageProperties(token, pageId, inferred.properties);
+        updated.push({
+          pageId: result.id,
+          title: inferred.properties["Issue Title"],
+          ...inferred.diagnostics,
+        });
+      } catch (err) {
+        errors.push({ pageId, error: err.message });
+      }
+    }
+
+    return {
+      success: errors.length === 0,
+      updated,
+      skipped,
+      errors,
+    };
+  }
+
+  if (action === "publish_quarterly_archive") {
+    const pages = await queryQuarterlyPagesRaw(token);
+    const updated = [];
+    const skipped = [];
+    const errors = [];
+
+    for (const page of pages) {
+      const pageId = page.id;
+      try {
+        const pageTitle = String(page.properties?.Name?.title?.map((item) => item.plain_text || "").join("") || "");
+        const status = page.properties?.["Publication Status"]?.status?.name || "";
+        const uploadConfirmed = page.properties?.["업로드 확정"]?.checkbox === true;
+        const isTemplateItself = /template/i.test(pageTitle);
+        const parsedBlocks = await parseIssueBlocks(token, pageId, { includeSourceMetadata: false });
+        const inferred = inferQuarterlyIssueProperties(page, parsedBlocks);
+
+        if (!inferred.diagnostics.albumCount) {
+          skipped.push({ pageId, title: pageTitle || page.url, reason: "no album rows" });
+          continue;
+        }
+        if (isTemplateItself && !body.includeTemplateDrafts) {
+          skipped.push({ pageId, title: pageTitle || page.url, reason: "template draft" });
+          continue;
+        }
+        if (status === "완료" && uploadConfirmed && body.includePublished !== true) {
+          skipped.push({ pageId, title: pageTitle || page.url, reason: "already published" });
+          continue;
+        }
+
+        const result = await updateNotionPageProperties(token, pageId, inferred.properties);
+        updated.push({
+          pageId: result.id,
+          title: inferred.properties["Issue Title"],
+          ...inferred.diagnostics,
+        });
+      } catch (err) {
+        errors.push({ pageId, error: err.message });
+      }
+    }
+
+    const youtubeOverrides = await readQuarterlyYoutubeTrackOverrides(db);
+    const mediaReviews = await readQuarterlyMediaReviewOverrides(db);
+    const baseArchive = await fetchQuarterlyContents({
+      token,
+      dataSourceId,
+      mediaCache: buildMediaCacheWithOverrides(mediaCache, await readQuarterlyMediaOverrides(db)),
+      nowArtic,
+      externalLinks,
+      includeSourceMetadata: true,
+    });
+    const archive = applyQuarterlyYoutubeTracks(baseArchive, youtubeOverrides.tracks);
+    const diagnostics = buildQuarterlyAdminDiagnostics(archive, mediaReviews.reviews);
+    diagnostics.youtubeTrackHealth = buildYoutubeTrackDiagnostics(archive);
+    diagnostics.summary.youtubeTrackTotal = diagnostics.youtubeTrackHealth.summary.total;
+    diagnostics.summary.youtubeTrackResolved = diagnostics.youtubeTrackHealth.summary.resolved;
+    diagnostics.summary.youtubeTrackUnresolved = diagnostics.youtubeTrackHealth.summary.unresolved;
+
+    return {
+      success: errors.length === 0,
+      updated,
+      skipped,
+      errors,
+      archive,
+      diagnostics,
+      publishedAt: new Date().toISOString(),
+    };
   }
 
   if (action === "batch_auto_resolve_youtube_tracks") {

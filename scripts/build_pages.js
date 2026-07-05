@@ -179,6 +179,7 @@ function replaceComponents(html, depth, isLayoutLevel = false, slug = '') {
 const staticPages = [
   { src: 'index.html', dest: 'index.html' },
   { src: 'about.html', dest: 'about/index.html' },
+  { src: 'artic-le.html', dest: 'artic-le/index.html' },
   { src: 'contact.html', dest: 'contact/index.html' },
   { src: 'quarterly.html', dest: 'quarterly/index.html' },
   { src: 'quarterly-acha.html', dest: 'quarterly/acha/index.html' },

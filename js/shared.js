@@ -165,7 +165,7 @@ function buildNavigationBar() {
   const menuItems = [
     { name: 'About', href: '/about/' },
     { name: 'Projects', href: '/projects/' },
-    { name: 'artic.le', href: 'javascript:void(0)' },
+    { name: 'artic.le', href: '/artic-le/' },
     { name: 'Quarterly', href: '/quarterly/' },
     { name: 'Contact', href: '/contact/' }
   ];
@@ -185,12 +185,10 @@ function buildNavigationBar() {
     const isArticle = item.name === 'artic.le';
     let isActive = false;
 
-    if (!isArticle) {
-      if (item.href === '/projects/') {
-        isActive = isProjectsActive;
-      } else {
-        isActive = pathname.includes(item.href);
-      }
+    if (item.href === '/projects/') {
+      isActive = isProjectsActive;
+    } else {
+      isActive = pathname.includes(item.href);
     }
 
     const activeClass = isActive ? 'active' : '';
@@ -306,10 +304,10 @@ function initMobileNav() {
     }
   });
 
-  // Close nav when clicking a link (except for the artic.le menu to keep overlay waiting)
+  // Close nav when clicking a link.
   nav.querySelectorAll('.nav-link, .nav-home').forEach(link => {
     link.addEventListener('click', () => {
-      if (link.classList.contains('nav-artic-le')) {
+      if (link.classList.contains('nav-artic-le') && link.getAttribute('href')?.startsWith('javascript')) {
         return;
       }
       document.body.classList.remove('nav-open');
@@ -330,7 +328,7 @@ function initMobileNav() {
 
 // ── 5. Sub-page Landing Transition Overlay ──
 function initSubpageTransition() {
-  const mainContent = document.querySelector('.about-content, .container, .contact-wrap, .page-container, .acha-page');
+  const mainContent = document.querySelector('.about-content, .container, .contact-wrap, .page-container, .acha-page, .article-page');
   if (!mainContent) return;
 
   // Do NOT run on homepage
@@ -378,6 +376,8 @@ function initSubpageTransition() {
     items = Array.from(document.querySelectorAll('.project-card'));
   } else if (document.querySelector('.contact-wrap')) {
     items = Array.from(document.querySelectorAll('.contact-email'));
+  } else if (document.querySelector('.article-page')) {
+    items = Array.from(document.querySelectorAll('.article-hero, .article-meta-grid, .article-section, .article-close'));
   }
 
   items.forEach((item, index) => {
@@ -452,6 +452,7 @@ function initArticleMenu() {
     let isTransitioning = false;
     
     link.addEventListener('click', (e) => {
+      if (!link.getAttribute('href')?.startsWith('javascript')) return;
       e.preventDefault();
       if (isTransitioning) return;
       isTransitioning = true;

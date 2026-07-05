@@ -30,6 +30,7 @@ Homepage/
 ├── src/                  # [원본 소스] 각 페이지별 고유 콘텐츠 조각 및 메타데이터
 │   ├── index.html        # 메인 홈 화면 본문 소스
 │   ├── about.html        # About 페이지 본문 소스
+│   ├── artic-le.html     # artic.le 인스타그램 캐러셀 리더/아카이브 본문 소스
 │   ├── contact.html      # Contact 페이지 본문 소스
 │   ├── quarterly.html    # Quarterly 페이지 본문 소스
 │   ├── projects.html     # Projects 페이지 본문 소스
@@ -78,6 +79,8 @@ Homepage/
 ├── css/                  # [스타일시트 토큰]
 │   ├── design-system.css # [중요] 디자인 시스템 토큰 (색상, 여백, 폰트 변수 및 자동 다크모드 제어)
 │   └── animations.css    # cinematic 페이드인, 스크롤 리빌, 마우스오버 줌 트랜지션 등
+├── images/               # [정적 이미지 자산] 로고, 프로젝트 이미지, artic.le 캐러셀 슬라이드 등
+│   └── artic-le/         # Instagram carousel에서 보존한 artic.le 슬라이드 및 전용 로고 자산
 ├── js/                   # [클라이언트 스크립트]
 │   └── shared.js         # 다크모드 상태 관리, 모바일 햄버거 토글, 아코디언/카러셀 모션 등 공통 로직
 ├── functions/            # [백엔드 API] Node.js 22 기반 Firebase Cloud Functions 코드베이스

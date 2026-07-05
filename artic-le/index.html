@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="artic.le archive.">
+  <meta name="author" content="artic.">
+  <title>Artic.le | artic.</title>
+  <link rel="icon" type="image/png" href="../images/favicon.png">
+  <link rel="stylesheet" href="../css/design-system.css">
+  <link rel="stylesheet" href="../css/animations.css">
+  <script>
+    (function(){
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+      window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
+      var s = localStorage.getItem('artic-theme');
+      if (s === 'dark') document.documentElement.style.background = '#1A1A1A';
+      else if (!s) { var h = new Date().getHours(); if (h >= 19 || h < 6) document.documentElement.style.background = '#1A1A1A'; }
+    })();
+  </script>
+  
+<style>
+body {
+  overflow-x: hidden;
+}
+
+.article-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 96px var(--gutter) 84px;
+}
+
+.article-post-meta,
+.article-control,
+.article-thumb,
+.article-original,
+.article-category,
+.article-date {
+  font-family: var(--font-sans);
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.article-hero {
+  min-height: 22vh;
+  display: flex;
+  align-items: end;
+  padding: clamp(28px, 5vw, 62px) 0 clamp(24px, 4vw, 42px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.article-title {
+  display: inline-flex;
+  margin: 0;
+}
+
+.article-logo {
+  display: block;
+  width: min(620px, 58vw);
+  height: auto;
+}
+
+.dark-mode .article-logo {
+  content: url("/images/artic-le/brand/article-color-dark.png");
+}
+
+.article-post {
+  --article-progress: 0;
+  display: grid;
+  grid-template-columns: minmax(210px, 0.28fr) minmax(0, 0.72fr);
+  gap: clamp(26px, 5vw, 72px);
+  padding: clamp(42px, 6vw, 84px) 0;
+  border-bottom: 1px solid var(--border-color);
+  opacity: 0;
+  transform: translateY(34px);
+  transition: opacity 0.75s var(--ease-out-expo), transform 0.75s var(--ease-out-expo);
+}
+
+.article-post.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.article-viewer {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  position: relative;
+  transform: translateY(calc((0.5 - var(--article-progress)) * 18px));
+  transition: transform 0.18s linear;
+}
+
+.article-stage {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  max-width: min(760px, 100%);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.article-stage::before,
+.article-stage::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28%;
+  z-index: 2;
+}
+
+.article-stage::before {
+  left: 0;
+  cursor: w-resize;
+}
+
+.article-stage::after {
+  right: 0;
+  cursor: e-resize;
+}
+
+.article-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.article-stage img {
+  display: block;
+  width: 100%;
+  height: min(66vh, 820px);
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  background: var(--bg-primary);
+  transition: transform 0.22s ease;
+}
+
+.article-post-info {
+  grid-column: 1;
+  grid-row: 1;
+  position: sticky;
+  top: 106px;
+  align-self: start;
+  min-width: 0;
+  padding-top: 2px;
+  transform: translateY(calc((var(--article-progress) - 0.5) * 12px));
+  transition: transform 0.18s linear;
+}
+
+.article-post-meta {
+  color: var(--text-muted);
+}
+
+.article-post-title {
+  margin-top: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 2.4vw, 2.35rem);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: 0;
+  color: var(--text-primary);
+}
+
+.article-category {
+  margin-top: 18px;
+  color: var(--text-primary);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.article-category,
+.article-date {
+  display: block;
+  width: fit-content;
+}
+
+.article-date {
+  margin-top: 18px;
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+}
+
+.article-caption {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.78rem;
+  line-height: 1.78;
+  color: var(--text-secondary);
+}
+
+.article-thumb-grid {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  width: min(280px, 100%);
+  max-width: min(760px, 100%);
+  margin: 18px auto 0;
+  padding: 12px 0;
+  overflow: visible;
+  scrollbar-width: none;
+  user-select: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.article-thumb-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.article-thumb {
+  position: relative;
+  flex: 0 0 5px;
+  width: 5px;
+  height: 5px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--text-muted);
+  color: var(--text-muted);
+  cursor: pointer;
+  overflow: hidden;
+  opacity: 0.38;
+  transition: width 0.25s ease, opacity 0.25s ease, background-color 0.25s ease;
+}
+
+.article-thumb img {
+  display: none;
+}
+
+.article-thumb span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.article-thumb.is-active {
+  width: 18px;
+  background: var(--text-primary);
+  opacity: 1;
+}
+
+.article-thumb:hover {
+  opacity: 1;
+}
+
+.article-preview {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 72px;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-primary);
+  opacity: 0;
+  transform: translate3d(var(--preview-x, 0), var(--preview-y, 0), 0) translate(-50%, -112%) scale(0.96);
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  transition: opacity 0.16s ease, transform 0.22s var(--ease-out-expo);
+}
+
+.article-preview.is-visible {
+  opacity: 1;
+  transform: translate3d(var(--preview-x, 0), var(--preview-y, 0), 0) translate(-50%, -118%) scale(1);
+}
+
+.article-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-whiteout {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.article-original {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 24px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  transition: color 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.article-original:hover {
+  color: var(--bg-primary);
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.article-mobile-strip {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .article-page {
+    padding-top: 84px;
+  }
+
+  .article-hero {
+    min-height: 30vh;
+  }
+
+  .article-post {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding: 42px 0 56px;
+  }
+
+  .article-viewer {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .article-post-info {
+    grid-column: auto;
+    grid-row: auto;
+    position: static;
+    order: -1;
+  }
+
+  .article-post-title {
+    max-width: 580px;
+  }
+
+  .article-thumb-grid {
+    display: none;
+  }
+
+  .article-stage {
+    display: none;
+  }
+
+  .article-mobile-strip {
+    display: flex;
+    gap: 12px;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0 var(--gutter) 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .article-mobile-strip img {
+    flex: 0 0 min(82vw, 460px);
+    width: min(82vw, 460px);
+    aspect-ratio: 4 / 5;
+    object-fit: contain;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    scroll-snap-align: center;
+  }
+
+  .article-original {
+    margin-top: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-post,
+  .article-viewer,
+  .article-post-info {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .article-page {
+    padding-inline: 18px;
+    padding-bottom: 64px;
+  }
+
+  .article-title {
+    max-width: 100%;
+  }
+
+  .article-logo {
+    width: min(100%, 360px);
+  }
+
+}
+</style>
+</head>
+<body>
+
+  <nav class="nav-bar delayed-reveal">
+  <a href="/" class="nav-home visible" id="nav-home">artic.</a>
+  <a href="/about/" class="nav-link">About</a>
+  <a href="/projects/" class="nav-link">Projects</a>
+  <a href="/artic-le/" class="nav-link nav-artic-le">artic.le</a>
+  <a href="/quarterly/" class="nav-link">Quarterly</a>
+  <a href="/contact/" class="nav-link">Contact</a>
+</nav>
+
+<!-- Theme Toggle (Integrated inside Header) -->
+<button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+  <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+  <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+  
+  
+
+<main class="article-page">
+  <section class="article-hero">
+    <div>
+      <h1 class="article-title">
+        <img class="article-logo" src="/images/artic-le/brand/article-color.png" alt="artic.le" width="760" height="175">
+      </h1>
+    </div>
+  </section>
+
+  <article class="article-post" data-article-gallery>
+    <div class="article-viewer">
+      <div class="article-stage">
+        <img data-article-main src="/images/artic-le/DI017yOzXyM/slide-01.jpg" alt="artic.le #2 slide 1" width="1440" height="1800">
+      </div>
+      <div class="article-mobile-strip" aria-label="artic.le #2 slides">
+        <img src="/images/artic-le/DI017yOzXyM/slide-01.jpg" alt="artic.le #2 slide 1" width="1440" height="1800">
+        <img src="/images/artic-le/DI017yOzXyM/slide-02.jpg" alt="artic.le #2 slide 2" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-03.jpg" alt="artic.le #2 slide 3" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-04.jpg" alt="artic.le #2 slide 4" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-05.jpg" alt="artic.le #2 slide 5" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-06.jpg" alt="artic.le #2 slide 6" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-07.jpg" alt="artic.le #2 slide 7" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-08.jpg" alt="artic.le #2 slide 8" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-09.jpg" alt="artic.le #2 slide 9" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-10.jpg" alt="artic.le #2 slide 10" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-11.jpg" alt="artic.le #2 slide 11" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-12.jpg" alt="artic.le #2 slide 12" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-13.jpg" alt="artic.le #2 slide 13" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-14.jpg" alt="artic.le #2 slide 14" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-15.jpg" alt="artic.le #2 slide 15" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-16.jpg" alt="artic.le #2 slide 16" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-17.jpg" alt="artic.le #2 slide 17" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-18.jpg" alt="artic.le #2 slide 18" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DI017yOzXyM/slide-19.jpg" alt="artic.le #2 slide 19" width="1440" height="1800" loading="lazy">
+      </div>
+    </div>
+
+    <aside class="article-post-info">
+      <h2 class="article-post-title">The Daily Calendar</h2>
+      <p class="article-category">Interview</p>
+      <p class="article-date">2025.04.24</p>
+      <p class="article-caption">artic이 카코포니를 만나, EP ‘April’s Party’ 발매를 기념하는 인터뷰를 진행합니다. 그녀에게 소중한 날짜들과 못다한 이야기가 담겨 있습니다. 지금 카코포니의 새로운 EP ‘April’s Party’를 들어보세요.</p>
+      <div class="article-thumb-grid" aria-label="artic.le #2 slide selector">
+        <div class="article-preview" aria-hidden="true"><img src="/images/artic-le/DI017yOzXyM/slide-01.jpg" alt=""></div>
+        <button class="article-thumb is-active" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-01.jpg" aria-label="Open slide 1"><img src="/images/artic-le/DI017yOzXyM/slide-01.jpg" alt="" width="1440" height="1800"><span>01</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-02.jpg" aria-label="Open slide 2"><img src="/images/artic-le/DI017yOzXyM/slide-02.jpg" alt="" width="1440" height="1800" loading="lazy"><span>02</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-03.jpg" aria-label="Open slide 3"><img src="/images/artic-le/DI017yOzXyM/slide-03.jpg" alt="" width="1440" height="1800" loading="lazy"><span>03</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-04.jpg" aria-label="Open slide 4"><img src="/images/artic-le/DI017yOzXyM/slide-04.jpg" alt="" width="1440" height="1800" loading="lazy"><span>04</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-05.jpg" aria-label="Open slide 5"><img src="/images/artic-le/DI017yOzXyM/slide-05.jpg" alt="" width="1440" height="1800" loading="lazy"><span>05</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-06.jpg" aria-label="Open slide 6"><img src="/images/artic-le/DI017yOzXyM/slide-06.jpg" alt="" width="1440" height="1800" loading="lazy"><span>06</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-07.jpg" aria-label="Open slide 7"><img src="/images/artic-le/DI017yOzXyM/slide-07.jpg" alt="" width="1440" height="1800" loading="lazy"><span>07</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-08.jpg" aria-label="Open slide 8"><img src="/images/artic-le/DI017yOzXyM/slide-08.jpg" alt="" width="1440" height="1800" loading="lazy"><span>08</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-09.jpg" aria-label="Open slide 9"><img src="/images/artic-le/DI017yOzXyM/slide-09.jpg" alt="" width="1440" height="1800" loading="lazy"><span>09</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-10.jpg" aria-label="Open slide 10"><img src="/images/artic-le/DI017yOzXyM/slide-10.jpg" alt="" width="1440" height="1800" loading="lazy"><span>10</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-11.jpg" aria-label="Open slide 11"><img src="/images/artic-le/DI017yOzXyM/slide-11.jpg" alt="" width="1440" height="1800" loading="lazy"><span>11</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-12.jpg" aria-label="Open slide 12"><img src="/images/artic-le/DI017yOzXyM/slide-12.jpg" alt="" width="1440" height="1800" loading="lazy"><span>12</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-13.jpg" aria-label="Open slide 13"><img src="/images/artic-le/DI017yOzXyM/slide-13.jpg" alt="" width="1440" height="1800" loading="lazy"><span>13</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-14.jpg" aria-label="Open slide 14"><img src="/images/artic-le/DI017yOzXyM/slide-14.jpg" alt="" width="1440" height="1800" loading="lazy"><span>14</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-15.jpg" aria-label="Open slide 15"><img src="/images/artic-le/DI017yOzXyM/slide-15.jpg" alt="" width="1440" height="1800" loading="lazy"><span>15</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-16.jpg" aria-label="Open slide 16"><img src="/images/artic-le/DI017yOzXyM/slide-16.jpg" alt="" width="1440" height="1800" loading="lazy"><span>16</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-17.jpg" aria-label="Open slide 17"><img src="/images/artic-le/DI017yOzXyM/slide-17.jpg" alt="" width="1440" height="1800" loading="lazy"><span>17</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-18.jpg" aria-label="Open slide 18"><img src="/images/artic-le/DI017yOzXyM/slide-18.jpg" alt="" width="1440" height="1800" loading="lazy"><span>18</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DI017yOzXyM/slide-19.jpg" aria-label="Open slide 19"><img src="/images/artic-le/DI017yOzXyM/slide-19.jpg" alt="" width="1440" height="1800" loading="lazy"><span>19</span></button>
+      </div>
+      <a class="article-original" href="https://www.instagram.com/p/DI017yOzXyM/" target="_blank" rel="noopener">View on Instagram</a>
+    </aside>
+  </article>
+
+  <article class="article-post" data-article-gallery>
+    <div class="article-viewer">
+      <div class="article-stage">
+        <img data-article-main src="/images/artic-le/DCjFbU1vd1L/slide-01.jpg" alt="artic.le #1 slide 1" width="1440" height="1800">
+      </div>
+      <div class="article-mobile-strip" aria-label="artic.le #1 slides">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-01.jpg" alt="artic.le #1 slide 1" width="1440" height="1800">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-02.jpg" alt="artic.le #1 slide 2" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-03.jpg" alt="artic.le #1 slide 3" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-04.jpg" alt="artic.le #1 slide 4" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-05.jpg" alt="artic.le #1 slide 5" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-06.jpg" alt="artic.le #1 slide 6" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-07.jpg" alt="artic.le #1 slide 7" width="1440" height="1800" loading="lazy">
+        <img src="/images/artic-le/DCjFbU1vd1L/slide-08.jpg" alt="artic.le #1 slide 8" width="1440" height="1800" loading="lazy">
+      </div>
+    </div>
+
+    <aside class="article-post-info">
+      <h2 class="article-post-title">snowman and Everything Everywhere All at Once</h2>
+      <p class="article-category">Curation</p>
+      <p class="article-date">2024.11.19</p>
+      <p class="article-caption">artic이 카코포니를 만나, 그녀의 겨울 싱글 ‘snowman’을 큐레이팅합니다. 지금 카코포니의 ‘snowman’을 ‘에브리싱 에브리웨어 올 앳 원스’와 함께 들어보세요.</p>
+      <div class="article-thumb-grid" aria-label="artic.le #1 slide selector">
+        <div class="article-preview" aria-hidden="true"><img src="/images/artic-le/DCjFbU1vd1L/slide-01.jpg" alt=""></div>
+        <button class="article-thumb is-active" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-01.jpg" aria-label="Open slide 1"><img src="/images/artic-le/DCjFbU1vd1L/slide-01.jpg" alt="" width="1440" height="1800"><span>01</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-02.jpg" aria-label="Open slide 2"><img src="/images/artic-le/DCjFbU1vd1L/slide-02.jpg" alt="" width="1440" height="1800" loading="lazy"><span>02</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-03.jpg" aria-label="Open slide 3"><img src="/images/artic-le/DCjFbU1vd1L/slide-03.jpg" alt="" width="1440" height="1800" loading="lazy"><span>03</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-04.jpg" aria-label="Open slide 4"><img src="/images/artic-le/DCjFbU1vd1L/slide-04.jpg" alt="" width="1440" height="1800" loading="lazy"><span>04</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-05.jpg" aria-label="Open slide 5"><img src="/images/artic-le/DCjFbU1vd1L/slide-05.jpg" alt="" width="1440" height="1800" loading="lazy"><span>05</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-06.jpg" aria-label="Open slide 6"><img src="/images/artic-le/DCjFbU1vd1L/slide-06.jpg" alt="" width="1440" height="1800" loading="lazy"><span>06</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-07.jpg" aria-label="Open slide 7"><img src="/images/artic-le/DCjFbU1vd1L/slide-07.jpg" alt="" width="1440" height="1800" loading="lazy"><span>07</span></button>
+        <button class="article-thumb" type="button" data-src="/images/artic-le/DCjFbU1vd1L/slide-08.jpg" aria-label="Open slide 8"><img src="/images/artic-le/DCjFbU1vd1L/slide-08.jpg" alt="" width="1440" height="1800" loading="lazy"><span>08</span></button>
+      </div>
+      <a class="article-original" href="https://www.instagram.com/p/DCjFbU1vd1L/" target="_blank" rel="noopener">View on Instagram</a>
+    </aside>
+  </article>
+</main>
+
+
+
+
+
+
+  <footer class="about-footer">
+  © 2026 artic. All Rights Reserved
+</footer>
+
+  <script src="../js/shared.js?v=quarterly-archive-1"></script>
+  <script>
+
+(() => {
+  const galleries = document.querySelectorAll('[data-article-gallery]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduceMotion) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('is-visible');
+      });
+    }, { threshold: 0.18 });
+
+    galleries.forEach((gallery) => observer.observe(gallery));
+
+    let ticking = false;
+    const syncScrollProgress = () => {
+      const viewport = window.innerHeight || document.documentElement.clientHeight;
+      galleries.forEach((gallery) => {
+        const rect = gallery.getBoundingClientRect();
+        const progress = Math.min(1, Math.max(0, (viewport - rect.top) / (viewport + rect.height)));
+        gallery.style.setProperty('--article-progress', progress.toFixed(3));
+      });
+      ticking = false;
+    };
+
+    const requestProgressSync = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(syncScrollProgress);
+    };
+
+    syncScrollProgress();
+    window.addEventListener('scroll', requestProgressSync, { passive: true });
+    window.addEventListener('resize', requestProgressSync);
+  } else {
+    galleries.forEach((gallery) => gallery.classList.add('is-visible'));
+  }
+
+  galleries.forEach((gallery) => {
+    const thumbGrid = gallery.querySelector('.article-thumb-grid');
+    const mainImage = gallery.querySelector('[data-article-main]');
+    const thumbs = Array.from(gallery.querySelectorAll('.article-thumb'));
+    const stage = gallery.querySelector('.article-stage');
+    const viewer = gallery.querySelector('.article-viewer');
+    const preview = gallery.querySelector('.article-preview');
+    const previewImage = preview?.querySelector('img');
+    const whiteout = document.createElement('span');
+    let index = 0;
+    let scrubIndex = 0;
+    let ignoreClick = false;
+    let isAnimating = false;
+
+    whiteout.className = 'article-whiteout';
+    stage?.appendChild(whiteout);
+
+    if (viewer && thumbGrid && thumbGrid.parentElement !== viewer) {
+      viewer.appendChild(thumbGrid);
+    }
+
+    if (mainImage) {
+      mainImage.draggable = false;
+      mainImage.addEventListener('dragstart', (event) => event.preventDefault());
+    }
+
+    const applyIndex = (nextIndex, options = {}) => {
+      if (!mainImage || thumbs.length === 0) return;
+      const previousIndex = index;
+      const resolvedIndex = (nextIndex + thumbs.length) % thumbs.length;
+      if (resolvedIndex === previousIndex) return;
+      if (options.animate && isAnimating) return;
+      const active = thumbs[resolvedIndex];
+      const direction = options.direction || (resolvedIndex >= previousIndex ? -1 : 1);
+
+      const commit = () => {
+        index = resolvedIndex;
+        mainImage.src = active.dataset.src;
+        mainImage.alt = `${gallery.querySelector('.article-post-title')?.textContent || 'artic.le'} slide ${index + 1}`;
+      };
+
+      const resetMotionState = () => {
+        mainImage.style.opacity = '';
+        mainImage.style.transform = '';
+        whiteout.style.opacity = '0';
+      };
+
+      thumbs.forEach((thumb, thumbIndex) => {
+        thumb.classList.toggle('is-active', thumbIndex === resolvedIndex);
+        thumb.setAttribute('aria-pressed', thumbIndex === resolvedIndex ? 'true' : 'false');
+      });
+
+      if (options.animate && !reduceMotion) {
+        isAnimating = true;
+        mainImage.getAnimations().forEach((animation) => animation.cancel());
+        whiteout.getAnimations().forEach((animation) => animation.cancel());
+        resetMotionState();
+
+        const outAnimation = mainImage.animate([
+          { opacity: 1, transform: 'translateX(0)' },
+          { opacity: 0.38, transform: `translateX(${direction * 28}px)` },
+        ], {
+          duration: 280,
+          easing: 'cubic-bezier(0.4, 0, 1, 1)',
+          fill: 'forwards'
+        });
+
+        const whiteIn = whiteout.animate([
+          { opacity: 0 },
+          { opacity: 0.92 }
+        ], {
+          duration: 220,
+          easing: 'cubic-bezier(0.4, 0, 1, 1)',
+          fill: 'forwards'
+        });
+
+        Promise.allSettled([outAnimation.finished, whiteIn.finished]).then(() => {
+          outAnimation.cancel();
+          whiteIn.cancel();
+          resetMotionState();
+          commit();
+          const inAnimation = mainImage.animate([
+            { opacity: 0.4, transform: `translateX(${-direction * 32}px)` },
+            { opacity: 1, transform: 'translateX(0)' }
+          ], {
+            duration: 520,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+          });
+          const whiteOut = whiteout.animate([
+            { opacity: 0.92 },
+            { opacity: 0 }
+          ], {
+            duration: 420,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'forwards'
+          });
+
+          Promise.allSettled([inAnimation.finished, whiteOut.finished]).finally(() => {
+            inAnimation.cancel();
+            whiteOut.cancel();
+            resetMotionState();
+            isAnimating = false;
+          });
+        });
+      } else {
+        commit();
+        if (options.animate && reduceMotion) {
+          whiteout.style.opacity = '0';
+          isAnimating = false;
+        } else if (options.animate) {
+          mainImage.animate([
+            { opacity: 0.65 },
+            { opacity: 1 }
+          ], {
+            duration: 260,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+          });
+        }
+      }
+    };
+
+    const updatePreview = (thumb) => {
+      if (!thumbGrid || !preview || !previewImage || !thumb) return;
+      const gridRect = thumbGrid.getBoundingClientRect();
+      const thumbRect = thumb.getBoundingClientRect();
+      previewImage.src = thumb.dataset.src;
+      preview.style.setProperty('--preview-x', `${thumbRect.left + thumbRect.width / 2 - gridRect.left}px`);
+      preview.style.setProperty('--preview-y', `${thumbRect.top - gridRect.top}px`);
+      preview.classList.add('is-visible');
+    };
+
+    const findThumbFromX = (clientX) => {
+      if (thumbs.length === 0) return null;
+      let closest = thumbs[0];
+      let closestDistance = Infinity;
+      thumbs.forEach((thumb) => {
+        const rect = thumb.getBoundingClientRect();
+        const center = rect.left + rect.width / 2;
+        const distance = Math.abs(clientX - center);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closest = thumb;
+        }
+      });
+      return closest;
+    };
+
+    thumbs.forEach((thumb, thumbIndex) => {
+      thumb.setAttribute('aria-pressed', thumbIndex === 0 ? 'true' : 'false');
+      thumb.addEventListener('click', (event) => {
+        if (ignoreClick) {
+          event.preventDefault();
+          return;
+        }
+        applyIndex(thumbIndex, { animate: true, direction: thumbIndex >= index ? -1 : 1 });
+      });
+    });
+
+    if (thumbGrid) {
+      let isScrubbing = false;
+
+      thumbGrid.addEventListener('pointerenter', (event) => {
+        const thumb = findThumbFromX(event.clientX);
+        updatePreview(thumb);
+      });
+
+      thumbGrid.addEventListener('pointermove', (event) => {
+        const thumb = findThumbFromX(event.clientX);
+        if (!thumb) return;
+        updatePreview(thumb);
+        if (isScrubbing) {
+          const nextIndex = thumbs.indexOf(thumb);
+          if (nextIndex !== scrubIndex) {
+            scrubIndex = nextIndex;
+            ignoreClick = true;
+            applyIndex(nextIndex, { animate: false });
+          }
+        }
+      });
+
+      thumbGrid.addEventListener('pointerleave', () => {
+        if (!isScrubbing) preview?.classList.remove('is-visible');
+      });
+
+      thumbGrid.addEventListener('pointerdown', (event) => {
+        const thumb = findThumbFromX(event.clientX);
+        if (!thumb) return;
+        isScrubbing = true;
+        scrubIndex = thumbs.indexOf(thumb);
+        thumbGrid.setPointerCapture?.(event.pointerId);
+        updatePreview(thumb);
+        applyIndex(scrubIndex, { animate: false });
+      });
+
+      const stopScrubbing = (event) => {
+        if (!isScrubbing) return;
+        isScrubbing = false;
+        preview?.classList.remove('is-visible');
+        thumbGrid.releasePointerCapture?.(event.pointerId);
+        window.setTimeout(() => {
+          ignoreClick = false;
+        }, 0);
+      };
+
+      thumbGrid.addEventListener('pointerup', stopScrubbing);
+      thumbGrid.addEventListener('pointercancel', stopScrubbing);
+    }
+
+    if (stage) {
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let deltaX = 0;
+      let deltaY = 0;
+      let hasHorizontalIntent = false;
+      let startTime = 0;
+
+      stage.addEventListener('pointerdown', (event) => {
+        if (event.button !== undefined && event.button !== 0) return;
+        if (isAnimating) return;
+        isDragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        deltaX = 0;
+        deltaY = 0;
+        hasHorizontalIntent = false;
+        startTime = window.performance.now();
+        stage.classList.add('is-dragging');
+        stage.setPointerCapture?.(event.pointerId);
+      });
+
+      stage.addEventListener('pointermove', (event) => {
+        if (!isDragging) return;
+        deltaX = event.clientX - startX;
+        deltaY = event.clientY - startY;
+        if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY) * 1.15) {
+          hasHorizontalIntent = true;
+        }
+        if (hasHorizontalIntent) {
+          event.preventDefault();
+        }
+      });
+
+      const stopDragging = (event) => {
+        if (!isDragging) return;
+        isDragging = false;
+        stage.classList.remove('is-dragging');
+        mainImage.style.transform = '';
+        const elapsed = window.performance.now() - startTime;
+        const stageWidth = stage.getBoundingClientRect().width;
+        const swipeThreshold = Math.min(118, Math.max(72, stageWidth * 0.14));
+        if (hasHorizontalIntent) {
+          if (Math.abs(deltaX) >= swipeThreshold) {
+          applyIndex(index + (deltaX < 0 ? 1 : -1), { animate: true, direction: deltaX < 0 ? -1 : 1 });
+          }
+        } else if (Math.abs(deltaX) <= 6 && Math.abs(deltaY) <= 6 && elapsed < 650) {
+          const rect = stage.getBoundingClientRect();
+          const x = startX - rect.left;
+          if (x <= rect.width * 0.26) {
+            applyIndex(index - 1, { animate: true, direction: 1 });
+          } else if (x >= rect.width * 0.74) {
+            applyIndex(index + 1, { animate: true, direction: -1 });
+          }
+        }
+        stage.releasePointerCapture?.(event.pointerId);
+      };
+
+      stage.addEventListener('pointerup', stopDragging);
+      stage.addEventListener('pointercancel', stopDragging);
+    }
+  });
+})();
+
+</script>
+</body>
+</html>

@@ -314,6 +314,27 @@ body {
   display: none;
 }
 
+@media (max-width: 1180px) and (min-width: 901px) {
+  .article-post {
+    grid-template-columns: minmax(190px, 0.3fr) minmax(0, 0.7fr);
+    gap: clamp(24px, 4vw, 48px);
+  }
+
+  .article-stage {
+    max-width: min(620px, 100%);
+  }
+
+  .article-stage img {
+    height: auto;
+    min-height: 0;
+    max-height: min(62vh, 700px);
+  }
+
+  .article-post-info {
+    top: 92px;
+  }
+}
+
 @media (max-width: 900px) {
   .article-page {
     padding-top: 84px;
@@ -355,6 +376,8 @@ body {
 
   .article-mobile-strip {
     display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
     gap: 12px;
     margin-inline: calc(var(--gutter) * -1);
     padding: 0 var(--gutter) 16px;
@@ -366,6 +389,8 @@ body {
   .article-mobile-strip img {
     flex: 0 0 min(82vw, 460px);
     width: min(82vw, 460px);
+    height: min(102.5vw, 575px);
+    max-height: 72vh;
     aspect-ratio: 4 / 5;
     object-fit: contain;
     background: var(--bg-secondary);
@@ -588,10 +613,12 @@ body {
     const preview = gallery.querySelector('.article-preview');
     const previewImage = preview?.querySelector('img');
     const whiteout = document.createElement('span');
+    const preloadCache = new Map();
     let index = 0;
     let scrubIndex = 0;
     let ignoreClick = false;
     let isAnimating = false;
+    let transitionToken = 0;
 
     whiteout.className = 'article-whiteout';
     stage?.appendChild(whiteout);
@@ -605,7 +632,40 @@ body {
       mainImage.addEventListener('dragstart', (event) => event.preventDefault());
     }
 
-    const applyIndex = (nextIndex, options = {}) => {
+    const prepareImage = (src) => {
+      if (!src) return Promise.resolve();
+      if (preloadCache.has(src)) return preloadCache.get(src);
+      const image = new Image();
+      image.decoding = 'async';
+      const promise = new Promise((resolve) => {
+        image.onload = () => {
+          if (image.decode) {
+            image.decode().then(resolve).catch(resolve);
+          } else {
+            resolve();
+          }
+        };
+        image.onerror = resolve;
+      });
+      image.src = src;
+      preloadCache.set(src, promise);
+      return promise;
+    };
+
+    const warmSlides = () => {
+      thumbs.forEach((thumb) => prepareImage(thumb.dataset.src));
+    };
+
+    prepareImage(mainImage?.src);
+    prepareImage(thumbs[1]?.dataset.src);
+    prepareImage(thumbs[thumbs.length - 1]?.dataset.src);
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(warmSlides, { timeout: 1200 });
+    } else {
+      window.setTimeout(warmSlides, 250);
+    }
+
+    const applyIndex = async (nextIndex, options = {}) => {
       if (!mainImage || thumbs.length === 0) return;
       const previousIndex = index;
       const resolvedIndex = (nextIndex + thumbs.length) % thumbs.length;
@@ -613,11 +673,18 @@ body {
       if (options.animate && isAnimating) return;
       const active = thumbs[resolvedIndex];
       const direction = options.direction || (resolvedIndex >= previousIndex ? -1 : 1);
+      const token = ++transitionToken;
 
-      const commit = () => {
+      const commit = async () => {
+        await prepareImage(active.dataset.src);
+        if (token !== transitionToken) return false;
         index = resolvedIndex;
         mainImage.src = active.dataset.src;
         mainImage.alt = `${gallery.querySelector('.article-post-title')?.textContent || 'artic.le'} slide ${index + 1}`;
+        if (mainImage.decode) {
+          await mainImage.decode().catch(() => {});
+        }
+        return token === transitionToken;
       };
 
       const resetMotionState = () => {
@@ -655,11 +722,15 @@ body {
           fill: 'forwards'
         });
 
-        Promise.allSettled([outAnimation.finished, whiteIn.finished]).then(() => {
+        Promise.allSettled([outAnimation.finished, whiteIn.finished]).then(async () => {
+          const didCommit = await commit();
           outAnimation.cancel();
           whiteIn.cancel();
           resetMotionState();
-          commit();
+          if (!didCommit) {
+            isAnimating = false;
+            return;
+          }
           const inAnimation = mainImage.animate([
             { opacity: 0.4, transform: `translateX(${-direction * 32}px)` },
             { opacity: 1, transform: 'translateX(0)' }
@@ -684,7 +755,8 @@ body {
           });
         });
       } else {
-        commit();
+        const didCommit = await commit();
+        if (!didCommit) return;
         if (options.animate && reduceMotion) {
           whiteout.style.opacity = '0';
           isAnimating = false;

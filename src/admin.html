@@ -361,6 +361,11 @@ path_depth: "../"
     color: #e74c3c;
   }
 
+  .status-badge.bot-detected {
+    background-color: rgba(231, 76, 60, 0.18);
+    color: #e74c3c;
+  }
+
   /* Forms & Editors */
   .edit-form-row {
     display: flex;
@@ -1497,8 +1502,12 @@ path_depth: "../"
       });
     };
 
-    window.deleteSubscriber = function(subId) {
-      if (!confirm('Are you sure you want to delete this subscriber? This action cannot be undone.')) return;
+    window.deleteSubscriber = function(subId, recordType = 'subscriber') {
+      const isBotEvent = recordType === 'bot';
+      const confirmMessage = isBotEvent
+        ? 'Are you sure you want to delete this bot detection log? This action cannot be undone.'
+        : 'Are you sure you want to delete this subscriber? This action cannot be undone.';
+      if (!confirm(confirmMessage)) return;
 
       const apiUrl = window.getArticApiUrl ? window.getArticApiUrl('admin') : '/api/admin/products';
 
@@ -1509,7 +1518,7 @@ path_depth: "../"
           'Authorization': `Bearer ${adminToken}`
         },
         body: JSON.stringify({
-          action: 'delete_subscriber',
+          action: isBotEvent ? 'delete_waitlist_bot_event' : 'delete_subscriber',
           id: subId
         })
       })
@@ -1520,7 +1529,7 @@ path_depth: "../"
         return res.json();
       })
       .then(() => {
-        alert('Subscriber deleted successfully.');
+        alert(isBotEvent ? 'Bot detection log deleted successfully.' : 'Subscriber deleted successfully.');
         loadDashboardData();
       })
       .catch(err => {
@@ -1538,19 +1547,25 @@ path_depth: "../"
       }
 
       subscribers.forEach(s => {
+        const isBotDetected = s.waitlist_status === 'bot_detected' || s.welcome_email_sent === 'bot_detected';
         const welcomeEmailSent = s.welcome_email_sent === true || s.welcome_email_sent === 1;
-        const mailStatusClass = welcomeEmailSent ? 'sent-success' : 'sent-failed';
-        const mailStatusText = welcomeEmailSent ? 'SENT' : 'PENDING';
+        const mailStatusClass = isBotDetected ? 'bot-detected' : (welcomeEmailSent ? 'sent-success' : 'sent-failed');
+        const mailStatusText = isBotDetected ? 'BOT DETECTED' : (welcomeEmailSent ? 'SENT' : 'PENDING');
+        const recordType = isBotDetected ? 'bot' : 'subscriber';
+        const createdAt = s.created_at ? new Date(s.created_at).toLocaleString('ko-KR') : '-';
+        const typeLabel = isBotDetected
+          ? `${escapeHtml(s.type || 'quarterly')} / ${escapeHtml(s.bot_reason || 'bot_detected')}`
+          : escapeHtml(s.type || 'quarterly');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="font-weight:700;">${s.id}</td>
-          <td><a href="mailto:${s.email}" style="color:inherit; text-decoration:underline;">${s.email}</a></td>
-          <td>${s.name || '-'}</td>
-          <td style="text-transform:uppercase;">${s.type || 'quarterly'}</td>
+          <td style="font-weight:700;">${escapeHtml(s.id)}</td>
+          <td><a href="mailto:${escapeHtml(s.email)}" style="color:inherit; text-decoration:underline;">${escapeHtml(s.email)}</a></td>
+          <td>${escapeHtml(s.name || '-')}</td>
+          <td style="text-transform:uppercase;">${typeLabel}</td>
           <td><span class="status-badge ${mailStatusClass}">${mailStatusText}</span></td>
-          <td>${new Date(s.created_at).toLocaleString('ko-KR')}</td>
+          <td>${escapeHtml(createdAt)}</td>
           <td>
-            <button class="action-btn-sm" style="font-size:0.55rem; padding:4px 8px; background-color:#e74c3c;" onclick="deleteSubscriber('${s.id}')">삭제</button>
+            <button class="action-btn-sm" style="font-size:0.55rem; padding:4px 8px; background-color:#e74c3c;" onclick="deleteSubscriber('${escapeHtml(s.id)}', '${recordType}')">삭제</button>
           </td>
         `;
         tbody.appendChild(tr);

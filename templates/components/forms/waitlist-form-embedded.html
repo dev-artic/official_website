@@ -16,6 +16,7 @@
   <div class="grid-collapse-wrapper waitlist-form-wrapper">
     <div class="grid-collapse-content" style="padding-bottom: 2px;">
       <form class="waitlist-form" novalidate>
+        <input type="text" name="company" class="waitlist-company" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="waitlist-fields-wrapper">
           <div class="waitlist-field-group">
             <input type="text" id="waitlist-name" name="name" class="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
@@ -84,6 +85,15 @@
     transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
     padding-top: 12px;
+  }
+
+  .waitlist-company {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
   }
 
   .grid-collapse-wrapper.active .waitlist-form {

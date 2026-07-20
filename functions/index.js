@@ -7,6 +7,7 @@ const nodemailer = require("nodemailer");
 const cors = require("cors")({ origin: true });
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const {
   VALID_ORDER_STATUSES,
   getInventoryTransition,
@@ -36,6 +37,79 @@ const QUARTERLY_MEDIA_CACHE_FILE = path.join(__dirname, "data", "quarterly_media
 const QUARTERLY_NOW_ARTIC_FILE = path.join(__dirname, "data", "quarterly_now_artic.json");
 const QUARTERLY_EXTERNAL_LINKS_FILE = path.join(__dirname, "data", "quarterly_external_links.json");
 const QUARTERLY_CONTENTS_CACHE_FILE = path.join(__dirname, "data", "quarterly_contents_cache.json");
+const WAITLIST_MIN_FORM_AGE_MS = 2500;
+const WAITLIST_RATE_LIMIT_MAX = 5;
+const WAITLIST_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+
+function normalizeWaitlistPayload(body = {}) {
+  return {
+    name: String(body.name || "").trim().replace(/\s+/g, " "),
+    email: String(body.email || "").trim().toLowerCase(),
+    honeypot: String(body.company || body.website || "").trim(),
+    formStartedAt: Number(body.formStartedAt || 0),
+  };
+}
+
+function isBotLikeWaitlistName(name) {
+  const compact = name.replace(/\s+/g, "");
+  if (compact.length < 14) return false;
+  if (!/^[A-Za-z0-9]+$/.test(compact)) return false;
+  const hasLower = /[a-z]/.test(compact);
+  const hasUpper = /[A-Z]/.test(compact);
+  const hasDigit = /\d/.test(compact);
+  return hasDigit || (hasLower && hasUpper);
+}
+
+function getWaitlistBotReason({ name, email, honeypot, formStartedAt }) {
+  if (honeypot) return "honeypot_filled";
+  if (formStartedAt && Date.now() - formStartedAt < WAITLIST_MIN_FORM_AGE_MS) return "submitted_too_fast";
+  if (name && (name.length > 60 || /https?:\/\//i.test(name) || isBotLikeWaitlistName(name))) return "bot_like_name";
+  if (email && /https?:\/\//i.test(email)) return "bot_like_email";
+  return null;
+}
+
+function getClientIp(req) {
+  const forwarded = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+  return forwarded || req.headers["fastly-client-ip"] || req.headers["cf-connecting-ip"] || req.ip || "unknown";
+}
+
+function hashWaitlistRateKey(value) {
+  return crypto.createHash("sha256").update(String(value)).digest("hex").slice(0, 32);
+}
+
+async function logWaitlistBotEvent(req, payload, reason) {
+  await db.collection("waitlist_bot_events").add({
+    name: payload.name || null,
+    email: payload.email || null,
+    type: "quarterly",
+    reason,
+    welcome_email_sent: "bot_detected",
+    client_ip_hash: hashWaitlistRateKey(getClientIp(req)),
+    user_agent: String(req.headers["user-agent"] || "").slice(0, 240),
+    created_at: FieldValue.serverTimestamp(),
+  });
+}
+
+async function enforceWaitlistRateLimit(req) {
+  const ipHash = hashWaitlistRateKey(getClientIp(req));
+  const windowId = Math.floor(Date.now() / WAITLIST_RATE_LIMIT_WINDOW_MS);
+  const ref = db.collection("waitlist_rate_limits").doc(`${ipHash}_${windowId}`);
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(ref);
+    const count = snapshot.exists ? Number(snapshot.data().count || 0) : 0;
+    if (count >= WAITLIST_RATE_LIMIT_MAX) {
+      const err = new Error("Too many requests. Please try again later.");
+      err.statusCode = 429;
+      throw err;
+    }
+    transaction.set(ref, {
+      count: FieldValue.increment(1),
+      ip_hash: ipHash,
+      window_id: windowId,
+      updated_at: FieldValue.serverTimestamp(),
+    }, { merge: true });
+  });
+}
 
 function writeQuarterlyContentsCacheFile(archive) {
   try {
@@ -473,7 +547,15 @@ exports.waitlist = onRequest((req, res) => {
     }
 
     try {
-      const { name, email } = req.body;
+      const payload = normalizeWaitlistPayload(req.body);
+      const { name, email } = payload;
+      const botReason = getWaitlistBotReason(payload);
+
+      if (botReason) {
+        await logWaitlistBotEvent(req, payload, botReason);
+        res.status(200).json({ success: true, saved_to_cloud: false });
+        return;
+      }
 
       if (!name) {
         res.status(400).json({ error: "Name is required" });
@@ -483,11 +565,24 @@ exports.waitlist = onRequest((req, res) => {
         res.status(400).json({ error: "Email is required" });
         return;
       }
+      if (name.length < 2) {
+        res.status(400).json({ error: "Please enter a valid name." });
+        return;
+      }
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         res.status(400).json({ error: "Invalid email format" });
         return;
+      }
+
+      try {
+        await enforceWaitlistRateLimit(req);
+      } catch (err) {
+        if (err.statusCode === 429) {
+          await logWaitlistBotEvent(req, payload, "rate_limited");
+        }
+        throw err;
       }
 
       const snapshot = await db.collection("subscribers")
@@ -562,7 +657,7 @@ Firestore 컬렉션 subscribers에 적재되었습니다.
       res.status(200).json({ success: true, saved_to_cloud: true, id: docRef.id });
     } catch (err) {
       console.error("Internal server error during waitlist submission:", err);
-      res.status(500).json({ error: err.message });
+      res.status(err.statusCode || 500).json({ error: err.message });
     }
   });
 });
@@ -1066,6 +1161,12 @@ exports.admin = onRequest({ secrets: [ADMIN_TOKEN_SECRET] }, (req, res) => {
           orders.push({ id: d.id, ...o });
         });
 
+        const serializeTimestamp = (value) => {
+          if (value && typeof value.toDate === "function") return value.toDate().toISOString();
+          if (value instanceof Date) return value.toISOString();
+          return value || null;
+        };
+
         const subscribersSnap = await db.collection("subscribers").get();
         const subscribers = [];
         subscribersSnap.forEach(d => {
@@ -1075,15 +1176,33 @@ exports.admin = onRequest({ secrets: [ADMIN_TOKEN_SECRET] }, (req, res) => {
           if (!dateVal && s.timestamp) {
             dateVal = s.timestamp;
           }
-          if (dateVal && typeof dateVal.toDate === 'function') {
-            s.created_at = dateVal.toDate().toISOString();
-          } else {
-            s.created_at = null;
-          }
-          subscribers.push({ id: d.id, ...s });
+          subscribers.push({
+            id: d.id,
+            ...s,
+            created_at: serializeTimestamp(dateVal),
+            waitlist_status: s.welcome_email_sent === true ? "sent" : "pending",
+          });
         });
 
-        // Sort subscribers by created_at descending in-memory
+        const botEventsSnap = await db.collection("waitlist_bot_events")
+          .orderBy("created_at", "desc")
+          .limit(50)
+          .get();
+        botEventsSnap.forEach(d => {
+          const event = d.data();
+          subscribers.push({
+            id: d.id,
+            name: event.name || "-",
+            email: event.email || "-",
+            type: event.type || "quarterly",
+            welcome_email_sent: "bot_detected",
+            waitlist_status: "bot_detected",
+            bot_reason: event.reason || "bot_detected",
+            created_at: serializeTimestamp(event.created_at),
+          });
+        });
+
+        // Sort subscribers and bot-detected attempts by created_at descending in-memory.
         subscribers.sort((a, b) => {
           const da = a.created_at ? new Date(a.created_at).getTime() : 0;
           const dbVal = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -1234,6 +1353,17 @@ exports.admin = onRequest({ secrets: [ADMIN_TOKEN_SECRET] }, (req, res) => {
             return;
           }
           await db.collection("subscribers").doc(id).delete();
+          res.status(200).json({ success: true });
+          return;
+        }
+
+        if (action === "delete_waitlist_bot_event") {
+          const { id } = req.body;
+          if (!id) {
+            res.status(400).json({ error: "Missing required field (id)" });
+            return;
+          }
+          await db.collection("waitlist_bot_events").doc(id).delete();
           res.status(200).json({ success: true });
           return;
         }

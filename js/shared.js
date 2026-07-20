@@ -613,15 +613,18 @@ function initWaitlistForm() {
     const toggleBtn = container.querySelector('.waitlist-toggle-btn');
     const nameInput = container.querySelector('.waitlist-name');
     const emailInput = container.querySelector('.waitlist-email');
+    const companyInput = container.querySelector('.waitlist-company');
     const submitBtn = container.querySelector('.waitlist-submit-btn');
     const messageDiv = container.querySelector('.waitlist-message');
     const fieldsWrapper = form.querySelector('.waitlist-fields-wrapper');
     const btnWrapper = container.querySelector('.waitlist-btn-wrapper');
     const formWrapper = container.querySelector('.waitlist-form-wrapper');
     const messageWrapper = container.querySelector('.waitlist-message-wrapper');
+    let formStartedAt = Date.now();
 
     if (toggleBtn) {
       toggleBtn.addEventListener('click', () => {
+        formStartedAt = Date.now();
         if (btnWrapper) btnWrapper.classList.remove('active');
         if (formWrapper) formWrapper.classList.add('active');
         if (nameInput) {
@@ -705,7 +708,12 @@ function initWaitlistForm() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name: name, email: email })
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          company: companyInput ? companyInput.value : '',
+          formStartedAt: formStartedAt
+        })
       })
       .then(res => {
         if (!res.ok) {

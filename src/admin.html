@@ -1056,11 +1056,11 @@ path_depth: "../"
               <span class="quarterly-workflow-note">Click after Notion body tier tables are complete.</span>
             </div>
             <div class="quarterly-workflow-step">
-              <button class="action-btn-sm" id="quarterly-refresh-btn" type="button">Refresh</button>
+              <button class="action-btn-sm is-secondary" id="quarterly-refresh-btn" type="button">Refresh</button>
               <span class="quarterly-workflow-note">Click after auto-fill verifies publishable metadata.</span>
             </div>
             <div class="quarterly-workflow-step">
-              <button class="action-btn-sm is-secondary" id="quarterly-scan-btn" type="button">Scan Audio Health</button>
+              <button class="action-btn-sm is-secondary" id="quarterly-scan-btn" type="button">Scan Media Health</button>
               <span class="quarterly-workflow-note">Click after refreshed admin data shows the target issue.</span>
             </div>
             <div class="quarterly-workflow-step">
@@ -2155,8 +2155,8 @@ path_depth: "../"
 
     if (document.getElementById('quarterly-scan-btn')) {
       document.getElementById('quarterly-scan-btn').addEventListener('click', () => {
-        if (!confirm('Refresh로 최신 Notion issue를 admin에 가져온 뒤 audio health를 스캔합니다.\n\n최신 Quarterly 데이터가 admin에 로드되었습니까?')) return;
-        scanAudioHealth();
+        if (!confirm('Refresh로 최신 Notion issue를 admin에 가져온 뒤 media health를 스캔합니다.\n\n최신 Quarterly 데이터가 admin에 로드되었습니까?')) return;
+        scanMediaHealth();
       });
     }
 
@@ -2172,7 +2172,7 @@ path_depth: "../"
       });
     }
 
-    function scanAudioHealth() {
+    async function scanMediaHealth() {
       if (!quarterlyAdminData || !quarterlyAdminData.archive || !quarterlyAdminData.archive.issues) {
         alert('Please wait until quarterly data is loaded.');
         return;
@@ -2180,6 +2180,7 @@ path_depth: "../"
 
       const issues = quarterlyAdminData.archive.issues;
       const flagged = [];
+      const promises = [];
 
       // Helper to normalize strings for comparison (remove spaces, special chars, keep alphanumeric + korean)
       const normalize = str => String(str || '').toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
@@ -2205,12 +2206,39 @@ path_depth: "../"
         'live': /(\(|\[|\b)live(\)|\]|\b)/i,
       };
 
+      function checkImageHealth(url) {
+        return new Promise(resolve => {
+          if (!url) return resolve({ ok: false, error: 'Artwork URL is completely missing' });
+          const img = new Image();
+          img.onload = () => resolve({ ok: true });
+          img.onerror = () => resolve({ ok: false, error: 'Failed to load image (broken link or blocked host)' });
+          img.src = url;
+        });
+      }
+
       issues.forEach(issue => {
         (issue.tiers || []).forEach(tier => {
           (tier.items || []).forEach(album => {
             const mediaKey = makeQuarterlyMediaKey(album.album, album.artist);
-            const tracks = album.highlightedTracks || [];
+            
+            // 1. Check Artwork Health
+            promises.push(
+              checkImageHealth(album.imageUrl).then(res => {
+                if (!res.ok) {
+                  flagged.push({
+                    type: 'artwork',
+                    issueId: issue.id,
+                    issueTitle: issue.title || issue.issue,
+                    album,
+                    mediaKey,
+                    warnings: [res.error]
+                  });
+                }
+              })
+            );
 
+            // 2. Check Audio Health
+            const tracks = album.highlightedTracks || [];
             tracks.forEach(track => {
               // Only check resolved tracks
               if (!track.youtubeId) return;
@@ -2228,12 +2256,12 @@ path_depth: "../"
                 const normVideo = normalize(videoTitle);
                 const normTrack = normalize(trackTitle);
 
-                // 1. Strict Title mismatch
+                // Strict Title mismatch
                 if (normTrack && !normVideo.includes(normTrack)) {
                   warnings.push(`Title mismatch (track title "${trackTitle}" not found in video title)`);
                 }
 
-                // 2. Suspicious keywords
+                // Suspicious keywords
                 for (const [key, regex] of Object.entries(suspiciousRegexes)) {
                   if (regex.test(videoTitle) && !regex.test(trackTitle)) {
                     warnings.push(`Suspicious keyword: "${key}" in video title but not in track title`);
@@ -2246,7 +2274,7 @@ path_depth: "../"
                 const normChannel = normalize(channelTitle);
                 const normArtist = normalize(artistName);
 
-                // 3. Strict Suspicious uploader
+                // Strict Suspicious uploader
                 const hasOfficialKeyword = officialKeywords.some(kw => normChannel.includes(kw));
                 const hasArtistMatch = normArtist && normChannel.includes(normArtist);
                 if (!hasOfficialKeyword && !hasArtistMatch) {
@@ -2256,6 +2284,7 @@ path_depth: "../"
 
               if (warnings.length > 0) {
                 flagged.push({
+                  type: 'audio',
                   issueId: issue.id,
                   issueTitle: issue.title || issue.issue,
                   album,
@@ -2269,6 +2298,8 @@ path_depth: "../"
         });
       });
 
+      // Wait for all image loading checks to complete
+      await Promise.all(promises);
       renderScanResults(flagged);
     }
 
@@ -2279,9 +2310,9 @@ path_depth: "../"
       if (flagged.length === 0) {
         body.innerHTML = `
           <div class="quarterly-detail-section">
-            <h3 class="quarterly-detail-title">Audio Health Scan Results</h3>
+            <h3 class="quarterly-detail-title">Media Health Scan Results</h3>
             <p style="color:#2ecc71; margin:16px 0 0; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
-              <span>✅</span> All resolved audio tracks passed the heuristic health checks (No mismatches or suspicious uploaders detected).
+              <span>✅</span> All media passed the heuristic health checks (No artwork errors, mismatches, or suspicious uploaders).
             </p>
           </div>
         `;
@@ -2292,44 +2323,69 @@ path_depth: "../"
 
       const flaggedHtml = flagged.map(item => {
         const album = item.album;
-        const track = item.track;
         const warningsList = item.warnings.map(w => `<li style="margin:2px 0;">⚠️ ${escapeHtml(w)}</li>`).join('');
 
-        return `
-          <div class="quarterly-scan-warning" style="margin-bottom:8px;">
-            <div>
-              <div class="quarterly-small-muted" style="margin-bottom:4px; font-weight:bold; color:var(--text-secondary);">
-                ${escapeHtml(item.issueTitle)} &middot; ${escapeHtml(album.artist)} - ${escapeHtml(album.album)}
+        if (item.type === 'artwork') {
+          return `
+            <div class="quarterly-scan-warning" style="margin-bottom:8px;">
+              <div>
+                <div class="quarterly-small-muted" style="margin-bottom:4px; font-weight:bold; color:var(--text-secondary);">
+                  ${escapeHtml(item.issueTitle)} &middot; ${escapeHtml(album.artist)} - ${escapeHtml(album.album)}
+                </div>
+                <strong style="font-size:0.8rem; margin-bottom:4px; color:var(--text-primary);">
+                  [Artwork Cover Error]
+                </strong>
+                <div class="quarterly-small-muted" style="margin-top:4px; word-break:break-all;">
+                  <strong>Failed URL:</strong> ${escapeHtml(album.imageUrl || 'N/A')}
+                </div>
+                <ul style="margin:6px 0 0 0; padding-left:16px; font-size:0.7rem; color:#e74c3c; list-style-type:none;">
+                  ${warningsList}
+                </ul>
               </div>
-              <strong style="font-size:0.8rem; margin-bottom:4px; color:var(--text-primary);">
-                Track ${escapeHtml(track.number || '')}: ${escapeHtml(track.title || '')}
-              </strong>
-              <div class="quarterly-small-muted" style="margin-top:4px;">
-                <strong>Matched Video:</strong> ${escapeHtml(track.videoTitle || 'N/A')}
-                <br>
-                <strong>Channel:</strong> ${escapeHtml(track.channelTitle || 'N/A')}
-                ${track.youtubeId ? ` &middot; <a href="https://www.youtube.com/watch?v=${encodeURIComponent(track.youtubeId)}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: underline;">Open Video</a>` : ''}
+              <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+                <button class="action-btn-sm" type="button" style="background:#e74c3c; border-color:#e74c3c; color:white; width:100%; margin:0;" onclick="focusAndEditCover('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}')">Fix</button>
               </div>
-              <ul style="margin:6px 0 0 0; padding-left:16px; font-size:0.7rem; color:#e74c3c; list-style-type:none;">
-                ${warningsList}
-              </ul>
             </div>
-            <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
-              <button class="action-btn-sm" type="button" style="background:#e74c3c; border-color:#e74c3c; color:white; width:100%; margin:0;" onclick="focusAndEditTrack('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}')">Fix</button>
-              <button class="action-btn-sm" type="button" style="background:#2ecc71; border-color:#2ecc71; color:white; width:100%; margin:0;" onclick="confirmQuarterlyTrackAudio('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}', this)">Confirm</button>
+          `;
+        } else {
+          // audio
+          const track = item.track;
+          return `
+            <div class="quarterly-scan-warning" style="margin-bottom:8px;">
+              <div>
+                <div class="quarterly-small-muted" style="margin-bottom:4px; font-weight:bold; color:var(--text-secondary);">
+                  ${escapeHtml(item.issueTitle)} &middot; ${escapeHtml(album.artist)} - ${escapeHtml(album.album)}
+                </div>
+                <strong style="font-size:0.8rem; margin-bottom:4px; color:var(--text-primary);">
+                  Track ${escapeHtml(track.number || '')}: ${escapeHtml(track.title || '')}
+                </strong>
+                <div class="quarterly-small-muted" style="margin-top:4px;">
+                  <strong>Matched Video:</strong> ${escapeHtml(track.videoTitle || 'N/A')}
+                  <br>
+                  <strong>Channel:</strong> ${escapeHtml(track.channelTitle || 'N/A')}
+                  ${track.youtubeId ? ` &middot; <a href="https://www.youtube.com/watch?v=${encodeURIComponent(track.youtubeId)}" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: underline;">Open Video</a>` : ''}
+                </div>
+                <ul style="margin:6px 0 0 0; padding-left:16px; font-size:0.7rem; color:#e74c3c; list-style-type:none;">
+                  ${warningsList}
+                </ul>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
+                <button class="action-btn-sm" type="button" style="background:#e74c3c; border-color:#e74c3c; color:white; width:100%; margin:0;" onclick="focusAndEditTrack('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}')">Fix</button>
+                <button class="action-btn-sm" type="button" style="background:#2ecc71; border-color:#2ecc71; color:white; width:100%; margin:0;" onclick="confirmQuarterlyTrackAudio('${escapeHtml(item.issueId)}', '${escapeHtml(item.mediaKey)}', '${escapeHtml(track.number || '')}', this)">Confirm</button>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       }).join('');
 
       body.innerHTML = `
         <div class="quarterly-detail-section">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 class="quarterly-detail-title">Audio Health Scan Results</h3>
+            <h3 class="quarterly-detail-title">Media Health Scan Results</h3>
             <span class="quarterly-pill warn">${escapeHtml(countText)}</span>
           </div>
           <p class="quarterly-small-muted" style="margin:8px 0 16px 0;">
-            Below is a list of resolved YouTube tracks that flagged our heuristic checks (e.g. title mismatch, unofficial uploader, or covers/lyrics keywords). Click <strong>Fix</strong> to open the editor directly.
+            Below is a list of media (artworks or resolved audio tracks) that flagged our heuristic checks. Click <strong>Fix</strong> to open the editor directly.
           </p>
           <div class="quarterly-issue-alerts">
             ${flaggedHtml}
@@ -2339,6 +2395,25 @@ path_depth: "../"
 
       body.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+
+    window.focusAndEditCover = function(issueId, mediaKey) {
+      selectedQuarterlyIssueId = issueId;
+      renderQuarterlyIssueList();
+      renderQuarterlyDetail();
+
+      const issue = getQuarterlyIssue(issueId);
+      const album = findQuarterlyAlbum(issue, { mediaKey });
+      if (!album) {
+        console.error('Album not found for mediaKey:', mediaKey);
+        return;
+      }
+      const encoded = encodeURIComponent(JSON.stringify(album)).replace(/'/g, "%27");
+      
+      // Assumes openQuarterlyMediaEditor is defined globally
+      if (typeof openQuarterlyMediaEditor === 'function') {
+        openQuarterlyMediaEditor(encoded);
+      }
+    };
 
     window.focusAndEditTrack = function(issueId, mediaKey, trackNumber) {
       selectedQuarterlyIssueId = issueId;

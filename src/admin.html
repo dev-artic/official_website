@@ -208,11 +208,11 @@ path_depth: "../"
 
   .tab-pane.is-loading::before {
     content: attr(data-loading-label);
-    position: absolute;
-    z-index: 4;
-    top: 18px;
+    position: fixed;
+    z-index: 9999;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     min-width: 176px;
     padding: 12px 18px 14px;
     border: 1px solid var(--border-color);
@@ -231,13 +231,13 @@ path_depth: "../"
 
   .tab-pane.is-loading::after {
     content: '';
-    position: absolute;
-    z-index: 5;
-    top: 50px;
+    position: fixed;
+    z-index: 10000;
+    top: calc(50% + 18px);
     left: 50%;
     width: 128px;
     height: 1px;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
     background:
       linear-gradient(90deg, transparent, var(--text-primary), transparent),
       linear-gradient(90deg, var(--border-color), var(--border-color));

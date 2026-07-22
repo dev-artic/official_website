@@ -288,6 +288,50 @@ path_depth: "../"
   }
 
   /* Tables and Data list */
+  .subscribers-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .subscribers-filter-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.62rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .subscribers-filter-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+  }
+
+  .subscribers-filter-btn.is-active {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .subscribers-filter-count {
+    font-size: 0.58rem;
+    padding: 1px 6px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    opacity: 0.8;
+  }
+
   .admin-table-wrap {
     overflow-x: auto;
     border: 1px solid var(--border-color);
@@ -967,6 +1011,17 @@ path_depth: "../"
 
     <!-- Subscribers Pane -->
     <div class="tab-pane" id="pane-subscribers">
+      <div class="subscribers-filter-bar" id="subscribers-filter-bar">
+        <button type="button" class="subscribers-filter-btn is-active" data-filter="valid">
+          Active Subscribers <span class="subscribers-filter-count" id="count-subscribers-valid">0</span>
+        </button>
+        <button type="button" class="subscribers-filter-btn" data-filter="bot">
+          Bot Detections <span class="subscribers-filter-count" id="count-subscribers-bot">0</span>
+        </button>
+        <button type="button" class="subscribers-filter-btn" data-filter="all">
+          All Records <span class="subscribers-filter-count" id="count-subscribers-all">0</span>
+        </button>
+      </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
           <thead>
@@ -1537,16 +1592,46 @@ path_depth: "../"
       });
     };
 
+    let allSubscribersData = [];
+    let currentSubscriberFilter = 'valid';
+
     function renderSubscribers(subscribers) {
+      if (Array.isArray(subscribers)) {
+        allSubscribersData = subscribers;
+      }
+      const raw = allSubscribersData || [];
+
+      // Update Filter Counts
+      const validItems = raw.filter(s => s.waitlist_status !== 'bot_detected' && s.welcome_email_sent !== 'bot_detected');
+      const botItems = raw.filter(s => s.waitlist_status === 'bot_detected' || s.welcome_email_sent === 'bot_detected');
+
+      const elValid = document.getElementById('count-subscribers-valid');
+      const elBot = document.getElementById('count-subscribers-bot');
+      const elAll = document.getElementById('count-subscribers-all');
+      if (elValid) elValid.textContent = validItems.length;
+      if (elBot) elBot.textContent = botItems.length;
+      if (elAll) elAll.textContent = raw.length;
+
+      // Filter array based on current selection
+      let filtered = raw;
+      if (currentSubscriberFilter === 'valid') {
+        filtered = validItems;
+      } else if (currentSubscriberFilter === 'bot') {
+        filtered = botItems;
+      }
+
       const tbody = document.getElementById('subscribers-table-body');
       tbody.innerHTML = '';
 
-      if (!subscribers || subscribers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No subscribers yet.</td></tr>`;
+      if (!filtered || filtered.length === 0) {
+        const emptyMessage = currentSubscriberFilter === 'valid'
+          ? 'No active subscribers yet.'
+          : (currentSubscriberFilter === 'bot' ? 'No bot detections recorded.' : 'No subscriber records found.');
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">${emptyMessage}</td></tr>`;
         return;
       }
 
-      subscribers.forEach(s => {
+      filtered.forEach(s => {
         const isBotDetected = s.waitlist_status === 'bot_detected' || s.welcome_email_sent === 'bot_detected';
         const welcomeEmailSent = s.welcome_email_sent === true || s.welcome_email_sent === 1;
         const mailStatusClass = isBotDetected ? 'bot-detected' : (welcomeEmailSent ? 'sent-success' : 'sent-failed');
@@ -1571,6 +1656,23 @@ path_depth: "../"
         tbody.appendChild(tr);
       });
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterBar = document.getElementById('subscribers-filter-bar');
+      if (filterBar) {
+        filterBar.addEventListener('click', (e) => {
+          const btn = e.target.closest('.subscribers-filter-btn');
+          if (!btn) return;
+          const filter = btn.dataset.filter;
+          if (!filter || filter === currentSubscriberFilter) return;
+          currentSubscriberFilter = filter;
+          filterBar.querySelectorAll('.subscribers-filter-btn').forEach(b => {
+            b.classList.toggle('is-active', b.dataset.filter === currentSubscriberFilter);
+          });
+          renderSubscribers();
+        });
+      }
+    });
 
     function escapeHtml(value) {
       return String(value === undefined || value === null ? '' : value)

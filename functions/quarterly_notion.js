@@ -1122,6 +1122,7 @@ async function updateNotionPageProperties(token, pageId, properties, options = {
   assertExpectedLastEditedTime(page, options.expectedLastEditedTime);
 
   const allowed = new Set([
+    "Name",
     "Slug",
     "Excerpt",
     "SEO Description",

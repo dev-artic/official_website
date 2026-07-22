@@ -1968,7 +1968,10 @@ path_depth: "../"
               <h3 class="quarterly-detail-title">${escapeHtml(issue.title || issue.issue)}</h3>
               <p class="quarterly-small-muted" style="margin:8px 0 0;">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.publicationStatus || '')} · ${escapeHtml(issue.date || '')}</p>
             </div>
-            <button class="action-btn-sm" type="button" onclick="batchAutoResolveYoutubeTracks('${escapeHtml(issue.id)}')">Auto-Resolve Audio</button>
+            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+              <button class="action-btn-sm" type="button" onclick="batchAutoResolveYoutubeTracks('${escapeHtml(issue.id)}')">Auto-Resolve Audio</button>
+              <button class="action-btn-sm" type="button" onclick="batchAutoResolveMedia('${escapeHtml(issue.id)}')">Auto-Resolve Media</button>
+            </div>
           </div>
           <div class="quarterly-health-row">
             <span class="quarterly-pill">${health.tierHeadingCount || 0}/7 tiers</span>
@@ -2069,7 +2072,7 @@ path_depth: "../"
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button class="action-btn-sm" type="button" onclick="saveQuarterlyCoverOverride()">Save Override</button>
-            <button class="action-btn-sm" type="button" onclick="refreshQuarterlyBugsCandidates()">Find Bugs Candidates</button>
+            <button class="action-btn-sm" type="button" onclick="refreshQuarterlyCandidates()">Find Candidates</button>
           </div>
           <div class="quarterly-candidate-list" id="quarterly-cover-candidates"></div>
         </div>
@@ -2726,10 +2729,10 @@ path_depth: "../"
       .catch(err => alert(err.message));
     };
 
-    window.refreshQuarterlyBugsCandidates = function() {
+    window.refreshQuarterlyCandidates = function() {
       if (!activeQuarterlyAlbum) return;
       const list = document.getElementById('quarterly-cover-candidates');
-      list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Searching Bugs...</p>';
+      list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">Searching candidates...</p>';
       postQuarterlyAdmin({
         action: 'refresh_bugs_cover_candidate',
         album: activeQuarterlyAlbum.album,
@@ -2738,15 +2741,15 @@ path_depth: "../"
       .then(data => {
         const candidates = data.candidates || [];
         if (!candidates.length) {
-          list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No Bugs candidates found.</p>';
+          list.innerHTML = '<p class="quarterly-small-muted" style="margin:0;">No candidates found.</p>';
           return;
         }
         list.innerHTML = candidates.map((candidate, index) => `
           <div class="quarterly-candidate">
-            <img src="${escapeHtml(candidate.imageUrl)}" alt="">
+            <img src="${escapeHtml(candidate.imageUrl)}" alt="" onload="this.nextElementSibling.querySelector('.img-dimensions').textContent = this.naturalWidth + 'x' + this.naturalHeight + ' px'">
             <div>
               <div class="quarterly-album-name">${escapeHtml(candidate.album)} · ${escapeHtml(candidate.artist)}</div>
-              <div class="quarterly-small-muted">${escapeHtml(candidate.text || candidate.albumUrl || '')}</div>
+              <div class="quarterly-small-muted img-dimensions">Loading size...</div>
             </div>
             <button class="action-btn-sm" type="button" onclick="useQuarterlyCandidate(${index})">Use</button>
           </div>

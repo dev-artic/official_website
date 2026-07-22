@@ -290,7 +290,7 @@ graph TD
   * **사용처**: `quarterly/` 등 페이지 내부 임베드 섹션.
   * **데이터 매핑**: 로컬 Firebase Emulator 또는 실서버 Cloud Functions `/waitlist` API를 경유하여 Firestore `subscribers` 컬렉션에 적재됩니다.
   * **인스턴스 모델**: 같은 페이지 안에 여러 waitlist CTA를 둘 수 있도록 `id`가 아닌 `.waitlist-container` 범위의 class selector로 초기화합니다. 상단 hero와 하단 archive CTA는 같은 컴포넌트를 독립적으로 재사용합니다.
-  * **스팸 봇 방어**: waitlist API는 Firestore `subscribers` 적재 및 welcome email 발송 전에 honeypot, 최소 제출 시간, 랜덤 문자열형 이름, IP hash 기반 rate limit을 먼저 검증합니다. 봇으로 판단된 제출은 `subscribers`에 저장하지 않고 welcome email도 보내지 않으며, 운영 진단용 최소 로그만 `waitlist_bot_events`에 `welcome_email_sent = bot_detected` 상태로 저장해 `/admin` Subscribers 탭에서 붉은 `BOT DETECTED` badge로 확인합니다.
+  * **스팸 봇 방어**: waitlist API는 Firestore `subscribers` 적재 및 welcome email 발송 전에 (1) honeypot 필드, (2) 폼 타임스탬프 필수성 및 최소 제출 시간(`formStartedAt` 누락 시 직접 API 호출 봇 100% 차단), (3) 깁버리시(Gibberish) 불규칙 대소문자/연속자음 랜덤 이름(`QcdhgDiH...` 등), (4) 다중 닷(Dot-stuffing) 봇 이메일(`v.ecazo.f.a...` 등), (5) IP hash 기반 rate limit을 종합 검증합니다. 봇으로 판단된 제출은 `subscribers`에 저장하지 않고 welcome email도 보내지 않으며, 운영 진단용 최소 로그만 `waitlist_bot_events`에 `welcome_email_sent = bot_detected` 상태로 저장해 `/admin` Subscribers 탭에서 붉은 `BOT DETECTED` badge로 확인하고 관리합니다.
 * **`checkout-form-popup.html` [주문 폼 - popup 타입]**:
   * **사용처**: `deus-ex-machina/` 등 LP/CD 구매 팝업 모달.
   * **데이터 매핑**: 로컬 Firebase Emulator 또는 실서버 Cloud Functions `/checkout` API를 경유하여 Firestore `orders` 컬렉션에 적재됩니다.

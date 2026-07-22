@@ -50,21 +50,53 @@ function normalizeWaitlistPayload(body = {}) {
   };
 }
 
+function isDotStuffedBotEmail(email) {
+  const localPart = String(email || "").split("@")[0] || "";
+  const dotCount = (localPart.match(/\./g) || []).length;
+  if (dotCount >= 3) return true;
+  if (dotCount >= 2) {
+    const parts = localPart.split(".");
+    const singleCharParts = parts.filter((p) => p.length === 1).length;
+    if (singleCharParts >= 2) return true;
+  }
+  return false;
+}
+
 function isBotLikeWaitlistName(name) {
   const compact = name.replace(/\s+/g, "");
-  if (compact.length < 14) return false;
-  if (!/^[A-Za-z0-9]+$/.test(compact)) return false;
-  const hasLower = /[a-z]/.test(compact);
-  const hasUpper = /[A-Z]/.test(compact);
-  const hasDigit = /\d/.test(compact);
-  return hasDigit || (hasLower && hasUpper);
+  if (compact.length > 50) return true;
+  if (/https?:\/\//i.test(name)) return true;
+
+  if (!name.includes(" ") && compact.length >= 8) {
+    let caseToggles = 0;
+    for (let i = 1; i < compact.length; i += 1) {
+      const prevIsUpper = /[A-Z]/.test(compact[i - 1]);
+      const currIsUpper = /[A-Z]/.test(compact[i]);
+      if (prevIsUpper !== currIsUpper) caseToggles += 1;
+    }
+    if (caseToggles >= 3) return true;
+    if (/[bcdfghjklmnpqrstvwxyz]{4,}/i.test(compact)) return true;
+  }
+
+  if (compact.length >= 10 && /^[A-Za-z0-9]+$/.test(compact)) {
+    const hasLower = /[a-z]/.test(compact);
+    const hasUpper = /[A-Z]/.test(compact);
+    const hasDigit = /\d/.test(compact);
+    if (hasDigit && (hasLower || hasUpper)) return true;
+  }
+
+  return false;
 }
 
 function getWaitlistBotReason({ name, email, honeypot, formStartedAt }) {
   if (honeypot) return "honeypot_filled";
-  if (formStartedAt && Date.now() - formStartedAt < WAITLIST_MIN_FORM_AGE_MS) return "submitted_too_fast";
-  if (name && (name.length > 60 || /https?:\/\//i.test(name) || isBotLikeWaitlistName(name))) return "bot_like_name";
-  if (email && /https?:\/\//i.test(email)) return "bot_like_email";
+  if (!formStartedAt) return "missing_form_timestamp";
+  const now = Date.now();
+  const age = now - formStartedAt;
+  if (age < WAITLIST_MIN_FORM_AGE_MS) return "submitted_too_fast";
+  if (age > 24 * 60 * 60 * 1000 || formStartedAt > now + 60000) return "invalid_form_timestamp";
+  if (name && isBotLikeWaitlistName(name)) return "bot_like_name";
+  if (email && (email.length > 100 || /https?:\/\//i.test(email) || isDotStuffedBotEmail(email))) return "bot_like_email";
   return null;
 }
 

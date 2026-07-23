@@ -3239,8 +3239,9 @@ path_depth: "../"
           try {
             await new Promise((resolve, reject) => {
               const img = new Image();
-              img.onload = resolve;
-              img.onerror = reject;
+              const timer = setTimeout(() => reject(new Error('timeout')), 3000);
+              img.onload = () => { clearTimeout(timer); resolve(); };
+              img.onerror = () => { clearTimeout(timer); reject(); };
               img.src = album.imageUrl;
             });
           } catch (e) {
@@ -3274,8 +3275,9 @@ path_depth: "../"
             try {
               const dimensions = await new Promise((resolve, reject) => {
                 const img = new Image();
-                img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
-                img.onerror = reject;
+                const timer = setTimeout(() => reject(new Error('timeout')), 3000);
+                img.onload = () => { clearTimeout(timer); resolve({ w: img.naturalWidth, h: img.naturalHeight }); };
+                img.onerror = () => { clearTimeout(timer); reject(); };
                 img.src = candidate.imageUrl;
               });
 

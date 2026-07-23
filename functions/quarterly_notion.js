@@ -963,7 +963,11 @@ function assertExpectedPageTitle(page, expectedTitle) {
   const expected = normalizeCompareValue(expectedTitle);
   if (!expected) return;
   const actual = normalizeCompareValue(getNotionPageTitle(page));
-  if (actual && actual !== expected) {
+  
+  // Relax check if the actual title already matches the "Issue Title" property 
+  // (meaning it was already updated by a previous auto-fill, but the frontend sent the old template title).
+  const issueTitleProp = normalizeCompareValue(getTextProperty(page.properties, "Issue Title"));
+  if (actual !== expected && actual !== issueTitleProp) {
     const error = new Error(`Notion page title mismatch. Expected "${expectedTitle}", got "${getNotionPageTitle(page)}".`);
     error.status = 409;
     throw error;

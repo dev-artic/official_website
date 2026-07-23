@@ -1145,10 +1145,20 @@ async function updateNotionPageProperties(token, pageId, properties, options = {
 
   Object.entries(properties || {}).forEach(([name, value]) => {
     if (!allowed.has(name)) return;
-    const currentProperty = page.properties?.[name];
+    
+    // If the requested property is "Name", map it to the actual title property key of the database
+    let targetName = name;
+    if (name === "Name") {
+      const titlePropEntry = Object.entries(page.properties || {}).find(([_, prop]) => prop?.type === "title");
+      if (titlePropEntry) {
+        targetName = titlePropEntry[0];
+      }
+    }
+
+    const currentProperty = page.properties?.[targetName];
     if (!currentProperty) return;
     const nextValue = buildNotionPropertyValue(currentProperty, value);
-    if (nextValue) nextProperties[name] = nextValue;
+    if (nextValue) nextProperties[targetName] = nextValue;
   });
 
   if (!Object.keys(nextProperties).length) {

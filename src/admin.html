@@ -3212,6 +3212,104 @@ path_depth: "../"
       });
     };
 
+    window.batchAutoResolveMedia = async function(issueId) {
+      if (!quarterlyAdminData || !quarterlyAdminData.archive || !quarterlyAdminData.archive.issues) return;
+      
+      const issue = quarterlyAdminData.archive.issues.find(i => i.id === issueId);
+      if (!issue) return;
+
+      const btn = document.querySelector(`button[onclick*="batchAutoResolveMedia('${issueId}')"]`);
+      if (btn) btn.textContent = 'Resolving...';
+
+      let missingAlbums = [];
+
+      // 1. Find albums with missing/broken artwork in this issue
+      (issue.tiers || []).forEach(tier => {
+        (tier.items || []).forEach(album => {
+          missingAlbums.push(album);
+        });
+      });
+
+      // Filter actually broken/missing images asynchronously
+      const actuallyMissing = [];
+      for (const album of missingAlbums) {
+        if (!album.imageUrl) {
+          actuallyMissing.push(album);
+        } else {
+          try {
+            await new Promise((resolve, reject) => {
+              const img = new Image();
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = album.imageUrl;
+            });
+          } catch (e) {
+            actuallyMissing.push(album);
+          }
+        }
+      }
+
+      if (actuallyMissing.length === 0) {
+        if (btn) btn.textContent = 'Auto-Resolve Media';
+        alert('All albums in this issue already have valid high-resolution artworks.');
+        return;
+      }
+
+      let resolvedCount = 0;
+
+      for (const album of actuallyMissing) {
+        try {
+          // 2. Fetch candidates for missing album
+          const res = await postQuarterlyAdmin({
+            action: 'refresh_bugs_cover_candidate',
+            album: album.album,
+            artist: album.artist
+          });
+
+          const candidates = res.candidates || [];
+          let bestValidCandidate = null;
+
+          // 3. Find the best candidate that is >= 1000x1000
+          for (const candidate of candidates) {
+            try {
+              const dimensions = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+                img.onerror = reject;
+                img.src = candidate.imageUrl;
+              });
+
+              if (dimensions.w >= 1000 && dimensions.h >= 1000) {
+                bestValidCandidate = candidate;
+                break; // Found the best one (since they are sorted by score)
+              }
+            } catch (e) {
+              // Ignore broken candidates
+            }
+          }
+
+          // 4. If found, save override automatically
+          if (bestValidCandidate) {
+            const mediaKey = makeQuarterlyMediaKey(album.album, album.artist);
+            await postQuarterlyAdmin({
+              action: 'save_quarterly_media_override',
+              mediaKey: mediaKey,
+              payload: {
+                imageUrl: bestValidCandidate.imageUrl,
+                albumUrl: bestValidCandidate.albumUrl
+              }
+            });
+            resolvedCount++;
+          }
+        } catch (error) {
+          console.error('Failed to resolve media for', album.album, error);
+        }
+      }
+
+      if (btn) btn.textContent = 'Auto-Resolve Media';
+      alert(`Auto-Resolve Media completed.\nSuccessfully found and saved high-resolution (>1000px) covers for ${resolvedCount} out of ${actuallyMissing.length} broken/missing albums.\nPlease run "Refresh" to see updates.`);
+    };
+
     checkAuth();
   });
 </script>

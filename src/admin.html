@@ -3057,8 +3057,8 @@ path_depth: "../"
       postQuarterlyAdmin({
         action: 'auto_fill_issue_properties',
         pageId: issue.id,
-        expectedTitle: issue.title || '',
-        expectedLastEditedTime: issue.lastEditedTime || ''
+        expectedTitle: '',
+        expectedLastEditedTime: ''
       })
       .then(data => {
         const inferred = data.inferred || {};
@@ -3240,8 +3240,16 @@ path_depth: "../"
             await new Promise((resolve, reject) => {
               const img = new Image();
               const timer = setTimeout(() => reject(new Error('timeout')), 3000);
-              img.onload = () => { clearTimeout(timer); resolve(); };
-              img.onerror = () => { clearTimeout(timer); reject(); };
+              img.onload = () => { 
+                clearTimeout(timer); 
+                // 기존 이미지가 있어도 크기가 1000 미만이면 교체 대상(reject)으로 간주
+                if (img.naturalWidth < 1000 || img.naturalHeight < 1000) {
+                  reject(new Error('low resolution'));
+                } else {
+                  resolve(); 
+                }
+              };
+              img.onerror = () => { clearTimeout(timer); reject(new Error('load failed')); };
               img.src = album.imageUrl;
             });
           } catch (e) {
@@ -3281,7 +3289,7 @@ path_depth: "../"
                 img.src = candidate.imageUrl;
               });
 
-              if (dimensions.w >= 500 && dimensions.h >= 500) {
+              if (dimensions.w >= 1000 && dimensions.h >= 1000) {
                 bestValidCandidate = candidate;
                 break; // Found the best one (since they are sorted by score)
               }

@@ -3240,26 +3240,7 @@ path_depth: "../"
           });
 
           const candidates = res.candidates || [];
-          let bestValidCandidate = null;
-
-          for (const candidate of candidates) {
-            try {
-              const dimensions = await new Promise((resolve, reject) => {
-                const img = new Image();
-                const timer = setTimeout(() => reject(new Error('timeout')), 3000);
-                img.onload = () => { clearTimeout(timer); resolve({ w: img.naturalWidth, h: img.naturalHeight }); };
-                img.onerror = () => { clearTimeout(timer); reject(); };
-                img.src = candidate.imageUrl;
-              });
-
-              if (dimensions.w >= 1000 && dimensions.h >= 1000) {
-                bestValidCandidate = candidate;
-                break;
-              }
-            } catch (e) {
-              // Ignore broken candidates
-            }
-          }
+          let bestValidCandidate = candidates.length > 0 ? candidates[0] : null;
 
           if (bestValidCandidate) {
             const mediaKey = makeQuarterlyMediaKey(album.album, album.artist);

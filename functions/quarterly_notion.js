@@ -679,7 +679,8 @@ function mapAlbumRow(headers, cells, source = null) {
   });
 
   const companionCell = getCellByHeader(headers, cells, ["Companion Essay", "Essay", "Featured Article", "Featured Essay"], 7);
-  const album = byHeader["앨범"] || byHeader["album"] || cellText(cells[0]);
+  const rawAlbum = byHeader["앨범"] || byHeader["album"] || cellText(cells[0]);
+  const album = rawAlbum ? rawAlbum.replace(/\[.*?\]\s*/g, '').trim() : rawAlbum;
   const artist = byHeader["아티스트"] || byHeader["artist"] || cellText(cells[1]);
   const genre = byHeader["장르"] || byHeader["genre"] || cellText(cells[2]);
   const releaseDate = byHeader["발매일"] || byHeader["releasedate"] || cellText(cells[3]);

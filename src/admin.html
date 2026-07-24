@@ -629,9 +629,27 @@ path_depth: "../"
     gap: 6px;
   }
 
+  .quarterly-issue-button:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
   .quarterly-issue-button.active {
     background: var(--bg-card);
+    border-left: 3px solid var(--accent-primary, #6c8cff);
+    padding-left: 13px;
   }
+
+  .quarterly-publish-indicator {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+  .quarterly-publish-indicator.published { background: #4ade80; }
+  .quarterly-publish-indicator.draft { background: #facc15; }
 
   .quarterly-issue-title {
     font-size: 0.76rem;
@@ -1772,8 +1790,8 @@ path_depth: "../"
         const warningCount = (health.warnings || []).length;
         return `
           <button class="quarterly-issue-button ${issue.id === selectedQuarterlyIssueId ? 'active' : ''}" type="button" data-issue-id="${escapeHtml(issue.id)}">
-            <span class="quarterly-issue-title">${escapeHtml(issue.title || issue.issue)}</span>
-            <span class="quarterly-issue-meta">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.date || '')}${issue.lastEditedTime ? ` · edited ${escapeHtml(new Date(issue.lastEditedTime).toLocaleString('ko-KR'))}` : ''}</span>
+            <span class="quarterly-issue-title"><span class="quarterly-publish-indicator ${['완료', 'Published', 'Ready'].includes(issue.publicationStatus) ? 'published' : 'draft'}"></span>${escapeHtml(issue.title || issue.issue)}</span>
+            <span class="quarterly-issue-meta">${escapeHtml(issue.publicationStatus || 'Draft')} · ${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.date || '')}${issue.lastEditedTime ? ` · edited ${escapeHtml(new Date(issue.lastEditedTime).toLocaleString('ko-KR'))}` : ''}</span>
             <span class="quarterly-health-row">
               <span class="quarterly-pill ${warningCount ? 'warn' : 'ok'}">${warningCount ? `${warningCount} warnings` : 'ok'}</span>
               <span class="quarterly-pill">${health.albumCount || 0} albums</span>
@@ -1968,9 +1986,9 @@ path_depth: "../"
               <h3 class="quarterly-detail-title">${escapeHtml(issue.title || issue.issue)}</h3>
               <p class="quarterly-small-muted" style="margin:8px 0 0;">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.publicationStatus || '')} · ${escapeHtml(issue.date || '')}</p>
             </div>
-            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-              <button class="action-btn-sm" type="button" onclick="batchAutoResolveYoutubeTracks('${escapeHtml(issue.id)}')">Auto-Resolve Audio</button>
+            <div style="display:flex; flex-direction:row; gap:8px; align-items:center;">
               <button class="action-btn-sm" type="button" onclick="batchAutoResolveMedia('${escapeHtml(issue.id)}')">Auto-Resolve Media</button>
+              <button class="action-btn-sm" type="button" onclick="batchAutoResolveYoutubeTracks('${escapeHtml(issue.id)}')">Auto-Resolve Audio</button>
             </div>
           </div>
           <div class="quarterly-health-row">

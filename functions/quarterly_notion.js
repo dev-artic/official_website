@@ -317,6 +317,11 @@ function inferQuarterlyIssueProperties(page, parsedBlocks = {}) {
   const seoDescription = `artic. quarterly archive for ${issue} Korean albums.`;
   const slug = slugifyQuarterlyIssue(year, quarter, region, category);
 
+  const existingPublicationStatus = getSelectName(properties, "Publication Status");
+  const existingUploadConfirmed = properties["업로드 확정"] ? getCheckboxValue(properties, "업로드 확정") : undefined;
+  const publicationStatus = existingPublicationStatus || "완료";
+  const uploadConfirmed = typeof existingUploadConfirmed === "boolean" ? existingUploadConfirmed : (albumCount > 0);
+
   return {
     properties: {
       Name: issueTitle,
@@ -333,12 +338,12 @@ function inferQuarterlyIssueProperties(page, parsedBlocks = {}) {
       "Published At": publishedAt,
       "아카이빙일": publishedAt,
       "Source Format": "Structured Table",
-      "Publication Status": "완료",
+      "Publication Status": publicationStatus,
       "Tier Model": "Seven-Level Albums",
       "Has Companion Essays": essays.length > 0,
       "Companion Essay Count": essays.length,
       "Companion Essay Tier Labels": companionLabels,
-      "업로드 확정": albumCount > 0,
+      "업로드 확정": uploadConfirmed,
     },
     diagnostics: {
       inferredFromAlbums: Boolean(inferredFromAlbums),

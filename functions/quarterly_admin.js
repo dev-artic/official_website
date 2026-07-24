@@ -978,6 +978,7 @@ async function handleQuarterlyAdminAction({
       nowArtic,
       externalLinks,
       includeSourceMetadata: true,
+      existingCache: null,
     });
     const archive = applyQuarterlyYoutubeTracks(baseArchive, youtubeOverrides.tracks);
     const diagnostics = buildQuarterlyAdminDiagnostics(archive, mediaReviews.reviews);

@@ -1369,14 +1369,14 @@ async function parseIssueBlocks(token, pageId, options = {}) {
   return parsed;
 }
 
-async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(), mediaCache = null, nowArtic = null, externalLinks = null, includeSourceMetadata = false, existingCache = null }) {
+async function fetchQuarterlyContents({ token, dataSourceId = getDataSourceId(), mediaCache = null, nowArtic = null, externalLinks = null, includeSourceMetadata = false, existingCache = null, includeDrafts = false }) {
   if (!token) {
     const error = new Error("NOTION_API_KEY is not configured");
     error.status = 500;
     throw error;
   }
 
-  const pages = await queryQuarterlyPages(token, dataSourceId);
+  const pages = includeDrafts ? await queryQuarterlyPagesRaw(token, dataSourceId) : await queryQuarterlyPages(token, dataSourceId);
   
   // Create a map of existing cached issues for fast lookup
   const cachedIssuesMap = new Map();

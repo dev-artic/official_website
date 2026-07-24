@@ -566,6 +566,7 @@ async function getQuarterlyAdminPayload({ token, dataSourceId, db, mediaCache, n
     externalLinks,
     includeSourceMetadata: true,
     existingCache,
+    includeDrafts: true,
   });
   const archive = applyQuarterlyYoutubeTracks(baseArchive, youtubeOverrides.tracks);
   const diagnostics = buildQuarterlyAdminDiagnostics(archive, reviewOverrides.reviews);

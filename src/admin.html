@@ -1777,7 +1777,7 @@ path_depth: "../"
     async function togglePublishStatus(issueId, publish, toggleEl) {
       toggleEl.disabled = true;
       const issue = getQuarterlyIssue(issueId);
-      const statusLabel = publish ? '완료' : 'Draft';
+      const statusLabel = publish ? '완료' : '진행 중';
       try {
         await postQuarterlyAdmin({
           action: 'save_issue_properties',

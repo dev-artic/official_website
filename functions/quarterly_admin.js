@@ -136,8 +136,8 @@ function validateQuarterlyAutoFillCandidate({ page, parsedBlocks, inferred, publ
   if (incompleteAlbumRows > 0) {
     blockers.push(`${incompleteAlbumRows} album row(s) are missing artist or release date fields.`);
   }
-  if (!diagnostics.inferredFromAlbums) {
-    blockers.push("Issue year/quarter could not be inferred from album release dates.");
+  if (!diagnostics.inferredFromAlbums && (!properties.Year || !properties.Quarter)) {
+    blockers.push("Issue year/quarter could not be inferred from album release dates or page properties.");
   }
   if (!properties.Slug || !properties.Issue || !properties.Year || !properties.Quarter) {
     blockers.push("Required issue properties could not be inferred.");

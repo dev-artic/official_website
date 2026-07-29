@@ -915,6 +915,16 @@ async function handleQuarterlyAdminAction({
       expectedTitle: body.expectedTitle || "",
       expectedLastEditedTime: body.expectedLastEditedTime || "",
     });
+
+    if (body.properties && ("Publication Status" in body.properties || "업로드 확정" in body.properties)) {
+      try {
+        await db.collection("quarterly_cache").doc("archive").delete();
+        console.log(`[CACHE] Invalidated quarterly_cache/archive due to publication property update for page ${pageId}`);
+      } catch (cacheErr) {
+        console.warn("Failed to invalidate quarterly_cache on save_issue_properties:", cacheErr.message);
+      }
+    }
+
     return { success: true, pageId: result.id };
   }
 

@@ -95,27 +95,32 @@ def parse_existing_video_ids(html: str) -> list[str]:
     return re.findall(r'class="archive-entry[^"]*"\s+data-vid="([^"]+)"', html)
 
 
+def parse_youtube_title(raw_title: str) -> tuple[str, str]:
+    """Returns (display_title, guest)"""
+    if " | " in raw_title:
+        parts = [p.strip() for p in raw_title.split(" | ")]
+        display_title = parts[0]
+        guest = parts[1] if len(parts) >= 2 else ""
+        return display_title, guest
+    return raw_title, ""
+
 # ─────────────────────────────────────────────────────────────
 # 3. 새 에피소드 HTML 블록 생성
 # ─────────────────────────────────────────────────────────────
 def build_episode_html(item: dict, ep_label: str) -> str:
     vid   = item["videoId"]
-    title = item["title"]
+    raw_title = item["title"]
     date  = item["publishedAt"]
     description = item.get("description", "")
 
+    display_title, parsed_guest = parse_youtube_title(raw_title)
+
     # YouTube 설명의 Guest 필드를 우선 사용하고, 없을 때만 제목을 보조 정보로 사용.
-    guest = ep_label
+    guest = parsed_guest if parsed_guest else ep_label
     guest_match = re.search(r"(?im)^\s*Guest\s*\|\s*(.+?)\s*$", description)
     if guest_match:
         guest = guest_match.group(1).strip()
-    elif " | " in title:
-        candidate = title.split(" | ")[0].strip()
-        if len(candidate) > 20:
-            guest = candidate[:20] + "…"
-        elif len(candidate) > 0:
-            guest = candidate
-    elif "EP." in title:
+    elif "EP." in raw_title and not parsed_guest:
         guest = "Episode"
 
     return f"""
@@ -127,7 +132,7 @@ def build_episode_html(item: dict, ep_label: str) -> str:
                   <div class="archive-item-text">
                     <span class="archive-item-type">{guest}</span>
                     <div class="archive-item-title-row">
-                      <span class="archive-item-title">{title}</span>
+                      <span class="archive-item-title">{display_title}</span>
                       <span class="archive-item-date">{date}</span>
                     </div>
                   </div>
@@ -142,15 +147,17 @@ def build_episode_html(item: dict, ep_label: str) -> str:
 # ─────────────────────────────────────────────────────────────
 def update_latest_release(html: str, newest: dict) -> str:
     vid   = newest["videoId"]
-    title = newest["title"]
+    raw_title = newest["title"]
     date  = newest["publishedAt"]
+
+    display_title, _ = parse_youtube_title(raw_title)
 
     new_block = f"""          <div class="archive-entry active" data-vid="{vid}">
             <a class="archive-item latest-featured-item" href="javascript:void(0)">
               <div class="archive-item-left">
                 <div class="archive-item-text">
                   <div class="archive-item-title-row">
-                    <span class="archive-item-title">{title}</span>
+                    <span class="archive-item-title">{display_title}</span>
                     <span class="archive-item-date">{date}</span>
                   </div>
                 </div>

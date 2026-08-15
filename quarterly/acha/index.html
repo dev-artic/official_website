@@ -776,7 +776,12 @@ body {
   }
 
   .acha-track-module.has-youtube-player .acha-youtube-player-shell {
-    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
   }
 
   .acha-youtube-player-shell > div,

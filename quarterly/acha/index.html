@@ -1870,6 +1870,7 @@ body {
   let activeAchaYoutubePlayer = null;
   let activeAchaYoutubeModule = null;
   let achaYoutubeApiPromise = null;
+  let isAchaYoutubePlayerReady = false;
   let activeAchaProgressTimer = 0;
 
   function escapeHtml(value) {
@@ -2583,27 +2584,29 @@ body {
     activeAchaYoutubePlayer = null;
   }
 
-  async function createAchaYoutubePlayer(module, videoId) {
+  async function ensureAchaYoutubePlayer() {
     await ensureAchaYoutubeApi();
-    destroyAchaYoutubePlayer();
+    if (activeAchaYoutubePlayer) return activeAchaYoutubePlayer;
 
-    const shell = module.querySelector('[data-acha-youtube-shell]');
-    if (!shell) throw new Error('YouTube player host unavailable.');
-    shell.innerHTML = '';
     const holder = document.createElement('div');
-    holder.id = `acha-youtube-player-${Math.random().toString(36).slice(2)}`;
-    shell.appendChild(holder);
+    holder.id = `acha-global-yt-player`;
+    holder.style.position = 'absolute';
+    holder.style.width = '1px';
+    holder.style.height = '1px';
+    holder.style.opacity = '0';
+    holder.style.pointerEvents = 'none';
+    holder.style.overflow = 'hidden';
+    document.body.appendChild(holder);
 
     return new Promise((resolve, reject) => {
       activeAchaYoutubePlayer = new window.YT.Player(holder.id, {
         height: '360',
         width: '640',
-        videoId,
         playerVars: { autoplay: 0, controls: 1, rel: 0, playsinline: 1 },
         events: {
-          onReady: (event) => {
+          onReady: () => {
+            isAchaYoutubePlayerReady = true;
             resolve(activeAchaYoutubePlayer);
-            event.target.playVideo();
           },
           onStateChange: (event) => {
             const activeModule = activeAchaYoutubeModule;
@@ -2627,15 +2630,20 @@ body {
             }
           },
           onError: () => {
-            setAchaPlayIcon(module, false);
-            setAchaPlayerStatus(module, 'Playback unavailable');
-            activeAchaYoutubeModule = null;
-            reject(new Error('YouTube playback failed.'));
+            const activeModule = activeAchaYoutubeModule;
+            if (activeModule) {
+              setAchaPlayIcon(activeModule, false);
+              setAchaPlayerStatus(activeModule, 'Playback unavailable');
+              activeAchaYoutubeModule = null;
+            }
           },
           onAutoplayBlocked: () => {
-            setAchaPlayIcon(module, false);
-            setAchaPlayerStatus(module, 'Press play to start');
-            activeAchaYoutubeModule = null;
+            const activeModule = activeAchaYoutubeModule;
+            if (activeModule) {
+              setAchaPlayIcon(activeModule, false);
+              setAchaPlayerStatus(activeModule, 'Press play to start');
+              activeAchaYoutubeModule = null;
+            }
           }
         }
       });
@@ -2725,14 +2733,21 @@ body {
     resetAchaPlayerProgress(module);
 
     if (track?.youtubeId) {
-      setAchaPlayerStatus(module, 'Loading');
       activeAchaYoutubeModule = module;
-      try {
-        await createAchaYoutubePlayer(module, track.youtubeId);
-      } catch (err) {
-        activeAchaYoutubeModule = null;
-        setAchaPlayIcon(module, false);
-        setAchaPlayerStatus(module, 'Playback unavailable');
+      if (isAchaYoutubePlayerReady && activeAchaYoutubePlayer) {
+        setAchaPlayerStatus(module, 'Loading');
+        activeAchaYoutubePlayer.loadVideoById(track.youtubeId);
+      } else {
+        setAchaPlayerStatus(module, 'Initializing');
+        ensureAchaYoutubePlayer()
+          .then((player) => {
+            player.loadVideoById(track.youtubeId);
+          })
+          .catch(() => {
+            activeAchaYoutubeModule = null;
+            setAchaPlayIcon(module, false);
+            setAchaPlayerStatus(module, 'Playback unavailable');
+          });
       }
       return;
     }
@@ -3399,6 +3414,7 @@ body {
   bodyEl?.addEventListener('keydown', handleInlineEssayKeydown, true);
   instagramModalEl?.addEventListener('click', handleInstagramModalClick);
   document.addEventListener('keydown', handleInstagramModalKeydown);
+  ensureAchaYoutubePlayer().catch(() => {});
   loadIssue();
 })();
 </script>

@@ -3393,6 +3393,8 @@ body {
       requestAnimationFrame(() => requestAnimationFrame(scrollToSelectedEssay));
       window.addEventListener('load', scrollToSelectedEssay, { once: true });
     }
+
+    preloadAchaYoutubePlayers().catch(() => {});
   }
 
   function getQuarterlyContentsApiUrl() {
@@ -3430,7 +3432,6 @@ body {
   bodyEl?.addEventListener('keydown', handleInlineEssayKeydown, true);
   instagramModalEl?.addEventListener('click', handleInstagramModalClick);
   document.addEventListener('keydown', handleInstagramModalKeydown);
-  preloadAchaYoutubePlayers().catch(() => {});
   loadIssue();
 })();
 </script>

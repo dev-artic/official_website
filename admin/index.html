@@ -647,8 +647,57 @@ body {
     gap: 6px;
   }
 
+  .quarterly-issue-button:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
   .quarterly-issue-button.active {
     background: var(--bg-card);
+    border-left: 3px solid var(--accent-primary, #6c8cff);
+    padding-left: 13px;
+  }
+
+  .quarterly-publish-toggle {
+    position: relative;
+    width: 28px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+  .quarterly-publish-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+  .quarterly-publish-toggle .toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: #555;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .quarterly-publish-toggle .toggle-track::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+  }
+  .quarterly-publish-toggle input:checked + .toggle-track {
+    background: #4ade80;
+  }
+  .quarterly-publish-toggle input:checked + .toggle-track::after {
+    transform: translateX(12px);
+  }
+  .quarterly-publish-toggle input:disabled + .toggle-track {
+    opacity: 0.5;
+    cursor: wait;
   }
 
   .quarterly-issue-title {
@@ -1771,6 +1820,35 @@ body {
       });
     }
 
+    async function togglePublishStatus(issueId, publish, toggleEl) {
+      toggleEl.disabled = true;
+      const issue = getQuarterlyIssue(issueId);
+      const statusLabel = publish ? '완료' : '진행 중';
+      try {
+        await postQuarterlyAdmin({
+          action: 'save_issue_properties',
+          pageId: issueId,
+          expectedTitle: '',
+          properties: {
+            'Publication Status': statusLabel,
+            '업로드 확정': publish,
+          }
+        });
+        // Update local data to reflect change immediately
+        if (issue) {
+          issue.publicationStatus = statusLabel;
+          issue.uploadConfirmed = publish;
+        }
+        renderQuarterlyIssueList();
+        renderQuarterlyDetail();
+      } catch (err) {
+        alert('Publish toggle failed: ' + err.message);
+        toggleEl.checked = !publish; // Revert toggle
+      } finally {
+        toggleEl.disabled = false;
+      }
+    }
+
     function getIssueDiagnostics(issueId) {
       return (quarterlyAdminData?.diagnostics?.issues || []).find(item => item.issueId === issueId) || {};
     }
@@ -1816,10 +1894,17 @@ body {
       list.innerHTML = issues.map(issue => {
         const health = diagnostics.find(item => item.issueId === issue.id) || {};
         const warningCount = (health.warnings || []).length;
+        const isPublished = ['완료', 'Published', 'Ready'].includes(issue.publicationStatus);
         return `
           <button class="quarterly-issue-button ${issue.id === selectedQuarterlyIssueId ? 'active' : ''}" type="button" data-issue-id="${escapeHtml(issue.id)}">
-            <span class="quarterly-issue-title">${escapeHtml(issue.title || issue.issue)}</span>
-            <span class="quarterly-issue-meta">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.date || '')}${issue.lastEditedTime ? ` · edited ${escapeHtml(new Date(issue.lastEditedTime).toLocaleString('ko-KR'))}` : ''}</span>
+            <span class="quarterly-issue-title" style="display:flex; align-items:center;">
+              <label class="quarterly-publish-toggle" onclick="event.stopPropagation()">
+                <input type="checkbox" ${isPublished ? 'checked' : ''} data-toggle-issue-id="${escapeHtml(issue.id)}">
+                <span class="toggle-track"></span>
+              </label>
+              ${escapeHtml(issue.title || issue.issue)}
+            </span>
+            <span class="quarterly-issue-meta">${escapeHtml(issue.publicationStatus || 'Draft')} · ${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.date || '')}${issue.lastEditedTime ? ` · edited ${escapeHtml(new Date(issue.lastEditedTime).toLocaleString('ko-KR'))}` : ''}</span>
             <span class="quarterly-health-row">
               <span class="quarterly-pill ${warningCount ? 'warn' : 'ok'}">${warningCount ? `${warningCount} warnings` : 'ok'}</span>
               <span class="quarterly-pill">${health.albumCount || 0} albums</span>
@@ -1834,6 +1919,14 @@ body {
           selectedQuarterlyIssueId = button.dataset.issueId;
           renderQuarterlyIssueList();
           renderQuarterlyDetail();
+        });
+      });
+
+      list.querySelectorAll('input[data-toggle-issue-id]').forEach(toggle => {
+        toggle.addEventListener('change', (e) => {
+          const issueId = toggle.dataset.toggleIssueId;
+          const publish = toggle.checked;
+          togglePublishStatus(issueId, publish, toggle);
         });
       });
     }
@@ -2014,9 +2107,9 @@ body {
               <h3 class="quarterly-detail-title">${escapeHtml(issue.title || issue.issue)}</h3>
               <p class="quarterly-small-muted" style="margin:8px 0 0;">${escapeHtml(issue.issue || '')} · ${escapeHtml(issue.publicationStatus || '')} · ${escapeHtml(issue.date || '')}</p>
             </div>
-            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-              <button class="action-btn-sm" type="button" onclick="batchAutoResolveYoutubeTracks('${escapeHtml(issue.id)}')">Auto-Resolve Audio</button>
+            <div style="display:flex; flex-direction:row; gap:8px; align-items:center;">
               <button class="action-btn-sm" type="button" onclick="batchAutoResolveMedia('${escapeHtml(issue.id)}')">Auto-Resolve Media</button>
+              <button class="action-btn-sm" type="button" onclick="batchAutoResolveYoutubeTracks('${escapeHtml(issue.id)}')">Auto-Resolve Audio</button>
             </div>
           </div>
           <div class="quarterly-health-row">
@@ -3103,8 +3196,8 @@ body {
       postQuarterlyAdmin({
         action: 'auto_fill_issue_properties',
         pageId: issue.id,
-        expectedTitle: issue.title || '',
-        expectedLastEditedTime: issue.lastEditedTime || ''
+        expectedTitle: '',
+        expectedLastEditedTime: ''
       })
       .then(data => {
         const inferred = data.inferred || {};
@@ -3256,6 +3349,77 @@ body {
           btn.textContent = 'Auto-Resolve Audio';
         }
       });
+    };
+
+    window.batchAutoResolveMedia = async function(issueId) {
+      if (!quarterlyAdminData || !quarterlyAdminData.archive || !quarterlyAdminData.archive.issues) return;
+      
+      const issue = quarterlyAdminData.archive.issues.find(i => i.id === issueId);
+      if (!issue) return;
+
+      const btn = document.querySelector(`button[onclick*="batchAutoResolveMedia('${issueId}')"]`);
+      if (btn) btn.textContent = 'Resolving...';
+
+      let allAlbums = [];
+      (issue.tiers || []).forEach(tier => {
+        (tier.items || []).forEach(album => {
+          allAlbums.push(album);
+        });
+      });
+
+      let resolvedCount = 0;
+      let totalCount = allAlbums.length;
+
+      for (const album of allAlbums) {
+        try {
+          const res = await postQuarterlyAdmin({
+            action: 'refresh_bugs_cover_candidate',
+            album: album.album,
+            artist: album.artist
+          });
+
+          const candidates = res.candidates || [];
+          let bestValidCandidate = null;
+
+          for (const candidate of candidates) {
+            try {
+              const dimensions = await new Promise((resolve, reject) => {
+                const img = new Image();
+                const timer = setTimeout(() => reject(new Error('timeout')), 3000);
+                img.onload = () => { clearTimeout(timer); resolve({ w: img.naturalWidth, h: img.naturalHeight }); };
+                img.onerror = () => { clearTimeout(timer); reject(); };
+                img.src = candidate.imageUrl;
+              });
+
+              if (dimensions.w >= 1000 && dimensions.h >= 1000) {
+                bestValidCandidate = candidate;
+                break;
+              }
+            } catch (e) {
+              // Ignore broken candidates
+            }
+          }
+
+          if (bestValidCandidate) {
+            await postQuarterlyAdmin({
+              action: 'save_album_cover_override',
+              album: album.album,
+              artist: album.artist,
+              mediaKey: makeQuarterlyMediaKey(album.album, album.artist),
+              imageUrl: bestValidCandidate.imageUrl,
+              sourceUrl: bestValidCandidate.albumUrl,
+              source: 'Bugs',
+              verified: true
+            });
+            resolvedCount++;
+          }
+        } catch (error) {
+          console.error('Failed to resolve media for', album.album, error);
+        }
+      }
+
+      if (btn) btn.textContent = 'Auto-Resolve Media';
+      alert(`Auto-Resolve Media completed.\nChecked ${totalCount} albums.\nSuccessfully found and saved high-resolution (>=1000px) covers for ${resolvedCount} albums.\nPlease run "Refresh" to see updates.`);
     };
 
     checkAuth();

@@ -14,6 +14,7 @@
           const vid = entry.dataset.vid;
           if (vid) {
             const img = new Image();
+            img.onerror = () => { img.src = 'https://img.youtube.com/vi/' + vid + '/hqdefault.jpg'; };
             img.src = 'https://img.youtube.com/vi/' + vid + '/maxresdefault.jpg';
           }
         });
@@ -72,7 +73,7 @@
         // Render custom video poster with opacity 0 initially for fade-in transition
         embed.innerHTML = `
           <div class="custom-video-poster" data-vid="${vid}" style="opacity: 0; transition: opacity 0.8s ease;">
-            <img class="poster-thumbnail" src="https://img.youtube.com/vi/${vid}/maxresdefault.jpg" alt="Video Cover">
+            <img class="poster-thumbnail" src="https://img.youtube.com/vi/${vid}/maxresdefault.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback=1;this.src='https://img.youtube.com/vi/${vid}/sddefault.jpg';}else if(this.dataset.fallback==1){this.dataset.fallback=2;this.src='https://img.youtube.com/vi/${vid}/hqdefault.jpg';}" alt="Video Cover">
             <div class="poster-play-btn">
               <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
             </div>

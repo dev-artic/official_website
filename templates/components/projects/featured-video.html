@@ -12,7 +12,7 @@
   </a>
   <div class="archive-embed open">
     <div class="custom-video-poster" data-vid="{{VIDEO_ID}}" style="opacity: 0; transition: opacity 0.8s ease;">
-      <img class="poster-thumbnail" src="https://img.youtube.com/vi/{{VIDEO_ID}}/maxresdefault.jpg" alt="Video Cover">
+      <img class="poster-thumbnail" src="https://img.youtube.com/vi/{{VIDEO_ID}}/maxresdefault.jpg" onerror="if(!this.dataset.fallback){this.dataset.fallback=1;this.src='https://img.youtube.com/vi/{{VIDEO_ID}}/sddefault.jpg';}else if(this.dataset.fallback==1){this.dataset.fallback=2;this.src='https://img.youtube.com/vi/{{VIDEO_ID}}/hqdefault.jpg';}" alt="Video Cover">
       <div class="poster-play-btn">
         <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
       </div>

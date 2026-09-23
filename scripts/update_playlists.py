@@ -142,6 +142,19 @@ def build_episode_html(item: dict, ep_label: str) -> str:
             </div>"""
 
 
+def get_best_thumbnail_url(vid: str) -> str:
+    """YouTube 썸네일 해상도(maxresdefault -> sddefault -> hqdefault) 가용성을 점검하여 200 OK인 최적 URL 반환"""
+    for res in ["maxresdefault", "sddefault", "hqdefault"]:
+        url = f"https://img.youtube.com/vi/{vid}/{res}.jpg"
+        try:
+            resp = requests.head(url, timeout=5)
+            if resp.status_code == 200:
+                return url
+        except Exception:
+            continue
+    return f"https://img.youtube.com/vi/{vid}/hqdefault.jpg"
+
+
 # ─────────────────────────────────────────────────────────────
 # 4. Latest Release 섹션을 최신 에피소드로 교체
 # ─────────────────────────────────────────────────────────────
@@ -151,6 +164,7 @@ def update_latest_release(html: str, newest: dict) -> str:
     date  = newest["publishedAt"]
 
     display_title, _ = parse_youtube_title(raw_title)
+    thumb_url = get_best_thumbnail_url(vid)
 
     new_block = f"""          <div class="archive-entry active" data-vid="{vid}">
             <a class="archive-item latest-featured-item" href="javascript:void(0)">
@@ -165,7 +179,7 @@ def update_latest_release(html: str, newest: dict) -> str:
             </a>
             <div class="archive-embed open">
               <div class="custom-video-poster" data-vid="{vid}" style="opacity: 0; transition: opacity 0.8s ease;">
-                <img class="poster-thumbnail" src="https://img.youtube.com/vi/{vid}/maxresdefault.jpg" alt="Video Cover">
+                <img class="poster-thumbnail" src="{thumb_url}" onerror="if(!this.dataset.fallback){{this.dataset.fallback=1;this.src='https://img.youtube.com/vi/{vid}/hqdefault.jpg';}}" alt="Video Cover">
                 <div class="poster-play-btn">
                   <svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>
                 </div>

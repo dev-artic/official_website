@@ -6,6 +6,11 @@ const DEFAULT_ARCHIVE_PATH = path.join(ROOT_DIR, 'scratch', 'quarterly_live_cont
 const DEFAULT_MEDIA_CACHE_PATH = path.join(ROOT_DIR, 'functions', 'data', 'quarterly_media_cache.json');
 
 const BUGS_MANUAL_ALBUM_IDS = {
+  "billstax::livefastdieskrt": {"albumId": "4144737", "resolvedAlbum": "LIVE FAST DIE SKRT", "resolvedArtist": "BILL STAX(빌스택스)", "sourceUrl": "https://music.bugs.co.kr/album/4144737", "note": "Album and artist verified against the Bugs album page."},
+  "bewhy::popiscryin": {"albumId": "4147037", "resolvedAlbum": "POP IS CRYIN'", "resolvedArtist": "비와이(BewhY)", "sourceUrl": "https://music.bugs.co.kr/album/4147037", "note": "Album and artist verified against the Bugs album page."},
+  "반타01mpt::아름8": {"albumId": "20817954", "resolvedAlbum": "아름8", "resolvedArtist": "반타01, MPT", "sourceUrl": "https://music.bugs.co.kr/album/20817954", "note": "Album and artist verified against the Bugs album page."},
+  "박효신::ae": {"albumId": "4144667", "resolvedAlbum": "A & E", "resolvedArtist": "박효신", "sourceUrl": "https://music.bugs.co.kr/album/4144667", "note": "Album and artist verified against the Bugs album page."},
+
   '시온::socialavoidance': {
     albumId: '4102719',
     resolvedAlbum: 'sociavoidance',

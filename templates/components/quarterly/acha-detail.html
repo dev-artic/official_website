@@ -1,6 +1,6 @@
 <style>
   body {
-    overflow-x: hidden;
+    @apply overflow-x-hidden;
     transition:
       background-color 0.72s var(--ease-out-expo),
       color 0.72s var(--ease-out-expo);
@@ -38,7 +38,7 @@
   }
 
   .acha-page {
-    width: 100%;
+    @apply w-full;
     max-width: var(--max-width);
     margin: 0 auto;
     padding: 120px var(--gutter) var(--space-xxl);
@@ -49,11 +49,11 @@
   }
 
   .acha-page * {
-    min-width: 0;
+    @apply min-w-0;
   }
 
   .acha-hero {
-    display: grid;
+    @apply grid;
     grid-template-columns: 1fr;
     gap: clamp(28px, 5vw, 72px);
     align-items: end;
@@ -62,22 +62,22 @@
   }
 
   .acha-hero-main {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(0, 1fr) minmax(260px, 36ch);
     gap: clamp(28px, 5vw, 72px);
     align-items: end;
   }
 
   .acha-hero-title {
-    min-width: 0;
+    @apply min-w-0;
   }
 
   .acha-hero-aside {
-    display: grid;
+    @apply grid;
     justify-items: end;
     align-self: end;
-    min-width: 0;
-    text-align: right;
+    @apply min-w-0;
+    @apply text-right;
   }
 
   .acha-kicker,
@@ -95,26 +95,26 @@
     font-size: 0.58rem;
     line-height: 1.45;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
   }
 
   .acha-back {
-    display: inline-flex;
-    align-items: center;
+    @apply inline-flex;
+    @apply items-center;
     gap: 8px;
     min-height: 44px;
-    width: fit-content;
+    @apply w-fit;
     margin-top: var(--space-md);
     padding: 10px 0 8px;
-    position: relative;
+    @apply relative;
     white-space: nowrap;
     transition: color 0.3s ease;
   }
 
   .acha-back::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     left: 18px;
     right: 0;
     bottom: 0;
@@ -126,7 +126,7 @@
   }
 
   .acha-back:hover {
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .acha-back:focus-visible,
@@ -155,15 +155,15 @@
   }
 
   .acha-hero h1 {
-    position: relative;
-    display: inline-block;
+    @apply relative;
+    @apply inline-block;
     margin-top: 10px;
     max-width: min(7.2ch, 100%);
     font-family: var(--font-serif);
     font-size: clamp(2.5rem, 7vw, 6.7rem);
     line-height: 0.94;
     font-weight: 700;
-    color: var(--text-primary);
+    @apply text-ink;
     word-break: keep-all;
     overflow-wrap: normal;
   }
@@ -179,12 +179,12 @@
 
   .acha-page.is-loading .acha-hero h1::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     inset: 0;
     background: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--bg-primary) 72%, transparent) 46%, transparent 78%);
     transform: translateX(-120%);
     animation: acha-title-wipe 2.4s var(--ease-out-expo) infinite;
-    pointer-events: none;
+    @apply pointer-events-none;
   }
 
   @keyframes acha-title-load {
@@ -226,8 +226,8 @@
     font-size: 0.7rem;
     line-height: 1.6;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
@@ -239,7 +239,7 @@
   }
 
   .acha-page:not(.is-loading) .acha-loading-note {
-    display: none;
+    @apply hidden;
   }
 
   .acha-page.is-loading #acha-summary,
@@ -336,23 +336,23 @@
     font-family: var(--font-sans);
     font-size: 0.86rem;
     line-height: 1.9;
-    color: var(--text-secondary);
+    @apply text-secondary;
     white-space: pre-line;
   }
 
   body.acha-instagram-modal-open {
-    overflow: hidden;
+    @apply overflow-hidden;
   }
 
   .acha-stats {
     --acha-stat-gap: clamp(10px, 1.3vw, 18px);
-    display: flex;
-    flex-wrap: nowrap;
+    @apply flex;
+    @apply flex-nowrap;
     gap: var(--acha-stat-gap);
     grid-column: 1 / -1;
     margin-top: clamp(28px, 5vw, 64px);
     padding-bottom: 2px;
-    overflow-x: auto;
+    @apply overflow-x-auto;
     border-top: 1px solid var(--border-color);
     scrollbar-width: none;
     scroll-snap-type: x proximity;
@@ -360,16 +360,16 @@
   }
 
   .acha-stat {
-    display: grid;
+    @apply grid;
     flex: 1 0 max(104px, calc((100% - (var(--acha-stat-gap) * 6)) / 7));
     gap: 8px;
-    min-width: 0;
+    @apply min-w-0;
     padding-top: 14px;
     scroll-snap-align: start;
   }
 
   .acha-stats::-webkit-scrollbar {
-    display: none;
+    @apply hidden;
   }
 
   .acha-stat span {
@@ -380,12 +380,12 @@
     font-family: var(--font-serif);
     font-size: clamp(1.4rem, 3vw, 2.5rem);
     line-height: 1;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .acha-cover-strip {
     margin: 0 calc(50% - 50vw) clamp(40px, 6vw, 84px);
-    overflow: hidden;
+    @apply overflow-hidden;
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
   }
@@ -395,12 +395,12 @@
     width: clamp(108px, 12vw, 176px);
     flex: 0 0 clamp(108px, 12vw, 176px);
     aspect-ratio: 1;
-    object-fit: cover;
+    @apply object-cover;
     background: var(--bg-secondary);
   }
 
   .acha-cover-track {
-    display: flex;
+    @apply flex;
     width: max-content;
     gap: clamp(8px, 1.2vw, 14px);
     padding: clamp(8px, 1.2vw, 14px) 0;
@@ -409,20 +409,20 @@
   }
 
   .acha-cover-set {
-    display: flex;
+    @apply flex;
     gap: clamp(8px, 1.2vw, 14px);
   }
 
   .acha-cover-fallback {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @apply flex;
+    @apply items-center;
+    @apply justify-center;
     padding: 14px;
-    text-align: center;
+    @apply text-center;
     font-family: var(--font-sans);
     font-size: 0.62rem;
     line-height: 1.45;
-    color: var(--text-muted);
+    @apply text-muted;
   }
 
   .acha-body {
@@ -430,7 +430,7 @@
   }
 
   .acha-essay-reader {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(150px, 0.2fr) minmax(0, 0.8fr);
     gap: clamp(28px, 5vw, 80px);
     padding: clamp(42px, 6vw, 82px) 0;
@@ -438,18 +438,18 @@
   }
 
   .acha-essay-reader:empty {
-    display: none;
+    @apply hidden;
   }
 
   .acha-essay-reader h2 {
     font-family: var(--font-serif);
     font-size: clamp(2rem, 5vw, 4.8rem);
     line-height: 0.96;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .acha-essay-content {
-    display: grid;
+    @apply grid;
     gap: 18px;
     max-width: 78ch;
   }
@@ -459,7 +459,7 @@
     font-family: var(--font-sans);
     font-size: 0.9rem;
     line-height: 1.9;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .acha-essay-content h3 {
@@ -467,7 +467,7 @@
     font-family: var(--font-serif);
     font-size: clamp(1rem, 1.5vw, 1.28rem);
     line-height: 1.24;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .acha-essay-content h4,
@@ -477,22 +477,22 @@
     font-size: 0.78rem;
     line-height: 1.65;
     letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-primary);
+    @apply uppercase;
+    @apply text-ink;
   }
 
   .acha-essay-content h5 {
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .acha-essay-content img {
-    width: 100%;
+    @apply w-full;
     max-width: 720px;
-    height: auto;
+    @apply h-auto;
   }
 
   .acha-tier {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(150px, 0.2fr) minmax(0, 0.8fr);
     gap: clamp(28px, 5vw, 80px);
     padding: clamp(42px, 6vw, 82px) 0;
@@ -500,7 +500,7 @@
   }
 
   .acha-tier-heading {
-    display: grid;
+    @apply grid;
     gap: 12px;
     align-content: start;
   }
@@ -509,7 +509,7 @@
     font-family: var(--font-serif);
     font-size: clamp(1.8rem, 4vw, 3.7rem);
     line-height: 0.96;
-    color: var(--text-primary);
+    @apply text-ink;
     word-break: keep-all;
     overflow-wrap: normal;
   }
@@ -517,14 +517,14 @@
   .acha-tier-summary {
     max-width: 28ch;
     letter-spacing: 0;
-    text-transform: none;
+    @apply normal-case;
     font-size: 0.74rem;
     line-height: 1.75;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .acha-tier-criteria {
-    display: grid;
+    @apply grid;
     gap: 6px;
     margin: 0;
     padding: 0;
@@ -532,11 +532,11 @@
     font-family: var(--font-sans);
     font-size: 0.68rem;
     line-height: 1.65;
-    color: var(--text-muted);
+    @apply text-muted;
   }
 
   .acha-album-list {
-    display: grid;
+    @apply grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     column-gap: clamp(24px, 4vw, 64px);
     row-gap: clamp(26px, 4vw, 48px);
@@ -547,7 +547,7 @@
   }
 
   .acha-album {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(96px, 0.24fr) minmax(0, 0.76fr);
     gap: clamp(16px, 3vw, 28px);
     align-items: start;
@@ -570,7 +570,7 @@
 
   .acha-album img,
   .acha-album .acha-cover-fallback {
-    width: 100%;
+    @apply w-full;
     min-height: 96px;
   }
 
@@ -584,7 +584,7 @@
   .acha-album img:hover,
   .acha-cover-strip img:focus-visible,
   .acha-album img:focus-visible {
-    position: relative;
+    @apply relative;
     z-index: 2;
     transform: scale(1.045);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
@@ -606,18 +606,18 @@
     font-size: clamp(1.15rem, 2.1vw, 1.9rem);
     line-height: 1.08;
     font-weight: 700;
-    color: var(--text-primary);
+    @apply text-ink;
     word-break: keep-all;
     overflow-wrap: normal;
   }
 
   .acha-album-meta {
-    display: block;
+    @apply block;
     margin-top: 8px;
     letter-spacing: 0;
-    text-transform: none;
+    @apply normal-case;
     font-size: 0.7rem;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .acha-critic-line {
@@ -625,11 +625,11 @@
     font-family: var(--font-sans);
     font-size: 0.84rem;
     line-height: 1.78;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .acha-field {
-    display: grid;
+    @apply grid;
     grid-template-columns: 112px minmax(0, 1fr);
     gap: 16px;
     margin-top: 12px;
@@ -638,7 +638,7 @@
     font-family: var(--font-sans);
     font-size: 0.72rem;
     line-height: 1.7;
-    color: var(--text-secondary);
+    @apply text-secondary;
     overflow-wrap: anywhere;
   }
 
@@ -657,27 +657,27 @@
   }
 
   .acha-track-module {
-    display: grid;
+    @apply grid;
     gap: 9px;
-    min-width: 0;
+    @apply min-w-0;
   }
 
   .acha-track-list {
-    display: grid;
+    @apply grid;
     gap: 7px;
   }
 
   .acha-track-trigger {
-    display: flex;
-    align-items: flex-start;
+    @apply flex;
+    @apply items-start;
     gap: 12px;
-    width: 100%;
+    @apply w-full;
     border: 0;
     background: transparent;
-    color: var(--text-primary);
+    @apply text-ink;
     padding: 0;
-    text-align: left;
-    cursor: pointer;
+    @apply text-left;
+    @apply cursor-pointer;
     font-family: var(--font-sans);
   }
 
@@ -691,27 +691,27 @@
     font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
     line-height: 1.35;
   }
 
   .acha-track-title {
-    display: block;
-    min-width: 0;
+    @apply block;
+    @apply min-w-0;
     font-size: 0.82rem;
     line-height: 1.35;
     letter-spacing: 0;
-    color: var(--text-primary);
+    @apply text-ink;
     transition: opacity 0.28s ease;
   }
 
   .acha-track-player {
-    display: grid;
+    @apply grid;
     gap: 13px;
     max-height: 0;
     opacity: 0;
-    overflow: hidden;
+    @apply overflow-hidden;
     margin-top: 0;
     padding-top: 0;
     border-top: 0 solid transparent;
@@ -737,46 +737,46 @@
   }
 
   .acha-play-widget {
-    display: flex;
-    flex-direction: column;
+    @apply flex;
+    @apply flex-col;
     gap: 12px;
   }
 
   .acha-youtube-player-shell {
-    display: none;
-    width: 100%;
+    @apply hidden;
+    @apply w-full;
     min-height: 200px;
     aspect-ratio: 16 / 9;
-    overflow: hidden;
+    @apply overflow-hidden;
     background: #000;
   }
 
   .acha-track-module.has-youtube-player .acha-youtube-player-shell {
-    position: absolute;
+    @apply absolute;
     width: 300px;
     height: 300px;
     opacity: 0.01;
     z-index: -1;
-    pointer-events: none;
-    overflow: hidden;
+    @apply pointer-events-none;
+    @apply overflow-hidden;
   }
 
   .acha-youtube-player-shell > div,
   .acha-youtube-player-shell iframe {
-    display: block;
-    width: 100%;
-    height: 100%;
+    @apply block;
+    @apply w-full;
+    @apply h-full;
     min-height: 200px;
     border: 0;
   }
 
   .acha-play-status-row {
-    display: flex;
-    justify-content: flex-end;
+    @apply flex;
+    @apply justify-end;
   }
 
   .acha-play-track-info {
-    display: flex;
+    @apply flex;
     align-items: baseline;
     gap: 14px;
     user-select: none;
@@ -784,73 +784,73 @@
 
   .acha-play-track-num {
     min-width: 24px;
-    flex-shrink: 0;
+    @apply shrink-0;
     font-family: var(--font-sans);
     font-size: 0.55rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
   }
 
   .acha-play-track-text {
     flex: 1;
-    min-width: 0;
+    @apply min-w-0;
   }
 
   .acha-play-track-title {
-    display: block;
+    @apply block;
     font-family: var(--font-sans);
     font-size: 0.96rem;
     font-weight: 500;
     line-height: 1.32;
-    color: var(--text-primary);
+    @apply text-ink;
     white-space: nowrap;
-    overflow: hidden;
+    @apply overflow-hidden;
     text-overflow: ellipsis;
     transition: opacity 0.3s ease;
   }
 
   .acha-play-track-status {
-    display: block;
+    @apply block;
     font-family: var(--font-sans);
     font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
   }
 
   .acha-play-progress-wrap {
-    display: flex;
-    align-items: center;
+    @apply flex;
+    @apply items-center;
     gap: 10px;
   }
 
   .acha-play-time {
     min-width: 30px;
-    flex-shrink: 0;
+    @apply shrink-0;
     font-family: var(--font-sans);
     font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 0.05em;
-    color: var(--text-muted);
+    @apply text-muted;
   }
 
   .acha-play-time.dur {
-    text-align: right;
+    @apply text-right;
   }
 
   .acha-play-bar-track {
     flex: 1;
     height: 1px;
     background-color: var(--border-color);
-    position: relative;
+    @apply relative;
   }
 
   .acha-play-bar-fill {
-    position: absolute;
+    @apply absolute;
     inset: 0 auto 0 0;
     width: 0%;
     background-color: var(--text-primary);
@@ -866,49 +866,49 @@
   }
 
   .acha-play-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    @apply flex;
+    @apply items-center;
+    @apply justify-between;
   }
 
   .acha-play-ctrl-btn,
   .acha-play-main-btn {
     border: 0;
     background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
+    @apply text-muted;
+    @apply cursor-pointer;
     font-family: var(--font-sans);
     font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
+    @apply uppercase;
     padding: 0;
     transition: color 0.28s ease, opacity 0.28s ease;
   }
 
   .acha-play-ctrl-btn {
-    display: inline-flex;
-    align-items: center;
+    @apply inline-flex;
+    @apply items-center;
     gap: 8px;
   }
 
   .acha-play-ctrl-btn[disabled] {
     opacity: 0.24;
-    cursor: default;
+    @apply cursor-default;
   }
 
   .acha-play-ctrl-btn:not([disabled]):hover,
   .acha-play-main-btn:hover {
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .acha-play-main-btn {
     width: 32px;
     height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-primary);
+    @apply inline-flex;
+    @apply items-center;
+    @apply justify-center;
+    @apply text-ink;
   }
 
   .acha-play-main-btn svg,
@@ -916,7 +916,7 @@
     width: 11px;
     height: 11px;
     fill: currentColor;
-    pointer-events: none;
+    @apply pointer-events-none;
   }
 
   .acha-play-track-info.track-anim-out-up {
@@ -956,12 +956,12 @@
   }
 
   .acha-source {
-    display: inline-block;
+    @apply inline-block;
     margin-top: 12px;
   }
 
   .acha-album.has-inline-essay {
-    position: relative;
+    @apply relative;
     border-top-color: color-mix(in srgb, var(--text-primary) 34%, var(--border-color));
   }
 
@@ -971,9 +971,9 @@
     --acha-essay-ink-rgb: 245, 245, 245;
     --acha-essay-difference-rgb: 255, 255, 255;
     grid-column: 1 / -1;
-    display: grid;
+    @apply grid;
     gap: clamp(14px, 2.4vw, 26px);
-    position: relative;
+    @apply relative;
     margin-top: clamp(8px, 1.6vw, 20px);
     padding: 0;
     border-top: 0;
@@ -993,47 +993,47 @@
   }
 
   .acha-inline-essay::before {
-    display: none;
+    @apply hidden;
   }
 
   .acha-inline-essay summary {
-    display: grid;
+    @apply grid;
     grid-template-columns: 1fr;
     align-items: end;
-    position: relative;
+    @apply relative;
     min-height: clamp(240px, 30vw, 440px);
-    cursor: pointer;
+    @apply cursor-pointer;
     list-style: none;
-    overflow: hidden;
+    @apply overflow-hidden;
     touch-action: manipulation;
   }
 
   .acha-inline-essay summary::-webkit-details-marker {
-    display: none;
+    @apply hidden;
   }
 
   .acha-essay-visual {
     grid-area: 1 / 1;
-    display: grid;
-    width: 100%;
+    @apply grid;
+    @apply w-full;
     justify-self: stretch;
     margin: 0;
-    position: relative;
-    overflow: hidden;
+    @apply relative;
+    @apply overflow-hidden;
     background: var(--bg-secondary);
     isolation: isolate;
     contain: paint;
-    pointer-events: none;
+    @apply pointer-events-none;
   }
 
   .acha-essay-visual::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     inset: 0;
     background:
       linear-gradient(90deg, rgba(0, 0, 0, 0.64) 0%, rgba(0, 0, 0, 0.32) 44%, rgba(0, 0, 0, 0.06) 100%),
       linear-gradient(0deg, rgba(0, 0, 0, 0.28), transparent 42%);
-    pointer-events: none;
+    @apply pointer-events-none;
     margin: 0;
     transition: background 0.7s var(--ease-out-expo), opacity 0.7s var(--ease-out-expo);
   }
@@ -1053,10 +1053,10 @@
 
   .acha-essay-visual img,
   .acha-essay-visual .acha-cover-fallback {
-    width: 100%;
+    @apply w-full;
     aspect-ratio: 21 / 8;
     min-height: clamp(260px, 32vw, 440px);
-    object-fit: cover;
+    @apply object-cover;
     object-position: center;
     background: var(--bg-secondary);
     transform: translateZ(0) scale(1.02);
@@ -1073,20 +1073,20 @@
   .acha-essay-visual figcaption,
   .acha-essay-toggle,
   .acha-essay-collapse {
-    display: inline-flex;
-    align-items: center;
+    @apply inline-flex;
+    @apply items-center;
     gap: 10px;
-    width: fit-content;
+    @apply w-fit;
     font-family: var(--font-sans);
     font-size: 0.6rem;
     line-height: 1.45;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
   }
 
   .acha-essay-visual figcaption {
-    position: absolute;
+    @apply absolute;
     left: clamp(16px, 2vw, 26px);
     bottom: clamp(14px, 2vw, 22px);
     z-index: 2;
@@ -1094,8 +1094,8 @@
   }
 
   .acha-essay-toggle {
-    position: relative;
-    justify-content: center;
+    @apply relative;
+    @apply justify-center;
     min-height: 44px;
     padding: 0;
     border: 0;
@@ -1103,15 +1103,15 @@
     appearance: none;
     font-weight: 700;
     line-height: 1;
-    cursor: pointer;
+    @apply cursor-pointer;
     touch-action: manipulation;
     transition: color 0.36s ease, opacity 0.36s ease;
   }
 
   .acha-essay-toggle-icon {
     --acha-toggle-size: 11px;
-    position: relative;
-    display: inline-block;
+    @apply relative;
+    @apply inline-block;
     flex: 0 0 var(--acha-toggle-size);
     width: var(--acha-toggle-size);
     height: var(--acha-toggle-size);
@@ -1123,7 +1123,7 @@
   .acha-essay-toggle-icon::before,
   .acha-essay-toggle-icon::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     left: 50%;
     top: 50%;
     width: var(--acha-toggle-size);
@@ -1148,7 +1148,7 @@
   .acha-essay-heading {
     grid-area: 1 / 1;
     z-index: 2;
-    display: grid;
+    @apply grid;
     gap: clamp(14px, 2vw, 24px);
     align-self: center;
     max-width: min(760px, 82%);
@@ -1156,18 +1156,18 @@
   }
 
   .acha-essay-actions {
-    display: flex;
-    flex-wrap: wrap;
+    @apply flex;
+    @apply flex-wrap;
     column-gap: clamp(18px, 2.2vw, 30px);
     row-gap: 10px;
-    align-items: center;
+    @apply items-center;
     margin-top: clamp(6px, 1vw, 14px);
   }
 
   .acha-instagram-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    @apply inline-flex;
+    @apply items-center;
+    @apply justify-center;
     min-height: 44px;
     padding: 0 15px;
     border: 1px solid rgba(var(--acha-essay-ink-rgb), 0.54);
@@ -1178,8 +1178,8 @@
     font-size: 0.58rem;
     line-height: 1;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
+    @apply uppercase;
+    @apply cursor-pointer;
     transition: background 0.3s ease, border-color 0.3s ease, transform 0.42s var(--ease-out-expo);
   }
 
@@ -1195,20 +1195,20 @@
   }
 
   .acha-instagram-modal[hidden] {
-    display: none;
+    @apply hidden;
   }
 
   .acha-instagram-modal {
-    position: fixed;
+    @apply fixed;
     inset: 0;
     z-index: 9999;
-    display: grid;
+    @apply grid;
     place-items: center;
     padding: var(--gutter);
   }
 
   .acha-instagram-backdrop {
-    position: absolute;
+    @apply absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.72);
     opacity: 0;
@@ -1216,11 +1216,11 @@
   }
 
   .acha-instagram-dialog {
-    position: relative;
+    @apply relative;
     z-index: 1;
     width: min(560px, calc(100vw - var(--gutter) * 2));
     max-height: min(760px, calc(100vh - var(--gutter) * 2));
-    display: grid;
+    @apply grid;
     grid-template-rows: auto minmax(0, 1fr);
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
@@ -1240,10 +1240,10 @@
   }
 
   .acha-instagram-header {
-    display: flex;
-    justify-content: space-between;
+    @apply flex;
+    @apply justify-between;
     gap: 16px;
-    align-items: center;
+    @apply items-center;
     padding: 14px 16px;
     border-bottom: 1px solid var(--border-color);
   }
@@ -1252,8 +1252,8 @@
     font-family: var(--font-sans);
     font-size: 0.62rem;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
+    @apply uppercase;
+    @apply text-secondary;
   }
 
   .acha-instagram-close {
@@ -1262,8 +1262,8 @@
     border: 1px solid var(--border-color);
     border-radius: 0;
     background: transparent;
-    color: var(--text-primary);
-    cursor: pointer;
+    @apply text-ink;
+    @apply cursor-pointer;
     font-family: var(--font-sans);
     font-size: 1rem;
     line-height: 1;
@@ -1276,7 +1276,7 @@
   }
 
   .acha-instagram-frame {
-    width: 100%;
+    @apply w-full;
     height: min(650px, calc(100vh - 152px));
     border: 0;
     background: var(--bg-secondary);
@@ -1293,19 +1293,19 @@
 
   .acha-essay-title-artist,
   .acha-essay-title-album {
-    display: block;
+    @apply block;
   }
 
   .acha-inline-essay .acha-essay-content {
     max-width: none;
-    position: relative;
+    @apply relative;
     isolation: isolate;
-    overflow: hidden;
+    @apply overflow-hidden;
     padding: clamp(28px, 4.6vw, 62px) clamp(18px, 4vw, 58px);
-    display: grid;
+    @apply grid;
     gap: clamp(28px, 4vw, 54px);
     background-color: transparent;
-    color: var(--text-secondary);
+    @apply text-secondary;
     transition: background-color 0.7s var(--ease-out-expo), color 0.7s var(--ease-out-expo);
   }
 
@@ -1316,7 +1316,7 @@
 
   .acha-inline-essay .acha-essay-content::before {
     content: '';
-    position: absolute;
+    @apply absolute;
     inset: 0;
     z-index: -2;
     background-image:
@@ -1332,7 +1332,7 @@
 
   .acha-inline-essay .acha-essay-content::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     inset: 0;
     z-index: -1;
     background: color-mix(in srgb, var(--bg-primary) 8%, transparent);
@@ -1400,7 +1400,7 @@
   }
 
   .acha-inline-essay[data-enhanced="true"] .acha-essay-content {
-    overflow: hidden;
+    @apply overflow-hidden;
     transition:
       height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
       opacity 0.4s ease,
@@ -1423,7 +1423,7 @@
     transform: translateY(-10px);
     padding-top: 0;
     padding-bottom: 0;
-    pointer-events: none;
+    @apply pointer-events-none;
   }
 
   .acha-inline-essay.is-expanding .acha-essay-content,
@@ -1438,23 +1438,23 @@
   }
 
   .acha-inline-essay:not([open]) .acha-essay-content {
-    display: none;
+    @apply hidden;
   }
 
   .acha-essays {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(150px, 0.2fr) minmax(0, 0.8fr);
     gap: clamp(28px, 5vw, 80px);
     padding: var(--space-xl) 0 0;
   }
 
   .acha-essay-list {
-    display: grid;
+    @apply grid;
     gap: 12px;
   }
 
   .acha-essay-list a {
-    display: grid;
+    @apply grid;
     grid-template-columns: 88px minmax(0, 1fr);
     gap: 18px;
     padding-top: 12px;
@@ -1463,13 +1463,13 @@
 
   @media (prefers-reduced-motion: reduce) {
     .acha-page.is-loading .acha-hero h1 {
-      color: var(--text-primary);
+      @apply text-ink;
       background: none;
       animation: none;
     }
 
     .acha-page.is-loading .acha-hero h1::after {
-      display: none;
+      @apply hidden;
     }
 
     .acha-tier,
@@ -1520,7 +1520,7 @@
 
     .acha-hero-aside {
       justify-items: start;
-      text-align: left;
+      @apply text-left;
     }
   }
 
@@ -1554,13 +1554,13 @@
     }
 
     .acha-stats {
-      position: relative;
+      @apply relative;
       gap: 12px;
       margin-top: clamp(28px, 9vw, 42px);
       margin-right: calc(var(--gutter) * -1);
       padding-right: var(--gutter);
       padding-bottom: 8px;
-      overflow-x: auto;
+      @apply overflow-x-auto;
       mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 34px), transparent 100%);
       -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 34px), transparent 100%);
     }
@@ -1661,7 +1661,7 @@
     }
 
     .acha-essay-visual {
-      width: 100%;
+      @apply w-full;
       max-width: none;
       min-height: inherit;
     }
@@ -1688,7 +1688,7 @@
     .acha-instagram-button,
     .acha-essay-collapse {
       min-height: 44px;
-      align-items: center;
+      @apply items-center;
     }
 
     .acha-essay-visual figcaption {
@@ -1697,7 +1697,7 @@
       left: auto;
       max-width: min(52vw, 180px);
       justify-self: end;
-      text-align: right;
+      @apply text-right;
     }
 
     .acha-inline-essay h4 {
@@ -1728,7 +1728,7 @@
     .acha-essay-visual img,
     .acha-essay-visual .acha-cover-fallback {
       max-width: none;
-      width: 100%;
+      @apply w-full;
     }
 
     .acha-instagram-modal {
@@ -1736,7 +1736,7 @@
     }
 
     .acha-instagram-dialog {
-      width: 100%;
+      @apply w-full;
       max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
     }
 

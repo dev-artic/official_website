@@ -6,7 +6,7 @@ path_depth: "../"
 ---
 <style>
 body {
-  overflow-x: hidden;
+  @apply overflow-x-hidden;
 }
 
 .article-page {
@@ -26,26 +26,26 @@ body {
   font-weight: 700;
   line-height: 1.45;
   letter-spacing: 0.16em;
-  text-transform: uppercase;
+  @apply uppercase;
 }
 
 .article-hero {
   min-height: 22vh;
-  display: flex;
+  @apply flex;
   align-items: end;
   padding: clamp(28px, 5vw, 62px) 0 clamp(24px, 4vw, 42px);
   border-bottom: 1px solid var(--border-color);
 }
 
 .article-title {
-  display: inline-flex;
+  @apply inline-flex;
   margin: 0;
 }
 
 .article-logo {
-  display: block;
+  @apply block;
   width: min(620px, 58vw);
-  height: auto;
+  @apply h-auto;
 }
 
 .dark-mode .article-logo {
@@ -54,7 +54,7 @@ body {
 
 .article-post {
   --article-progress: 0;
-  display: grid;
+  @apply grid;
   grid-template-columns: minmax(210px, 0.28fr) minmax(0, 0.72fr);
   gap: clamp(26px, 5vw, 72px);
   padding: clamp(42px, 6vw, 84px) 0;
@@ -72,18 +72,18 @@ body {
 .article-viewer {
   grid-column: 2;
   grid-row: 1;
-  min-width: 0;
-  position: relative;
+  @apply min-w-0;
+  @apply relative;
   transform: translateY(calc((0.5 - var(--article-progress)) * 18px));
   transition: transform 0.18s linear;
 }
 
 .article-stage {
-  position: relative;
-  overflow: hidden;
+  @apply relative;
+  @apply overflow-hidden;
   background: transparent;
   max-width: min(760px, 100%);
-  cursor: grab;
+  @apply cursor-grab;
   touch-action: pan-y;
   user-select: none;
 }
@@ -91,7 +91,7 @@ body {
 .article-stage::before,
 .article-stage::after {
   content: "";
-  position: absolute;
+  @apply absolute;
   top: 0;
   bottom: 0;
   width: 28%;
@@ -113,11 +113,11 @@ body {
 }
 
 .article-stage img {
-  display: block;
-  width: 100%;
+  @apply block;
+  @apply w-full;
   height: min(66vh, 820px);
   aspect-ratio: 4 / 5;
-  object-fit: contain;
+  @apply object-contain;
   background: var(--bg-primary);
   transition: transform 0.22s ease;
 }
@@ -125,17 +125,17 @@ body {
 .article-post-info {
   grid-column: 1;
   grid-row: 1;
-  position: sticky;
+  @apply sticky;
   top: 106px;
   align-self: start;
-  min-width: 0;
+  @apply min-w-0;
   padding-top: 2px;
   transform: translateY(calc((var(--article-progress) - 0.5) * 12px));
   transition: transform 0.18s linear;
 }
 
 .article-post-meta {
-  color: var(--text-muted);
+  @apply text-muted;
 }
 
 .article-post-title {
@@ -145,12 +145,12 @@ body {
   font-weight: 400;
   line-height: 1.12;
   letter-spacing: 0;
-  color: var(--text-primary);
+  @apply text-ink;
 }
 
 .article-category {
   margin-top: 18px;
-  color: var(--text-primary);
+  @apply text-ink;
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.18em;
@@ -158,13 +158,13 @@ body {
 
 .article-category,
 .article-date {
-  display: block;
-  width: fit-content;
+  @apply block;
+  @apply w-fit;
 }
 
 .article-date {
   margin-top: 18px;
-  color: var(--text-muted);
+  @apply text-muted;
   font-size: 0.6rem;
   letter-spacing: 0.14em;
 }
@@ -175,55 +175,55 @@ body {
   border-top: 1px solid var(--border-color);
   font-size: 0.78rem;
   line-height: 1.78;
-  color: var(--text-secondary);
+  @apply text-secondary;
 }
 
 .article-thumb-grid {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  @apply relative;
+  @apply flex;
+  @apply flex-wrap;
+  @apply justify-center;
   gap: 7px;
   width: min(280px, 100%);
   max-width: min(760px, 100%);
   margin: 18px auto 0;
   padding: 12px 0;
-  overflow: visible;
+  @apply overflow-visible;
   scrollbar-width: none;
   user-select: none;
   -webkit-overflow-scrolling: touch;
 }
 
 .article-thumb-grid::-webkit-scrollbar {
-  display: none;
+  @apply hidden;
 }
 
 .article-thumb {
-  position: relative;
+  @apply relative;
   flex: 0 0 5px;
   width: 5px;
   height: 5px;
-  min-width: 0;
+  @apply min-w-0;
   padding: 0;
   border: 0;
   border-radius: 999px;
   background: var(--text-muted);
-  color: var(--text-muted);
-  cursor: pointer;
-  overflow: hidden;
+  @apply text-muted;
+  @apply cursor-pointer;
+  @apply overflow-hidden;
   opacity: 0.38;
   transition: width 0.25s ease, opacity 0.25s ease, background-color 0.25s ease;
 }
 
 .article-thumb img {
-  display: none;
+  @apply hidden;
 }
 
 .article-thumb span {
-  position: absolute;
+  @apply absolute;
   width: 1px;
   height: 1px;
-  overflow: hidden;
+  @apply overflow-hidden;
   clip: rect(0 0 0 0);
 }
 
@@ -238,7 +238,7 @@ body {
 }
 
 .article-preview {
-  position: absolute;
+  @apply absolute;
   left: 0;
   top: 0;
   width: 72px;
@@ -248,8 +248,8 @@ body {
   background: var(--bg-primary);
   opacity: 0;
   transform: translate3d(var(--preview-x, 0), var(--preview-y, 0), 0) translate(-50%, -112%) scale(0.96);
-  pointer-events: none;
-  overflow: hidden;
+  @apply pointer-events-none;
+  @apply overflow-hidden;
   z-index: 3;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
   transition: opacity 0.16s ease, transform 0.22s var(--ease-out-expo);
@@ -261,28 +261,28 @@ body {
 }
 
 .article-preview img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  @apply block;
+  @apply w-full;
+  @apply h-full;
+  @apply object-cover;
 }
 
 .article-whiteout {
-  position: absolute;
+  @apply absolute;
   inset: 0;
   z-index: 4;
   background: #fff;
   opacity: 0;
-  pointer-events: none;
+  @apply pointer-events-none;
 }
 
 .article-original {
-  display: inline-flex;
-  width: fit-content;
+  @apply inline-flex;
+  @apply w-fit;
   margin-top: 24px;
   padding: 12px 14px;
   border: 1px solid var(--border-color);
-  color: var(--text-primary);
+  @apply text-ink;
   transition: color 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
 }
 
@@ -293,7 +293,7 @@ body {
 }
 
 .article-mobile-strip {
-  display: none;
+  @apply hidden;
 }
 
 @media (max-width: 1180px) and (min-width: 901px) {
@@ -307,7 +307,7 @@ body {
   }
 
   .article-stage img {
-    height: auto;
+    @apply h-auto;
     min-height: 0;
     max-height: min(62vh, 700px);
   }
@@ -340,7 +340,7 @@ body {
   .article-post-info {
     grid-column: auto;
     grid-row: auto;
-    position: static;
+    @apply static;
     order: -1;
   }
 
@@ -349,21 +349,21 @@ body {
   }
 
   .article-thumb-grid {
-    display: none;
+    @apply hidden;
   }
 
   .article-stage {
-    display: none;
+    @apply hidden;
   }
 
   .article-mobile-strip {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: flex-start;
+    @apply flex;
+    @apply flex-nowrap;
+    @apply items-start;
     gap: 12px;
     margin-inline: calc(var(--gutter) * -1);
     padding: 0 var(--gutter) 16px;
-    overflow-x: auto;
+    @apply overflow-x-auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }
@@ -374,7 +374,7 @@ body {
     height: min(102.5vw, 575px);
     max-height: 72vh;
     aspect-ratio: 4 / 5;
-    object-fit: contain;
+    @apply object-contain;
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     scroll-snap-align: center;

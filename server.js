@@ -145,7 +145,9 @@ async function handleGetQuarterlyContents(req, res) {
       const stats = fs.statSync(QUARTERLY_CONTENTS_CACHE_FILE);
       const fileAgeMs = Date.now() - stats.mtimeMs;
       const cacheTtlMs = 5 * 60 * 1000; // 5 minutes
-      if (fileAgeMs < cacheTtlMs) {
+      const enrichmentChanged = [QUARTERLY_MEDIA_CACHE_FILE, QUARTERLY_EXTERNAL_LINKS_FILE, ...QUARTERLY_NOW_ARTIC_FILES]
+        .some((file) => fs.existsSync(file) && fs.statSync(file).mtimeMs > stats.mtimeMs);
+      if (fileAgeMs < cacheTtlMs && !enrichmentChanged) {
         const fileContent = fs.readFileSync(QUARTERLY_CONTENTS_CACHE_FILE, 'utf8');
         const parsed = JSON.parse(fileContent);
         if (parsed && parsed.archive) {

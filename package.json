@@ -3,13 +3,16 @@
     "puppeteer": "^25.1.0"
   },
   "devDependencies": {
-    "concurrently": "^10.0.3"
+    "@tailwindcss/cli": "^4.3.3",
+    "concurrently": "^10.0.3",
+    "tailwindcss": "^4.3.3"
   },
   "scripts": {
     "emulators": "firebase emulators:start --only functions,firestore",
     "server": "node server.js",
     "dev": "concurrently \"npm run emulators\" \"npm run server\"",
     "build": "node scripts/build_pages.js",
-    "test:inventory": "node scripts/test_order_inventory_transitions.js"
+    "test:inventory": "node scripts/test_order_inventory_transitions.js",
+    "build:styles": "node -e \"require('./scripts/build_styles').buildSharedStyles()\""
   }
 }

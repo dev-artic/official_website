@@ -10,7 +10,7 @@
   font-family: 'ITCGaramond';
   src: url('../fonts/ITCGaramondStd-Book.otf') format('opentype');
   font-weight: 400;
-  font-style: normal;
+  @apply not-italic;
   font-display: swap;
 }
 
@@ -18,7 +18,7 @@
   font-family: 'KakaoBig';
   src: url('../fonts/KakaoBigSans-Bold.ttf') format('truetype');
   font-weight: 700;
-  font-style: normal;
+  @apply not-italic;
   font-display: swap;
 }
 
@@ -26,7 +26,7 @@
   font-family: 'KakaoSmall';
   src: url('../fonts/KakaoSmallSans-Regular.ttf') format('truetype');
   font-weight: 400;
-  font-style: normal;
+  @apply not-italic;
   font-display: swap;
 }
 
@@ -41,7 +41,7 @@
   --bg-secondary: #FAFAFA;
   --text-primary: #000000;
   --text-secondary: #333333;
-  --text-muted: #999999;
+  --text-muted: #6E6E6E;
   --accent: #000000;
   --accent-light: #F0F0F0;
   --border-color: rgba(0, 0, 0, 0.08);
@@ -76,7 +76,7 @@
   --bg-secondary: #242424;
   --text-primary: #F0F0F0;
   --text-secondary: #BBBBBB;
-  --text-muted: #707070;
+  --text-muted: #A3A3A3;
   --accent: #F0F0F0;
   --accent-light: #2A2A2A;
   --border-color: rgba(255, 255, 255, 0.08);
@@ -100,8 +100,8 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  @apply bg-canvas;
+  @apply text-ink;
   line-height: 1.6;
   transition: var(--transition-theme);
 }
@@ -117,12 +117,12 @@ img { display: block; max-width: 100%; }
 
 /* ── Shared Floating Nav ── */
 .nav-bar {
-  position: fixed;
+  @apply fixed;
   top: 0;
   left: 0;
   right: 0;
-  display: flex;
-  justify-content: center;
+  @apply flex;
+  @apply justify-center;
   align-items: baseline;
   padding: 0.55rem var(--gutter);
   z-index: 100;
@@ -135,22 +135,22 @@ img { display: block; max-width: 100%; }
 /* Subpage delayed reveal ??hides nav + content until transition overlay covers screen */
 .delayed-reveal {
   opacity: 0 !important;
-  pointer-events: none;
+  @apply pointer-events-none;
   transition: opacity 0.3s ease-out;
 }
 
 .delayed-reveal.revealed {
   opacity: 1 !important;
-  pointer-events: auto;
+  @apply pointer-events-auto;
 }
 
 .nav-link {
   font-family: var(--font-sans);
   font-size: 0.7rem;
   font-weight: 400;
-  text-transform: uppercase;
+  @apply uppercase;
   letter-spacing: 0.2em;
-  color: var(--text-muted);
+  @apply text-muted;
   text-decoration: none;
   white-space: nowrap;
   padding: 4px 1.4rem;
@@ -159,7 +159,7 @@ img { display: block; max-width: 100%; }
 
 .nav-link:hover,
 .nav-link.active {
-  color: var(--text-primary);
+  @apply text-ink;
 }
 
 /* "artic." home link — ITC Garamond, visually height-matched to uppercase items */
@@ -168,11 +168,11 @@ img { display: block; max-width: 100%; }
   font-size: 0.92rem;
   font-weight: 400;
   letter-spacing: 0.02em;
-  color: var(--text-muted);
+  @apply text-muted;
   text-decoration: none;
   white-space: nowrap;
   padding: 4px 1.4rem;
-  overflow: hidden;
+  @apply overflow-hidden;
   max-width: 0;
   opacity: 0;
   padding-left: 0;
@@ -184,7 +184,7 @@ img { display: block; max-width: 100%; }
 }
 
 .nav-home:hover {
-  color: var(--text-primary);
+  @apply text-ink;
 }
 
 .nav-home.visible {
@@ -195,7 +195,7 @@ img { display: block; max-width: 100%; }
 
 /* ── Theme Toggle (Bottom-Left, fixed position) ── */
 .theme-toggle {
-  position: fixed;
+  @apply fixed;
   bottom: 24px;
   left: 24px;
   width: 36px;
@@ -203,10 +203,10 @@ img { display: block; max-width: 100%; }
   border-radius: 50%;
   border: 1px solid var(--border-color);
   background: var(--bg-primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @apply cursor-pointer;
+  @apply flex;
+  @apply items-center;
+  @apply justify-center;
   z-index: 100;
   transition: var(--transition-theme), transform 0.3s ease;
   padding: 0;
@@ -259,15 +259,15 @@ img { display: block; max-width: 100%; }
 
 /* ── 6. Responsive Mobile Navigation (Hamburger & Sidebar) ── */
 .hamburger-btn {
-  display: none;
+  @apply hidden;
 }
 
 .nav-overlay {
-  display: none;
+  @apply hidden;
 }
 
 .mobile-header-bar {
-  display: none;
+  @apply hidden;
 }
 
 @media (max-width: 767px) {
@@ -277,14 +277,14 @@ img { display: block; max-width: 100%; }
 
   /* Mobile Top Header Bar with frosted glass boundary */
   .mobile-header-bar {
-    display: block;
-    position: fixed;
+    @apply block;
+    @apply fixed;
     top: 0;
     left: 0;
     right: 0;
     height: 72px;
     z-index: 997; /* Under hamburger (1000) and overlay (998) */
-    pointer-events: none; /* Let clicks pass through the blur area */
+    @apply pointer-events-none; /* Let clicks pass through the blur area */
     background: var(--glass-bg);
     border-bottom: 0;
     backdrop-filter: var(--glass-blur);
@@ -295,47 +295,47 @@ img { display: block; max-width: 100%; }
 
   /* Dynamic Backdrop Overlay with deep blur and darkness */
   .nav-overlay {
-    display: block;
-    position: fixed;
+    @apply block;
+    @apply fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     z-index: 998; /* Under overlay container, above page content */
     opacity: 0;
-    pointer-events: none;
+    @apply pointer-events-none;
     transition: opacity 0.5s ease;
   }
 
   .nav-open .nav-overlay {
     opacity: 1;
-    pointer-events: auto;
+    @apply pointer-events-auto;
   }
 
   /* Hamburger Button */
   .hamburger-btn {
-    position: fixed;
+    @apply fixed;
     top: 20px;
     right: 20px;
     width: 44px;
     height: 44px;
     background-color: rgba(0, 0, 0, 0); /* Safari hit-test fix */
     border: none;
-    cursor: pointer;
+    @apply cursor-pointer;
     z-index: 1000; /* Float over everything */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    @apply flex;
+    @apply flex-col;
+    @apply justify-center;
+    @apply items-center;
     gap: 5px;
     padding: 0;
     transition: transform 0.3s ease;
     touch-action: manipulation;
-    pointer-events: auto;
+    @apply pointer-events-auto;
   }
 
   .burger-line {
-    display: block;
+    @apply block;
     width: 20px;
     height: 1.5px;
     background-color: var(--text-primary);
@@ -359,16 +359,16 @@ img { display: block; max-width: 100%; }
 
   /* Full-screen Transparent Menu Overlay */
   .nav-bar {
-    position: fixed;
+    @apply fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    width: 100%;
+    @apply w-full;
     height: var(--viewport-stable);
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-end;
+    @apply flex-col;
+    @apply justify-start;
+    @apply items-end;
     padding: 100px 32px var(--space-md) var(--space-md);
     gap: var(--space-md);
     background-color: transparent;
@@ -392,11 +392,11 @@ img { display: block; max-width: 100%; }
   /* Sidebar Links stack vertically and right-aligned */
   .nav-link {
     position: relative !important;
-    width: auto;
+    @apply w-auto;
     padding: var(--space-xs) 0 !important;
     font-size: 1.15rem;
     border-bottom: none;
-    text-align: right;
+    @apply text-right;
     color: rgba(255, 255, 255, 0.7);
     
     /* Fade and slide down transition */
@@ -412,15 +412,15 @@ img { display: block; max-width: 100%; }
 
   .nav-home {
     position: relative !important;
-    width: auto;
+    @apply w-auto;
     max-width: none !important;
     opacity: 0 !important;
     padding: var(--space-xs) 0 !important;
     font-size: 1.7rem;
     border-bottom: none;
     margin-bottom: var(--space-sm);
-    overflow: visible;
-    text-align: right;
+    @apply overflow-visible;
+    @apply text-right;
     color: rgba(255, 255, 255, 0.7);
     
     /* Fade and slide down transition */
@@ -450,7 +450,7 @@ img { display: block; max-width: 100%; }
   .nav-open .nav-bar .nav-link.active::after,
   .nav-open .nav-bar .nav-home.active::after {
     content: '•';
-    position: absolute;
+    @apply absolute;
     right: -14px;
     top: 50%;
     transform: translateY(-50%);
@@ -461,32 +461,32 @@ img { display: block; max-width: 100%; }
 
 /* ── 7. Premium Sub-page Landing Transition Overlay ── */
 .subpage-transition-overlay {
-  position: fixed;
+  @apply fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   width: 100vw;
   height: 100vh;
   height: var(--viewport-stable);
-  background-color: var(--bg-primary);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  @apply bg-canvas;
+  @apply flex;
+  @apply justify-center;
+  @apply items-center;
   z-index: 9999;
   opacity: 1;
   transition: opacity 0.6s var(--ease-out-expo);
-  pointer-events: auto;
+  @apply pointer-events-auto;
 }
 
 .subpage-transition-title {
   font-family: var(--font-serif);
   font-size: 0.85rem;
   font-weight: 700;
-  text-transform: uppercase;
+  @apply uppercase;
   letter-spacing: 0.25em;
-  color: var(--text-primary);
+  @apply text-ink;
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 0.6s var(--ease-out-expo), transform 0.6s var(--ease-out-expo);
-  text-align: center;
+  @apply text-center;
 }
 
 .subpage-transition-overlay.active .subpage-transition-title {
@@ -496,7 +496,7 @@ img { display: block; max-width: 100%; }
 
 .subpage-transition-overlay.fade-out {
   opacity: 0;
-  pointer-events: none;
+  @apply pointer-events-none;
 }
 
 .subpage-transition-overlay.fade-out .subpage-transition-title {

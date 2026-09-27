@@ -20,7 +20,7 @@ path_depth: ""
 
     /* -- Hero About Button (discover) -- */
     .hero-about-btn {
-      position: absolute;
+      @apply absolute;
       top: calc(50svh + 100px); /* Logo center (50svh) + half height (36px) + gap (64px) */
       left: 50%;
       opacity: 0;
@@ -42,11 +42,11 @@ path_depth: ""
     .hero {
       min-height: 100vh;
       min-height: var(--viewport-stable);
-      position: relative;
+      @apply relative;
     }
 
     .logo-split {
-      position: absolute;
+      @apply absolute;
       top: 50svh;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -55,29 +55,29 @@ path_depth: ""
     }
 
     .logo-split img {
-      position: absolute;
+      @apply absolute;
       top: 0; left: 0;
-      width: 100%;
-      height: auto;
-      display: block;
+      @apply w-full;
+      @apply h-auto;
+      @apply block;
     }
 
     .logo-icon-wrapper {
-      position: absolute;
+      @apply absolute;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+      @apply w-full;
+      @apply h-full;
       clip-path: inset(0 0 54% 0);
-      overflow: hidden;
+      @apply overflow-hidden;
     }
 
     .logo-type-wrapper {
-      position: absolute;
+      @apply absolute;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+      @apply w-full;
+      @apply h-full;
       clip-path: inset(55.5% 0 -5px 0);
-      overflow: hidden;
+      @apply overflow-hidden;
     }
 
     .logo-icon {
@@ -102,7 +102,7 @@ path_depth: ""
 
     /* ??Content Sections ??*/
     .content-section {
-      width: 100%;
+      @apply w-full;
       max-width: var(--max-width);
       margin: 0 auto;
       padding: var(--space-xxl) var(--gutter);
@@ -111,13 +111,13 @@ path_depth: ""
     }
 
     .section-tag {
-      display: block;
+      @apply block;
       font-family: var(--font-sans);
       font-size: 0.6rem;
       font-weight: 400;
-      text-transform: uppercase;
+      @apply uppercase;
       letter-spacing: 0.3em;
-      color: var(--text-muted);
+      @apply text-muted;
       margin-bottom: var(--space-sm);
     }
 
@@ -127,7 +127,7 @@ path_depth: ""
       font-weight: 700;
       letter-spacing: 0.02em;
       line-height: 1.2;
-      color: var(--text-primary);
+      @apply text-ink;
       margin-bottom: var(--space-md);
       max-width: 600px;
     }
@@ -136,7 +136,7 @@ path_depth: ""
       font-family: var(--font-sans);
       font-size: 0.85rem;
       line-height: 1.8;
-      color: var(--text-secondary);
+      @apply text-secondary;
       max-width: 480px;
       margin-bottom: var(--space-lg);
     }
@@ -166,11 +166,11 @@ path_depth: ""
 
     /* ??Projects Preview ??*/
     .projects-preview {
-      display: flex;
+      @apply flex;
       gap: var(--space-md);
-      width: 100%;
+      @apply w-full;
       max-width: 100%;
-      overflow-x: auto;
+      @apply overflow-x-auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
       scroll-snap-type: x mandatory;
@@ -179,27 +179,27 @@ path_depth: ""
     }
 
     .projects-preview::-webkit-scrollbar {
-      display: none;
+      @apply hidden;
     }
     .section-link {
-      display: inline-flex;
-      align-items: center;
+      @apply inline-flex;
+      @apply items-center;
       gap: 8px;
       font-family: var(--font-sans);
       font-size: 0.65rem;
       font-weight: 400;
-      text-transform: uppercase;
+      @apply uppercase;
       letter-spacing: 0.18em;
-      color: var(--text-muted);
+      @apply text-muted;
       transition: color 0.3s ease;
       white-space: nowrap;
-      position: relative;
+      @apply relative;
       padding-bottom: 2px;
     }
 
     .section-link::after {
       content: '';
-      position: absolute;
+      @apply absolute;
       width: calc(100% - 20px);
       transform: scaleX(0);
       height: 1px;
@@ -216,7 +216,7 @@ path_depth: ""
     }
 
     .section-link:hover {
-      color: var(--text-primary);
+      @apply text-ink;
     }
 
     .section-link svg {
@@ -232,41 +232,41 @@ path_depth: ""
 
     /* — Projects Preview Row — */
     .projects-row {
-      width: 100%;
+      @apply w-full;
       max-width: 100%;
-      position: relative;
+      @apply relative;
     }
         /* ??Desktop Floating Link (Wrapper that shows on row hover, contains a standard section-link) ??*/
     .floating-view-link {
-      position: absolute;
+      @apply absolute;
       right: 0;
       top: 0;
       height: calc(100% - 8px);
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-end;
+      @apply inline-flex;
+      @apply items-center;
+      @apply justify-end;
       z-index: 10;
       opacity: 0;
-      pointer-events: none;
+      @apply pointer-events-none;
       transition: opacity 0.4s var(--ease-out-expo);
     }
 
     /* Gradient overlay behind the text */
     .floating-view-link::before {
       content: '';
-      position: absolute;
+      @apply absolute;
       right: 0;
       top: 0;
       bottom: 0;
       width: 320px;
       background: linear-gradient(to left, var(--bg-primary) 40%, transparent 100%);
       z-index: -1;
-      pointer-events: none;
+      @apply pointer-events-none;
     }
 
     .projects-row:hover .floating-view-link {
       opacity: 1;
-      pointer-events: auto;
+      @apply pointer-events-auto;
     }
 
     
@@ -282,24 +282,24 @@ path_depth: ""
       flex: 0 0 0px;
       width: 0px;
       opacity: 0;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--bg-secondary);
+      @apply overflow-hidden;
+      @apply flex;
+      @apply items-center;
+      @apply justify-center;
+      @apply bg-surface;
       border-left: 1px solid var(--border-color);
       transition: flex-basis 0.3s var(--ease-out-expo), width 0.3s var(--ease-out-expo), opacity 0.3s ease;
-      height: auto;
+      @apply h-auto;
       aspect-ratio: 4 / 5;
-      position: relative;
+      @apply relative;
     }
 
     .pull-indicator-content {
-      display: flex;
-      align-items: center;
+      @apply flex;
+      @apply items-center;
       gap: 8px;
       padding: 0 24px;
-      color: var(--text-muted);
+      @apply text-muted;
       white-space: nowrap;
       transition: transform 0.3s var(--ease-out-expo);
     }
@@ -319,9 +319,9 @@ path_depth: ""
       font-family: var(--font-sans);
       font-size: 0.65rem;
       font-weight: 400;
-      text-transform: uppercase;
+      @apply uppercase;
       letter-spacing: 0.18em;
-      color: var(--text-muted);
+      @apply text-muted;
     }
 
     .preview-card {
@@ -334,18 +334,18 @@ path_depth: ""
     /* ── View All Projects Inline Scroll Link ── */
     .view-all-link-wrapper {
       flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      @apply flex;
+      @apply items-center;
+      @apply justify-center;
       padding-left: var(--space-md);
       padding-right: var(--gutter);
       scroll-snap-align: start;
     }
 
     .preview-card-img {
-      width: 100%;
+      @apply w-full;
       aspect-ratio: 4 / 5;
-      object-fit: cover;
+      @apply object-cover;
       margin-bottom: var(--space-xs);
       transition: transform 0.6s var(--ease-out-expo);
     }
@@ -359,31 +359,31 @@ path_depth: ""
       font-size: 0.9rem;
       font-weight: 700;
       letter-spacing: 0.02em;
-      text-transform: uppercase;
+      @apply uppercase;
     }
 
     .preview-card-meta {
       font-size: 0.6rem;
-      color: var(--text-muted);
+      @apply text-muted;
       letter-spacing: 0.1em;
-      text-transform: uppercase;
+      @apply uppercase;
       margin-top: 2px;
     }
 
     .preview-img-wrap {
-      overflow: hidden;
+      @apply overflow-hidden;
       margin-bottom: var(--space-xs);
-      position: relative;
+      @apply relative;
     }
 
     /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Explore Tag */
     .preview-img-wrap::after {
       content: 'EXPLORE';
-      position: absolute;
+      @apply absolute;
       bottom: 12px;
       right: 12px;
-      display: flex;
-      align-items: center;
+      @apply flex;
+      @apply items-center;
       padding: 6px 12px;
       background-color: var(--glass-bg);
       backdrop-filter: blur(12px);
@@ -394,11 +394,11 @@ path_depth: ""
       font-size: 0.5rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: var(--text-primary);
+      @apply text-ink;
       opacity: 0;
       transform: translateY(6px);
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
+      @apply pointer-events-none;
     }
 
     .preview-card:hover .preview-img-wrap::after {
@@ -412,19 +412,19 @@ path_depth: ""
       margin: 0 auto;
       padding: var(--space-lg) var(--gutter);
       border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
+      @apply flex;
+      @apply justify-end;
+      @apply items-center;
       font-family: var(--font-sans);
       font-size: 0.55rem;
       letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      @apply uppercase;
+      @apply text-muted;
       transition: border-color 0.5s ease;
     }
 
     .site-footer span {
-      color: var(--text-muted);
+      @apply text-muted;
     }
 
     /* ── Desktop/Mobile Displays ── */
@@ -446,15 +446,15 @@ path_depth: ""
 
     /* ── Swipe to Navigate Slider Component ── */
     .swipe-to-navigate {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      width: 100%;
+      @apply flex;
+      @apply items-center;
+      @apply justify-end;
+      @apply w-full;
       margin-top: 24px;
     }
 
     .swipe-track {
-      position: relative;
+      @apply relative;
       width: 200px;
       height: 44px;
       border: 1px solid var(--border-color);
@@ -462,24 +462,24 @@ path_depth: ""
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-radius: 0px; /* Sharp corners matching artic. */
-      overflow: hidden;
-      display: flex;
-      align-items: center;
+      @apply overflow-hidden;
+      @apply flex;
+      @apply items-center;
       transition: border-color 0.5s ease, background-color 0.5s ease;
     }
 
     .swipe-text {
-      position: absolute;
-      width: 100%;
-      text-align: center;
+      @apply absolute;
+      @apply w-full;
+      @apply text-center;
       font-family: var(--font-sans);
       font-size: 0.55rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: var(--text-muted);
-      text-transform: uppercase;
+      @apply text-muted;
+      @apply uppercase;
       user-select: none;
-      pointer-events: none;
+      @apply pointer-events-none;
       transition: opacity 0.3s ease;
       padding-left: 36px;
       padding-right: 12px;
@@ -490,11 +490,11 @@ path_depth: ""
       width: 42px;
       height: 42px;
       background-color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: grab;
-      position: absolute;
+      @apply flex;
+      @apply items-center;
+      @apply justify-center;
+      @apply cursor-grab;
+      @apply absolute;
       left: 0px;
       transition: background-color 0.5s ease;
       border-radius: 0px; /* Sharp handle */
@@ -544,26 +544,26 @@ path_depth: ""
 
     /* ── Quarterly Teaser Section (New Flowing Design) ── */
     .quarterly-teaser-wrap {
-      position: relative;
+      @apply relative;
       width: 100vw;
       margin-left: calc(-50vw + 50%);
       min-height: 640px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background-color: var(--bg-primary);
+      @apply flex;
+      @apply items-center;
+      @apply justify-center;
+      @apply overflow-hidden;
+      @apply bg-canvas;
       transition: background-color 0.5s ease;
       padding: 0;
       box-sizing: border-box;
     }
 
     .quarterly-flow-marquee {
-      display: flex;
-      overflow: hidden;
+      @apply flex;
+      @apply overflow-hidden;
       user-select: none;
-      width: 100%;
-      position: absolute;
+      @apply w-full;
+      @apply absolute;
       left: 0;
       height: 220px;
     }
@@ -584,9 +584,9 @@ path_depth: ""
     }
 
     .marquee-group {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
+      @apply shrink-0;
+      @apply flex;
+      @apply items-center;
       justify-content: space-around;
       min-width: 100%;
     }
@@ -610,24 +610,24 @@ path_depth: ""
 
 
     .flow-cover-item {
-      position: relative;
+      @apply relative;
       flex: 0 0 200px;
       width: 200px;
       aspect-ratio: 1 / 1;
       margin: 0 -40px; /* Strong overlapping, zero gap layout */
       border: 1px solid var(--border-color);
-      background-color: var(--bg-secondary);
+      @apply bg-surface;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      overflow: hidden;
+      @apply overflow-hidden;
       transition: transform 0.6s var(--ease-out-expo), box-shadow 0.6s var(--ease-out-expo), border-color 0.5s ease;
     }
 
     .flow-cover-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      @apply w-full;
+      @apply h-full;
+      @apply object-cover;
       transition: transform 0.6s var(--ease-out-expo);
-      pointer-events: none;
+      @apply pointer-events-none;
     }
 
     /* Add hover state to single covers for micro-interaction */
@@ -669,22 +669,22 @@ path_depth: ""
 
     /* Static Editorial Grid Lines */
     .editorial-line {
-      position: absolute;
+      @apply absolute;
       background-color: var(--border-color);
-      pointer-events: none;
+      @apply pointer-events-none;
       transition: background-color 0.5s ease;
     }
     
     .line-h {
       left: 0;
-      width: 100%;
+      @apply w-full;
       height: 1px;
     }
     
     .line-v {
       top: 0;
       width: 1px;
-      height: 100%;
+      @apply h-full;
     }
 
     /* Editorial Line depths (weaving under and over marquees) */
@@ -702,24 +702,24 @@ path_depth: ""
 
     /* Floating Teaser Card Container */
     .teaser-card-container {
-      position: relative;
+      @apply relative;
       z-index: 10;
-      width: 100%;
+      @apply w-full;
       max-width: var(--max-width);
       padding: 0 var(--gutter);
       box-sizing: border-box;
-      pointer-events: none; /* Let clicks pass to marquee hover except on the card itself */
-      display: flex;
-      justify-content: flex-end; /* Pin to the right side on desktop */
+      @apply pointer-events-none; /* Let clicks pass to marquee hover except on the card itself */
+      @apply flex;
+      @apply justify-end; /* Pin to the right side on desktop */
     }
 
     .teaser-card {
-      position: relative;
-      width: 100%;
+      @apply relative;
+      @apply w-full;
       max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      @apply flex;
+      @apply flex-col;
+      @apply justify-center;
       padding: var(--space-xl);
       border: 1px solid var(--border-color);
       background: var(--glass-bg);
@@ -727,22 +727,22 @@ path_depth: ""
       -webkit-backdrop-filter: blur(24px);
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
       box-sizing: border-box;
-      pointer-events: auto; /* Re-enable clicks on the card */
+      @apply pointer-events-auto; /* Re-enable clicks on the card */
       transition: border-color 0.5s ease, background-color 0.5s ease;
     }
 
     .teaser-content {
-      color: var(--text-primary);
+      @apply text-ink;
     }
 
     .teaser-tag {
-      display: inline-block;
+      @apply inline-block;
       font-family: var(--font-sans);
       font-size: 0.55rem;
       font-weight: 700;
-      text-transform: uppercase;
+      @apply uppercase;
       letter-spacing: 0.25em;
-      color: var(--text-muted);
+      @apply text-muted;
       margin-bottom: var(--space-xs);
     }
 
@@ -752,14 +752,14 @@ path_depth: ""
       font-weight: 700;
       line-height: 1.3;
       margin-bottom: var(--space-md);
-      text-transform: uppercase;
+      @apply uppercase;
     }
 
     .teaser-text {
       font-family: var(--font-sans);
       font-size: 0.75rem;
       line-height: 1.8;
-      color: var(--text-secondary);
+      @apply text-secondary;
       margin-bottom: var(--space-lg);
     }
 
@@ -767,11 +767,11 @@ path_depth: ""
     @media (max-width: 767px) {
       .quarterly-teaser-wrap {
         min-height: 600px;
-        flex-direction: column;
+        @apply flex-col;
         padding: var(--space-lg) 0;
       }
       .teaser-card-container {
-        justify-content: center;
+        @apply justify-center;
       }
       .teaser-card {
         padding: var(--space-lg);

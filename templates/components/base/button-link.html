@@ -7,25 +7,25 @@
 <style>
   /* ── Reusable Section Link Button Styles ── */
   .section-link {
-    display: inline-flex;
-    align-items: center;
+    @apply inline-flex;
+    @apply items-center;
     gap: 8px;
     font-family: var(--font-sans);
     font-size: 0.65rem;
     font-weight: 400;
-    text-transform: uppercase;
+    @apply uppercase;
     letter-spacing: 0.18em;
-    color: var(--text-muted);
+    @apply text-muted;
     transition: color 0.3s ease;
     white-space: nowrap;
-    position: relative;
+    @apply relative;
     padding-bottom: 2px;
     text-decoration: none; /* Reset underline */
   }
 
   .section-link::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     width: calc(100% - 20px);
     transform: scaleX(0);
     height: 1px;
@@ -42,7 +42,7 @@
   }
 
   .section-link:hover {
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .section-link svg {

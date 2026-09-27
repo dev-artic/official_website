@@ -6,30 +6,30 @@
     }
 
     body {
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
+      @apply bg-canvas;
+      @apply text-ink;
       font-family: var(--font-sans);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      overflow-x: hidden;
+      @apply flex;
+      @apply flex-col;
+      @apply items-center;
+      @apply justify-start;
+      @apply overflow-x-hidden;
       padding: 0;
       padding-top: 100px;
-      position: relative;
+      @apply relative;
       transition: var(--transition-theme);
     }
 
     /* Core Container */
     .page-container {
-      position: relative;
+      @apply relative;
       z-index: 2;
-      width: 100%;
+      @apply w-full;
       max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      @apply flex;
+      @apply flex-col;
+      @apply items-center;
       flex-grow: 1;
       padding: 0 var(--space-sm);
     }
@@ -49,11 +49,11 @@
        ══════════════════════════════════════ */
 
     .album-showcase {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      width: 100%;
+      @apply flex;
+      @apply flex-col;
+      @apply items-center;
+      @apply text-center;
+      @apply w-full;
       gap: 32px; /* Premium gap between cover and text on mobile */
       margin-bottom: 80px; /* Generous gap below the showcase */
       /* Stacked group centered vertically in the viewport initially */
@@ -70,10 +70,10 @@
     /* Desktop: row layout, always left-aligned to align with content columns below */
     @media (min-width: 768px) {
       .album-showcase {
-        flex-direction: row;
-        justify-content: flex-start;
-        text-align: left;
-        align-items: center;
+        @apply flex-row;
+        @apply justify-start;
+        @apply text-left;
+        @apply items-center;
         gap: 48px; /* Doubled gap between cover and text */
         transform: translateY(calc(50svh - 210px)); /* Desktop row centered vertically */
       }
@@ -81,12 +81,12 @@
 
     /* ── Album Art ── */
     .album-art-wrapper {
-      position: relative;
+      @apply relative;
       z-index: 2; /* Layered above the text to physically cover it during Phase 1 & 2 */
       width: 280px;
       height: 280px;
       margin-bottom: 0;
-      flex-shrink: 0;
+      @apply shrink-0;
       will-change: width, height; /* Hardware acceleration for layout resize */
       /* Phase 3: album cover shrinks when sliding up */
       animation: albumShrink 1.1s cubic-bezier(0.16, 1, 0.3, 1) 2.7s forwards;
@@ -114,9 +114,9 @@
     }
 
     .album-art {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      @apply w-full;
+      @apply h-full;
+      @apply object-cover;
       border: 1px solid var(--border-color);
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
@@ -126,7 +126,7 @@
       opacity: 0;
       animation: albumFadeIn 1s ease 0.3s forwards;
       transition: transform 0.6s var(--ease-out-expo);
-      cursor: pointer;
+      @apply cursor-pointer;
     }
 
     @keyframes albumFadeIn {
@@ -139,7 +139,7 @@
 
     /* ── Album Info ── */
     .album-info {
-      position: relative;
+      @apply relative;
       z-index: 1; /* Layered below the cover to ensure it emerges from behind the cover's edge */
       opacity: 0;
       clip-path: inset(0 100% 0 0);
@@ -184,9 +184,9 @@
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0;
-      color: var(--text-primary);
+      @apply text-ink;
       margin-bottom: var(--space-xs);
-      display: inline-block;
+      @apply inline-block;
     }
 
     .album-title {
@@ -194,7 +194,7 @@
       font-size: 2.25rem;
       font-weight: 700;
       letter-spacing: 0;
-      color: var(--text-primary);
+      @apply text-ink;
       margin-bottom: var(--space-xs);
       white-space: nowrap;
     }
@@ -207,7 +207,7 @@
 
     .album-meta {
       font-size: 0.8rem;
-      color: var(--text-muted);
+      @apply text-muted;
       letter-spacing: 0;
       font-weight: 400;
     }
@@ -257,9 +257,9 @@
 
     /* ── 2-Column Page Layout ── */
     .content-columns {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
+      @apply w-full;
+      @apply flex;
+      @apply flex-col;
       gap: var(--space-xl);
       margin-bottom: 120px;
       opacity: 0;
@@ -268,7 +268,7 @@
 
     @media (min-width: 768px) {
       .content-columns {
-        display: grid;
+        @apply grid;
         grid-template-columns: 1fr 1fr;
         gap: 48px;
         align-items: start;
@@ -277,7 +277,7 @@
 
     /* Left Column: Latest Release */
     .links-container {
-      display: block;
+      @apply block;
     }
 
     .links-container .archive-entry {
@@ -311,21 +311,21 @@
 
     /* Flat Monochrome Link Card */
     .link-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
+      @apply flex;
+      @apply items-center;
+      @apply justify-between;
+      @apply w-full;
       background-color: transparent;
       border: 1px solid var(--border-color);
       padding: 12px 16px;
       border-radius: 0px;
       text-decoration: none;
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      cursor: pointer;
+      @apply cursor-pointer;
     }
 
     .link-item:hover {
-      background-color: var(--bg-secondary);
+      @apply bg-surface;
       border-color: var(--text-primary);
       transform: translateY(-1px);
     }
@@ -334,7 +334,7 @@
       font-family: var(--font-sans);
       font-size: 0.65rem;
       font-weight: 500;
-      color: var(--text-muted);
+      @apply text-muted;
       letter-spacing: 0.02em;
       transition: color 0.3s ease;
       line-height: 1.2;
@@ -342,11 +342,11 @@
 
     .archive-item:hover .archive-item-date,
     .link-item:hover .archive-item-date {
-      color: var(--text-primary);
+      @apply text-ink;
     }
 
     .latest-release-header {
-      display: block;
+      @apply block;
       font-family: var(--font-sans);
       transition: border-color 0.5s ease;
     }
@@ -361,7 +361,7 @@
       font-family: var(--font-sans);
       font-size: 0.65rem;
       font-weight: 700;
-      color: var(--text-secondary);
+      @apply text-secondary;
       letter-spacing: 0.05em;
     }
 
@@ -369,7 +369,7 @@
       font-family: var(--font-sans);
       font-size: 0.88rem;
       font-weight: 400;
-      color: var(--text-primary);
+      @apply text-ink;
       margin-top: 4px;
       line-height: 1.2;
     }
@@ -377,16 +377,16 @@
     .latest-featured-item .archive-item-date {
       font-size: 0.72rem;
       font-weight: 500;
-      color: var(--text-muted);
+      @apply text-muted;
     }
 
     .latest-featured-item:hover .archive-item-date {
-      color: var(--text-primary);
+      @apply text-ink;
     }
 
     /* ── Archive Section ── */
     .archive-section {
-      width: 100%;
+      @apply w-full;
     }
 
     .archive-group {
@@ -394,12 +394,12 @@
     }
 
     .archive-group-label {
-      display: block;
+      @apply block;
       font-family: var(--font-sans);
       font-size: 0.6rem;
       font-weight: 700;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      @apply uppercase;
+      @apply text-muted;
       margin-bottom: var(--space-sm);
       padding-bottom: var(--space-xs);
       border-bottom: 1px solid var(--border-color);
@@ -407,8 +407,8 @@
     }
 
     .archive-list {
-      display: flex;
-      flex-direction: column;
+      @apply flex;
+      @apply flex-col;
     }
 
     .archive-entry {
@@ -416,13 +416,13 @@
     }
 
     .archive-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
+      @apply flex;
+      @apply items-center;
+      @apply justify-between;
+      @apply w-full;
       padding: 14px 0;
       text-decoration: none;
-      cursor: pointer;
+      @apply cursor-pointer;
       transition: all 0.3s ease;
     }
 
@@ -431,23 +431,23 @@
     }
 
     .archive-item-left {
-      display: flex;
-      align-items: center;
+      @apply flex;
+      @apply items-center;
       gap: 10px;
-      width: 100%;
+      @apply w-full;
     }
 
     .archive-item-text {
       flex-grow: 1;
-      display: flex;
-      flex-direction: column;
+      @apply flex;
+      @apply flex-col;
     }
 
     .archive-item-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
+      @apply flex;
+      @apply justify-between;
+      @apply items-center;
+      @apply w-full;
       gap: 24px;
     }
 
@@ -456,7 +456,7 @@
       height: 14px;
       fill: var(--text-muted);
       stroke: none;
-      flex-shrink: 0;
+      @apply shrink-0;
       transition: fill 0.3s ease;
     }
 
@@ -465,33 +465,33 @@
     }
 
     .archive-item-type {
-      display: block;
+      @apply block;
       font-family: var(--font-sans);
       font-size: 0.55rem;
       font-weight: 700;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      @apply uppercase;
+      @apply text-muted;
       transition: color 0.3s ease;
     }
 
     .archive-item-title {
-      display: block;
+      @apply block;
       font-family: var(--font-sans);
       font-size: 0.72rem;
-      color: var(--text-primary);
+      @apply text-ink;
       transition: color 0.3s ease;
       line-height: 1.2;
     }
 
     .archive-item:hover .archive-item-type {
-      color: var(--text-secondary);
+      @apply text-secondary;
     }
 
     /* Inline video embed */
     .archive-embed {
-      width: 100%;
+      @apply w-full;
       max-height: 0;
-      overflow: hidden;
+      @apply overflow-hidden;
       opacity: 0;
       transform: translateY(-12px);
       transition: max-height 0.65s cubic-bezier(0.25, 1, 0.5, 1), 
@@ -508,27 +508,27 @@
     }
 
     .archive-embed iframe {
-      width: 100%;
+      @apply w-full;
       aspect-ratio: 16 / 9;
       border: none;
-      display: block;
+      @apply block;
     }
 
     /* Premium minimalist monochrome custom video poster overlay */
     .custom-video-poster {
-      position: relative;
-      width: 100%;
+      @apply relative;
+      @apply w-full;
       aspect-ratio: 16 / 9;
-      cursor: pointer;
-      overflow: hidden;
+      @apply cursor-pointer;
+      @apply overflow-hidden;
       background-color: #000;
       transition: opacity 0.3s ease;
     }
 
     .poster-thumbnail {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      @apply w-full;
+      @apply h-full;
+      @apply object-cover;
       filter: brightness(0.85);
       transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease;
     }
@@ -540,11 +540,11 @@
 
     /* Figma UI Kit / Tailwind UI-inspired Editorial Glassmorphic Pill Play Button */
     .poster-play-btn {
-      position: absolute;
+      @apply absolute;
       bottom: 16px;
       right: 16px;
-      display: flex;
-      align-items: center;
+      @apply flex;
+      @apply items-center;
       gap: 8px;
       padding: 8px 14px;
       background-color: var(--glass-bg);
@@ -553,7 +553,7 @@
       border: 1px solid var(--border-color);
       border-radius: 0px; /* Sharp editorial corners matching artic. */
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      cursor: pointer;
+      @apply cursor-pointer;
     }
 
     .poster-play-btn svg {
@@ -570,8 +570,8 @@
       font-size: 0.55rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: var(--text-primary);
-      text-transform: uppercase;
+      @apply text-ink;
+      @apply uppercase;
       line-height: 1;
       transition: color 0.4s ease;
     }
@@ -603,7 +603,7 @@
 
     /* ── Mobile Accordion Styles & Overrides ── */
     .toggle-icon {
-      display: none;
+      @apply hidden;
     }
 
     @media (max-width: 767px) {
@@ -626,21 +626,21 @@
       }
 
       .mobile-toggle-header {
-        display: flex;
-        justify-content: space-between;
+        @apply flex;
+        @apply justify-between;
         align-items: baseline;
-        cursor: pointer;
+        @apply cursor-pointer;
         padding-bottom: 8px;
-        position: relative;
+        @apply relative;
         user-select: none;
       }
 
       .mobile-toggle-header::after {
         content: '';
-        position: absolute;
+        @apply absolute;
         bottom: 0;
         left: 0;
-        width: 100%;
+        @apply w-full;
         height: 1px;
         background-color: var(--border-color);
         transform: scaleX(0);
@@ -654,11 +654,11 @@
       }
       
       .toggle-icon {
-        display: block;
+        @apply block;
         font-family: var(--font-sans);
         font-size: 1.1rem;
         font-weight: 300;
-        color: var(--text-muted);
+        @apply text-muted;
         line-height: 1;
         transition: color 0.3s ease;
         opacity: 0;
@@ -671,12 +671,12 @@
       }
 
       .mobile-toggle-header:hover .toggle-icon {
-        color: var(--text-primary);
+        @apply text-ink;
       }
 
       .toggle-icon::after {
         content: '+';
-        display: inline-block;
+        @apply inline-block;
         transition: transform 0.3s ease;
       }
 
@@ -687,7 +687,7 @@
       /* Hide content when collapsed */
       .toggle-content {
         max-height: 0;
-        overflow: hidden;
+        @apply overflow-hidden;
         opacity: 0;
         transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, margin-top 0.4s ease;
         margin-top: 0;
@@ -716,20 +716,20 @@
 
       /* Latest Release Header styling on mobile */
       .links-container .mobile-toggle-header {
-        display: flex;
-        justify-content: space-between;
+        @apply flex;
+        @apply justify-between;
         align-items: baseline;
         padding-bottom: 8px;
-        position: relative;
+        @apply relative;
         user-select: none;
       }
 
       .links-container .mobile-toggle-header::after {
         content: '';
-        position: absolute;
+        @apply absolute;
         bottom: 0;
         left: 0;
-        width: 100%;
+        @apply w-full;
         height: 1px;
         background-color: var(--border-color);
         transform: scaleX(0);

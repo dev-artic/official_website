@@ -33,18 +33,30 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+
+      - name: Install build dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Rebuild static HTML pages from templates
         run: node scripts/build_pages.js
 
       - name: Validate templates
-        run: node scripts/validate_templates.js
+        run: |
+          node scripts/validate_templates.js
+          node scripts/test_styles.js
+
+      - name: Assemble public site
+        run: |
+          mkdir -p _site
+          cp -R .nojekyll index.html CNAME projects.json about admin artic-le contact css fonts images js projects quarterly _site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
   # Deployment job
   deploy:

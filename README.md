@@ -146,6 +146,14 @@ graph TD
     # 또는: node scripts/build_pages.js
     ```
   * 이 스크립트는 `templates/`에 구성된 디자인 요소들을 `src/` 본문과 결합하여 최종 HTML을 빌드하고, 각 컴포넌트의 스타일시트 선언부를 HTML의 `<head>` 영역으로 자동 통합하는 렌더링 최적화를 수행합니다.
+* **Tailwind CSS 4 빌드**:
+  * `npm ci`로 build 의존성을 설치합니다. `css/tailwind.css`가 전역 entry이며 기존 색상/폰트/간격 토큰을 Tailwind theme에 연결합니다. 프로젝트 고유 reset을 유지하기 위해 Preflight는 사용하지 않습니다.
+  * `scripts/build_styles.js`는 `css/site.css`와 각 페이지의 통합 CSS를 빌드 시 minify합니다. `npm run build` 또는 `node scripts/build_pages.js`는 CSS까지 자동 컴파일합니다. `npm run build:styles`는 전역 CSS만 재생성합니다.
+  * 두 layout 모두 생성된 `css/site.css`를 로드합니다. `css/design-system.css`, `css/animations.css`, source/template의 style 영역은 Tailwind `@apply`를 사용할 수 있는 소스입니다. 생성 파일을 직접 수정하거나 브라우저에서 소스 CSS를 직접 로드하지 않습니다.
+  * 공통 layout, display, alignment, color는 Tailwind utilities로 작성하고, 고유 typography, keyframes, 복잡한 grid/transition은 CSS로 유지합니다. JS가 사용하는 class명은 그대로 유지합니다. 동적으로 생성할 utility class는 완성된 문자열로 source에 작성합니다.
+  * Tailwind 4 지원 범위는 Safari 16.4+, Chrome 111+, Firefox 128+입니다. 브라우저 런타임/CDN 스크립트는 필요 없습니다. CSS 수정 후 다시 build하고 Hard Refresh합니다.
+  * Pages/playlist CI는 Node 22와 `npm ci`로 빌드합니다. Pages에는 공개 파일만 `_site/`로 묶어 업로드하며 node_modules와 backend 소스는 포함하지 않습니다.
+  * 회귀 검사: `node scripts/test_styles.js` (컴파일 directive 누출, stylesheet 연결, inline JS 문법 확인).
 * **백엔드 API 로직 개발**:
   * 대기명단 가입, 결제 주문, 상품 조회, Quarterly Notion 아카이브 조회, CORS-safe 이미지 프록시는 **`functions/index.js`** 파일에서 Node.js 22 기반 Firebase Functions로 설계 및 작성됩니다.
   * 주문 상태별 재고 변경 규칙은 **`functions/order_inventory.js`** 에 분리되어 있으며, `npm run test:inventory`로 회귀 테스트합니다.
@@ -320,17 +328,19 @@ graph TD
     node scripts/crawl_bugs_album_art.js --archive=scratch/quarterly_live_contents.json --cache=scratch/bugs_album_art_cache.json --artistCache=scratch/bugs_artist_image_cache.json --missingOnly=true --artists=true
     node scripts/resolve_quarterly_album_art.js --archive=scratch/quarterly_live_contents.json --cache=functions/data/quarterly_media_cache.json --missingOnly=true
     ```
+    로컬 archive cache는 media/Now artic./external link 파일 변경 시 재생성되어 신규 커버 수정이 즉시 반영됩니다.
     수집 후 `scratch/bugs_album_art_cache.json`과 `scratch/bugs_artist_image_cache.json`을 `functions/data/quarterly_media_cache.json` 형태로 병합하고, 배포 전에는 아래 검증 gate를 통과해야 합니다.
     ```bash
     node scripts/verify_quarterly_media_cache.js --archive=scratch/quarterly_live_contents.json --cache=functions/data/quarterly_media_cache.json --write=true
     ```
-  * **Now artic. 수집**: `instagram.com/artic.live` 공개 reels 목록은 캡션을 노출하지 않으므로, `node scripts/crawl_instagram_now_artic.js`는 각 reel 상세 페이지의 meta description을 열어 `실시간`, `오늘자`, `어제자` 캡션 후보를 읽습니다. Instagram CDN preview URL은 만료되므로 수집 시 `images/quarterly/now-artic/<shortcode>.jpg`로 내려받아 정적 자산으로 보존하고, 공개 모달 재생에는 원본 reel URL에서 생성한 Instagram embed URL을 사용합니다. Instagram이 headless/public session에 로그인 게이트를 걸면 링크 수집 결과가 0개일 수 있으므로, 안정 운영 전에는 Notion 수동 입력 또는 로그인된 승인 세션 기반 수집을 병행 검토합니다.
+  * **Now artic. 수집**: `node scripts/crawl_instagram_now_artic.js`는 `instagram.com/artic.live`의 `/reels/` 및 메인 프로필 페이지를 headless Puppeteer로 순회하고, 각 reel/post 상세 페이지의 `og:description`에서 캡션을 읽어 Now artic. 현장 콘텐츠를 자동 분류합니다. 1차 키워드(`실시간`, `오늘자`, `어제자`)는 해당 키워드를 label로, 2차 키워드(`현장`, `셋로그`, `콘서트`, `공연`, `라이브`, `리스닝`, `페스티벌`, `Venue`)는 `현장` label로 분류합니다. `#보도자료`, `TASTING NOTE`, `Source |` 패턴이 포함된 캡션은 제외합니다. 기존 JSON의 항목 중 현재 스캔에서 발견되지 않은 것은 shortcode 기준으로 보존하고, 수동 입력된 `eventTitle`, `venue` 등 필드 override도 유지합니다. Instagram CDN preview URL은 만료되므로 수집 시 `images/quarterly/now-artic/<shortcode>.jpg`로 내려받아 정적 자산으로 보존합니다. 크롤링 완료 후 `node scripts/build_pages.js`를 자동 실행하고, `--deploy` 플래그를 추가하면 git push → Firebase Functions 배포 → Firestore 캐시 무효화를 원스톱으로 수행합니다.
     ```bash
-    NOW_ARTIC_REEL_URLS="https://www.instagram.com/artic.live/reel/..." node scripts/crawl_instagram_now_artic.js
+    node scripts/crawl_instagram_now_artic.js                  # 크롤링 + 빌드
+    node scripts/crawl_instagram_now_artic.js --deploy         # 크롤링 + 빌드 + 전체 배포
+    node scripts/crawl_instagram_now_artic.js --dry-run -v     # 결과 미리보기 (파일 변경 없음)
     ```
-    ```bash
-    node scripts/crawl_instagram_now_artic.js
-    ```
+
+    운영 규칙: [NOW ARTIC ripper workflow](docs/now-artic-ripper.md). `eventTitle`은 캡션 첫 문장이 아닌 행사명으로 추출하며, 추출이 불확실하면 비워 두고 검수합니다. 기존 수동 제목은 보존합니다. 카드/미리보기 본문에서는 캡션 끝에 반복된 행사명과 Venue 이후 정보를 제외하고 제목과 하단 표에만 표시합니다. 원본 캡션과 본문 문장 속 행사명 언급은 보존하며 `node scripts/test_now_artic_caption.js`로 검증합니다. 명시적으로 제외된 게시물은 복원하지 않으며, 날짜는 실행 환경의 시간대와 무관하게 원문 날짜를 유지합니다. `scanned`는 상세 페이지 시도 횟수입니다. Dry-run은 이미지/JSON을 쓰지 않고, 치명적인 수집 실패는 기존 데이터를 덮어쓰지 않습니다. 배포는 첫 명령 실패 시 중단합니다. `--deploy` 전 README 검토와 코드/문서 커밋을 마치고 main 브랜치 및 staging 내용을 확인해야 합니다. 로컬 QA는 `?artic_uat=local`로 저장된 production API 설정을 해제합니다.
 
 ### 5. 프로젝트 특화 컴포넌트 (`templates/components/projects/`)
 * **`player.html`**: 중앙 오디오 플레이 위젯 및 프로그레스바 트랙.

@@ -53,13 +53,20 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+
+      - name: Install build dependencies
+        run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Rebuild static HTML pages from templates
         run: node scripts/build_pages.js
 
       - name: Validate templates
-        run: node scripts/validate_templates.js
+        run: |
+          node scripts/validate_templates.js
+          node scripts/test_styles.js
 
       - name: Commit & push updated files
         if: steps.sync.outputs.changed == 'true' || github.event.inputs.force_update == 'true'
@@ -68,7 +75,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/projects/ projects/the-root/index.html projects/tasting-note/index.html projects/neutral-interview/index.html
+          git add css/site.css src/projects/ projects/the-root/index.html projects/tasting-note/index.html projects/neutral-interview/index.html
           git diff --cached --quiet || git commit -m "chore: auto-sync YouTube playlists and rebuild static pages"
           git push
           

@@ -52,14 +52,14 @@
   /* ── Checkout Form Styling ── */
   .checkout-scroll-container {
     max-height: 380px;
-    overflow-y: auto;
+    @apply overflow-y-auto;
     padding-right: 8px;
     padding-bottom: 24px;
     margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
+    @apply flex;
+    @apply flex-col;
     gap: 16px;
-    text-align: left;
+    @apply text-left;
   }
 
   .checkout-scroll-container::-webkit-scrollbar {
@@ -71,8 +71,8 @@
   }
 
   .checkout-form-group {
-    display: flex;
-    flex-direction: column;
+    @apply flex;
+    @apply flex-col;
     gap: 6px;
   }
 
@@ -80,20 +80,20 @@
     font-family: var(--font-sans);
     font-size: 0.65rem;
     font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-primary);
+    @apply uppercase;
+    @apply text-ink;
     letter-spacing: 0.05em;
   }
 
   .checkout-input, .checkout-select, .checkout-textarea {
-    width: 100%;
-    background-color: var(--bg-primary);
+    @apply w-full;
+    @apply bg-canvas;
     border: 1px solid var(--border-color);
     padding: 12px 14px;
     border-radius: 4px;
     font-family: var(--font-sans);
     font-size: 0.78rem;
-    color: var(--text-primary);
+    @apply text-ink;
     outline: none;
     transition: border-color 0.3s ease, background-color 0.3s ease;
   }
@@ -120,13 +120,13 @@
   }
 
   .checkout-address-row {
-    display: flex;
+    @apply flex;
     gap: 8px;
   }
 
   .checkout-address-row .checkout-input {
     flex: 1 1 auto;
-    min-width: 0;
+    @apply min-w-0;
   }
 
   .checkout-address-btn {
@@ -139,7 +139,7 @@
     font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.05em;
-    cursor: pointer;
+    @apply cursor-pointer;
     transition: opacity 0.2s ease, border-color 0.2s ease;
   }
 

@@ -1,0 +1,22 @@
+/* Build-time Tailwind entry. Preserve artic.'s existing reset and motion rules. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@import "./design-system.css";
+@import "./animations.css";
+@source "../src";
+@source "../templates";
+@source "../js";
+
+@custom-variant dark (&:where(.dark-mode, .dark-mode *));
+@theme inline {
+  --color-canvas: var(--bg-primary);
+  --color-surface: var(--bg-secondary);
+  --color-ink: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-line: var(--border-color);
+  --font-body: var(--font-sans);
+  --font-display: var(--font-serif);
+  --spacing-gutter: var(--gutter);
+}

@@ -33,9 +33,9 @@
     }
 
     .print-modal.product-showcase-modal .print-modal-content {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
+      @apply flex;
+      @apply flex-col;
+      @apply h-full;
       min-height: 0;
     }
 
@@ -44,7 +44,7 @@
       top: 0;
       left: auto;
       z-index: 5;
-      width: 100%;
+      @apply w-full;
       height: var(--modal-header-height);
       min-height: var(--modal-header-height);
       max-height: var(--modal-header-height);
@@ -52,15 +52,15 @@
       padding: var(--modal-header-padding-y) var(--modal-header-padding-x);
       border-bottom: 1px solid var(--border-color);
       box-sizing: border-box;
-      overflow: hidden;
+      @apply overflow-hidden;
       contain: paint;
       transform: none !important;
       transition: none !important;
     }
 
     .print-modal.product-showcase-modal .print-modal-image-wrap img {
-      display: block;
-      width: auto;
+      @apply block;
+      @apply w-auto;
       max-width: 100%;
       max-height: var(--modal-image-max-height);
       transform: none;
@@ -89,7 +89,7 @@
       max-width: 100% !important;
       flex: 1 1 auto !important;
       min-height: 0;
-      overflow: hidden;
+      @apply overflow-hidden;
       justify-content: flex-start !important;
       box-sizing: border-box;
     }
@@ -100,7 +100,7 @@
 
     .print-modal.product-showcase-modal.is-header-collapsed:not(.is-checkout) .print-modal-info,
     .print-modal.product-showcase-modal.is-header-collapsed.is-success .print-modal-info {
-      overflow-y: auto;
+      @apply overflow-y-auto;
       overscroll-behavior: contain;
       -webkit-overflow-scrolling: touch;
     }
@@ -124,7 +124,7 @@
       overflow: hidden !important;
       width: 33.333% !important;
       display: flex !important;
-      flex-direction: column;
+      @apply flex-col;
     }
 
     .print-modal.product-showcase-modal:not(.is-checkout):not(.is-success) .print-modal-slide.slide-details,

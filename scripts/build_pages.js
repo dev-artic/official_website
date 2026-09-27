@@ -1,5 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+const { buildSharedStyles, compilePageStyles } = require('./build_styles');
+
+buildSharedStyles();
 
 const baseDir = path.resolve(__dirname, '..');
 const templatesDir = path.join(baseDir, 'templates');
@@ -253,7 +256,7 @@ staticPages.forEach(p => {
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
   }
-  fs.writeFileSync(destFullPath, finalHtml, 'utf8');
+  fs.writeFileSync(destFullPath, compilePageStyles(finalHtml), 'utf8');
   console.log(`Compiled page source: ${p.src} -> ${p.dest}`);
 });
 
@@ -365,7 +368,7 @@ projectDirs.forEach(slugName => {
   }
 
   const destFullPath = path.join(destDir, 'index.html');
-  fs.writeFileSync(destFullPath, finalHtml, 'utf8');
+  fs.writeFileSync(destFullPath, compilePageStyles(finalHtml), 'utf8');
   console.log(`Compiled project detail page: ${slugName} -> projects/${slugName}/index.html`);
 });
 

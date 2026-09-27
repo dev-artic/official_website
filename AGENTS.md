@@ -146,3 +146,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 * 이 스크립트는 Node.js 설치 점검, Firebase CLI 전역 설치, 프로젝트 루트 및 Firebase Functions 디렉토리 의존성(`npm install`), Firebase 로그인 인증을 원스톱으로 처리합니다.
+
+## 8. Quarterly NOW ARTIC Ripper
+
+When collecting, refreshing, or reviewing NOW ARTIC Instagram content, follow [the ripper workflow](docs/now-artic-ripper.md). Use event names for `eventTitle`, preserve curated overrides, and review unresolved titles before publishing.

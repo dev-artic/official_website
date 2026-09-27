@@ -24,13 +24,13 @@
   <div class="quarterly-feed-sentinel" id="quarterly-feed-sentinel" aria-live="polite">Loading Quarterly archive.</div>
 </section>
 
-<div class="quarterly-now-modal" id="quarterly-now-modal" aria-hidden="true" role="dialog" aria-label="Now artic. detail">
+<dialog class="quarterly-now-modal" id="quarterly-now-modal" aria-label="Now artic. detail">
   <div class="quarterly-now-modal-backdrop" data-now-modal-close></div>
   <div class="quarterly-now-modal-panel">
     <button class="quarterly-now-modal-close" type="button" data-now-modal-close aria-label="Close Now artic. detail">&times;</button>
     <div class="quarterly-now-modal-content" id="quarterly-now-modal-content"></div>
   </div>
-</div>
+</dialog>
 
 <script>
 (function initQuarterlyArchiveFeed() {
@@ -418,7 +418,11 @@
   }
 
   function getNowDisplayCaption(item) {
-    return getNowCaption(item).split(/\bVenue\b/i)[0].trim();
+    const caption = getNowCaption(item).split(/\bVenue\b/i)[0].replace(/\s+/g, ' ').trim();
+    const title = String(item.eventTitle || item.title || item.event || '').replace(/\s+/g, ' ').trim();
+    if (!title) return caption;
+    if (caption === title) return '';
+    return caption.endsWith(` ${title}`) ? caption.slice(0, -title.length).trim() : caption;
   }
 
   function hasValue(value) {
@@ -473,7 +477,7 @@
     const item = nowModalItems[index];
     if (!item) return;
     const caption = getNowDisplayCaption(item);
-    const eventTitle = item.title || item.eventTitle || item.event || 'This quarter in motion.';
+    const eventTitle = item.eventTitle || item.title || item.event || 'This quarter in motion.';
     nowModalContentEl.innerHTML = `
       <div class="quarterly-now-modal-media">
         ${renderNowMedia(item)}
@@ -493,14 +497,15 @@
       </aside>
     `;
     nowModalEl.classList.add('is-open');
-    nowModalEl.setAttribute('aria-hidden', 'false');
+    nowModalEl.showModal();
     document.body.classList.add('quarterly-now-modal-open');
   }
 
   function closeNowModal() {
     if (!nowModalEl || !nowModalContentEl) return;
     nowModalEl.classList.remove('is-open');
-    nowModalEl.setAttribute('aria-hidden', 'true');
+    nowModalEl.close();
+    nowModalContentEl.replaceChildren();
     document.body.classList.remove('quarterly-now-modal-open');
   }
 
@@ -525,7 +530,8 @@
                   ${getNowEmbedUrl(item) ? '<span class="quarterly-now-preview-play" aria-hidden="true"></span>' : ''}
                 </span>
                 <span>
-                  <strong>${escapeHtml(getNowDisplayCaption(item))}</strong>
+                  <strong>${escapeHtml(item.eventTitle || item.title || getNowDisplayCaption(item))}</strong>
+                  ${item.eventTitle || item.title ? `<span class="quarterly-now-excerpt">${escapeHtml(getNowDisplayCaption(item))}</span>` : ''}
                   <em>View note</em>
                 </span>
               </button>
@@ -663,8 +669,9 @@
     }
   });
 
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeNowModal();
+  nowModalEl.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeNowModal();
   });
 
   async function loadArchive() {
@@ -704,7 +711,7 @@
 
 <style>
   .quarterly-archive {
-    width: 100%;
+    @apply w-full;
     max-width: var(--max-width);
     margin: 0 auto;
     padding: var(--space-xl) var(--gutter) var(--space-xxl);
@@ -731,11 +738,11 @@
   }
 
   .quarterly-archive * {
-    min-width: 0;
+    @apply min-w-0;
   }
 
   .quarterly-archive-head {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(0, 0.66fr) minmax(220px, 0.34fr);
     gap: clamp(20px, 4vw, 56px);
     align-items: end;
@@ -748,11 +755,11 @@
   .quarterly-album-preview span,
   .quarterly-featured-articles span {
     font-family: var(--font-sans);
-    font-size: 0.58rem;
+    font-size: 0.68rem;
     line-height: 1.45;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
   }
 
   .quarterly-archive-note {
@@ -760,7 +767,7 @@
     font-family: var(--font-sans);
     font-size: 0.84rem;
     line-height: 1.7;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-archive-head h2 {
@@ -768,18 +775,18 @@
     font-size: clamp(2rem, 5vw, 4.8rem);
     line-height: 0.96;
     font-weight: 700;
-    color: var(--text-primary);
+    @apply text-ink;
     overflow-wrap: anywhere;
   }
 
   .quarterly-current,
   .quarterly-feed {
-    display: grid;
+    @apply grid;
     gap: 0;
   }
 
   .quarterly-loading-panel {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(180px, 22%) minmax(0, 1fr);
     gap: clamp(28px, 5vw, 80px);
     min-height: clamp(360px, 48vh, 620px);
@@ -789,7 +796,7 @@
   }
 
   .quarterly-loading-panel > div {
-    display: grid;
+    @apply grid;
     gap: 18px;
     max-width: 58ch;
   }
@@ -798,7 +805,7 @@
     font-family: var(--font-serif);
     font-size: clamp(1.65rem, 3.6vw, 3.25rem);
     line-height: 0.98;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .quarterly-loading-panel p:last-of-type {
@@ -806,11 +813,11 @@
     font-family: var(--font-sans);
     font-size: 0.76rem;
     line-height: 1.75;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-loading-panel span {
-    display: block;
+    @apply block;
     width: min(100%, 520px);
     height: 1px;
     background: var(--border-color);
@@ -845,7 +852,7 @@
   }
 
   .quarterly-quarter {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(180px, 22%) minmax(0, 1fr);
     gap: clamp(28px, 5vw, 80px);
     padding: clamp(40px, 7vw, 96px) 0;
@@ -858,18 +865,18 @@
   }
 
   .quarterly-quarter-head {
-    display: grid;
+    @apply grid;
     align-content: start;
   }
 
   .quarterly-quarter-head h3 {
-    display: grid;
+    @apply grid;
     grid-template-columns: repeat(2, 0.72em);
     grid-auto-rows: 0.78em;
     column-gap: 0.02em;
     row-gap: 0.02em;
     justify-items: center;
-    align-items: center;
+    @apply items-center;
     width: max-content;
     max-width: 100%;
     font-family: var(--font-serif);
@@ -878,14 +885,14 @@
     letter-spacing: 0;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1;
-    color: var(--text-primary);
+    @apply text-ink;
     overflow-wrap: normal;
   }
 
   .quarterly-quarter-head h3 span {
-    display: block;
-    width: 100%;
-    text-align: center;
+    @apply block;
+    @apply w-full;
+    @apply text-center;
     transform: translateZ(0);
   }
 
@@ -895,13 +902,13 @@
   }
 
   .quarterly-quarter-modules {
-    display: grid;
+    @apply grid;
     gap: clamp(34px, 4.6vw, 64px);
     align-items: start;
   }
 
   .quarterly-module {
-    display: grid;
+    @apply grid;
     gap: clamp(18px, 2.8vw, 36px);
     align-items: start;
   }
@@ -931,7 +938,7 @@
   }
 
   .quarterly-module-albums {
-    display: grid;
+    @apply grid;
     gap: clamp(12px, 1.8vw, 20px);
     align-content: start;
   }
@@ -946,30 +953,30 @@
   }
 
   .quarterly-module-body {
-    display: grid;
+    @apply grid;
     gap: clamp(18px, 2.4vw, 30px);
     align-content: start;
   }
 
   .quarterly-acha-heading,
   .quarterly-now-heading {
-    display: grid;
+    @apply grid;
     gap: clamp(10px, 1.4vw, 16px);
   }
 
   .quarterly-acha-meta {
-    display: grid;
+    @apply grid;
     gap: 5px;
     max-width: 42ch;
     margin: 0;
     font-family: var(--font-sans);
     font-size: 0.66rem;
     line-height: 1.55;
-    color: var(--text-muted);
+    @apply text-muted;
   }
 
   .quarterly-acha-meta span:first-child {
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-module h4 {
@@ -977,7 +984,7 @@
     font-size: clamp(1.35rem, 2.6vw, 2.35rem);
     line-height: 1.08;
     font-weight: 700;
-    color: var(--text-primary);
+    @apply text-ink;
     overflow-wrap: anywhere;
   }
 
@@ -986,12 +993,12 @@
     font-family: var(--font-sans);
     font-size: 0.84rem;
     line-height: 1.9;
-    color: var(--text-secondary);
+    @apply text-secondary;
     white-space: pre-line;
   }
 
   .quarterly-acha-identity {
-    display: grid;
+    @apply grid;
     gap: 7px;
     max-width: 54ch;
     padding: clamp(12px, 1.8vw, 18px);
@@ -1004,9 +1011,9 @@
     font-size: 0.62rem;
     line-height: 1.45;
     letter-spacing: 0.08em;
-    text-transform: uppercase;
+    @apply uppercase;
     font-weight: 700;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .quarterly-acha-identity p,
@@ -1015,28 +1022,28 @@
     font-family: var(--font-sans);
     font-size: 0.7rem;
     line-height: 1.72;
-    color: var(--text-secondary);
+    @apply text-secondary;
     word-break: keep-all;
   }
 
   .quarterly-acha-identity em {
-    font-style: normal;
-    color: var(--text-muted);
+    @apply not-italic;
+    @apply text-muted;
   }
 
   .quarterly-module-meta {
     font-family: var(--font-sans);
     font-size: 0.66rem;
     line-height: 1.6;
-    color: var(--text-muted);
+    @apply text-muted;
   }
 
   .quarterly-module-visual {
-    display: block;
+    @apply block;
   }
 
   .quarterly-cover-stack {
-    display: grid;
+    @apply grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: clamp(8px, 1.7vw, 18px);
   }
@@ -1047,9 +1054,9 @@
 
   .quarterly-cover-stack img,
   .quarterly-cover-fallback {
-    width: 100%;
+    @apply w-full;
     aspect-ratio: 1;
-    object-fit: cover;
+    @apply object-cover;
     background: var(--bg-secondary);
   }
 
@@ -1060,7 +1067,7 @@
 
   .quarterly-cover-stack img:hover,
   .quarterly-cover-stack img:focus-visible {
-    position: relative;
+    @apply relative;
     z-index: 2;
     transform: scale(1.045);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
@@ -1068,20 +1075,20 @@
 
   .quarterly-cover-fallback,
   .quarterly-cover-stack.is-empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @apply flex;
+    @apply items-center;
+    @apply justify-center;
     min-height: 140px;
     padding: 16px;
-    text-align: center;
+    @apply text-center;
     font-family: var(--font-sans);
     font-size: 0.62rem;
     line-height: 1.5;
-    color: var(--text-muted);
+    @apply text-muted;
   }
 
   .quarterly-album-preview {
-    display: grid;
+    @apply grid;
     gap: 0;
     margin: 0;
     padding: 0;
@@ -1091,7 +1098,7 @@
   }
 
   .quarterly-album-preview li {
-    display: grid;
+    @apply grid;
     grid-template-columns: 48px minmax(0, 1fr);
     gap: 14px;
     align-items: start;
@@ -1119,18 +1126,18 @@
     font-size: 0.76rem;
     line-height: 1.6;
     font-weight: 700;
-    color: var(--text-primary);
+    @apply text-ink;
     overflow-wrap: anywhere;
   }
 
   .quarterly-album-preview em {
-    display: block;
+    @apply block;
     margin-top: 2px;
     font-family: var(--font-sans);
     font-size: 0.68rem;
     line-height: 1.55;
-    font-style: normal;
-    color: var(--text-secondary);
+    @apply not-italic;
+    @apply text-secondary;
   }
 
   .quarterly-album-preview p {
@@ -1138,17 +1145,17 @@
     font-family: var(--font-sans);
     font-size: 0.72rem;
     line-height: 1.72;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-now-list {
-    display: grid;
+    @apply grid;
     gap: 0;
     margin-top: 0;
   }
 
   .quarterly-featured-articles {
-    display: grid;
+    @apply grid;
     grid-column: 1 / -1;
     grid-template-columns: minmax(180px, 0.22fr) minmax(0, 0.78fr);
     gap: clamp(28px, 5vw, 80px);
@@ -1158,15 +1165,15 @@
   }
 
   .quarterly-featured-list {
-    display: grid;
+    @apply grid;
     gap: clamp(26px, 4vw, 52px);
   }
 
   .quarterly-featured-list article {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(180px, 28%) minmax(0, 1fr);
     gap: clamp(28px, 4vw, 68px);
-    align-items: center;
+    @apply items-center;
     min-height: clamp(260px, 28vw, 420px);
   }
 
@@ -1188,29 +1195,29 @@
   }
 
   .quarterly-featured-visual {
-    display: grid;
+    @apply grid;
     gap: 8px;
     margin: 0;
   }
 
   .quarterly-featured-visual img {
-    width: 100%;
+    @apply w-full;
     aspect-ratio: 4 / 5;
-    object-fit: cover;
+    @apply object-cover;
     background: var(--bg-secondary);
   }
 
   .quarterly-featured-visual figcaption {
     font-family: var(--font-sans);
-    font-size: 0.58rem;
+    font-size: 0.68rem;
     line-height: 1.45;
     letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
   }
 
   .quarterly-featured-copy {
-    display: grid;
+    @apply grid;
     gap: clamp(12px, 1.8vw, 20px);
     max-width: 76ch;
     padding-left: clamp(20px, 3vw, 44px);
@@ -1226,7 +1233,7 @@
   }
 
   .quarterly-now-trigger {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(120px, 0.18fr) minmax(0, 0.82fr);
     gap: clamp(14px, 2vw, 22px);
     align-items: start;
@@ -1234,9 +1241,9 @@
     padding: 0;
     background: transparent;
     border: 0;
-    color: var(--text-primary);
-    cursor: pointer;
-    text-align: left;
+    @apply text-ink;
+    @apply cursor-pointer;
+    @apply text-left;
     font-family: var(--font-sans);
     transition: color 0.26s ease, border-color 0.26s ease;
   }
@@ -1251,7 +1258,7 @@
     font-family: var(--font-serif);
     font-size: clamp(1.15rem, 2vw, 1.8rem);
     line-height: 1.12;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .quarterly-featured-articles p {
@@ -1259,22 +1266,22 @@
     font-family: var(--font-sans);
     font-size: 0.78rem;
     line-height: 1.8;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-text-link {
-    display: inline-flex;
-    align-items: center;
+    @apply inline-flex;
+    @apply items-center;
     gap: 8px;
     min-height: 44px;
-    width: fit-content;
+    @apply w-fit;
     font-family: var(--font-sans);
     font-size: 0.65rem;
     line-height: 1.4;
     letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    position: relative;
+    @apply uppercase;
+    @apply text-muted;
+    @apply relative;
     padding: 10px 0 8px;
     transition: color 0.3s ease;
   }
@@ -1285,7 +1292,7 @@
 
   .quarterly-text-link::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     width: calc(100% - 20px);
     height: 1px;
     bottom: 7px;
@@ -1297,7 +1304,7 @@
   }
 
   .quarterly-text-link:hover {
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .quarterly-text-link:focus-visible,
@@ -1308,7 +1315,7 @@
   }
 
   .quarterly-featured-articles .quarterly-text-link:hover span {
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .quarterly-text-link:hover::after {
@@ -1330,26 +1337,26 @@
   .quarterly-now-preview,
   .quarterly-now-list img,
   .quarterly-now-thumb {
-    width: 100%;
+    @apply w-full;
     max-width: 220px;
     aspect-ratio: 1;
   }
 
   .quarterly-now-preview {
-    position: relative;
-    display: block;
-    overflow: hidden;
+    @apply relative;
+    @apply block;
+    @apply overflow-hidden;
     background: var(--bg-secondary);
   }
 
   .quarterly-now-list img,
   .quarterly-now-thumb {
-    object-fit: cover;
+    @apply object-cover;
     background: var(--bg-secondary);
   }
 
   .quarterly-now-preview-play {
-    position: absolute;
+    @apply absolute;
     left: 50%;
     top: 50%;
     width: 32px;
@@ -1362,7 +1369,7 @@
 
   .quarterly-now-preview-play::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     left: 53%;
     top: 50%;
     border-top: 5px solid transparent;
@@ -1372,73 +1379,93 @@
   }
 
   .quarterly-now-trigger > span {
-    display: grid;
+    @apply grid;
     gap: 9px;
   }
 
   .quarterly-now-list strong {
-    display: -webkit-box;
+    @apply block text-ink;
     max-width: 62ch;
-    overflow: hidden;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    font-size: 0.76rem;
-    line-height: 1.7;
-    font-weight: 400;
-    color: var(--text-secondary);
+    font-family: var(--font-serif);
+    font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+    line-height: 1.5;
+    font-weight: 700;
+    word-break: keep-all;
     overflow-wrap: anywhere;
   }
 
+  .quarterly-now-excerpt {
+    @apply text-secondary overflow-hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    font-size: 0.8rem;
+    line-height: 1.75;
+    max-width: 62ch;
+  }
+
   .quarterly-now-trigger em {
-    width: fit-content;
-    font-style: normal;
-    font-size: 0.58rem;
+    @apply w-fit;
+    @apply not-italic;
+    font-size: 0.68rem;
     line-height: 1.4;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 3px;
     transition: color 0.3s ease, border-color 0.3s ease;
   }
 
   .quarterly-now-trigger:hover em {
-    color: var(--text-primary);
+    @apply text-ink;
     border-color: var(--text-primary);
   }
 
   .quarterly-now-trigger:active em,
   .quarterly-text-link:active {
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .quarterly-now-modal-open {
-    overflow: hidden;
+    @apply overflow-hidden;
   }
 
   .quarterly-now-modal {
-    position: fixed;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    @apply fixed;
     inset: 0;
     z-index: 1200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @apply flex;
+    @apply items-center;
+    @apply justify-center;
     padding: var(--space-md);
     opacity: 0;
     visibility: hidden;
-    pointer-events: none;
+    @apply pointer-events-none;
     transition: opacity 0.42s var(--ease-out-expo), visibility 0s linear 0.42s;
+  }
+
+  .quarterly-now-modal::backdrop {
+    background: transparent;
   }
 
   .quarterly-now-modal.is-open {
     opacity: 1;
     visibility: visible;
-    pointer-events: auto;
+    @apply pointer-events-auto;
     transition-delay: 0s;
   }
 
   .quarterly-now-modal-backdrop {
-    position: absolute;
+    @apply absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.72);
     backdrop-filter: blur(14px);
@@ -1452,13 +1479,13 @@
   }
 
   .quarterly-now-modal-panel {
-    position: relative;
+    @apply relative;
     z-index: 2;
     width: min(1120px, calc(100vw - 48px));
     max-height: calc(100dvh - 48px);
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
-    overflow: hidden;
+    @apply overflow-hidden;
     box-shadow: 0 30px 90px rgba(0, 0, 0, 0.25);
     opacity: 0;
     transform: translateY(22px) scale(0.985);
@@ -1471,7 +1498,7 @@
   }
 
   .quarterly-now-modal-close {
-    position: absolute;
+    @apply absolute;
     top: 18px;
     right: 18px;
     z-index: 3;
@@ -1480,8 +1507,8 @@
     border: 1px solid var(--border-color);
     border-radius: 50%;
     background: var(--glass-bg);
-    color: var(--text-primary);
-    cursor: pointer;
+    @apply text-ink;
+    @apply cursor-pointer;
     font-size: 1.2rem;
     line-height: 1;
     transition: transform 0.36s var(--ease-out-expo), border-color 0.26s ease, background 0.26s ease;
@@ -1493,16 +1520,16 @@
   }
 
   .quarterly-now-modal-content {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(320px, 0.56fr) minmax(280px, 0.44fr);
     min-height: min(720px, calc(100dvh - 48px));
   }
 
   .quarterly-now-modal-media {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @apply relative;
+    @apply flex;
+    @apply items-center;
+    @apply justify-center;
     background: #000;
     min-height: 520px;
   }
@@ -1510,15 +1537,15 @@
   .quarterly-now-modal-media img,
   .quarterly-now-modal-media video,
   .quarterly-now-modal-media iframe {
-    width: 100%;
-    height: 100%;
+    @apply w-full;
+    @apply h-full;
     max-height: calc(100dvh - 48px);
-    object-fit: contain;
+    @apply object-contain;
     border: 0;
   }
 
   .quarterly-now-play {
-    position: absolute;
+    @apply absolute;
     width: 54px;
     height: 54px;
     border-radius: 50%;
@@ -1528,7 +1555,7 @@
 
   .quarterly-now-play::after {
     content: '';
-    position: absolute;
+    @apply absolute;
     top: 50%;
     left: 52%;
     transform: translate(-50%, -50%);
@@ -1540,35 +1567,35 @@
   }
 
   .quarterly-now-modal-copy {
-    display: grid;
+    @apply grid;
     align-content: start;
     gap: var(--space-md);
     padding: clamp(36px, 5vw, 72px);
-    overflow-y: auto;
+    @apply overflow-y-auto;
   }
 
   .quarterly-now-modal-copy h3 {
     font-family: var(--font-serif);
     font-size: clamp(1.35rem, 2.5vw, 2.2rem);
     line-height: 1.08;
-    color: var(--text-primary);
+    @apply text-ink;
   }
 
   .quarterly-now-modal-copy p {
     font-family: var(--font-sans);
     font-size: 0.84rem;
     line-height: 1.85;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-now-modal-copy dl {
-    display: grid;
+    @apply grid;
     gap: 12px;
     margin-top: var(--space-sm);
   }
 
   .quarterly-now-modal-copy dl div {
-    display: grid;
+    @apply grid;
     grid-template-columns: 86px minmax(0, 1fr);
     gap: 16px;
     padding-top: 10px;
@@ -1584,30 +1611,30 @@
 
   .quarterly-now-modal-copy dt {
     letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
+    @apply uppercase;
+    @apply text-muted;
   }
 
   .quarterly-now-modal-copy dd {
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-feed-sentinel {
-    display: flex;
+    @apply flex;
     min-height: 96px;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    @apply items-center;
+    @apply justify-center;
+    @apply text-center;
   }
 
   .quarterly-feed-sentinel.is-complete {
-    display: block;
+    @apply block;
     min-height: 0;
-    text-align: left;
+    @apply text-left;
   }
 
   .quarterly-archive-cta {
-    display: grid;
+    @apply grid;
     grid-template-columns: minmax(0, 1fr);
     gap: clamp(18px, 3vw, 36px);
     padding: clamp(44px, 7vw, 96px) 0 0;
@@ -1615,7 +1642,7 @@
   }
 
   .quarterly-archive-cta-copy {
-    display: grid;
+    @apply grid;
     gap: var(--space-md);
     max-width: 64ch;
   }
@@ -1624,14 +1651,14 @@
     font-family: var(--font-sans);
     font-size: 0.82rem;
     line-height: 1.75;
-    color: var(--text-secondary);
+    @apply text-secondary;
   }
 
   .quarterly-archive-cta-ko {
     font-family: var(--font-sans);
     font-size: 0.78rem;
     line-height: 1.75;
-    color: var(--text-muted);
+    @apply text-muted;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1743,8 +1770,8 @@
     }
 
     .quarterly-module h4 a {
-      display: inline-flex;
-      align-items: center;
+      @apply inline-flex;
+      @apply items-center;
       min-height: 44px;
     }
 
@@ -1768,7 +1795,7 @@
       gap: 14px;
       min-height: 112px;
       padding: 0;
-      align-items: center;
+      @apply items-center;
     }
 
     .quarterly-now-trigger + .quarterly-now-trigger {
@@ -1809,7 +1836,7 @@
     }
 
     .quarterly-featured-visual {
-      width: 100%;
+      @apply w-full;
       max-width: none;
     }
 
@@ -1838,21 +1865,21 @@
 
     .quarterly-now-list img,
     .quarterly-now-thumb {
-      width: 100%;
+      @apply w-full;
       max-width: none;
-      min-width: 0;
+      @apply min-w-0;
     }
 
     .quarterly-now-modal {
-      align-items: stretch;
+      @apply items-stretch;
       justify-content: stretch;
       padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     }
 
     .quarterly-now-modal-panel {
-      width: 100%;
+      @apply w-full;
       max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
-      overflow-y: auto;
+      @apply overflow-y-auto;
     }
 
     .quarterly-now-modal-close {
@@ -1882,7 +1909,7 @@
 
     .quarterly-now-modal-copy {
       padding: 28px 22px max(34px, calc(24px + env(safe-area-inset-bottom)));
-      overflow: visible;
+      @apply overflow-visible;
     }
 
     .quarterly-now-modal-copy dl div {

@@ -6,10 +6,10 @@ path_depth: "../"
 ---
 <style>
 body {
-      overflow-x: hidden;
+      @apply overflow-x-hidden;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      @apply flex;
+      @apply flex-col;
       box-sizing: border-box;
     }
 
@@ -19,18 +19,18 @@ body {
       padding: 0 var(--gutter);
       padding-top: 80px;
       padding-bottom: 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+      @apply flex;
+      @apply flex-col;
+      @apply justify-center;
       flex: 1;
-      width: 100%;
+      @apply w-full;
       box-sizing: border-box;
     }
 
     .contact-header,
     .contact-grid {
       max-width: 780px;
-      width: 100%;
+      @apply w-full;
       margin-left: auto;
       margin-right: auto;
     }
@@ -46,10 +46,10 @@ body {
       font-family: var(--font-sans);
       font-size: 0.6rem;
       font-weight: 700;
-      text-transform: uppercase;
+      @apply uppercase;
       letter-spacing: 0.25em;
-      color: var(--text-muted);
-      display: block;
+      @apply text-muted;
+      @apply block;
       margin-bottom: 16px;
     }
 
@@ -58,13 +58,13 @@ body {
       font-size: clamp(1.5rem, 3.5vw, 2.2rem);
       font-weight: 700;
       line-height: 1.25;
-      color: var(--text-primary);
+      @apply text-ink;
       max-width: 580px;
       letter-spacing: -0.01em;
     }
 
     .contact-grid {
-      display: grid;
+      @apply grid;
       grid-template-columns: 1fr;
       gap: 40px;
       margin-bottom: 40px; /* Reduced margin-bottom to prevent forcing scrollbar */
@@ -83,11 +83,11 @@ body {
     .contact-channel {
       border-top: 1px solid var(--border-color);
       padding-top: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+      @apply flex;
+      @apply flex-col;
+      @apply items-start;
       gap: 12px;
-      position: relative;
+      @apply relative;
       transition: border-color 0.5s ease;
     }
 
@@ -96,26 +96,26 @@ body {
       font-size: 0.55rem;
       font-weight: 700;
       letter-spacing: 0.15em;
-      color: var(--text-muted);
-      text-transform: uppercase;
+      @apply text-muted;
+      @apply uppercase;
     }
 
     .channel-link {
       font-family: var(--font-sans);
       font-size: clamp(1.1rem, 2.5vw, 1.4rem);
       font-weight: 400;
-      color: var(--text-primary);
+      @apply text-ink;
       text-decoration: none;
       transition: all 0.3s ease;
       word-break: break-all;
-      position: relative;
-      display: inline-block;
+      @apply relative;
+      @apply inline-block;
     }
 
     .channel-link::after {
       content: '';
-      position: absolute;
-      width: 100%;
+      @apply absolute;
+      @apply w-full;
       transform: scaleX(0);
       height: 1px;
       bottom: -2px;
@@ -135,19 +135,19 @@ body {
       font-size: 0.6rem;
       font-weight: 700;
       letter-spacing: 0.12em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      cursor: pointer;
+      @apply text-muted;
+      @apply uppercase;
+      @apply cursor-pointer;
       padding: 4px 0;
       transition: color 0.3s ease;
-      display: inline-flex;
-      align-items: center;
+      @apply inline-flex;
+      @apply items-center;
       gap: 6px;
       text-decoration: none;
     }
 
     .channel-action:hover {
-      color: var(--text-primary);
+      @apply text-ink;
     }
 
 
@@ -156,12 +156,12 @@ body {
       margin-top: auto;
       padding: var(--space-lg) 0;
       border-top: 1px solid var(--border-color);
-      text-align: right;
+      @apply text-right;
       font-family: var(--font-sans);
       font-size: 0.55rem;
       letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
+      @apply uppercase;
+      @apply text-muted;
       transition: border-color 0.5s ease;
     }
 

@@ -19,10 +19,10 @@
         <input type="text" name="company" class="waitlist-company" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="waitlist-fields-wrapper">
           <div class="waitlist-field-group">
-            <input type="text" id="waitlist-name" name="name" class="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
+            <input type="text" aria-label="Your name" name="name" class="waitlist-name" placeholder="YOUR NAME" required autocomplete="name">
           </div>
           <div class="waitlist-field-group">
-            <input type="email" id="waitlist-email" name="email" class="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required autocomplete="email">
+            <input type="email" aria-label="Email address" name="email" class="waitlist-email" placeholder="ENTER YOUR EMAIL ADDRESS" required autocomplete="email">
             <button type="submit" class="waitlist-submit-btn" aria-label="Submit email">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -50,20 +50,20 @@
 <style>
   /* ── Waitlist Form Style ── */
   .waitlist-container {
-    position: relative;
-    width: 100%;
+    @apply relative;
+    @apply w-full;
     margin-top: 16px;
   }
 
   .waitlist-toggle-btn {
     opacity: 1;
-    display: inline-flex;
+    @apply inline-flex;
     transition: opacity 0.4s ease, all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .grid-collapse-wrapper:not(.active) .waitlist-toggle-btn {
     opacity: 0;
-    pointer-events: none;
+    @apply pointer-events-none;
   }
 
   .about-action svg {
@@ -78,59 +78,59 @@
   }
 
   .waitlist-form {
-    width: 100%;
+    @apply w-full;
     max-width: 320px;
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
+    @apply pointer-events-none;
     padding-top: 12px;
   }
 
   .waitlist-company {
-    position: absolute;
+    @apply absolute;
     left: -10000px;
     width: 1px;
     height: 1px;
     opacity: 0;
-    pointer-events: none;
+    @apply pointer-events-none;
   }
 
   .grid-collapse-wrapper.active .waitlist-form {
     opacity: 1;
     transform: translateY(0);
-    pointer-events: auto;
+    @apply pointer-events-auto;
   }
 
   /* Fields stacked layout */
   .waitlist-fields-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+    @apply flex;
+    @apply flex-col;
+    @apply w-full;
     gap: 14px;
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   .waitlist-form.submitting .waitlist-fields-wrapper {
     opacity: 0.3;
-    pointer-events: none;
+    @apply pointer-events-none;
     transform: translateY(-4px);
   }
 
   .waitlist-field-group {
-    position: relative;
-    width: 100%;
+    @apply relative;
+    @apply w-full;
   }
 
   .waitlist-form input {
-    width: 100%;
+    @apply w-full;
     background: none;
     border: none;
     border-bottom: 1px solid var(--border-color);
     padding: 10px 0;
     font-family: var(--font-sans);
     font-size: 0.72rem;
-    color: var(--text-primary);
+    @apply text-ink;
     outline: none;
     border-radius: 0;
     transition: border-color 0.4s ease;
@@ -147,17 +147,17 @@
 
   /* Submit button inside email group */
   .waitlist-field-group button {
-    position: absolute;
+    @apply absolute;
     right: 0;
     bottom: 0;
     background: none;
     border: none;
     width: 36px;
     height: 36px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    @apply cursor-pointer;
+    @apply flex;
+    @apply items-center;
+    @apply justify-end;
     padding: 0;
   }
 
@@ -191,25 +191,25 @@
 
   /* Sliding progress line loader */
   .waitlist-loading-bar {
-    display: none;
-    width: 100%;
+    @apply hidden;
+    @apply w-full;
     max-width: 320px;
     height: 1px;
     background-color: var(--border-color);
-    position: relative;
-    overflow: hidden;
+    @apply relative;
+    @apply overflow-hidden;
     margin-top: 12px;
   }
 
   .waitlist-container.submitting .waitlist-loading-bar {
-    display: block;
+    @apply block;
   }
 
   .waitlist-loading-progress {
     width: 40%;
-    height: 100%;
+    @apply h-full;
     background-color: var(--text-primary);
-    position: absolute;
+    @apply absolute;
     left: -40%;
     animation: waitlistLoading 1s infinite linear;
   }
@@ -225,7 +225,7 @@
     opacity: 0;
     transform: translateY(4px);
     transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    text-align: left;
+    @apply text-left;
     max-width: 320px;
     padding-top: 16px;
   }
@@ -240,16 +240,16 @@
     font-size: 1.2rem;
     font-weight: normal;
     letter-spacing: 0.05em;
-    color: var(--text-primary);
+    @apply text-ink;
     margin-bottom: 6px;
   }
 
   .waitlist-message .success-desc {
     font-size: 0.65rem;
     line-height: 1.6;
-    color: var(--text-muted);
+    @apply text-muted;
     letter-spacing: 0.02em;
-    text-transform: uppercase;
+    @apply uppercase;
   }
 
   .waitlist-message.error {
@@ -262,7 +262,7 @@
   .waitlist-message.duplicate {
     font-size: 0.65rem;
     line-height: 1.5;
-    color: var(--text-primary);
+    @apply text-ink;
     letter-spacing: 0.02em;
   }
 </style>

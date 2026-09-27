@@ -1,6 +1,6 @@
 {
   "source": "Verified quarterly media cache",
-  "updatedAt": "2026-06-07T13:35:48.769Z",
+  "updatedAt": "2026-09-26T12:44:52.454Z",
   "albumArt": {
     "huka::잇뽕": {
       "album": "잇뽕",
@@ -4504,6 +4504,66 @@
       "verifiedBy": "bugs-album-page",
       "verifiedAt": "2026-06-07T13:35:48.769Z",
       "verificationWarning": ""
+    },
+    "billstax::livefastdieskrt": {
+      "source": "Bugs",
+      "provider": "manual-bugs-album-id",
+      "providerAlbumId": "4144737",
+      "album": "LIVE FAST DIE SKRT",
+      "artist": "BILL STAX",
+      "resolvedAlbum": "LIVE FAST DIE SKRT",
+      "resolvedArtist": "BILL STAX(빌스택스)",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/1000/41447/4144737.jpg",
+      "albumUrl": "https://music.bugs.co.kr/album/4144737",
+      "verified": true,
+      "matchStatus": "verified_manual_id",
+      "note": "Album and artist verified against the Bugs album page.",
+      "crawledAt": "2026-09-26T12:44:52.288Z"
+    },
+    "bewhy::popiscryin": {
+      "source": "Bugs",
+      "provider": "manual-bugs-album-id",
+      "providerAlbumId": "4147037",
+      "album": "POP IS CRYIN’",
+      "artist": "Bewhy",
+      "resolvedAlbum": "POP IS CRYIN'",
+      "resolvedArtist": "비와이(BewhY)",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/1000/41470/4147037.jpg",
+      "albumUrl": "https://music.bugs.co.kr/album/4147037",
+      "verified": true,
+      "matchStatus": "verified_manual_id",
+      "note": "Album and artist verified against the Bugs album page.",
+      "crawledAt": "2026-09-26T12:44:52.324Z"
+    },
+    "반타01mpt::아름8": {
+      "source": "Bugs",
+      "provider": "manual-bugs-album-id",
+      "providerAlbumId": "20817954",
+      "album": "아름8",
+      "artist": "반타01 & MPT",
+      "resolvedAlbum": "아름8",
+      "resolvedArtist": "반타01, MPT",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/1000/208179/20817954.jpg",
+      "albumUrl": "https://music.bugs.co.kr/album/20817954",
+      "verified": true,
+      "matchStatus": "verified_manual_id",
+      "note": "Album and artist verified against the Bugs album page.",
+      "crawledAt": "2026-09-26T12:44:52.404Z"
+    },
+    "박효신::ae": {
+      "source": "Bugs",
+      "provider": "manual-bugs-album-id",
+      "providerAlbumId": "4144667",
+      "album": "A & E",
+      "artist": "박효신",
+      "resolvedAlbum": "A & E",
+      "resolvedArtist": "박효신",
+      "imageUrl": "https://image.bugsm.co.kr/album/images/1000/41446/4144667.jpg",
+      "albumUrl": "https://music.bugs.co.kr/album/4144667",
+      "verified": true,
+      "matchStatus": "verified_manual_id",
+      "note": "Album and artist verified against the Bugs album page.",
+      "crawledAt": "2026-09-26T12:44:52.454Z"
     }
   },
   "artistImages": {

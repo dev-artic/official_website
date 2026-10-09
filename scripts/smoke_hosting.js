@@ -12,7 +12,7 @@ async function main() {
     assert.equal(response.headers.get('x-content-type-options'), 'nosniff', route);
     assert.equal(response.headers.get('x-frame-options'), 'DENY', route);
     assert.ok(response.headers.get('content-security-policy')?.includes("object-src 'none'"), route);
-    assert.ok(response.headers.get('cache-control')?.includes('no-store'), route);
+    assert.ok(response.headers.get('cache-control')?.includes('no-store'), `${route}: expected no-store HTML cache policy`);
     const html = await response.text();
     assert.ok(html.includes('shared.js'), route);
     console.log(`PASS page ${route}`);

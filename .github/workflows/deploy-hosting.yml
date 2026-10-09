@@ -49,3 +49,6 @@ jobs:
         run: firebase deploy --only hosting --project artic-official-home --non-interactive
       - name: Verify deployed pages, headers and existing APIs
         run: npm run smoke:hosting
+      - name: Verify the migrated production domain and www redirect
+        if: vars.FIREBASE_CUSTOM_DOMAIN_ENABLED == 'true'
+        run: npm run smoke:hosting -- https://artic.live

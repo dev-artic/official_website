@@ -35,5 +35,12 @@ async function main() {
   assert.equal(products.status, 200);
   assert.ok(Array.isArray(await products.json()));
   console.log('PASS private paths, existing API routing, unauthenticated admin rejection, read-only products');
+  if (new URL(base).hostname === 'artic.live') {
+    const path = '/quarterly/acha/?issue=2026-q1-korean-albums';
+    const redirect = await request(`https://www.artic.live${path}`, { method: 'HEAD', redirect: 'manual' });
+    assert.ok([301, 308].includes(redirect.status), 'www must permanently redirect to the canonical domain');
+    assert.equal(redirect.headers.get('location'), `https://artic.live${path}`, 'www redirect must retain the page and issue query');
+    console.log('PASS www canonical redirect retains the page and issue query');
+  }
 }
 main().catch(error => { console.error(error.message); process.exitCode = 1; });

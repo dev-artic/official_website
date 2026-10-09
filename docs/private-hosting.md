@@ -2,6 +2,14 @@
 
 Audit date: 2026-10-09 (Asia/Seoul).
 
+## Applied status
+
+The operator approved the Hosting-only IAM configuration, `artic.live` DNS migration and subsequent repository privacy change on 2026-10-09. PR #1 is merged. The dedicated service account and restricted OIDC provider are configured, and `FIREBASE_DEPLOY_ENABLED=true` is set. Actual main-push [run 37882200835](https://github.com/dev-artic/official_website/actions/runs/37882200835) passed security checks, OIDC authentication, Hosting deployment and read-only live smoke tests. No user-managed service-account key was created. Existing Firebase CLI authentication was used for the approved setup through official Google APIs; the reproducible shell setup below requires a separately installed/authenticated Google Cloud CLI.
+
+Firebase custom domain `artic.live` is registered with `PROJECT_GROUPED` certificate preference. Ownership and certificate verification remain pending DNS changes in Squarespace. The existing GitHub A records and email SPF/MX records are unchanged. Add Firebase's current ownership and ACME TXT records first, wait for a valid certificate, then change only the serving A/AAAA records. Fetch current challenges from Firebase rather than reusing expired values. Repository visibility remains public and Pages remains available until custom-domain HTTPS is verified. Do not interpret the registered custom domain as a completed cutover.
+
+The playlist workflow now explicitly dispatches Firebase Hosting after bot commits. Both old Pages and new Firebase main-push deployments remain enabled during migration; Pages is retired only after domain verification. Backend dependency source fixes have not been deployed to running Functions. The primary local checkout's unrelated pending NOW ARTIC edits were not committed or overwritten by this migration.
+
 ## Verified architecture
 
 - Repository: `dev-artic/official_website`, personal account, public at audit time, default branch `main`.
@@ -45,7 +53,7 @@ At implementation, root audit has zero findings. Functions audit has no high/cri
 
 Security headers preserve inline scripts required by the current static compiler. CSP allows inline scripts and HTTPS providers; it is a compatibility boundary, not complete XSS prevention. Admin token storage, permissive backend CORS and the external image proxy remain existing backend security surfaces. Static scanning is not a penetration test. Production smoke tests use page reads, public products reads and unauthenticated admin rejection only.
 
-## OIDC permissions: approval required
+## OIDC permissions: approved and configured
 
 After approval, run `bash scripts/setup_hosting_ci.sh --apply` using a Google Cloud CLI login with IAM configuration access. It creates:
 
@@ -57,7 +65,7 @@ After approval, run `bash scripts/setup_hosting_ci.sh --apply` using a Google Cl
 
 Enable `FIREBASE_DEPLOY_ENABLED=true` after configuration and merge. Main pushes then scan, build, authenticate with OIDC, deploy only Hosting and run live smoke checks. Verify a successful actual Actions deploy before domain cutover. Use `gh workflow run deploy-hosting.yml --ref main` to retry. Playlist bot pushes explicitly dispatch the selected deployment workflow because a `GITHUB_TOKEN` push does not trigger a second push workflow.
 
-## Domain and privacy cutover: approval required
+## Domain and privacy cutover: approved, DNS pending
 
 1. Add `artic.live` to the existing Firebase Hosting site using the advanced migration flow. Obtain Firebase's actual verification/TXT and serving records; do not guess them.
 2. Add only the requested verification/DNS records after approval. Preserve all MX, mail-related TXT, nameservers and registrar ownership. `CNAME` in this Git repository does not update DNS.
@@ -66,7 +74,7 @@ Enable `FIREBASE_DEPLOY_ENABLED=true` after configuration and merge. Main pushes
 5. Once `artic.live` demonstrably serves Firebase, retire `deploy-pages.yml`, set the playlist deployment target to Firebase, then change repository visibility to private with approval. On GitHub Free, making it private earlier can unpublish the Pages site.
 6. Verify unauthenticated GitHub repository lookup is denied and rerun checks/deploy against the private repository. Existing GitHub secret remains.
 
-The transition workflow uses `FIREBASE_DEPLOY_ENABLED` to select the explicit playlist deployment target and logs that target. Until cutover, Pages remains the selected production target. There is no silent retry to another host on error.
+The transition workflow uses `FIREBASE_DEPLOY_ENABLED` to select the explicit playlist deployment target and logs that target. Firebase is selected after OIDC configuration; existing Pages stays reachable for the domain migration. There is no silent retry to another host on error.
 
 ## Rollback
 

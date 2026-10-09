@@ -99,7 +99,7 @@ Homepage/
 
 artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다.
 
-비공개 저장소 운영을 위한 classic Firebase Hosting 전환 구성은 [운영·보안·전환 절차](docs/private-hosting.md)에 정리되어 있습니다. 검증용 주소는 `https://artic-official-home.web.app`이며, `artic.live`는 DNS 전환 완료까지 기존 GitHub Pages를 유지합니다. `npm run build:hosting`은 공개 파일만 `_site/`에 조립하며, main 배포는 `.github/workflows/deploy-hosting.yml`의 보안 검사와 OIDC 인증을 사용합니다. GitHub 유료 플랜은 필요하지 않지만 기존 Blaze 프로젝트의 무료 사용량 초과 과금은 별개입니다. 도메인·IAM·저장소 공개 범위 변경은 승인 후 진행합니다.
+비공개 저장소 운영을 위한 classic Firebase Hosting 전환 구성은 [운영·보안·전환 절차](docs/private-hosting.md)에 정리되어 있습니다. 검증용 주소는 `https://artic-official-home.web.app`이며, `artic.live`는 DNS 전환 완료까지 기존 GitHub Pages를 유지합니다. `npm run build:hosting`은 공개 파일만 `_site/`에 조립하며, main 배포는 `.github/workflows/deploy-hosting.yml`의 보안 검사와 OIDC 인증을 사용합니다. 2026-10-09 운영자 승인 후 Hosting 전용 IAM/OIDC 연결과 `FIREBASE_DEPLOY_ENABLED=true` 설정을 완료했고, 실제 main push 자동 배포 및 배포 후 검증을 통과했습니다. Firebase의 `artic.live` custom domain은 등록했지만 Squarespace DNS 소유권/인증서 검증은 대기 중입니다. HTTPS 연결 확인 전에는 기존 Pages와 공개 저장소를 유지합니다. GitHub 유료 플랜은 필요하지 않지만 기존 Blaze 프로젝트의 무료 사용량 초과 과금은 별개입니다.
 
 ```mermaid
 graph TD

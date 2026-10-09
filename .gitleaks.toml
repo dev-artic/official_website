@@ -1,0 +1,8 @@
+title = "artic. repository secret scanning"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated dependencies and local build outputs"
+paths = ['''(^|/)node_modules/''', '''(^|/)\.git/''', '''(^|/)_site/''']

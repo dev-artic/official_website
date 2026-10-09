@@ -2,6 +2,29 @@
   "functions": {
     "source": "functions"
   },
+  "hosting": {
+    "site": "artic-official-home",
+    "public": "_site",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {"key": "X-Content-Type-Options", "value": "nosniff"},
+          {"key": "X-Frame-Options", "value": "DENY"},
+          {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"},
+          {"key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()"},
+          {"key": "Content-Security-Policy", "value": "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: data: blob:; media-src 'self' https: blob:; connect-src 'self' https:; frame-src https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests"},
+          {"key": "Cache-Control", "value": "public, max-age=3600"}
+        ]
+      },
+      {"source": "**/*.html", "headers": [{"key": "Cache-Control", "value": "no-store"}]},
+      {"source": "/", "headers": [{"key": "Cache-Control", "value": "no-store"}]},
+      {"source": "**/", "headers": [{"key": "Cache-Control", "value": "no-store"}]},
+      {"source": "/js/**", "headers": [{"key": "Cache-Control", "value": "no-cache"}]},
+      {"source": "/css/**", "headers": [{"key": "Cache-Control", "value": "no-cache"}]}
+    ]
+  },
   "emulators": {
     "functions": {
       "port": 5001

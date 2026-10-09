@@ -7,12 +7,18 @@
     "concurrently": "^10.0.3",
     "tailwindcss": "^4.3.3"
   },
+  "overrides": {
+    "@parcel/watcher": "2.6.0"
+  },
   "scripts": {
     "emulators": "firebase emulators:start --only functions,firestore",
     "server": "node server.js",
     "dev": "concurrently \"npm run emulators\" \"npm run server\"",
     "build": "node scripts/build_pages.js",
     "test:inventory": "node scripts/test_order_inventory_transitions.js",
-    "build:styles": "node -e \"require('./scripts/build_styles').buildSharedStyles()\""
+    "build:styles": "node -e \"require('./scripts/build_styles').buildSharedStyles()\"",
+    "build:hosting": "npm run build && node scripts/assemble_hosting.js",
+    "test:hosting": "node scripts/test_hosting.js",
+    "smoke:hosting": "node scripts/smoke_hosting.js"
   }
 }

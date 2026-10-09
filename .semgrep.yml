@@ -1,0 +1,41 @@
+rules:
+  - id: request-to-shell
+    languages: [javascript]
+    severity: ERROR
+    message: HTTP request data must not reach a shell command.
+    mode: taint
+    pattern-sources:
+      - pattern: req.body
+      - pattern: req.query
+      - pattern: req.params
+      - pattern: req.url
+    pattern-sinks:
+      - pattern: exec($COMMAND, ...)
+      - pattern: execSync($COMMAND, ...)
+      - pattern: child_process.exec($COMMAND, ...)
+      - pattern: child_process.execSync($COMMAND, ...)
+  - id: request-to-eval
+    languages: [javascript]
+    severity: ERROR
+    message: HTTP request data must not be executed as JavaScript.
+    mode: taint
+    pattern-sources:
+      - pattern: req.body
+      - pattern: req.query
+      - pattern: req.params
+    pattern-sinks:
+      - pattern: eval($CODE)
+      - pattern: new Function(..., $CODE)
+      - pattern: vm.runInNewContext($CODE, ...)
+  - id: disabled-tls-verification
+    languages: [javascript]
+    severity: ERROR
+    message: TLS certificate validation must remain enabled.
+    pattern-either:
+      - pattern: '{..., rejectUnauthorized: false, ...}'
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+  - id: wildcard-postmessage
+    languages: [javascript]
+    severity: ERROR
+    message: Use the intended target origin when posting messages across windows.
+    pattern: $WINDOW.postMessage($MESSAGE, '*')

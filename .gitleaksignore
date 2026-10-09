@@ -1,0 +1,4 @@
+# Historical Firebase browser configuration (public client identifier, not admin credentials).
+# Scope is exactly these old occurrences; new Google API keys remain blocked.
+6332c053595bb20039595d13428dd67bad5f8189:index.html:gcp-api-key:240
+f2380944a5dd6157c2f49a6c746e0245f85776fe:deus-ex-machina/index.html:gcp-api-key:596

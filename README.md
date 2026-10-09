@@ -99,6 +99,8 @@ Homepage/
 
 artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이브리드 아키텍처로 구동됩니다.
 
+비공개 저장소 운영을 위한 classic Firebase Hosting 전환 구성은 [운영·보안·전환 절차](docs/private-hosting.md)에 정리되어 있습니다. 검증용 주소는 `https://artic-official-home.web.app`이며, `artic.live`는 DNS 전환 완료까지 기존 GitHub Pages를 유지합니다. `npm run build:hosting`은 공개 파일만 `_site/`에 조립하며, main 배포는 `.github/workflows/deploy-hosting.yml`의 보안 검사와 OIDC 인증을 사용합니다. GitHub 유료 플랜은 필요하지 않지만 기존 Blaze 프로젝트의 무료 사용량 초과 과금은 별개입니다. 도메인·IAM·저장소 공개 범위 변경은 승인 후 진행합니다.
+
 ```mermaid
 graph TD
     subgraph 💻 1. 개발 단계 (Development Phase)
@@ -222,7 +224,10 @@ graph TD
   * production 배포 전에는 반드시 `README.md`를 처음부터 끝까지 읽고, 이번 변경으로 달라진 아키텍처/환경변수/명령어/QA 플로우/운영 제약이 있으면 함께 수정합니다.
   * README 수정이 필요한 경우 배포 코드와 같은 커밋 또는 같은 배포 단위로 커밋/푸시합니다.
   * README 수정이 필요 없다고 판단한 경우에도 “전체 README 검토 완료, 변경 없음”을 배포 보고에 명시합니다.
-* **A. 프론트엔드 배포 (GitHub Pages)**:
+* **A. 프론트엔드 배포 (Firebase Hosting 전환)**:
+  * `npm run build:hosting`, `npm run test:hosting`을 실행한 뒤 `firebase deploy --only hosting --project artic-official-home`으로 정적 사이트만 배포하고 `npm run smoke:hosting`으로 확인합니다. Functions·Firestore·인증 데이터는 이 배포에 포함되지 않습니다.
+  * 자동 배포는 `checks.yml`의 Gitleaks·Semgrep·npm audit·빌드/회귀 검사를 통과해야 합니다. 초기 IAM 연결 및 `FIREBASE_DEPLOY_ENABLED=true` 설정 이후 main push가 Hosting 배포를 실행합니다. [전환 순서](docs/private-hosting.md)에 따라 Firebase 도메인 HTTPS 검증 후 저장소를 비공개로 바꿉니다.
+  * 아래 GitHub Pages 경로는 도메인 전환 전까지의 운영 경로입니다.
   * 로컬에서 컴파일러(`npm run build`) 실행 후, 결과물과 `src/` 소스를 원격 저장소에 커밋 및 푸시합니다.
     ```bash
     git add .

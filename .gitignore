@@ -14,3 +14,9 @@ scratch
 node_modules/
 
 _site/
+.firebase/
+.env.*
+!**/.env.example
+gha-creds-*.json
+security-reports/
+__pycache__/

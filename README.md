@@ -101,6 +101,8 @@ artic. 서비스는 정적 콘텐츠와 동적 백엔드 API가 결합한 하이
 
 비공개 저장소 운영을 위한 classic Firebase Hosting 전환 구성은 [운영·보안·전환 절차](docs/private-hosting.md)에 정리되어 있습니다. 검증용 주소는 `https://artic-official-home.web.app`이며, `artic.live`는 DNS 전환 완료까지 기존 GitHub Pages를 유지합니다. `npm run build:hosting`은 공개 파일만 `_site/`에 조립하며, main 배포는 `.github/workflows/deploy-hosting.yml`의 보안 검사와 OIDC 인증을 사용합니다. 2026-10-09 운영자 승인 후 Hosting 전용 IAM/OIDC 연결과 `FIREBASE_DEPLOY_ENABLED=true` 설정을 완료했고, 실제 main push 자동 배포 및 배포 후 검증을 통과했습니다. 두 주소의 이전용 인증서는 발급됐습니다. `www`의 기존 CNAME이 Firebase 무중단 이전 준비를 막아, 2026-10-10에는 기존 GitHub IP를 향하는 A 레코드로 원자적으로 편집하고 www 소유권 TXT를 추가했습니다. 네 곳의 authoritative DNS에서 확인했으며 아직 Firebase 접속 전환은 아닙니다. 본 주소 A와 이메일 설정은 그대로입니다. Firebase의 www 소유권 확인 및 직접 HTTPS 검증을 기다리며, 본 주소 `/`에 남은 이전 404 캐시도 정상화 여부를 확인해야 합니다. HTTPS 연결 확인과 실제 Firebase 전환 이후 기존 DNS 캐시(최대 4시간) 만료 전에는 Pages와 공개 저장소를 유지합니다. 도메인 이전이 확인되면 `FIREBASE_CUSTOM_DOMAIN_ENABLED=true`를 설정해 이후 배포마다 본 주소와 www의 상세 페이지/query 보존 redirect도 검사합니다. GitHub 유료 플랜은 필요하지 않지만 기존 Blaze 프로젝트의 무료 사용량 초과 과금은 별개입니다.
 
+2026-10-10 07:35 UTC 재확인에서 두 도메인의 소유권과 인증서는 모두 유효하며, Firebase가 www A/TXT를 인식해 이전 준비 완료와 실제 serving A `199.36.158.100`을 반환했습니다. 새 서버의 본 주소와 www 루트 이동은 정상입니다. 다만 정확한 www ACHA 상세주소에는 이전 404 캐시가 남아 있어 Hosting만 재배포한 뒤 다시 검증하며, 아직 접속 DNS 전환 시각은 없습니다. [최근 보안 검사·자동 배포](https://github.com/dev-artic/official_website/actions/runs/38014610585)는 통과했습니다.
+
 ```mermaid
 graph TD
     subgraph 💻 1. 개발 단계 (Development Phase)
